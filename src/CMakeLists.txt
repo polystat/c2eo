@@ -17,11 +17,13 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 # Source files list
 set(SOURCE_FILES
     # Headers
+    vardecl.h
     analyzers.h
     matchers.h
     
     # Sources
     main.cpp
+    vardecl.cpp
     analyzers.cpp
     matchers.cpp
 )

@@ -2,16 +2,6 @@
 
 //==============================================================================
 
-
-//------------------------------------------------------------------------------
-void addIntVarDeclMatcher(MatchFinder &finder) {
-    static IntVarDeclAnalyzer intVarDeclAnalyzer;
-    static DeclarationMatcher intVarDeclMatcher =
-        varDecl(hasType(isInteger())).bind("intVarDecl");
-
-    finder.addMatcher(intVarDeclMatcher, &intVarDeclAnalyzer);
-}
-
 //------------------------------------------------------------------------------
 void addLoopMatcher(MatchFinder &finder) {
     static LoopAnalyzer loopAnalyzer;
@@ -32,8 +22,29 @@ void addLoopMatcher(MatchFinder &finder) {
     finder.addMatcher(loopMatcher, &loopAnalyzer);
 }
 
+//------------------------------------------------------------------------------
+void addIntVarDeclMatcher(MatchFinder &finder) {
+    static IntVarDeclAnalyzer intVarDeclAnalyzer;
+    static DeclarationMatcher intVarDeclMatcher =
+        varDecl(hasType(isInteger())).bind("intVarDecl");
+
+    finder.addMatcher(intVarDeclMatcher, &intVarDeclAnalyzer);
+}
+
+//------------------------------------------------------------------------------
+void addIntVarDeclGlobalMemoryMatcher(MatchFinder &finder) {
+    static IntVarDeclGlobalMemoryAnalyzer intVarDeclGlobalMemoryAnalyzer;
+    static DeclarationMatcher intVarDeclGlobalMemoryMatcher =
+        varDecl(
+            hasType(isInteger())
+        ).bind("intVarGlobalMemoryDecl");
+
+    finder.addMatcher(intVarDeclGlobalMemoryMatcher, &intVarDeclGlobalMemoryAnalyzer);
+}
+
 //==============================================================================
 void addMatchers(MatchFinder &finder) {
     addIntVarDeclMatcher(finder);
+//    addIntVarDeclGlobalMemoryMatcher(finder);
     addLoopMatcher(finder);
 }
