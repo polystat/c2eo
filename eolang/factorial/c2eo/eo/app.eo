@@ -1,0 +1,70 @@
++package c2eo
+
++alias varint c2eo.varInt
++alias varintinit c2eo.varIntInit
++alias varfloat c2eo.varFloat
+
++alias negint c2eo.negInt
++alias addint c2eo.addInt
++alias subint c2eo.subInt
++alias mulint c2eo.mulInt
++alias divint c2eo.divInt
++alias modint c2eo.modInt
++alias powint c2eo.powInt
++alias lessint c2eo.lessInt
+
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
+[arg] > factorialC
+  varint > n!
+  varint > result!
+  varint > one!
+  varint > two!
+
+  # Factorial evaluation
+  [] > factorial
+    seq > @
+      if.
+        lessint
+          ^.n
+          ^.two
+        seq
+          stdout
+            sprintf
+              "%s\n"
+              ^.result.toString
+          stdout
+            "OK\n"
+        seq
+          mulint
+            ^.result
+            ^.n
+            ^.result
+          subint
+            ^.n
+            ^.one
+            ^.n
+          factorial
+
+  # Main function
+  [arg] > main
+    seq > @
+      ^.n.set (arg.get 0).toInt
+      stdout
+        sprintf
+          "%s! = "
+          ^.n.toString
+      ^.factorial
+
+  seq > @
+    n.set 0
+    result.set 1
+    one.set 1
+    two.set 2
+    main arg
+
+# Старт приложения
+[args...] > app
+  seq > @
+    factorialC args
