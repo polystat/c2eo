@@ -10,6 +10,7 @@
 // Сюда же, возможно, добавятся общие статические объекты
 struct AbstractGen {
     virtual void Generate(std::string &str) = 0;
+    virtual void GenValue(std::string &str) {}
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -22,6 +23,7 @@ struct GlobalSpaceGen: AbstractGen {
     // Добавление очередного объекта к глобальному пространству
     void Add(AbstractGen* obj);
     void Generate(std::string &str);
+    void GenValue(std::string &str);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -33,6 +35,7 @@ struct GlobalVarGen: AbstractGen {
     std::string type;       // тип переменной
     std::string value;      // значение переменной
     void Generate(std::string &str);
+    void GenValue(std::string &str);
 };
 
 //-------------------------------------------------------------------------------------------------

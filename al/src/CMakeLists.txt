@@ -23,6 +23,7 @@ set(SOURCE_FILES
     analyzers.h
     matchers.h
     generator.h
+    util.h
 
     # Sources
     main.cpp
@@ -30,6 +31,7 @@ set(SOURCE_FILES
     analyzers.cpp
     matchers.cpp
     generator.cpp
+    util.cpp
 )
 
 
