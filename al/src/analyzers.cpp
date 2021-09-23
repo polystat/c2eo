@@ -1,5 +1,6 @@
 #include "analyzers.h"
 
+// Анализатор цикла с заданными инициализатором, условием... Заимствован из примера
 void LoopAnalyzer::run(const MatchFinder::MatchResult &Result) {
   ASTContext *Context = Result.Context;
   const ForStmt *FS = Result.Nodes.getNodeAs<ForStmt>("forLoop");
@@ -15,6 +16,7 @@ void LoopAnalyzer::run(const MatchFinder::MatchResult &Result) {
   llvm::outs() << "Potential array-based loop discovered.\n";
 }
 
+// Анализ на целочисленную переменную
 void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     ASTContext *Context = Result.Context;
     const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
@@ -28,6 +30,7 @@ void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     //VD->dump();
 }
 
+// Анализ на глобальную целочисленную переменную
 void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
   ASTContext *Context = Result.Context;
   const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("intVarGlobalMemoryDecl");
@@ -93,3 +96,18 @@ void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result)
 
   //VD->dump();
 }
+
+// Анализ на глобальную переменную
+void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
+    ASTContext *context = Result.Context;
+    const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
+    // We do not want to convert header files!
+    ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
+    if (!VD)
+        return;
+
+    getVarDeclParameters(VD);
+
+    //VD->dump();
+}
+

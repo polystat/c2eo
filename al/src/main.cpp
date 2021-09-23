@@ -3,6 +3,8 @@
 */
 
 #include "matchers.h"
+#include "generator.h"
+
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -16,11 +18,18 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 // A help message for this specific tool can be added afterwards.
 static cl::extrahelp MoreHelp("\nMore help text...\n");
 
-/*
- * Главная функция, обеспечивающая начальный запуск и обход AST
- */ 
 
+//--------------------------------------------------------------------------------------------------
+// Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
+
+    GlobalSpaceGen globGen;
+    GlobalVarGen::globalSpaceGenPtr = &globGen;
+    std::string globCode;
+
+    ApplicationGen appGen;
+    std::string appCode;
+
     if (argc < 2) {
         llvm::errs() << "Incorrect command line format. Necessary: recvisitor <C-file-name>\n";
         return -1;
@@ -28,7 +37,7 @@ int main(int argc, const char **argv) {
 
     auto ExpectedParser 
         = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
-    
+
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
         llvm::errs() << ExpectedParser.takeError();
@@ -42,10 +51,24 @@ int main(int argc, const char **argv) {
 
 ////    Matchers matchers;
 ////    return Tool.run(matchers.getFrontEndActionFactory());
-     LoopAnalyzer loopAnalyzer;
-     MatchFinder finder;
-     addMatchers(finder);
+    LoopAnalyzer loopAnalyzer;
+    MatchFinder finder;
+    addMatchers(finder);
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
 // 
-     return Tool.run(newFrontendActionFactory(&finder).get());
+    auto result = Tool.run(newFrontendActionFactory(&finder).get());
+
+//         CodeGenerator::getCodeToConsole();
+
+//         CodeGenerator::getCodeToFile("test.eo");
+//         llvm::outs() << "code printed to file " << "test.eo" << "\n";
+    globGen.Generate(globCode);
+    llvm::outs() << "\n===================================\n";
+    llvm::outs() << globCode;
+
+    llvm::outs() << "\n===================================\n";
+    appGen.Generate(appCode);
+    llvm::outs() << appCode;
+
+    return result;
 }
