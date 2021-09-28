@@ -4,7 +4,7 @@
 int unsigned intVar01;
 int intVar02 = 3 + 5;
 const int x = 0x10;
-float y1 = 2.71828;
+//float y = 3.14;
 double y2 = 3.14;      // не конвертирует
 long long t = 100ll;
 _Bool boolVal01;

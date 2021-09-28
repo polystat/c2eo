@@ -3,6 +3,26 @@
 //==============================================================================
 
 //------------------------------------------------------------------------------
+// Сопоставитель с определением функции
+void addFuncDeclMatcher(MatchFinder &finder) {
+    static FuncDeclAnalyzer funcDeclAnalyzer;
+    static DeclarationMatcher funcDeclMatcher =
+        functionDecl().bind("funcDecl");
+
+    finder.addMatcher(funcDeclMatcher, &funcDeclAnalyzer);
+}
+
+//------------------------------------------------------------------------------
+// Сопоставитель с определением глобальной переменной базового типа
+void addDeclBaseVarGlobalMemoryMatcher(MatchFinder &finder) {
+    static DeclBaseVarGlobalMemoryAnalyzer declBaseVarGlobalMemoryAnalyzer;
+    static DeclarationMatcher declBaseVarGlobalMemoryMatcher =
+        varDecl().bind("declBaseVarGlobalMemory");
+
+    finder.addMatcher(declBaseVarGlobalMemoryMatcher, &declBaseVarGlobalMemoryAnalyzer);
+}
+
+//------------------------------------------------------------------------------
 // Сопоставитель с циклом из исходного примера
 void addLoopMatcher(MatchFinder &finder) {
     static LoopAnalyzer loopAnalyzer;
@@ -45,20 +65,11 @@ void addIntVarDeclGlobalMemoryMatcher(MatchFinder &finder) {
     finder.addMatcher(intVarDeclGlobalMemoryMatcher, &intVarDeclGlobalMemoryAnalyzer);
 }
 
-//------------------------------------------------------------------------------
-// Сопоставитель с определением глобальной переменной базового типа
-void addDeclBaseVarGlobalMemoryMatcher(MatchFinder &finder) {
-    static DeclBaseVarGlobalMemoryAnalyzer declBaseVarGlobalMemoryAnalyzer;
-    static DeclarationMatcher declBaseVarGlobalMemoryMatcher =
-        varDecl().bind("declBaseVarGlobalMemory");
-
-    finder.addMatcher(declBaseVarGlobalMemoryMatcher, &declBaseVarGlobalMemoryAnalyzer);
-}
-
 //==============================================================================
 void addMatchers(MatchFinder &finder) {
-    addDeclBaseVarGlobalMemoryMatcher(finder);
-//    addIntVarDeclMatcher(finder);
-//    addIntVarDeclGlobalMemoryMatcher(finder);
-//    addLoopMatcher(finder);
+    addFuncDeclMatcher(finder);
+//    addDeclBaseVarGlobalMemoryMatcher(finder);
+////    addIntVarDeclMatcher(finder);
+////    addIntVarDeclGlobalMemoryMatcher(finder);
+////    addLoopMatcher(finder);
 }

@@ -135,6 +135,7 @@ void getVarDeclParameters(const VarDecl *VD) {
         initValueAnalysis(VD, strValue);
     } else {
         llvm::outs() << "  has not Initializer\n";
+        initZeroValueAnalysis(VD, strValue);
     }
 
     // Проверка, что переменная является глобальной
@@ -163,9 +164,6 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     auto size = typeInfo.Width;
     //auto align = typeInfo.Align;  // не нужен
-
-
-
     APValue *initVal = VD->evaluateValue();
     if(initVal != nullptr) {
         llvm::outs() << "    Initial Value = ";
@@ -194,6 +192,29 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
         llvm::outs() << str << "\n";
     } else {
         llvm::outs() << "    no Initial Value\n";
+    }
+}
+
+// Анализ полученного начального значения с тестовым выводом его
+// и формированием строки со значением на выходе
+void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
+    // Анализ типа переменной для корректного преобразования в тип Eolang
+    auto qualType = VD->getType();      // квалифицированный тип (QualType)
+    auto typePtr = qualType.getTypePtr();   // указатель на тип (Type)
+
+    // Анализ размера переменной для определения разновидности данных
+    auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
+    auto size = typeInfo.Width;
+    if(typePtr->isBooleanType()) {
+        str = "false";
+    } else if(typePtr->isCharType()) {
+        str = "'\\0'";
+    } else if (typePtr->isIntegerType()){
+        str = "0";
+    } else if(typePtr->isRealFloatingType()) {
+        str = "0.0";
+    } else {
+        str = "";
     }
 }
 

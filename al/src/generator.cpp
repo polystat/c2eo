@@ -7,7 +7,7 @@
 
 
 //--------------------------------------------------------------------------------------------------
-GlobalSpaceGen* GlobalVarGen::globalSpaceGenPtr = nullptr;
+GlobalSpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
 
 //--------------------------------------------------------------------------------------------------
 void GlobalVarGen::Generate(std::string &str) {
@@ -16,15 +16,35 @@ void GlobalVarGen::Generate(std::string &str) {
     str += name;
 }
 
+void GlobalVarGen::GenValue(std::string &str) {
+    str = name;
+    str += ".set ";
+    str += value;
+}
+
+//--------------------------------------------------------------------------------------------------
+void GlobalFuncGen::Generate(std::string &str) {
+    // Первоначально осуществляется генерация списка атрибутов
+    str = "[";
+    if(name == "main") {
+        str += "arg] > main\n";
+    } else {
+        for(auto paramName: paramNames) {
+            str += paramName;
+            str += ", ";
+        }
+        str += "ret_param_xxxx] > ";
+        str += name;
+        str += "\n";
+    }
+    // Далее идет формирование тела функции, которое пока не прописано
+    str += "    seq > @\n";
+    str += "      ...\n";
+}
+
 //--------------------------------------------------------------------------------------------------
 void GlobalSpaceGen::Generate(std::string &str) {
-    str =
-        "+package c2eo\n\n"
-        "+alias varint c2eo.varInt\n"
-        "+alias varint c2eo.varFloat\n\n"
-
-        "[arg] > global\n";
-
+    str = "";
     // Формирование списка глобальных объектов
     std::string strObj = "";
     for(auto globalObject: globalObjects) {
@@ -33,7 +53,18 @@ void GlobalSpaceGen::Generate(std::string &str) {
         str += strObj;
         str += "\n";
     }
-    str += "\n";
+}
+
+void GlobalSpaceGen::GenValue(std::string &str) {
+    // Формирование списка инициализаций
+    std::string strInit = "";
+    for(auto globalObject: globalObjects) {
+        globalObject->GenValue(strInit);
+        str += "    ";
+        str += strInit;
+        str += "\n";
+    }
+    //str += "\n";
 }
 
 //........................................................................

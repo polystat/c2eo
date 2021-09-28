@@ -4,6 +4,7 @@
 
 #include "matchers.h"
 #include "generator.h"
+#include "util.h"
 
 
 // Apply a custom category to all command-line options so that they are the
@@ -25,7 +26,8 @@ int main(int argc, const char **argv) {
 
     GlobalSpaceGen globGen;
     GlobalVarGen::globalSpaceGenPtr = &globGen;
-    std::string globCode;
+    std::string globObj;
+    std::string globInit;
 
     ApplicationGen appGen;
     std::string appCode;
@@ -62,13 +64,23 @@ int main(int argc, const char **argv) {
 
 //         CodeGenerator::getCodeToFile("test.eo");
 //         llvm::outs() << "code printed to file " << "test.eo" << "\n";
-    globGen.Generate(globCode);
+    globGen.Generate(globObj);
+    globGen.GenValue(globInit);
     llvm::outs() << "\n===================================\n";
-    llvm::outs() << globCode;
+    llvm::outs() << globObj;
+    str2file(globObj, "glob.global");
+    llvm::outs() << globInit;
+    str2file(globInit, "glob.seq");
+
+    // Тестовое формирование глобального объекта с инициализацией
+    std::vector<std::string> text;
+    createGlobal(text);
+    text2file(text, "global.eo");
 
     llvm::outs() << "\n===================================\n";
     appGen.Generate(appCode);
     llvm::outs() << appCode;
+    str2file(appCode, "app.eo");
 
     return result;
 }

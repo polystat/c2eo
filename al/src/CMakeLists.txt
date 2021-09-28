@@ -20,16 +20,20 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 set(SOURCE_FILES
     # Headers
     vardecl.h
+    funcdecl.h
     analyzers.h
     matchers.h
     generator.h
+    util.h
 
     # Sources
     main.cpp
     vardecl.cpp
+    funcdecl.cpp
     analyzers.cpp
     matchers.cpp
     generator.cpp
+    util.cpp
 )
 
 
