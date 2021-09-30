@@ -1,7 +1,6 @@
 // Функции, используемые при анализе переменных
 
 #include "funcdecl.h"
-#include "stmt.h"
 #include "generator.h"
 
 //-------------------------------------------------------------------------------------------------
@@ -28,8 +27,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         llvm::outs() << "  Does not have Trivial Body\n";
     }
 
-    //auto body = FD->getBody();
-    Stmt* body = FD->getBody();
+    auto body = FD->getBody();
     if(body != nullptr) {
         llvm::outs() << "  Body pointer != 0\n";
     } else {
@@ -102,25 +100,6 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         llvm::outs() << "  Function is Inline\n";
     } else {
         llvm::outs() << "  Function isn't Inline\n";
-    }
-
-    // Обработка и анализ составного оператора
-    if(body != nullptr) {
-        char* bodyName = (char*)(body->getStmtClassName());
-        //int bodyTag = (int)(body->getStmtClass());
-        Stmt::StmtClass stmtClass = body->getStmtClass();
-        if(bodyName != nullptr) {
-            //llvm::outs() << "  It is " << bodyName << " statement. Tag = " << bodyTag << "\n";
-            llvm::outs() << "  It is " << bodyName << " statement. stmtClass = " << stmtClass << "\n";
-        } else {
-            llvm::outs() << "  Incorrect body name identification\n";
-        }
-        // Далее должна начаться обработка составного оператора;
-        // вложенного в функцию
-//        if(bodyTag == 8) { // Нужно разобраться с именами перчислимых типов
-        if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
-            getCompoundStmtParameters(static_cast<CompoundStmt*>(body));
-        }
     }
 
     // Формируется глобальная функция со всеми атрибутами

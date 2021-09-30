@@ -12,8 +12,9 @@ struct GlobalSpaceGen;
 
 struct AbstractGen {
     static GlobalSpaceGen* globalSpaceGenPtr;
-    virtual void Generate(std::string &str) = 0;
+    virtual void Generate(std::string &str) {}
     virtual void GenValue(std::string &str) {}
+    virtual void PrintValue(std::string &str) {}
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -36,8 +37,9 @@ struct GlobalVarGen: AbstractGen {
     std::string name;       // идентификатор переменной
     std::string type;       // тип переменной
     std::string value;      // значение переменной
-    virtual void Generate(std::string &str);
-    virtual void GenValue(std::string &str);
+    void Generate(std::string &str);
+    void GenValue(std::string &str);
+    void PrintValue(std::string &str);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -48,8 +50,7 @@ struct GlobalFuncGen: AbstractGen {
     std::vector<std::string> paramNames;    // список имен параметров (типы не нужны)
     // Возращаемый параметры передается как дополнительный атрибут с некоторым именем,
     // которое не должно нигде встречаться в другом контексте.
-    virtual void Generate(std::string &str);
-    virtual void GenValue(std::string &str);
+    void Generate(std::string &str);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -63,7 +64,7 @@ struct FullGen: AbstractGen {
 // Используется для формирования кода, запускающего программу
 struct ApplicationGen: AbstractGen {
     std::string appCode;       // строка с порождаемым кодом
-    void Generate(std::string &str);
+    void Generate(std::string &str, std::vector<AbstractGen*> *globalObjects);
 };
 
 #endif // __GENERATOR__

@@ -10,6 +10,12 @@
 GlobalSpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
 
 //--------------------------------------------------------------------------------------------------
+void GlobalVarGen::PrintValue(std::string &str) {
+    str += "  (stdout ";
+    str += name;
+    str += ".toString ) > @\n";
+}
+
 void GlobalVarGen::Generate(std::string &str) {
     str = type;
     str += " > ";
@@ -42,12 +48,6 @@ void GlobalFuncGen::Generate(std::string &str) {
     str += "      ...\n";
 }
 
-void GlobalFuncGen::GenValue(std::string &str) {
-    if(name == "main") {
-        str += "\n    main arg\n";
-    }
-}
-
 //--------------------------------------------------------------------------------------------------
 void GlobalSpaceGen::Generate(std::string &str) {
     str = "";
@@ -63,8 +63,8 @@ void GlobalSpaceGen::Generate(std::string &str) {
 
 void GlobalSpaceGen::GenValue(std::string &str) {
     // Формирование списка инициализаций
+    std::string strInit = "";
     for(auto globalObject: globalObjects) {
-        std::string strInit = "";
         globalObject->GenValue(strInit);
         str += "    ";
         str += strInit;
@@ -80,14 +80,21 @@ void GlobalSpaceGen::Add(AbstractGen* obj) {
 }
 
 //--------------------------------------------------------------------------------------------------
-void ApplicationGen::Generate(std::string &str) {
+void ApplicationGen::Generate(std::string &str, std::vector<AbstractGen*> *globalObjects) {
     str = 
         "+package c2eo\n\n"
-        "+alias global c2eo.global\n\n"
+        "+alias global c2eo.global\n"
+        "+alias sprintf org.org.eolang.txt.sprintf\n"
+        "+alias stdout org.org.eolang.io.stdout\n\n"
 
         "[args...] > app\n"
         "  seq > @\n"
         "    global args\n";
+#ifdef _DEBUG
+    for(auto globalObj : *globalObjects){
+        globalObj->PrintValue(str);
+    }
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------
