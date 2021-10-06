@@ -6,6 +6,9 @@
 #include "generator.h"
 #include "util.h"
 
+#ifdef _DEBUG
+#include "testing.h"
+#endif
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -78,7 +81,13 @@ int main(int argc, const char **argv) {
     text2file(text, "global.eo");
 
     llvm::outs() << "\n===================================\n";
-    appGen.Generate(appCode, &globGen.globalObjects);
+    appGen.Generate(appCode);
+
+    #ifdef _DEBUG
+    GlobalVarTest globalVarTest;
+    globalVarTest.Print(appCode, &globGen.globalObjects);
+    #endif
+
     llvm::outs() << appCode;
     str2file(appCode, "app.eo");
 
