@@ -38,18 +38,25 @@ $ cd ../..
 $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 ```
 
-# Configuration C2EO. 
-Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake::
+# Configuration C2EO.
+* Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
+* Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables
+  (works only for ../kam/src);
 ```
 $ cd c2eo
 $ # rm -rf build
 $ mkdir build && cd $_
 $ cmake -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM_SOURCE=~/path/to/llvm-clang/ \
-  -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" ../src
+  -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" ../al/src
 $ cmake --build . --target c2eo -- -j 6
 ```
 
-# Run 
+# Run
+Use `--` at the end of command below to skip all errors;
+Use `-d` to set the path to output directory;
 ```
-$ ./c2eo file-name.c
+$ ./c2eo file-name.c -- -d path/
 ```
+
+# Tests
+[here](./scripts/readme.md)
