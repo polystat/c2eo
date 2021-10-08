@@ -1,0 +1,17 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[] > cLong
+
+  memory > @
+
+  sprintf "%d" $ > toString
+
+  "long" > type
+
+  8 > bytes
+
+  -9223372036854775808 > min
+
+  9223372036854775807 > max
