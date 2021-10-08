@@ -2,6 +2,6 @@
 int intVar01 = 10;
 
 int main(){
-    printf("%d", intVar01);
+    printf("%d\n", intVar01);
     return 0;
 }

@@ -141,6 +141,7 @@ void GlobalSpaceGen::ShowValue(std::string &str) {
             str += "  ";
             str += strInit;
             str += "\n";
+            str += "      stdout \"\\n\"\n";
         }
     }
     //str += "\n";
