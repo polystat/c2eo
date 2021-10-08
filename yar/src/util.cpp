@@ -40,7 +40,9 @@ void createGlobal(std::vector<std::string> &text) {
     );
     // Читаются сформированные глобальные объекты
     file2vector("glob.global", text);
+#ifdef _DEBUG
     file2vector("glob.debug", text);
+#endif
     // Формируется начало последовательности инициализаций
     text.push_back("  seq > @");
     // Читаются инициализации объектов

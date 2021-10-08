@@ -82,10 +82,10 @@ int main(int argc, const char **argv) {
     str2file(globObj, "glob.global");
     llvm::outs() << globInit;
     str2file(globInit, "glob.seq");
-//#ifdef _DEBUG
+#ifdef _DEBUG
     llvm::outs() << globDb;
     str2file(globDb, "glob.debug");
-//#endif
+#endif
 
     // Тестовое формирование глобального объекта с инициализацией
     std::vector<std::string> text;

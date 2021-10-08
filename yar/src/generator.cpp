@@ -123,7 +123,7 @@ void FullGen::Generate(std::string &str) {
 }
 
 //-------------------------------------------------------------------------------------------
-//#ifdef _DEBUG
+#ifdef _DEBUG
 void GlobalVarGen::ShowValue(std::string &str) {
     str = "    stdout (^.";
     str += name;
@@ -146,4 +146,4 @@ void GlobalSpaceGen::ShowValue(std::string &str) {
     }
     //str += "\n";
 }
-//#endif
+#endif
