@@ -1,0 +1,31 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[] > cShort
+
+  memory > m
+  m > @
+
+  [value] > write
+    -32768 > min
+    32767 > max
+    65536 > range
+
+    if. > @
+      value.greater max
+      ^.m.write (((value.add min).mod range).add min)
+      if.
+        value.less min
+        ^.m.write (((value.add 32769).mod range).add max)
+        ^.m.write value
+
+  sprintf "%d" $ > toString
+
+  "short" > type
+
+  4 > bytes
+
+  32767 > max
+
+  -32768 > min

@@ -1,0 +1,22 @@
++package c2eo
+
++alias org.eolang.io.stdout
++alias c2eo.ctypes.cInt
++alias c2eo.ctypes.cShort
++alias c2eo.ctypes.cLong
+
+
+[args...] > app
+  cShort > s
+  cInt > i
+  cLong > l
+
+  seq > @
+    s.write (cLong.max)
+    i.write (cLong.max)
+    l.write (cLong.max)
+    stdout (s.toString)
+    stdout "\n"
+    stdout (i.toString)
+    stdout "\n"
+    stdout (l.toString)
