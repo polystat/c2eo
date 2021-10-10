@@ -25,10 +25,10 @@ SOFTWARE.
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eolang</groupId>
-  <artifactId>quick-start</artifactId>
+  <artifactId>c2eo</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
-    <eolang.version>0.1.25</eolang.version>
+    <eolang.version>0.10.7</eolang.version>
   </properties>
   <build>
     <plugins>
@@ -47,49 +47,17 @@ SOFTWARE.
         <executions>
           <execution>
             <goals>
-              <goal>parse</goal>
-              <goal>optimize</goal>
-              <goal>compile</goal>
+              <goal>register</goal>
+              <goal>assemble</goal>
+              <goal>transpile</goal>
             </goals>
             <configuration>
-              <sourcesDir>${project.basedir}/eo </sourcesDir>
+              <sourcesDir>${project.basedir}/eo</sourcesDir>
               <targetDir>${project.basedir}/target</targetDir>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>compile</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.eolang</groupId>
-                  <artifactId>eo-runtime</artifactId>
-                  <version>${eolang.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <outputDirectory>${project.build.directory}</outputDirectory>
-                  <destFileName>eo-runtime.jar</destFileName>
-                </artifactItem>
-              </artifactItems>
             </configuration>
           </execution>
         </executions>
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.eolang</groupId>
-      <artifactId>eo-runtime</artifactId>
-      <version>${eolang.version}</version>
-    </dependency>
-  </dependencies>
 </project>
