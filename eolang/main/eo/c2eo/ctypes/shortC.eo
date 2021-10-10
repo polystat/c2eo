@@ -2,10 +2,9 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > cShort
+[] > shortC
 
-  memory > m
-  m > @
+  memory > @
 
   [value] > write
     -32768 > min
@@ -14,11 +13,11 @@
 
     if. > @
       value.greater max
-      ^.m.write (((value.add min).mod range).add min)
+      ^.@.write (((value.add min).mod range).add min)
       if.
         value.less min
-        ^.m.write (((value.add 32769).mod range).add max)
-        ^.m.write value
+        ^.@.write (((value.add 32769).mod range).add max)
+        ^.@.write value
 
   sprintf "%d" $ > toString
 

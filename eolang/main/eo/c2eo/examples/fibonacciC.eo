@@ -1,0 +1,31 @@
++package c2eo.examples
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.ctypes.intC
+
+[args] > fibonacciC
+
+  intC > n
+  intC > result
+  intC > lastResult
+  intC > tmp
+
+  if. > fibonacci
+    n.less 1
+    seq
+    seq
+      tmp.write result
+      result.write (result.add lastResult)
+      lastResult.write tmp
+      n.write (n.sub 1)
+      fibonacci
+
+  seq > main
+    result.write 1
+    lastResult.write 0
+    n.write (args.get 0).toInt
+    stdout (sprintf "fibonacci[%d] = " n)
+    fibonacci
+    stdout (sprintf "%d\n" result)

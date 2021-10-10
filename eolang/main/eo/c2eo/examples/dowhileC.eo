@@ -1,0 +1,26 @@
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.intC
+
+[args] > dowhileC
+
+  intC > a
+  intC > i
+
+  [] > cycle_body
+    seq > @
+      stdout (sprintf "dowhile[%d] " (^.i))
+      ^.i.write (^.i.add 1)
+
+  seq > main
+    a.write (args.get 0).toInt
+    i.write 0
+
+    cycle_body
+    while.
+      i.less a
+      [x]
+        ^.cycle_body > @

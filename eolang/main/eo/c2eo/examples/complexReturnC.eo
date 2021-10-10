@@ -1,0 +1,63 @@
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.intC
++alias c2eo.ctypes.boolC
+
+[args] > complexReturnC
+
+  [a] > f
+    intC > result
+    boolC > isReturn
+
+    if. > @
+      seq
+        isReturn.write false
+        if.
+          a.eq 1
+          seq
+            a.write (a.add 1)
+          seq
+
+        if.
+          a.eq 2
+          seq
+            a.write (a.add 2)
+            isReturn.write true
+            result.write 2
+          if.
+            a.eq 3
+            seq
+              a.write (a.add 3)
+              isReturn.write true
+              result.write 3
+            seq
+
+        if.
+          isReturn
+          seq
+          if.
+            seq
+              if.
+                a.eq 4
+                seq
+                  a.write (a.add 4)
+                seq
+            seq
+              a.write (a.add 5)
+              isReturn.write true
+              result.write a
+            error "Unexpected behavior"
+      result
+      error "Unexpected behavior"
+
+  [] > main
+    intC > a
+    intC > result
+
+    seq > @
+      a.write (^.args.get 0).toInt
+      result.write (^.f a)
+      stdout (sprintf "complexReturn[%d] = %d\n" a result)

@@ -2,7 +2,7 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > cFloat
+[] > floatC
 
   memory > @
 
