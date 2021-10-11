@@ -18,6 +18,8 @@
 +alias c2eo.examples.forC
 +alias c2eo.examples.simpleReturnC
 +alias c2eo.examples.complexReturnC
++alias c2eo.examples.enumC1
++alias c2eo.examples.enumC2
 
 [args...] > app
   shortC > s
@@ -29,7 +31,6 @@
   boolC > y
 
   seq > @
-    assert true (stdout "assert pass\n")
     (factorialC args).main
     (fibonacciC args).main
     (piC args).main
@@ -43,7 +44,8 @@
     stdout "\n"
     (simpleReturnC args).main
     (complexReturnC args).main
-
+    (enumC1 args).main
+    (enumC2 args).main
 
     s.write 65000
     i.write 9223372036324
