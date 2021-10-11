@@ -112,9 +112,12 @@ void ApplicationGen::Generate(std::string &str) {
         "+package c2eo\n\n"
         "+alias global c2eo.global\n\n"
 
+        "+alias sprintf org.eolang.txt.sprintf\n"
+        "+alias stdout org.eolang.io.stdout\n\n"
+
         "[args...] > app\n"
         "  seq > @\n"
-        "    global args\n";
+        "    global args > g!\n";
 }
 
 //--------------------------------------------------------------------------------------------------

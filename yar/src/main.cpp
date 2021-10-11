@@ -27,7 +27,6 @@ int main(int argc, const char **argv) {
     GlobalSpaceGen globGen;
     GlobalVarGen::globalSpaceGenPtr = &globGen;
     std::string globObj;
-    std::string globDb;
     std::string globInit;
 
     ApplicationGen appGen;
@@ -72,10 +71,12 @@ int main(int argc, const char **argv) {
 
 //         CodeGenerator::getCodeToFile("test.eo");
 //         llvm::outs() << "code printed to file " << "test.eo" << "\n";
+
     globGen.Generate(globObj);
-//#ifdef _DEBUG
+#ifdef _DEBUG
+    std::string globDb;
     globGen.ShowValue(globDb);
-//#endif
+#endif
     globGen.GenValue(globInit);
     llvm::outs() << "\n===================================\n";
     llvm::outs() << globObj;
