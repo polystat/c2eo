@@ -1,0 +1,11 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[] > boolC
+
+  memory > @
+
+  sprintf "%b" $ > toString
+
+  "bool" > type

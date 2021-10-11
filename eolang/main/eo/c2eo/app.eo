@@ -1,0 +1,69 @@
++package c2eo
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.ctypes.shortC
++alias c2eo.ctypes.intC
++alias c2eo.ctypes.longC
++alias c2eo.ctypes.boolC
+
++alias c2eo.examples.factorialC
++alias c2eo.examples.fibonacciC
++alias c2eo.examples.piC
++alias c2eo.examples.switchC
++alias c2eo.examples.ifC
++alias c2eo.examples.whileC
++alias c2eo.examples.dowhileC
++alias c2eo.examples.forC
++alias c2eo.examples.simpleReturnC
++alias c2eo.examples.complexReturnC
++alias c2eo.examples.enumC1
++alias c2eo.examples.enumC2
+
+[args...] > app
+  shortC > s
+  intC > i
+  longC > l
+  intC > a
+  intC > b
+  intC > c
+  boolC > y
+
+  seq > @
+    (factorialC args).main
+    (fibonacciC args).main
+    (piC args).main
+    (switchC args).main
+    (ifC args).main
+    (whileC args).main
+    stdout "\n"
+    (dowhileC args).main
+    stdout "\n"
+    (forC args).main
+    stdout "\n"
+    (simpleReturnC args).main
+    (complexReturnC args).main
+    (enumC1 args).main
+    (enumC2 args).main
+
+    s.write 65000
+    i.write 9223372036324
+    l.write 9223372036854775807
+    a.write 20
+    b.write 10
+    y.write false
+    stdout (sprintf "\nbool = %b\n" y)
+    stdout (sprintf "short = %d -> short = %d\n" 65000 s)
+    stdout (sprintf "int = %d -> int = %d\n" 9223372036324 i)
+    stdout (sprintf "long = %d -> long = %d\n" 9223372036854775807 l)
+    stdout (sprintf "\na = %d\n" a)
+    stdout (sprintf "b = %d\n" b)
+    c.write (a.add b)
+    stdout (sprintf "c = a + b. c = %d + %d. c = %d\n" a b c)
+    c.write (a.sub b)
+    stdout (sprintf "c = a - b. c = %d - %d. c = %d\n" a b c)
+    c.write (a.mul b)
+    stdout (sprintf "c = a * b. c = %d * %d. c = %d\n" a b c)
+    c.write (a.div b)
+    stdout (sprintf "c = a * b. c = %d / %d. c = %d\n" a b c)
