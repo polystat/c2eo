@@ -3,14 +3,14 @@
 +alias org.eolang.io.stdout
 +alias org.eolang.txt.sprintf
 
-+alias c2eo.ctypes.intC
-+alias c2eo.ctypes.boolC
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_bool
 
 [args] > complexReturnC
 
   [a] > f
-    intC > result
-    boolC > isReturn
+    c_int32 > result
+    c_bool > isReturn
 
     if. > @
       seq
@@ -54,8 +54,8 @@
       error "Unexpected behavior"
 
   [] > main
-    intC > a
-    intC > result
+    c_int32 > a
+    c_int32 > result
 
     seq > @
       a.write (^.args.get 0).toInt

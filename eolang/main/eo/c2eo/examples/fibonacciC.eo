@@ -3,14 +3,14 @@
 +alias org.eolang.txt.sprintf
 +alias org.eolang.io.stdout
 
-+alias c2eo.ctypes.intC
++alias c2eo.ctypes.c_int32
 
 [args] > fibonacciC
 
-  intC > n
-  intC > result
-  intC > lastResult
-  intC > tmp
+  c_int32 > n
+  c_int32 > result
+  c_int32 > lastResult
+  c_int32 > tmp
 
   if. > fibonacci
     n.less 1
