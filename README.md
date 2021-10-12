@@ -17,7 +17,7 @@ We are going to store different information.
 ```
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
 $ mkdir llvm-clang
-$ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz
+$ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz --strip-components=1
 ```
 
 # BUILD LLVM+CLANG:
