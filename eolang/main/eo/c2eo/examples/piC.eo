@@ -3,15 +3,15 @@
 +alias org.eolang.txt.sprintf
 +alias org.eolang.io.stdout
 
-+alias c2eo.ctypes.intC
-+alias c2eo.ctypes.floatC
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_float64
 
 [args] > piC
 
-  intC > n
-  intC > i
-  floatC > divider
-  floatC > result
+  c_int32 > n
+  c_int32 > i
+  c_float64 > divider
+  c_float64 > result
 
   if. > pi
     i.less n

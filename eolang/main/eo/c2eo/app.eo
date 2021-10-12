@@ -3,10 +3,10 @@
 +alias org.eolang.txt.sprintf
 +alias org.eolang.io.stdout
 
-+alias c2eo.ctypes.shortC
-+alias c2eo.ctypes.intC
-+alias c2eo.ctypes.longC
-+alias c2eo.ctypes.boolC
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
++alias c2eo.ctypes.c_bool
 
 +alias c2eo.examples.factorialC
 +alias c2eo.examples.fibonacciC
@@ -20,15 +20,20 @@
 +alias c2eo.examples.complexReturnC
 +alias c2eo.examples.enumC1
 +alias c2eo.examples.enumC2
++alias c2eo.examples.typeCastingC
++alias c2eo.examples.structC
++alias c2eo.examples.functionPointersC
 
+# (typeCastingC args).main
+# (functionPointersC args).main
 [args...] > app
-  shortC > s
-  intC > i
-  longC > l
-  intC > a
-  intC > b
-  intC > c
-  boolC > y
+  c_int16 > s
+  c_int32 > i
+  c_int64 > l
+  c_int32 > a
+  c_int32 > b
+  c_int32 > c
+  c_bool > y
 
   seq > @
     (factorialC args).main
@@ -46,6 +51,7 @@
     (complexReturnC args).main
     (enumC1 args).main
     (enumC2 args).main
+    (structC args).main
 
     s.write 65000
     i.write 9223372036324
@@ -54,9 +60,9 @@
     b.write 10
     y.write false
     stdout (sprintf "\nbool = %b\n" y)
-    stdout (sprintf "short = %d -> short = %d\n" 65000 s)
-    stdout (sprintf "int = %d -> int = %d\n" 9223372036324 i)
-    stdout (sprintf "long = %d -> long = %d\n" 9223372036854775807 l)
+    stdout (sprintf "int16 = %d -> int16 = %d\n" 65000 s)
+    stdout (sprintf "int32 = %d -> int32 = %d\n" 9223372036324 i)
+    stdout (sprintf "int64 = %d -> int64 = %d\n" 9223372036854775807 l)
     stdout (sprintf "\na = %d\n" a)
     stdout (sprintf "b = %d\n" b)
     c.write (a.add b)

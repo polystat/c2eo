@@ -3,12 +3,12 @@
 +alias org.eolang.txt.sprintf
 +alias org.eolang.io.stdout
 
-+alias c2eo.ctypes.intC
++alias c2eo.ctypes.c_int32
 
 [args] > factorialC
 
-  intC > n
-  intC > result
+  c_int32 > n
+  c_int32 > result
 
   if. > factorial
     n.less 2
