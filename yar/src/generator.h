@@ -15,9 +15,9 @@ struct AbstractGen {
     virtual void Generate(std::string &str) = 0;
     virtual void GenValue(std::string &str) {}
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
     virtual void ShowValue(std::string &str) {}
-//#endif
+#endif
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -31,9 +31,9 @@ struct GlobalSpaceGen: AbstractGen {
     void Add(AbstractGen* obj);
     void Generate(std::string &str);
     void GenValue(std::string &str);
-//#ifdef _DEBUG
+#ifdef _DEBUG
     void ShowValue(std::string &str);
-//#endif
+#endif
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -45,9 +45,9 @@ struct GlobalVarGen: AbstractGen {
     std::string value;      // значение переменной
     virtual void Generate(std::string &str);
     virtual void GenValue(std::string &str);
-//#ifdef _DEBUG
+#ifdef _DEBUG
     virtual void ShowValue(std::string &str);
-//#endif
+#endif
 };
 
 /*//-------------------------------------------------------------------------------------------------
@@ -67,9 +67,9 @@ struct GlobalFuncGen: AbstractGen {
     // которое не должно нигде встречаться в другом контексте.
     virtual void Generate(std::string &str);
     virtual void GenValue(std::string &str);
-//#ifdef _DEBUG
+#ifdef _DEBUG
     virtual void ShowValue(std::string &str);
-//#endif
+#endif
 };
 
 //-------------------------------------------------------------------------------------------------
