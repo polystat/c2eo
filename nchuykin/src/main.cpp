@@ -3,6 +3,8 @@
 */
 
 #include "matchers.h"
+#include "generator.h"
+#include "util.h"
 
 
 // Apply a custom category to all command-line options so that they are the
@@ -18,12 +20,27 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::extrahelp MoreHelp("\nMore help text...\n");
 
 
+void generateSpace(SpaceGen &globGen,  const char *objFilename,
+                   const char* initFilename);
 
-/*
- * Главная функция, обеспечивающая начальный запуск и обход AST
- */
-
+//--------------------------------------------------------------------------------------------------
+// Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
+
+    SpaceGen globGen, staticLocalGen, staticGlobalGen;
+    VarGen::globalSpaceGenPtr = &globGen;
+    VarGen::globalStaticSpaceGenPtr = &staticGlobalGen;
+    VarGen::localStaticSpaceGenPtr = &staticLocalGen;
+
+
+    std::string staticLocalObj;
+    std::string staticLocalInit;
+    std::string staticGlobalObj;
+    std::string staticGlobalInit;
+
+    ApplicationGen appGen;
+    std::string appCode;
+
     if (argc < 2) {
         llvm::errs() << "Incorrect command line format. Necessary: recvisitor <C-file-name>\n";
         return -1;
@@ -31,7 +48,7 @@ int main(int argc, const char **argv) {
 
     auto ExpectedParser 
         = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
-    
+
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
         llvm::errs() << ExpectedParser.takeError();
@@ -45,17 +62,47 @@ int main(int argc, const char **argv) {
 
 ////    Matchers matchers;
 ////    return Tool.run(matchers.getFrontEndActionFactory());
-     LoopAnalyzer loopAnalyzer;
-     MatchFinder finder;
-     addMatchers(finder);
+    LoopAnalyzer loopAnalyzer;
+    MatchFinder finder;
+    addMatchers(finder);
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
 // 
-     Tool.run(newFrontendActionFactory(&finder).get());
+    auto result = Tool.run(newFrontendActionFactory(&finder).get());
 
-         CodeGenerator::getCodeToConsole();
+//         CodeGenerator::getCodeToConsole();
 
-         CodeGenerator::getCodeToFile("test.eo");
-         llvm::outs() << "code printed to file " << "test.eo" << "\n";
+//         CodeGenerator::getCodeToFile("test.eo");
+//         llvm::outs() << "code printed to file " << "test.eo" << "\n";
 
-     return 0;
+    std::string objFilename ="glob.global";
+    std::string  initFilename ="glob.seq";
+
+    generateSpace(globGen, "glob.global", "glob.seq");
+    generateSpace(staticLocalGen,  "staticLocal.global", "staticLocal.seq");
+    generateSpace(staticGlobalGen, "staticGlobal.global", "staticGlobal.seq");
+
+    // Тестовое формирование глобального объекта с инициализацией
+    std::vector<std::string> text;
+    createGlobal(text);
+    text2file(text, "global.eo");
+
+    llvm::outs() << "\n===================================\n";
+    appGen.Generate(appCode);
+    llvm::outs() << appCode;
+    str2file(appCode, "app.eo");
+
+    return result;
+}
+
+void generateSpace(SpaceGen &globGen, const char* objFilename,
+                   const char* initFilename) {
+    std::string obj;
+    std::string init;
+    globGen.Generate(obj);
+    globGen.GenValue(init);
+    outs() << "\n===================================\n";
+    outs() << obj;
+    str2file(obj, objFilename);
+    outs() << init;
+    str2file(init, initFilename);
 }

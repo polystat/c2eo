@@ -1,5 +1,37 @@
 #include "analyzers.h"
 
+//------------------------------------------------------------------------------
+// Анализ на функцию
+void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
+    ASTContext *context = Result.Context;
+    const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
+    // We do not want to convert header files!
+    ////if (!FD || !Context->getSourceManager().isWrittenInMainFile(FD->getForLoc()))
+    if (!FD)
+        return;
+
+    getFuncDeclParameters(FD);
+
+    //FD->dump();
+}
+
+//------------------------------------------------------------------------------
+// Анализ на глобальную переменную
+void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
+    ASTContext *context = Result.Context;
+    const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
+    // We do not want to convert header files!
+    ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
+    if (!VD)
+        return;
+
+    getVarDeclParameters(VD);
+
+    //VD->dump();
+}
+
+//------------------------------------------------------------------------------
+// Анализатор цикла с заданными инициализатором, условием... Заимствован из примера
 void LoopAnalyzer::run(const MatchFinder::MatchResult &Result) {
   ASTContext *Context = Result.Context;
   const ForStmt *FS = Result.Nodes.getNodeAs<ForStmt>("forLoop");
@@ -15,6 +47,8 @@ void LoopAnalyzer::run(const MatchFinder::MatchResult &Result) {
   llvm::outs() << "Potential array-based loop discovered.\n";
 }
 
+//------------------------------------------------------------------------------
+// Анализ на целочисленную переменную
 void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     ASTContext *Context = Result.Context;
     const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
@@ -25,9 +59,12 @@ void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     llvm::outs() << "Integer variable.\n";
     // Определение и тестовый вывод основных параметров описания переменных
     getVarDeclParameters(VD);
+
     //VD->dump();
 }
 
+//------------------------------------------------------------------------------
+// Анализ на глобальную целочисленную переменную
 void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
   ASTContext *Context = Result.Context;
   const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("intVarGlobalMemoryDecl");
@@ -36,7 +73,7 @@ void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result)
   if (!VD)
     return;
 
-  llvm::outs() << "I`m variable. My name is" << VD->getNameAsString() << "\n";
+  llvm::outs() << "I`m variable. My name is " << VD->getNameAsString() << "\n";
 
   if(VD->hasLocalStorage()) {
     llvm::outs() << "   hasLocalStorage.\n";
