@@ -8,13 +8,12 @@ The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
 
 Semantic-preserving translation of C programs to EOLANG programs.
 
-- ### [Document with C2EO transform examples](./doc/transformExamples.md)
+- #### [Document with C2EO transform examples](./doc/transformExamples.md)
 
-- ### [Project for playing with examples](./eolang/main)
+- #### [Project for playing with examples](./eolang/main)
 
-- ### [Tests](./scripts/readme.md)
+- #### [Tests](./scripts/readme.md)
 
-&nbsp;
 ## 1. Install LLVM + CLANG
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
