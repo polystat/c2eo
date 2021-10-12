@@ -158,32 +158,137 @@
   9223372036854775807 > max
 ```
 
-## 8. enumc2
+## 8. Operators
 
-```java
-+package c2eo.examples
+### Assignment operator =
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
-+alias c2eo.ctypes.c_int32
-
-[args] > enumC2
-
-  6 > currentDay
-  c_int32 > someday
-  c_int32 > anotherDay
-
-  currentDay > getSomeDay
-
-  seq > main
-    someday.write 2
-    stdout (sprintf "enum2 someday = %d\n" someday)
-    anotherDay.write getSomeDay
-    stdout (sprintf "enum2 another day = %d\n" anotherDay)
+```c
+float a = 0;
+float b = 1;
+b = a;
 ```
 
-## 9. complexreturn
+```java
+cfloat > a
+cfloat > b
+b.write a
+```
+
+### Addition operator  +
+
+```c
+float a = 0;
+float b = 1;
+b = a + b;
+```
+
+```java
+cfloat > a
+cfloat > b
+b.write (a.add b)
+```
+
+### Substraction operator -
+
+```c
+float a = 0;
+float b = 1;
+b = a - b;
+```
+
+```java
+cfloat > a
+cfloat > b
+b.write (a.sub b)
+```
+
+### Multiply operator *
+
+```c
+float a = 0;
+float b = 1;
+b = a * b;
+```
+
+```java
+cfloat > a
+cfloat > b
+b.write (a.mul b)
+```
+
+### Divide operator /
+
+```c
+float a = 0;
+float b = 1;
+b = a / b;
+```
+
+```java
+cfloat > a
+cfloat > b
+b.write (a.div b)
+```
+
+### Mod operator %
+
+```c
+float a = 0;
+float b = 1;
+b = a % b;
+```
+
+```java
+cfloat > a
+cfloat > b
+b.write (a.mod b)
+```
+
+### etc.
+
+## 9. Сonstants
+
+### Int
+
+```c
+const int constantName = 10;
+```
+
+```java
+10 > constantName
+```
+
+### Float
+
+```c
+const float constantName = 3.14;
+```
+
+```java
+3.14 > constantName
+```
+
+### Boolean
+
+```c
+const _Bool constantName = 1;
+```
+
+```java
+true > constantName
+```
+
+### Char
+
+```c
+const char constantName = 'a';
+```
+
+```java
+"a" > constantName
+```
+
+## 10. ComplexReturn
 
 - C
 
@@ -293,7 +398,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "complexReturn[%d] = %d\n" a result)
 ```
 
-## 10. dowhile
+## 11. dowhile
 
 - C
 
@@ -343,7 +448,7 @@ int main(int argc, char** argv) {
         ^.cycle_body > @
 ```
 
-## 11. enum
+## 12. enum
 
 - C
 
@@ -370,7 +475,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-- EO
+- EO ver. 1
 
 ```java
 +package c2eo.examples
@@ -403,7 +508,32 @@ int main(int argc, char** argv) {
     stdout (sprintf "enum1 another day = %d\n" anotherDay)
 ```
 
-## 12. factorial
+- EO ver. 2
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > enumC2
+
+  6 > currentDay
+  c_int32 > someday
+  c_int32 > anotherDay
+
+  currentDay > getSomeDay
+
+  seq > main
+    someday.write 2
+    stdout (sprintf "enum2 someday = %d\n" someday)
+    anotherDay.write getSomeDay
+    stdout (sprintf "enum2 another day = %d\n" anotherDay)
+```
+
+## 13. factorial
 
 - C
 
@@ -463,7 +593,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%d\n" result)
 ```
 
-## 13. fibonacci
+## 14. fibonacci
 
 - C
 
@@ -532,7 +662,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%d\n" result)
 ```
 
-## 14. for
+## 15. for
 
 - C
 
@@ -574,7 +704,7 @@ int main(int argc, char** argv) {
           ^.i.write (^.i.add 1)
 ```
 
-## 15. functionpointers
+## 16. functionpointers
 
 - C
 
@@ -628,7 +758,7 @@ int main(int argc, char** argv) {
     g f b
 ```
 
-## 16. if
+## 17. if
 
 - C
 
@@ -729,7 +859,7 @@ int main(int argc, char** argv) {
           stdout "if-else_if_ELSE work\n"
 ```
 
-## 17. pi
+## 18. pi
 
 - C
 
@@ -808,7 +938,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%f\n" result)
 ```
 
-## 18. simplereturn
+## 19. simplereturn
 
 - C
 
@@ -860,7 +990,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "simpleReturn[%d] = %d \n" a result)
 ```
 
-## 19. struct
+## 20. struct
 
 - C
 
@@ -901,7 +1031,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "Book.title = %s \n" (b.title))
 ```
 
-## 20. switch
+## 21. switch
 
 - C
 
@@ -962,7 +1092,7 @@ int main(int argc, char** argv) {
             stdout "default"
 ```
 
-## 21. typecasting
+## 22. typecasting
 
 - C
 
@@ -1012,7 +1142,7 @@ int main() {
 
 ```
 
-## 22. while
+## 23. while
 
 - C
 
