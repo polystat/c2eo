@@ -2,13 +2,13 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > longC
+[] > c_int64
 
   memory > @
 
   sprintf "%d" $ > toString
 
-  "long" > type
+  "int64" > type
 
   8 > bytes
 

@@ -3,13 +3,13 @@
 +alias org.eolang.io.stdout
 +alias org.eolang.txt.sprintf
 
-+alias c2eo.ctypes.intC
++alias c2eo.ctypes.c_int32
 
 [args] > enumC2
 
   6 > currentDay
-  intC > someday
-  intC > anotherDay
+  c_int32 > someday
+  c_int32 > anotherDay
 
   currentDay > getSomeDay
 

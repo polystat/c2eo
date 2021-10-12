@@ -3,12 +3,12 @@
 +alias org.eolang.io.stdout
 +alias org.eolang.txt.sprintf
 
-+alias c2eo.ctypes.intC
++alias c2eo.ctypes.c_int32
 
 [args] > dowhileC
 
-  intC > a
-  intC > i
+  c_int32 > a
+  c_int32 > i
 
   [] > cycle_body
     seq > @
