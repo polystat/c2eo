@@ -8,20 +8,22 @@ The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
 
 Semantic-preserving translation of C programs to EOLANG programs.
 
-This is draft of project to decide different problems, which non interesting for original project.
+- #### [Document with C2EO transform examples](./doc/transformExamples.md)
 
-We are going to store different information.
+- #### [Project for playing with examples](./eolang/main)
 
+- #### [Tests](./scripts/readme.md)
 
-# Install LLVM+CLANG:
-```
+## 1. Install LLVM + CLANG
+```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
 $ mkdir llvm-clang
 $ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz
 ```
 
-# BUILD LLVM+CLANG:
-```
+&nbsp;
+## 2. Build LLVM + CLANG
+```bash
 $ cd llvm-clang
 $ # rm -rf build
 $ mkdir build && cd $_
@@ -32,17 +34,21 @@ $ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUI
 $ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 ```
 
-# INSTALL C2EO:
-```
+&nbsp;
+## 3. Install C2EO
+```bash
 $ cd ../..
 $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 ```
 
-# Configuration C2EO.
-* Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
-* Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables
-  (works only for ../kam/src);
-```
+&nbsp;
+## 4. Configuration C2EO
+
+> Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
+
+> Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables (works only for ../kam/src);
+
+```bash
 $ cd c2eo
 $ # rm -rf build
 $ mkdir build && cd $_
@@ -51,12 +57,13 @@ $ cmake -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM_SOURCE=~/path/to/llvm-clang/ \
 $ cmake --build . --target c2eo -- -j 6
 ```
 
-# Run
-Use `--` at the end of command below to skip all errors;
-Use `-d` to set the path to output directory;
-```
+&nbsp;
+## 5. Run
+
+> Use `--` at the end of command below to skip all errors;
+
+> Use `-d` to set the path to output directory;
+
+```bash
 $ ./c2eo file-name.c -- -d path/
 ```
-
-# Tests
-[here](./scripts/readme.md)
