@@ -27,7 +27,7 @@
       addint
         ^.a
         ^.b
-        ^.res 
+        ^.res
 
   # Main function
   [arg] > main

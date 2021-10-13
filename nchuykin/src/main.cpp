@@ -20,23 +20,23 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::extrahelp MoreHelp("\nMore help text...\n");
 
 
-void generateSpace(SpaceGen &globGen,  const char *objFilename,
-                   const char* initFilename);
+void generateSpace(SpaceGen &globGen, std::string objFilename,
+                   std::string initFilename) ;
+
+std::string getShortFilename(const std::string &filename);
 
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
+    std::string filename = getShortFilename(argv[1]);
 
-    SpaceGen globGen, staticLocalGen, staticGlobalGen;
+    SpaceGen globGen, staticGen;
     VarGen::globalSpaceGenPtr = &globGen;
-    VarGen::globalStaticSpaceGenPtr = &staticGlobalGen;
-    VarGen::localStaticSpaceGenPtr = &staticLocalGen;
+    VarGen::staticSpaceGenPtr = &staticGen;
 
 
-    std::string staticLocalObj;
-    std::string staticLocalInit;
-    std::string staticGlobalObj;
-    std::string staticGlobalInit;
+    std::string staticObj;
+    std::string staticInit;
 
     ApplicationGen appGen;
     std::string appCode;
@@ -46,8 +46,8 @@ int main(int argc, const char **argv) {
         return -1;
     }
 
-    auto ExpectedParser 
-        = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
+    auto ExpectedParser
+            = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
 
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
@@ -55,7 +55,7 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    CommonOptionsParser& OptionsParser = ExpectedParser.get();
+    CommonOptionsParser &OptionsParser = ExpectedParser.get();
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
 
@@ -74,17 +74,19 @@ int main(int argc, const char **argv) {
 //         CodeGenerator::getCodeToFile("test.eo");
 //         llvm::outs() << "code printed to file " << "test.eo" << "\n";
 
-    std::string objFilename ="glob.global";
-    std::string  initFilename ="glob.seq";
 
-    generateSpace(globGen, "glob.global", "glob.seq");
-    generateSpace(staticLocalGen,  "staticLocal.global", "staticLocal.seq");
-    generateSpace(staticGlobalGen, "staticGlobal.global", "staticGlobal.seq");
+    generateSpace(globGen, filename + ".glob", filename + ".glob.seq");
+    generateSpace(staticGen, filename + ".stat", filename + ".stat.seq");
+
 
     // Тестовое формирование глобального объекта с инициализацией
-    std::vector<std::string> text;
-    createGlobal(text);
-    text2file(text, "global.eo");
+    std::vector<std::string> glob;
+    createGlobal(glob, filename);
+    text2file(glob, "global.eo");
+
+    std::vector<std::string> stat;
+    createStatic(stat, filename);
+    text2file(stat, filename+".eo");
 
     llvm::outs() << "\n===================================\n";
     appGen.Generate(appCode);
@@ -94,8 +96,16 @@ int main(int argc, const char **argv) {
     return result;
 }
 
-void generateSpace(SpaceGen &globGen, const char* objFilename,
-                   const char* initFilename) {
+// Получение имени файла, как то что находится между /(если есть) и .с
+std::string getShortFilename(const std::string &filename) {
+    size_t st = filename.find_last_of("/");
+    st =  st != std::string::npos ? st + 1 : 0;
+    size_t end = filename.find_last_of(".c") - 1;
+    return filename.substr(st, end - st);
+}
+
+void generateSpace(SpaceGen &globGen, std::string objFilename,
+        std::string initFilename) {
     std::string obj;
     std::string init;
     globGen.Generate(obj);

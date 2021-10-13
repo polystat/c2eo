@@ -4,7 +4,7 @@
 int intVar01;
 static int intVar00;
 
-int func(int x)
+void func(int x)
 {
-    static int intVar02;
+    static int intVar02 = 5;
 }

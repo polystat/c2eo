@@ -122,8 +122,9 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
             getCompoundStmtParameters(static_cast<CompoundStmt*>(body));
         }
     }
-
+    //TODO расскомментировать эти строки и добавить статику
     // Формируется глобальная функция со всеми атрибутами
+    /*
     if(isGlobal) {
         GlobalFuncGen* func = new GlobalFuncGen;
         if(funcName == "main") {
@@ -136,7 +137,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
             func->paramNames.push_back(paramName);
         }
         func->globalSpaceGenPtr->Add(func);
-    }
+    }*/
 
     //FD->dump();
 }

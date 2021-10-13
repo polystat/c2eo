@@ -12,8 +12,7 @@ struct SpaceGen;
 
 struct AbstractGen {
     static SpaceGen* globalSpaceGenPtr;
-    static SpaceGen* globalStaticSpaceGenPtr;
-    static SpaceGen* localStaticSpaceGenPtr;
+    static SpaceGen* staticSpaceGenPtr;
 
     virtual void Generate(std::string &str) = 0;
     virtual void GenValue(std::string &str) {}
