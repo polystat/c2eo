@@ -10,7 +10,7 @@
   c_int32 > a
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
     stdout (sprintf "switch[%d] = " a)
     if.
       a.eq 0

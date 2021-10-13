@@ -58,7 +58,7 @@
     l.write 9223372036854775807
     a.write 20
     b.write 10
-    y.write false
+    y.write FALSE
     stdout (sprintf "\nbool = %b\n" y)
     stdout (sprintf "int16 = %d -> int16 = %d\n" 65000 s)
     stdout (sprintf "int32 = %d -> int32 = %d\n" 9223372036324 i)

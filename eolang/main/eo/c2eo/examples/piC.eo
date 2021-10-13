@@ -32,7 +32,7 @@
       result.write (result.mul 4.0)
 
   seq > main
-    n.write (args.get 0).toInt
+    n.write (args.get 0).as-int
     i.write 0
     divider.write 1.0
     result.write 0.0

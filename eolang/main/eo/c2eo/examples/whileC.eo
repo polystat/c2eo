@@ -11,7 +11,7 @@
   c_int32 > i
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
     i.write 0
     while.
       i.less a

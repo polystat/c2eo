@@ -27,7 +27,7 @@
 
   memory > @
 
-  sprintf "%b" $ > toString
+  sprintf "%b" $ > as-string
 
   "bool" > type
 ```
@@ -43,8 +43,6 @@
 
   memory > @
 
-  sprintf "%c" $ > toString
-
   "char" > type
 ```
 
@@ -59,7 +57,7 @@
 
   memory > @
 
-  sprintf "%f" $ > toString
+  sprintf "%f" $ > as-string
 
   "float64" > type
 
@@ -90,7 +88,7 @@
         ^.@.write (((value.add 32769).mod range).add max)
         ^.@.write value
 
-  sprintf "%d" $ > toString
+  sprintf "%d" $ > as-string
 
   "int16" > type
 
@@ -125,7 +123,7 @@
         ^.@.write (((value.add 2147483649).mod range).add max)
         ^.@.write value
 
-  sprintf "%d" $ > toString
+  sprintf "%d" $ > as-string
 
   "int32" > type
 
@@ -147,7 +145,7 @@
 
   memory > @
 
-  sprintf "%d" $ > toString
+  sprintf "%d" $ > as-string
 
   "int64" > type
 
@@ -275,7 +273,7 @@ const _Bool constantName = 1;
 ```
 
 ```java
-true > constantName
+TRUE > constantName
 ```
 
 ### Char
@@ -349,7 +347,7 @@ int main(int argc, char** argv) {
 
     if. > @
       seq
-        isReturn.write false
+        isReturn.write FALSE
         if.
           a.eq 1
           seq
@@ -360,13 +358,13 @@ int main(int argc, char** argv) {
           a.eq 2
           seq
             a.write (a.add 2)
-            isReturn.write true
+            isReturn.write TRUE
             result.write 2
           if.
             a.eq 3
             seq
               a.write (a.add 3)
-              isReturn.write true
+              isReturn.write TRUE
               result.write 3
             seq
 
@@ -382,7 +380,7 @@ int main(int argc, char** argv) {
                 seq
             seq
               a.write (a.add 5)
-              isReturn.write true
+              isReturn.write TRUE
               result.write a
             error "Unexpected behavior"
       result
@@ -393,7 +391,7 @@ int main(int argc, char** argv) {
     c_int32 > result
 
     seq > @
-      a.write (^.args.get 0).toInt
+      a.write (^.args.get 0).as-int
       result.write (^.f a)
       stdout (sprintf "complexReturn[%d] = %d\n" a result)
 ```
@@ -438,7 +436,7 @@ int main(int argc, char** argv) {
       ^.i.write (^.i.add 1)
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
     i.write 0
 
     cycle_body
@@ -587,7 +585,7 @@ int main(int argc, char** argv) {
 
   seq > main
     result.write 1
-    n.write (args.get 0).toInt
+    n.write (args.get 0).as-int
     stdout (sprintf "%d! = " n)
     factorial
     stdout (sprintf "%d\n" result)
@@ -656,7 +654,7 @@ int main(int argc, char** argv) {
   seq > main
     result.write 1
     lastResult.write 0
-    n.write (args.get 0).toInt
+    n.write (args.get 0).as-int
     stdout (sprintf "fibonacci[%d] = " n)
     fibonacci
     stdout (sprintf "%d\n" result)
@@ -694,7 +692,7 @@ int main(int argc, char** argv) {
   c_int32 > i
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
     i.write 0
     while.
       i.less a
@@ -822,7 +820,7 @@ int main(int argc, char** argv) {
   c_int32 > a
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
 
     if.
       a.eq 5
@@ -929,7 +927,7 @@ int main(int argc, char** argv) {
       result.write (result.mul 4.0)
 
   seq > main
-    n.write (args.get 0).toInt
+    n.write (args.get 0).as-int
     i.write 0
     divider.write 1.0
     result.write 0.0
@@ -985,7 +983,7 @@ int main(int argc, char** argv) {
     c_int32 > result
 
     seq > @
-      a.write (^.args.get 0).toInt
+      a.write (^.args.get 0).as-int
       result.write (^.f a a)
       stdout (sprintf "simpleReturn[%d] = %d \n" a result)
 ```
@@ -1074,7 +1072,7 @@ int main(int argc, char** argv) {
   c_int32 > a
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
     stdout (sprintf "switch[%d] = " a)
     if.
       a.eq 0
@@ -1177,7 +1175,7 @@ int main(int argc, char** argv) {
   c_int32 > i
 
   seq > main
-    a.write (args.get 0).toInt
+    a.write (args.get 0).as-int
     i.write 0
     while.
       i.less a

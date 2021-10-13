@@ -6,7 +6,7 @@
 
   memory > @
 
-  sprintf "%d" $ > toString
+  sprintf "%d" $ > as-string
 
   "int64" > type
 
