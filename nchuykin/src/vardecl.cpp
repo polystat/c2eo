@@ -51,19 +51,20 @@ void getVarDeclParameters(const VarDecl *VD) {
         } else {
             llvm::outs() << "    -->unsignedCharType\n";
         }
-        strType = "varchar";
+        strType = "c_char";
     } else if (typePtr->isBooleanType()) {
         llvm::outs() << "    -->isBooleanType\n";
-        strType = "varbool";
+        strType = "c_bool";
     } else if (typePtr->isRealFloatingType()) {
         llvm::outs() << "    -->isRealFloatingType\n";
-        strType = "varfloat";
+        strType = "c_float";
     } else if (typePtr->isIntegerType()) {
         if (typePtr->isSignedIntegerType())
             llvm::outs() << "    -->signedIntegerType\n";
         else
             llvm::outs() << "    -->unsignedIntegerType\n";
-        strType = "varint";
+        //TODO доработать этот код для разных размеров
+        strType = "c_int32";
     }
 
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
@@ -163,20 +164,13 @@ void getVarDeclParameters(const VarDecl *VD) {
         var->type = strType;
         var->value = strValue;
         var->globalSpaceGenPtr->Add(var);
-    } else if (globalStorage && !extStorage && !staticLocal && (storageClass == SC_Static))
-    {
-        VarGen* var = new VarGen;
-        var->name = "gs_" + varName;
-        var->type = strType;
-        var->value  = strValue;
-        var->globalStaticSpaceGenPtr->Add(var);
-    } else if (staticLocal && !extStorage)
+    } else if (globalStorage && !extStorage)
     {
         VarGen* var = new VarGen;
         var->name = "ss_" + varName;
         var->type = strType;
         var->value  = strValue;
-        var->localStaticSpaceGenPtr->Add(var);
+        var->staticSpaceGenPtr->Add(var);
     }
 
  /*
