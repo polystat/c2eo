@@ -2,9 +2,19 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_float64
+[initial] > c_float64
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
 
   sprintf "%f" $ > as-string
 
