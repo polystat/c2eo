@@ -6,6 +6,4 @@
 
   memory > @
 
-  sprintf "%c" $ > toString
-
   "char" > type

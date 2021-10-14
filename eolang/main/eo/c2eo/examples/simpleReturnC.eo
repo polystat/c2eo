@@ -22,6 +22,6 @@
     c_int32 > result
 
     seq > @
-      a.write (^.args.get 0).toInt
+      a.write (^.args.get 0).as-int
       result.write (^.f a a)
       stdout (sprintf "simpleReturn[%d] = %d \n" a result)

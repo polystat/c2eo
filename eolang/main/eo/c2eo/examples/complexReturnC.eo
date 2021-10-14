@@ -14,7 +14,7 @@
 
     if. > @
       seq
-        isReturn.write false
+        isReturn.write FALSE
         if.
           a.eq 1
           seq
@@ -25,13 +25,13 @@
           a.eq 2
           seq
             a.write (a.add 2)
-            isReturn.write true
+            isReturn.write TRUE
             result.write 2
           if.
             a.eq 3
             seq
               a.write (a.add 3)
-              isReturn.write true
+              isReturn.write TRUE
               result.write 3
             seq
 
@@ -47,7 +47,7 @@
                 seq
             seq
               a.write (a.add 5)
-              isReturn.write true
+              isReturn.write TRUE
               result.write a
             error "Unexpected behavior"
       result
@@ -58,6 +58,6 @@
     c_int32 > result
 
     seq > @
-      a.write (^.args.get 0).toInt
+      a.write (^.args.get 0).as-int
       result.write (^.f a)
       stdout (sprintf "complexReturn[%d] = %d\n" a result)

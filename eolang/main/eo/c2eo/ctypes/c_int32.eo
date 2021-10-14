@@ -19,7 +19,7 @@
         ^.@.write (((value.add 2147483649).mod range).add max)
         ^.@.write value
 
-  sprintf "%d" $ > toString
+  sprintf "%d" $ > as-string
 
   "int32" > type
 

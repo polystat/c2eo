@@ -6,6 +6,6 @@
 
   memory > @
 
-  sprintf "%b" $ > toString
+  sprintf "%b" $ > as-string
 
   "bool" > type

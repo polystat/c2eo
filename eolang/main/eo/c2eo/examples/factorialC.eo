@@ -20,7 +20,7 @@
 
   seq > main
     result.write 1
-    n.write (args.get 0).toInt
+    n.write (args.get 0).as-int
     stdout (sprintf "%d! = " n)
     factorial
     stdout (sprintf "%d\n" result)
