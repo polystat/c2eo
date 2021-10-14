@@ -34,6 +34,7 @@
   c_int32 > a
   c_int32 > b
   c_int32 > c
+  c_int32 13 > c_mem
   c_bool > y
 
   seq > @
@@ -61,7 +62,8 @@
     a.write 20
     b.write 10
     y.write FALSE
-    stdout (sprintf "\nbool = %b\n" y)
+    stdout (sprintf "\ninitialized c_mem = %d\n" c_mem)
+    stdout (sprintf "bool = %b\n" y)
     stdout (sprintf "int16 = %d -> int16 = %d\n" 65000 s)
     stdout (sprintf "int32 = %d -> int32 = %d\n" 9223372036324 i)
     stdout (sprintf "int64 = %d -> int64 = %d\n" 9223372036854775807 l)

@@ -2,9 +2,17 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_int32
+[initial] > c_int32
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
 
   [value] > write
     -2147483648 > min
@@ -13,11 +21,11 @@
 
     if. > @
       value.greater max
-      ^.@.write (((value.add min).mod range).add min)
+      ^.mem.write (((value.add min).mod range).add min)
       if.
         value.less min
-        ^.@.write (((value.add 2147483649).mod range).add max)
-        ^.@.write value
+        ^.mem.write (((value.add 2147483649).mod range).add max)
+        ^.mem.write value
 
   sprintf "%d" $ > as-string
 

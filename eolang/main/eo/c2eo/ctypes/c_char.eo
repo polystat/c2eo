@@ -2,8 +2,18 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_char
+[initial] > c_char
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
 
   "char" > type
