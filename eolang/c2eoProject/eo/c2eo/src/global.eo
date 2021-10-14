@@ -1,0 +1,47 @@
++package c2eo.src
+
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_char
++alias c2eo.ctypes.c_float64
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
+
++alias c2eo.src.static01
+
+[arg] > global
+  static01 > m!
+  "global" > type
+  c_int32 0 > g_intVar01
+
+  [arg] > main
+    seq > @
+      stdout
+        ^.g_intVar01.as-string
+      stdout "\n"
+      stdout
+        ^.g_intVar01.as-string
+      stdout "\n"
+      stdout
+        ^.g_intVar02.as-string
+      stdout "\n"
+      stdout
+        ^.g_x.as-string
+      stdout "\n"
+      stdout
+        ^.g_t.as-string
+      stdout "\n"
+      stdout
+        ^.m.ss_a.as-string
+      stdout "\n"
+      stdout
+        ^.m.ss_zzz.as-string
+      stdout "\n"
+  main arg > @
+
+  c_int32 8 > g_intVar02
+  c_int32 16 > g_x
+  c_int32 100 > g_t
