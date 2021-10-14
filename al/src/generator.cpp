@@ -7,20 +7,23 @@
 
 
 //--------------------------------------------------------------------------------------------------
-GlobalSpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
+
+SpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
+SpaceGen* AbstractGen::staticSpaceGenPtr = nullptr;
 
 //--------------------------------------------------------------------------------------------------
-void GlobalVarGen::Generate(std::string &str) {
-    str = type;
+void VarGen::Generate(std::string &str) {
+    str = type + " ";
+    str += value;
     str += " > ";
     str += name;
 }
 
-void GlobalVarGen::GenValue(std::string &str) {
-    str = name;
-    str += ".set ";
-    str += value;
-}
+// void VarGen::GenValue(std::string &str) {
+//     str = name;
+//     str += ".write ";
+//     str += value;
+// }
 
 //--------------------------------------------------------------------------------------------------
 void GlobalFuncGen::Generate(std::string &str) {
@@ -49,7 +52,7 @@ void GlobalFuncGen::GenValue(std::string &str) {
 }
 
 //--------------------------------------------------------------------------------------------------
-void GlobalSpaceGen::Generate(std::string &str) {
+void SpaceGen::Generate(std::string &str) {
     str = "";
     // Формирование списка глобальных объектов
     std::string strObj = "";
@@ -61,7 +64,7 @@ void GlobalSpaceGen::Generate(std::string &str) {
     }
 }
 
-void GlobalSpaceGen::GenValue(std::string &str) {
+void SpaceGen::GenValue(std::string &str) {
     // Формирование списка инициализаций
     for(auto globalObject: globalObjects) {
         std::string strInit = "";
@@ -75,22 +78,41 @@ void GlobalSpaceGen::GenValue(std::string &str) {
 
 //........................................................................
 // Добавление очередного объекта к глобальному пространству
-void GlobalSpaceGen::Add(AbstractGen* obj) {
+void SpaceGen::Add(AbstractGen* obj) {
     globalObjects.push_back(obj);
+}
+
+SpaceGen::~SpaceGen() {
+    globalObjects.clear();
 }
 
 //--------------------------------------------------------------------------------------------------
 void ApplicationGen::Generate(std::string &str) {
-    str = 
-        "+package c2eo\n\n"
-        "+alias global c2eo.global\n\n"
+    str = R""""(+package c2eo
 
-        "[args...] > app\n"
-        "  seq > @\n"
-        "    global args\n";
++alias c2eo.global
++alias c2eo.testVarDeclInt05
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
+[args...] > app
+  seq > @
+    global args > g!
+    testVarDeclInt05 args > m!
+    stdout
+      sprintf
+        "%s %s %s\n"
+        g.g_intVar01.toString
+        m.gs_intVar00.toString
+        m.ls_intVar02.toString
+)"""";
 }
 
 //--------------------------------------------------------------------------------------------------
 void FullGen::Generate(std::string &str) {
     
 }
+
+
+

@@ -20,17 +20,17 @@ void getVarDeclParameters(const VarDecl *VD) {
     ///StringRef varTypeName(typeName);
     ////auto qualType = VD->getType();
     QualType qualType = VD->getType();
-    const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
+    const IdentifierInfo *typeId = qualType.getBaseTypeIdentifier();
     ////varTypeName = typeId->getName();
     ////llvm::outs() << "  Type is " << varTypeName << "\n";
-    if(typeId != nullptr) {
+    if (typeId != nullptr) {
         llvm::outs() << "  Type is " << typeId->getName() << "\n";
     } else {
         llvm::outs() << "  The problem to identify type name\n";
     }
 
     auto typePtr = qualType.getTypePtr();
-    if(typePtr->isBuiltinType()) {
+    if (typePtr->isBuiltinType()) {
         llvm::outs() << "  It is Builtin type\n";
 //         BuiltinType* btPtr = dynamic_cast<BuiltinType*>(typePtr);
 //         if(btPtr != nullptr) {
@@ -44,26 +44,27 @@ void getVarDeclParameters(const VarDecl *VD) {
     //auto kind = typePtr->getKind();
 
     std::string strType = "";
-    
-    if(typePtr->isCharType()) {
-        if(typePtr->isSignedIntegerType()) {
+
+    if (typePtr->isCharType()) {
+        if (typePtr->isSignedIntegerType()) {
             llvm::outs() << "    -->signedCharType\n";
         } else {
             llvm::outs() << "    -->unsignedCharType\n";
         }
-        strType = "varchar";
-    } else if(typePtr->isBooleanType()) {
+        strType = "c_char";
+    } else if (typePtr->isBooleanType()) {
         llvm::outs() << "    -->isBooleanType\n";
-        strType = "varbool";
-    } else if(typePtr->isRealFloatingType()) {
+        strType = "c_bool";
+    } else if (typePtr->isRealFloatingType()) {
         llvm::outs() << "    -->isRealFloatingType\n";
-        strType = "varfloat";
-    } else if(typePtr->isIntegerType()) {
-        if(typePtr->isSignedIntegerType())
+        strType = "c_float";
+    } else if (typePtr->isIntegerType()) {
+        if (typePtr->isSignedIntegerType())
             llvm::outs() << "    -->signedIntegerType\n";
         else
             llvm::outs() << "    -->unsignedIntegerType\n";
-        strType = "varint";
+        //TODO доработать этот код для разных размеров
+        strType = "c_int32";
     }
 
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
@@ -73,34 +74,47 @@ void getVarDeclParameters(const VarDecl *VD) {
     // Наверное не во всех случаях полезно
     auto storageClass = VD->getStorageClass();
     llvm::outs() << "  storage class is ";
-    switch(storageClass) {
-        case SC_None:           llvm::outs() << "None";          break;
-        case SC_Extern:         llvm::outs() << "Extern";        break;
-        case SC_Static:         llvm::outs() << "Static";        break;
-        case SC_PrivateExtern:  llvm::outs() << "PrivateExtern"; break;
-        case SC_Auto:           llvm::outs() << "Auto";          break;
-        case SC_Register:       llvm::outs() << "Register";      break;
-        default:                llvm::outs() << "NOT DEFINED";
+    switch (storageClass) {
+        case SC_None:
+            llvm::outs() << "None";
+            break;
+        case SC_Extern:
+            llvm::outs() << "Extern";
+            break;
+        case SC_Static:
+            llvm::outs() << "Static";
+            break;
+        case SC_PrivateExtern:
+            llvm::outs() << "PrivateExtern";
+            break;
+        case SC_Auto:
+            llvm::outs() << "Auto";
+            break;
+        case SC_Register:
+            llvm::outs() << "Register";
+            break;
+        default:
+            llvm::outs() << "NOT DEFINED";
     }
     llvm::outs() << "\n";
 
     // Проверка на размещение переменной в локальной памяти
     auto inLocalStorage = VD->hasLocalStorage();
-    if(inLocalStorage) {
+    if (inLocalStorage) {
         llvm::outs() << "  Local Storage\n";
     } else {
         llvm::outs() << "  not Local Storage\n";
     }
     // Проверка на статическую локальную переменную
     auto staticLocal = VD->isStaticLocal();
-    if(staticLocal) {
+    if (staticLocal) {
         llvm::outs() << "  Static Local\n";
     } else {
         llvm::outs() << "  not Static Local\n";
     }
     // Внешняя переменная (описатель external)
     auto extStorage = VD->hasExternalStorage();
-    if(extStorage) {
+    if (extStorage) {
         llvm::outs() << "  External Storage Defenition\n";
     } else {
         llvm::outs() << "  not External Storage Definition\n";
@@ -108,21 +122,21 @@ void getVarDeclParameters(const VarDecl *VD) {
     // Размещение переменной в глобальной памяти
     // Касается глобальных и статических переменных
     auto globalStorage = VD->hasGlobalStorage();
-    if(globalStorage) {
+    if (globalStorage) {
         llvm::outs() << "  has GlobalStorage\n";
     } else {
         llvm::outs() << "  has not GlobalStorage\n";
     }
     // Переменная с локальной видимостью
     auto localVarDecl = VD->isLocalVarDecl();
-    if(localVarDecl) {
+    if (localVarDecl) {
         llvm::outs() << "  is Local VarDecl\n";
     } else {
         llvm::outs() << "  is not Local VarDecl\n";
     }
     // Переменная или параметр с локальной видимостью
     auto localVarDeclOrParm = VD->isLocalVarDeclOrParm();
-    if(localVarDeclOrParm) {
+    if (localVarDeclOrParm) {
         llvm::outs() << "  is Local VarDecl or Parm\n";
     } else {
         llvm::outs() << "  is not Local VarDecl or Parm\n";
@@ -130,7 +144,7 @@ void getVarDeclParameters(const VarDecl *VD) {
     // Наличие начальной инициализации
     auto isInit = VD->hasInit();
     std::string strValue = "";
-    if(isInit) {
+    if (isInit) {
         llvm::outs() << "  has Initializer\n";
         initValueAnalysis(VD, strValue);
     } else {
@@ -138,17 +152,51 @@ void getVarDeclParameters(const VarDecl *VD) {
         initZeroValueAnalysis(VD, strValue);
     }
 
+
+
+
     // Проверка, что переменная является глобальной
+    if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
+        // Формируется глобальная переменная со всеми атрибутами
+        VarGen *var = new VarGen;
+
+        var->name = "g_" + varName;
+        var->type = strType;
+        var->value = strValue;
+        var->globalSpaceGenPtr->Add(var);
+    } else if (globalStorage && !extStorage)
+    {
+        VarGen* var = new VarGen;
+        var->name = "ss_" + varName;
+        var->type = strType;
+        var->value  = strValue;
+        var->staticSpaceGenPtr->Add(var);
+    }
+
+ /*
+    // Проверка, что переменная является статической.
     if (globalStorage && !extStorage && !staticLocal)
     {
         // Формируется глобальная переменная со всеми атрибутами
-        GlobalVarGen* var = new GlobalVarGen; 
+        VarGen* var = new VarGen;
 
         var->name = "g_" + varName;
         var->type = strType;
         var->value  = strValue;
         var->globalSpaceGenPtr->Add(var);
     }
+
+    // Проверка, что переменная является статической.
+     else if (staticLocal)
+    {
+        // Формируется глобальная переменная со всеми атрибутами
+        StaticVarGen* var = new StaticVarGen;
+
+        var->name = "s_" + varName;
+        var->type = strType;
+        var->value  = strValue;
+        var->globalSpaceGenPtr->Add(var);
+    } */
 
     //VD->dump();
 }
