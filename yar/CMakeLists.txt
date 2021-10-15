@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(c2eo)
 
-set(PATH_TO_LLVM_SOURCE "~/llvm-clang/" CACHE PATH [FORCE])
+set(PATH_TO_LLVM_SOURCE "../llvm-project" CACHE PATH [FORCE])
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
 
 # for tests to default output all variables
@@ -20,21 +20,21 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 # Source files list
 set(SOURCE_FILES
     # Headers
-    vardecl.h
-    funcdecl.h
-    analyzers.h
-    matchers.h
-    generator.h
-    util.h
+        src/vardecl.h
+        src/funcdecl.h
+        src/analyzers.h
+        src/matchers.h
+        src/generator.h
+        src/util.h
 
     # Sources
-    main.cpp
-    vardecl.cpp
-    funcdecl.cpp
-    analyzers.cpp
-    matchers.cpp
-    generator.cpp
-    util.cpp
+        src/main.cpp
+        src/vardecl.cpp
+        src/funcdecl.cpp
+        src/analyzers.cpp
+        src/matchers.cpp
+        src/generator.cpp
+        src/util.cpp
 )
 
 
