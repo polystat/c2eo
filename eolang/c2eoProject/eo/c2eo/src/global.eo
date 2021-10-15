@@ -10,11 +10,7 @@
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_int64
 
-+alias c2eo.src.static01
-
 [arg] > global
-  static01 > m!
-  "global" > type
   c_int32 0 > g_intVar01
 
   [arg] > main
@@ -35,13 +31,17 @@
         ^.g_t.as-string
       stdout "\n"
       stdout
-        ^.m.ss_a.as-string
+        ^.static01.ss_a.as-string
       stdout "\n"
       stdout
-        ^.m.ss_zzz.as-string
+        ^.static01.ss_zzz.as-string
       stdout "\n"
   main arg > @
 
   c_int32 8 > g_intVar02
   c_int32 16 > g_x
   c_int32 100 > g_t
+
+  [] > static01
+    c_int32 666 > ss_a
+    c_int32 0 > ss_zzz
