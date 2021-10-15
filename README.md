@@ -35,7 +35,7 @@ $ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 # INSTALL C2EO:
 ```
 $ cd ../..
-$ git clone https://github.com/kreofil/C2EO-draft.git c2eo
+$ git clone --recurse-submodules https://github.com/polystat/c2eo.git c2eo
 ```
 
 # Configuration C2EO.
