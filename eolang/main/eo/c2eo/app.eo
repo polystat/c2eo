@@ -22,6 +22,7 @@
 +alias c2eo.examples.structC
 +alias c2eo.examples.functionPointersC
 +alias c2eo.examples.breakC
++alias c2eo.examples.continueC
 
 # (typeCastingC args).main
 # (functionPointersC args).main
@@ -79,4 +80,7 @@
     stdout "\n"
 
     (breakC args).main
+    stdout "\n"
+
+    (continueC args).main
     stdout "\n"
