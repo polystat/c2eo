@@ -41,7 +41,7 @@ $ git clone --recurse-submodules https://github.com/polystat/c2eo.git c2eo
 # Configuration C2EO.
 * Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
 * Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables
-  (works only for ../kam/src);
+  (works only for ../yar/src);
 ```
 $ cd c2eo
 $ # rm -rf build

@@ -8,13 +8,12 @@ RUN apt-get update && \
         apt-get install -y \
           libboost-dev libboost-program-options-dev \
           libgtest-dev \
-          cmake \
-        && \
+          cmake ninja-build && \
         cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 \
           -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" \
           -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON \
-          -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja && \
-        cmake cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
+          -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja && ls && \
+        cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 
 WORKDIR /c2eo/yar/build
 
