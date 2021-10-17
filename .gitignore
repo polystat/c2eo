@@ -29,6 +29,7 @@
 *.app
 
 # User-specific stuff:
+**/.vscode/**
 **/.idea/**
 **/cmake-build-debug/**
 **/CMakeFiles/**

@@ -1,3 +1,0 @@
-/home/nchuykin/repository/C2EO-draft/nchuykin/src/build/CMakeFiles/rebuild_cache.dir
-/home/nchuykin/repository/C2EO-draft/nchuykin/src/build/CMakeFiles/edit_cache.dir
-/home/nchuykin/repository/C2EO-draft/nchuykin/src/build/CMakeFiles/c2eo.dir
