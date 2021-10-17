@@ -43,7 +43,7 @@ int main(int argc, const char **argv) {
     std::string appCode;
 
     if (argc < 2) {
-        llvm::errs() << "Incorrect command line format. Necessary: recvisitor <C-file-name>\n";
+        llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> --\n";
         return -1;
     }
 
