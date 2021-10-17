@@ -13,7 +13,7 @@
 5 > sat
 6 > sun
 
-[args] > enumC1
+[args] > enum1C
 
   sun > currentDay
   c_int32 > someday
