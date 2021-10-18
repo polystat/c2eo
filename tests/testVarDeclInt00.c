@@ -12,7 +12,7 @@ _Bool boolVal01;
 _Bool boolVal02 = 111-11-100;
 static int a = 666;
 unsigned char c;
-char ch = 'a';
+//char ch = 'a';
 
 void f() {
     int xxx;
@@ -32,6 +32,6 @@ int main(){
     printf("%f\n", y);
     printf("%lld\n", t);
     printf("%d\n", a);
-    printf("%d\n", ch);
+    //printf("%d\n", ch);
     return 0;
 }
