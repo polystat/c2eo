@@ -5,7 +5,7 @@
 
 +alias c2eo.ctypes.c_int32
 
-[args] > enumC2
+[args] > enum2C
 
   6 > currentDay
   c_int32 > someday

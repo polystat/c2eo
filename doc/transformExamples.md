@@ -23,9 +23,19 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_bool
+[initial] > c_bool
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
 
   sprintf "%b" $ > as-string
 
@@ -39,9 +49,19 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_char
+[initial] > c_char
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
 
   "char" > type
 ```
@@ -53,9 +73,19 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_float64
+[initial] > c_float64
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
 
   sprintf "%f" $ > as-string
 
@@ -71,9 +101,18 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_int16
+[initial] > c_int16
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
+
 
   [value] > write
     -32768 > min
@@ -82,11 +121,11 @@
 
     if. > @
       value.greater max
-      ^.@.write (((value.add min).mod range).add min)
+      ^.mem.write (((value.add min).mod range).add min)
       if.
         value.less min
-        ^.@.write (((value.add 32769).mod range).add max)
-        ^.@.write value
+        ^.mem.write (((value.add 32769).mod range).add max)
+        ^.mem.write value
 
   sprintf "%d" $ > as-string
 
@@ -106,9 +145,17 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_int32
+[initial] > c_int32
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
 
   [value] > write
     -2147483648 > min
@@ -117,11 +164,11 @@
 
     if. > @
       value.greater max
-      ^.@.write (((value.add min).mod range).add min)
+      ^.mem.write (((value.add min).mod range).add min)
       if.
         value.less min
-        ^.@.write (((value.add 2147483649).mod range).add max)
-        ^.@.write value
+        ^.mem.write (((value.add 2147483649).mod range).add max)
+        ^.mem.write value
 
   sprintf "%d" $ > as-string
 
@@ -141,9 +188,19 @@
 
 +alias org.eolang.txt.sprintf
 
-[] > c_int64
+[initial] > c_int64
 
-  memory > @
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
 
   sprintf "%d" $ > as-string
 
@@ -156,95 +213,7 @@
   9223372036854775807 > max
 ```
 
-## 8. Operators
-
-### Assignment operator =
-
-```c
-float a = 0;
-float b = 1;
-b = a;
-```
-
-```java
-cfloat > a
-cfloat > b
-b.write a
-```
-
-### Addition operator  +
-
-```c
-float a = 0;
-float b = 1;
-b = a + b;
-```
-
-```java
-cfloat > a
-cfloat > b
-b.write (a.add b)
-```
-
-### Substraction operator -
-
-```c
-float a = 0;
-float b = 1;
-b = a - b;
-```
-
-```java
-cfloat > a
-cfloat > b
-b.write (a.sub b)
-```
-
-### Multiply operator *
-
-```c
-float a = 0;
-float b = 1;
-b = a * b;
-```
-
-```java
-cfloat > a
-cfloat > b
-b.write (a.mul b)
-```
-
-### Divide operator /
-
-```c
-float a = 0;
-float b = 1;
-b = a / b;
-```
-
-```java
-cfloat > a
-cfloat > b
-b.write (a.div b)
-```
-
-### Mod operator %
-
-```c
-float a = 0;
-float b = 1;
-b = a % b;
-```
-
-```java
-cfloat > a
-cfloat > b
-b.write (a.mod b)
-```
-
-### etc.
-
-## 9. Сonstants
+## 8. Сonstants
 
 ### Int
 
@@ -286,7 +255,268 @@ const char constantName = 'a';
 "a" > constantName
 ```
 
-## 10. ComplexReturn
+## 9. globalc
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_char
++alias c2eo.ctypes.c_float64
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
+
+[] > globalC
+
+  seq > @
+    non_initialized
+    stdout "\n"
+    initialized
+
+  c_bool > b_1
+  c_char > c_1
+  c_float64 > f64_1
+  c_int16 > i16_1
+  c_int32 > i32_1
+  c_int64 > i64_1
+
+  seq > non_initialized
+
+    b_1.write FALSE
+    c_1.write 'a'
+    f64_1.write 3.1415
+    i16_1.write 127
+    i32_1.write 255
+    i64_1.write 511
+
+    stdout (sprintf "b_1 = %b\n" b_1)
+    stdout (sprintf "c_1 = %c\n" c_1)
+    stdout (sprintf "f64_1 = %f\n" f64_1)
+    stdout (sprintf "i16_1 = %d\n" i16_1)
+    stdout (sprintf "i32_1 = %d\n" i32_1)
+    stdout (sprintf "i64_1 = %d\n" i64_1)
+
+
+  c_bool TRUE > b_2
+  c_char 'b' > c_2
+  c_float64 3.1415 > f64_2
+  c_int16 128 > i16_2
+  c_int32 256 > i32_2
+  c_int64 512 > i64_2
+
+  seq > initialized
+    stdout (sprintf "b_2 = %b\n" b_2)
+    stdout (sprintf "c_2 = %c\n" c_2)
+    stdout (sprintf "f64_2 = %f\n" f64_2)
+    stdout (sprintf "i16_2 = %d\n" i16_2)
+    stdout (sprintf "i32_2 = %d\n" i32_2)
+    stdout (sprintf "i64_2 = %d\n" i64_2)
+```
+
+## 10. operationsc
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[] > operationsC
+
+  c_int32 11 > a
+  c_int32 5 > b
+  c_int32 > c
+
+  seq > @
+
+    stdout (sprintf "a = %d\n" a)
+    stdout (sprintf "b = %d\n" b)
+
+    c.write (a.add b)
+    stdout (sprintf "c = a + b  ->  c = %d + %d  ->  c = %d\n" a b c)
+    c.write (a.sub b)
+    stdout (sprintf "c = a - b  ->  c = %d - %d  ->  c = %d\n" a b c)
+    c.write (a.mul b)
+    stdout (sprintf "c = a * b  ->  c = %d * %d  ->  c = %d\n" a b c)
+    c.write (a.div b)
+    stdout (sprintf "c = a / b  ->  c = %d / %d  ->  c = %d\n" a b c)
+    c.write (a.mod b)
+    stdout (sprintf "c = a mod b  ->  c = %d mod %d  ->  c = %d\n" a b c)
+```
+
+## 11. overflowc
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
+
+[] > overflowC
+
+  seq > @
+    non_initialized
+    stdout "\n"
+    initialized
+
+  c_int16 > i16_1
+  c_int32 > i32_1
+  c_int64 > i64_1
+
+  seq > non_initialized
+
+    i16_1.write 65000
+    i32_1.write 9223372036324
+    i64_1.write 9223372036854775807
+
+    stdout (sprintf "int16 = %d  ->  int16 = %d\n" 65000 i16_1)
+    stdout (sprintf "int32 = %d  ->  int32 = %d\n" 9223372036324 i32_1)
+    stdout (sprintf "int64 = %d  ->  int64 = %d\n" 9223372036854775807 i64_1)
+
+    i16_1.write -65000
+    i32_1.write -9223372036324
+    i64_1.write -9223372036854775808
+
+    stdout (sprintf "int16 = %d  ->  int16 = %d\n" -65000 i16_1)
+    stdout (sprintf "int32 = %d  ->  int32 = %d\n" -9223372036324 i32_1)
+    stdout (sprintf "int64 = %d  ->  int64 = %d\n" -9223372036854775808 i64_1)
+
+
+  c_int16 65000 > i16_2
+  c_int32 9223372036324 > i32_2
+  c_int64 9223372036854775807 > i64_2
+
+  c_int16 -65000 > i16_3
+  c_int32 -9223372036324 > i32_3
+  c_int64 -9223372036854775808 > i64_3
+
+  seq > initialized
+
+    stdout (sprintf "int16 %d  ->  int16 = %d\n" 65000 i16_2)
+    stdout (sprintf "int32 %d  ->  int32 = %d\n" 9223372036324 i32_2)
+    stdout (sprintf "int64 %d  ->  int64 = %d\n" 9223372036854775807 i64_2)
+
+    stdout (sprintf "int16 %d  ->  int16 = %d\n" -65000 i16_3)
+    stdout (sprintf "int32 %d  ->  int32 = %d\n" -9223372036324 i32_3)
+    stdout (sprintf "int64 %d  ->  int64 = %d\n" -9223372036854775808 i64_3)
+```
+
+## 12. break
+
+- C
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int breakOrReturn(int a)
+{
+    while (1)
+    {
+        if ((a % 5) == 0)
+        {
+            break;
+        }
+
+        if ((a % 3) == 0)
+        {
+            return 1;
+        }
+
+        a++;
+    }
+
+    printf("We broke out of the loop\n");
+    return 0;
+}
+
+
+int main(int argc, char** argv) {
+    int a = atoi(argv[1]);
+    int result = breakOrReturn(a);
+    printf("breakOrReturn = %d", result);
+}
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_bool
+
+[args] > breakC
+
+  [a] > breakOrReturn
+
+    c_int32 > a1
+    c_int32 > result
+    c_bool > isBreak
+    c_bool > isReturn
+
+    if. > @
+      seq
+        a1.write a
+        isBreak.write FALSE
+        isReturn.write FALSE
+        while.
+          TRUE.and (isBreak.not) (isReturn.not)
+          [i]
+            seq > @
+              if.
+                (^.a1.mod 5).eq 0
+                seq
+                  ^.isBreak.write TRUE
+                seq
+              if.
+                (^.a1.mod 3).eq 0
+                seq
+                  ^.isReturn.write TRUE
+                  ^.result.write 1
+                seq
+              if.
+                ^.isReturn
+                seq
+                  ^.a1.write (^.a1.add 1)
+                seq
+        if.
+          isReturn
+          seq
+          if.
+            seq
+              stdout "We broke out of the loop\n"
+            result.write 0
+            seq
+
+      result
+      error "Unexpected behavior"
+
+  [] > main
+
+    c_int32 > a
+    c_int32 > result
+
+    seq > @
+      a.write (^.args.get 0).as-int
+      result.write (^.breakOrReturn a)
+      stdout (sprintf "breakOrReturn = %d" result)
+```
+
+## 13. complexreturn
 
 - C
 
@@ -396,7 +626,87 @@ int main(int argc, char** argv) {
       stdout (sprintf "complexReturn[%d] = %d\n" a result)
 ```
 
-## 11. dowhile
+## 14. continue
+
+- C
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int collatzProblem(int number)
+{
+    while (number > 1)
+    {
+        if ((number % 2) == 0 )
+        {
+            number = number / 2;
+            continue;
+        }
+
+        number = (number * 3) + 1;
+    }
+
+    return number;
+}
+
+
+int main(int argc, char** argv) {
+    int a = atoi(argv[1]);
+    int result = collatzProblem(a);
+    printf("collatzProblem(%d) = %d", a, result);
+}
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_int32
+
+[args] > continueC
+
+  [number] > collatzProblem
+
+    c_int32 number > number1
+    c_bool FALSE > isContinue
+
+    if. > @
+      seq
+        while.
+          number1.greater 1
+          [x]
+            seq > @
+              if.
+                (^.number1.mod 2).eq 0
+                seq
+                  ^.number1.write (^.number1.mod 2)
+                  ^.isContinue.write TRUE
+                seq
+              if.
+                ^.isContinue
+                seq
+                ^.number1.write ((^.number1.mul 3).add 1)
+      number1
+      error "Unexpected behavior"
+
+  [] > main
+
+    c_int32 > a
+    c_int32 > result
+
+    seq > @
+      a.write (^.args.get 0).as-int
+      result.write (^.collatzProblem a)
+      stdout (sprintf "collatzProblem(%d) = %d" a result)
+```
+
+## 15. dowhile
 
 - C
 
@@ -446,7 +756,7 @@ int main(int argc, char** argv) {
         ^.cycle_body > @
 ```
 
-## 12. enum
+## 16. enum
 
 - C
 
@@ -491,7 +801,7 @@ int main(int argc, char** argv) {
 5 > sat
 6 > sun
 
-[args] > enumC1
+[args] > enum1C
 
   sun > currentDay
   c_int32 > someday
@@ -516,7 +826,7 @@ int main(int argc, char** argv) {
 
 +alias c2eo.ctypes.c_int32
 
-[args] > enumC2
+[args] > enum2C
 
   6 > currentDay
   c_int32 > someday
@@ -531,7 +841,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "enum2 another day = %d\n" anotherDay)
 ```
 
-## 13. factorial
+## 17. factorial
 
 - C
 
@@ -591,7 +901,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%d\n" result)
 ```
 
-## 14. fibonacci
+## 18. fibonacci
 
 - C
 
@@ -660,7 +970,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%d\n" result)
 ```
 
-## 15. for
+## 19. for
 
 - C
 
@@ -702,7 +1012,7 @@ int main(int argc, char** argv) {
           ^.i.write (^.i.add 1)
 ```
 
-## 16. functionpointers
+## 20. functionpointers
 
 - C
 
@@ -756,7 +1066,7 @@ int main(int argc, char** argv) {
     g f b
 ```
 
-## 17. if
+## 21. if
 
 - C
 
@@ -857,7 +1167,7 @@ int main(int argc, char** argv) {
           stdout "if-else_if_ELSE work\n"
 ```
 
-## 18. pi
+## 22. pi
 
 - C
 
@@ -936,7 +1246,153 @@ int main(int argc, char** argv) {
     stdout (sprintf "%f\n" result)
 ```
 
-## 19. simplereturn
+## 23. pointers1
+
+- C
+
+```c
+// Работа с указателями
+// Формирование значений через указатели
+
+#include <stdio.h>
+int x = 5;
+int *p;
+
+int main() {
+    int y;
+    p = &x;
+    *p = 25;
+    p = &y;
+    *p = x;
+    printf("x = %d\ny = %d\n*p = %d\n", x, y, *p);
+    return 0;
+}
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.ctypes.c_int32
+
+[args] > pointers1C
+
+  c_int32 5 > x
+
+  [] > main
+
+    c_int32 > y
+
+    seq > @
+      ^.x.write 25
+      y.write (^.x)
+      stdout (sprintf "x = %d\ny = %d\n*p = %d\n" (^.x) y y)
+```
+
+## 24. pointers2
+
+- C
+
+```c
+// Работа с указателями
+// Формирование значений через void-указатели
+
+#include <stdio.h>
+int x = 5;
+void *p;
+
+int main() {
+    int y;
+    p = &x;
+    *(int*)p = 25;
+    p = &y;
+    *(int*)p = x;
+    printf("x = %d\ny = %d\n*p = %d\n", x, y, *(int*)p);
+    return 0;
+}
+
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.ctypes.c_int32
+
+[args] > pointers2C
+
+  c_int32 5 > x
+
+  [] > main
+
+    c_int32 > y
+
+    seq > @
+      ^.x.write 25
+      y.write (^.x)
+      stdout (sprintf "x = %d\ny = %d\n*p = %d\n" (^.x) y y)
+```
+
+## 25. pointers3
+
+- C
+
+```c
+// Работа с указателями
+// Формирование значений через void-указатели
+
+#include <stdio.h>
+int x = 5;
+int *p;
+int **pp;
+
+int main() {
+    int y;
+    p = &x;
+    *p = 25;
+    pp = &p;
+    p = &y;
+    y = x + 10;
+    int ***ppp = &pp;
+    printf("x = %d\ny = %d\n*p = %d\n**pp = %d\n***ppp = %d\n",
+           x, y, *p, **pp, ***ppp);
+    return 0;
+}
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.ctypes.c_int32
+
+[args] > pointers3C
+
+  c_int32 5 > x
+
+  [] > main
+
+    c_int32 > y
+
+    seq > @
+      ^.x.write 25
+      y.write (^.x.add 10)
+      stdout (sprintf "x = %d\ny = %d\n*p = %d\n**pp = %d\n***ppp = %d\n" (^.x) y y y y)
+```
+
+## 26. simplereturn
 
 - C
 
@@ -988,7 +1444,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "simpleReturn[%d] = %d \n" a result)
 ```
 
-## 20. struct
+## 27. struct
 
 - C
 
@@ -1029,7 +1485,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "Book.title = %s \n" (b.title))
 ```
 
-## 21. switch
+## 28. switch
 
 - C
 
@@ -1090,7 +1546,7 @@ int main(int argc, char** argv) {
             stdout "default"
 ```
 
-## 22. typecasting
+## 29. typecasting
 
 - C
 
@@ -1140,7 +1596,7 @@ int main() {
 
 ```
 
-## 23. while
+## 30. while
 
 - C
 
@@ -1184,4 +1640,3 @@ int main(int argc, char** argv) {
           stdout (sprintf "while[%d] " (^.i))
           ^.i.write (^.i.add 1)
 ```
-
