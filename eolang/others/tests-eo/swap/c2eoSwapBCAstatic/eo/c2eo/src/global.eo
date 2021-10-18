@@ -1,0 +1,34 @@
++package c2eo.src
+
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_char
++alias c2eo.ctypes.c_float64
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
+
+[arg] > global
+  [] > static01
+    c_int64 0 > a
+    c_int64 10 > b
+    c_int64 30 > c
+
+  [arg] > main
+    seq > @
+      stdout
+        sprintf
+          "Start: b = %s, c = %s\n"
+          ^.static01.b.as-string
+          ^.static01.c.as-string
+      ^.static01.a.write (^.static01.b)
+      ^.static01.b.write (^.static01.c)
+      ^.static01.c.write (^.static01.a)
+      stdout
+        sprintf
+          "Finish: b = %s, c = %s\n"
+          ^.static01.b.as-string
+          ^.static01.c.as-string
+  main arg > @
