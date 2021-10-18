@@ -1,0 +1,120 @@
++package c2eo
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.examples.globalC
++alias c2eo.examples.operationsC
++alias c2eo.examples.overflowC
++alias c2eo.examples.factorialC
++alias c2eo.examples.fibonacciC
++alias c2eo.examples.piC
++alias c2eo.examples.switchC
++alias c2eo.examples.ifC
++alias c2eo.examples.whileC
++alias c2eo.examples.dowhileC
++alias c2eo.examples.forC
++alias c2eo.examples.simpleReturnC
++alias c2eo.examples.complexReturnC
++alias c2eo.examples.enum1C
++alias c2eo.examples.enum2C
++alias c2eo.examples.typeCastingC
++alias c2eo.examples.structC
++alias c2eo.examples.functionPointersC
++alias c2eo.examples.breakC
++alias c2eo.examples.continueC
++alias c2eo.examples.pointers1C
++alias c2eo.examples.pointers2C
++alias c2eo.examples.pointers3C
+
+
+# (typeCastingC args).main
+# (functionPointersC args).main
+[args...] > app
+
+  seq > @
+    stdout "\n"
+
+    stdout "globalC\n"
+    globalC
+    stdout "\n"
+
+    stdout "operationsC\n"
+    operationsC
+    stdout "\n"
+
+    stdout "overflowC\n"
+    overflowC
+    stdout "\n"
+
+    stdout "factorialC\n"
+    (factorialC args).main
+    stdout "\n"
+
+    stdout "fibonacciC\n"
+    (fibonacciC args).main
+    stdout "\n"
+
+    stdout "piC\n"
+    (piC args).main
+    stdout "\n"
+
+    stdout "switchC\n"
+    (switchC args).main
+    stdout "\n"
+
+    stdout "ifC\n"
+    (ifC args).main
+    stdout "\n"
+
+    stdout "whileC\n"
+    (whileC args).main
+    stdout "\n\n"
+
+    stdout "dowhileC\n"
+    (dowhileC args).main
+    stdout "\n\n"
+
+    stdout "forC\n"
+    (forC args).main
+    stdout "\n\n"
+
+    stdout "simpleReturnC\n"
+    (simpleReturnC args).main
+    stdout "\n"
+
+    stdout "complexReturnC\n"
+    (complexReturnC args).main
+    stdout "\n"
+
+    stdout "enumC1\n"
+    (enum1C args).main
+    stdout "\n"
+
+    stdout "enum2C\n"
+    (enum2C args).main
+    stdout "\n"
+
+    stdout "structC\n"
+    (structC args).main
+    stdout "\n"
+
+    stdout "breakC\n"
+    (breakC args).main
+    stdout "\n"
+
+    stdout "continueC\n"
+    (continueC args).main
+    stdout "\n"
+
+    stdout "pointers1C\n"
+    (pointers1C args).main
+    stdout "\n\n"
+
+    stdout "pointers2C\n"
+    (pointers2C args).main
+    stdout "\n"
+
+    stdout "pointers3C\n"
+    (pointers3C args).main
+    stdout "\n"

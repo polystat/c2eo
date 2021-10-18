@@ -20,25 +20,35 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::extrahelp MoreHelp("\nMore help text...\n");
 
 
+// void generateSpace(SpaceGen &globGen, std::string objFilename,
+//                    std::string initFilename) ;
+void generateSpace(SpaceGen &globGen, std::string objFilename);
+
+std::string getShortFilename(const std::string &filename);
+
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
+    std::string filename = getShortFilename(argv[1]);
 
-    GlobalSpaceGen globGen;
-    GlobalVarGen::globalSpaceGenPtr = &globGen;
-    std::string globObj;
-    std::string globInit;
+    SpaceGen globGen, staticGen;
+    VarGen::globalSpaceGenPtr = &globGen;
+    VarGen::staticSpaceGenPtr = &staticGen;
+
+
+    std::string staticObj;
+    std::string staticInit;
 
     ApplicationGen appGen;
     std::string appCode;
 
     if (argc < 2) {
-        llvm::errs() << "Incorrect command line format. Necessary: recvisitor <C-file-name>\n";
+        llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> --\n";
         return -1;
     }
 
-    auto ExpectedParser 
-        = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
+    auto ExpectedParser
+            = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
 
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
@@ -46,7 +56,7 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    CommonOptionsParser& OptionsParser = ExpectedParser.get();
+    CommonOptionsParser &OptionsParser = ExpectedParser.get();
     ClangTool Tool(OptionsParser.getCompilations(),
                    OptionsParser.getSourcePathList());
 
@@ -64,18 +74,22 @@ int main(int argc, const char **argv) {
 
 //         CodeGenerator::getCodeToFile("test.eo");
 //         llvm::outs() << "code printed to file " << "test.eo" << "\n";
-    globGen.Generate(globObj);
-    globGen.GenValue(globInit);
-    llvm::outs() << "\n===================================\n";
-    llvm::outs() << globObj;
-    str2file(globObj, "glob.global");
-    llvm::outs() << globInit;
-    str2file(globInit, "glob.seq");
+
+
+//     generateSpace(globGen, filename + ".glob", filename + ".glob.seq");
+//     generateSpace(staticGen, filename + ".stat", filename + ".stat.seq");
+    generateSpace(globGen, filename + ".glob");
+    generateSpace(staticGen, filename + ".stat");
+
 
     // Тестовое формирование глобального объекта с инициализацией
-    std::vector<std::string> text;
-    createGlobal(text);
-    text2file(text, "global.eo");
+    std::vector<std::string> glob;
+    createGlobal(glob, filename);
+    text2file(glob, "global.eo");
+
+    std::vector<std::string> stat;
+    createStatic(stat, filename);
+    text2file(stat, filename+".eo");
 
     llvm::outs() << "\n===================================\n";
     appGen.Generate(appCode);
@@ -83,4 +97,37 @@ int main(int argc, const char **argv) {
     str2file(appCode, "app.eo");
 
     return result;
+}
+
+// Получение имени файла, как то что находится между /(если есть) и .с
+std::string getShortFilename(const std::string &filename) {
+    size_t st = filename.find_last_of("/");
+    st =  st != std::string::npos ? st + 1 : 0;
+    size_t end = filename.find_last_of(".c") - 1;
+    return filename.substr(st, end - st);
+}
+
+// void generateSpace(SpaceGen &globGen, std::string objFilename,
+//         std::string initFilename) {
+//     std::string obj;
+//     std::string init;
+//     globGen.Generate(obj);
+//     globGen.GenValue(init);
+//     outs() << "\n===================================\n";
+//     outs() << obj;
+//     str2file(obj, objFilename);
+//     outs() << init;
+//     str2file(init, initFilename);
+// }
+
+void generateSpace(SpaceGen &globGen, std::string objFilename) {
+    std::string obj;
+    std::string init;
+    globGen.Generate(obj);
+    globGen.GenValue(init);
+    outs() << "\n===================================\n";
+    outs() << obj;
+    str2file(obj, objFilename);
+    //outs() << init;
+    //str2file(init, initFilename);
 }

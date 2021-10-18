@@ -1,0 +1,27 @@
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > simpleReturnC
+
+  [a b] > f
+
+    c_int32 > c
+
+    if. > @
+      seq
+        c.write (a.add b)
+      c
+      error "Unexpected behavior"
+
+  [] > main
+    c_int32 > a
+    c_int32 > result
+
+    seq > @
+      a.write (^.args.get 0).as-int
+      result.write (^.f a a)
+      stdout (sprintf "simpleReturn[%d] = %d \n" a result)

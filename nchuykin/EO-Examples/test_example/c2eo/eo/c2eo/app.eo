@@ -1,0 +1,18 @@
++package c2eo
+
++alias c2eo.global
++alias c2eo.main
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
+[args...] > app
+  seq > @
+    global args > g!
+    main args > m!
+    stdout
+      sprintf
+        "%s %s %s\n"
+        g.g_intVar01.toString
+        m.gs_intVar00.toString
+        m.ls_intVar02.toString

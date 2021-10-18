@@ -1,0 +1,43 @@
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_int32
+
+[args] > continueC
+
+  [number] > collatzProblem
+
+    c_int32 number > number1
+    c_bool FALSE > isContinue
+
+    if. > @
+      seq
+        while.
+          number1.greater 1
+          [x]
+            seq > @
+              if.
+                (^.number1.mod 2).eq 0
+                seq
+                  ^.number1.write (^.number1.mod 2)
+                  ^.isContinue.write TRUE
+                seq
+              if.
+                ^.isContinue
+                seq
+                ^.number1.write ((^.number1.mul 3).add 1)
+      number1
+      error "Unexpected behavior"
+
+  [] > main
+
+    c_int32 > a
+    c_int32 > result
+
+    seq > @
+      a.write (^.args.get 0).as-int
+      result.write (^.collatzProblem a)
+      stdout (sprintf "collatzProblem(%d) = %d" a result)

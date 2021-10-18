@@ -26,8 +26,13 @@ using namespace clang;
 
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl *VD);
+//-------------------------------------------------------------------------------------------------
 
 // Анализ полученного начального значения с последующим использованием
-void initValueAnalysis(const VarDecl *VD, int& value);
+void initValueAnalysis(const VarDecl *VD, std::string &str);
+
+
+// Анализ типа для неициализированных переменны с установко нулевого значения
+void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 
 #endif // __VARDECL__

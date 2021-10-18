@@ -1,0 +1,11 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[] > c_char
+
+  memory > @
+
+  sprintf "%c" $ > toString
+
+  "char" > type

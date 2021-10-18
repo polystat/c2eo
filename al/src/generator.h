@@ -8,18 +8,21 @@
 // Абстрактный генератор кода на всякий случай
 // Возможно придется связывать динамически разные генераторы в общий список или массив
 // Сюда же, возможно, добавятся общие статические объекты
-struct GlobalSpaceGen;
+struct SpaceGen;
 
 struct AbstractGen {
-    static GlobalSpaceGen* globalSpaceGenPtr;
+    static SpaceGen* globalSpaceGenPtr;
+    static SpaceGen* staticSpaceGenPtr;
+
     virtual void Generate(std::string &str) = 0;
     virtual void GenValue(std::string &str) {}
+    virtual ~AbstractGen() = default;
 };
 
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для глобального пространства
-// Наряду с константной оберкой обеспечивает запись глобальных объектов
-struct GlobalSpaceGen: AbstractGen {
+// Наряду с константной оберткой обеспечивает запись глобальных объектов
+struct SpaceGen: AbstractGen {
     std::vector<AbstractGen*> globalObjects;
     std::string space;      // строка с собранным глобальным пространством
 
@@ -27,25 +30,28 @@ struct GlobalSpaceGen: AbstractGen {
     void Add(AbstractGen* obj);
     void Generate(std::string &str);
     void GenValue(std::string &str);
+
+    ~SpaceGen();
 };
 
 //-------------------------------------------------------------------------------------------------
-// Генератор кода для глобальных переменных
-// Накапливает необходимые значения в соответствующих строках
-struct GlobalVarGen: AbstractGen {
+// Генератор кода для глобальных переменных.
+// Накапливает необходимые значения в соответствующих строках.
+struct VarGen: AbstractGen {
     std::string name;       // идентификатор переменной
     std::string type;       // тип переменной
     std::string value;      // значение переменной
     virtual void Generate(std::string &str);
-    virtual void GenValue(std::string &str);
+//    virtual void GenValue(std::string &str);
 };
 
+
 //-------------------------------------------------------------------------------------------------
-// Генератор кода для глобальных функций
-// Накапливает необходимые значения в соответствующих строках
+// Генератор кода для глобальных функций.
+// Накапливает необходимые значения в соответствующих строках.
 struct GlobalFuncGen: AbstractGen {
     std::string name;       // имя объекта-функции
-    std::vector<std::string> paramNames;    // список имен параметров (типы не нужны)
+    std::vector<std::string> paramNames;    // список имен параметров (типы не нужны).
     // Возращаемый параметры передается как дополнительный атрибут с некоторым именем,
     // которое не должно нигде встречаться в другом контексте.
     virtual void Generate(std::string &str);

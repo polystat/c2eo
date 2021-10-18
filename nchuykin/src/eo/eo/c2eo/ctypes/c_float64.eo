@@ -1,0 +1,13 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[] > c_float64
+
+  memory > @
+
+  sprintf "%f" $ > toString
+
+  "float64" > type
+
+  8 > bytes
