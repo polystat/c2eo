@@ -7,5 +7,5 @@
 [condition error_msg] > assert
   if. > @
     condition
-    seq
+    TRUE
     exception error_msg
