@@ -18,7 +18,7 @@ Semantic-preserving translation of C programs to EOLANG programs.
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
 $ mkdir llvm-clang
-$ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz
+$ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz --strip-components=1
 ```
 
 &nbsp;
@@ -38,7 +38,7 @@ $ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 ## 3. Install C2EO
 ```bash
 $ cd ../..
-$ git clone https://github.com/kreofil/C2EO-draft.git c2eo
+$ git clone --recurse-submodules https://github.com/polystat/c2eo.git c2eo
 ```
 
 &nbsp;
@@ -46,7 +46,7 @@ $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 
 > Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
 
-> Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables (works only for ../kam/src);
+> Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables (works only for ../yar/src);
 
 ```bash
 $ cd c2eo
@@ -67,3 +67,6 @@ $ cmake --build . --target c2eo -- -j 6
 ```bash
 $ ./c2eo file-name.c -- -d path/
 ```
+
+# Tests
+[here](./scripts/readme.md)
