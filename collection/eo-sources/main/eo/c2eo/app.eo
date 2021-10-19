@@ -26,6 +26,7 @@
 +alias c2eo.examples.pointers1C
 +alias c2eo.examples.pointers2C
 +alias c2eo.examples.pointers3C
++alias c2eo.collections.array
 +alias diagnostics.exception
 +alias diagnostics.assert
 
@@ -118,6 +119,14 @@
 
     stdout "pointers3C\n"
     (pointers3C args).main
+    stdout "\n"
+
+    stdout "array\n"
+    stdout (sprintf "(array 1 2 3 4 5).length = %d" (array 1 2 3 4 5).length)
+    stdout "\n"
+
+    stdout "False assert"
+    assert FALSE "False assert work!"
     stdout "\n"
 
     stdout "exception\n"
