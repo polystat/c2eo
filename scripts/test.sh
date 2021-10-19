@@ -9,16 +9,17 @@ for fn in `find ../tests -name "*.c"`; do
     NAME="${fn##*/}"
     {
     mkdir ${FILE%%.c}
-    unzip env.zip -d ${FILE%%.c} >> test.log
+    #unzip env.zip -d ${FILE%%.c} >> test.log
+    cp -rf ./env/ ${FILE%%.c} >> test.log
     gcc ${FILE} -o ${FILE%%.c}/${NAME%%.c}.out -w
     eval " ${FILE%%.c}/${NAME%%.c}.out > ${FILE%%.c}/${NAME%%.c}.res_c"
-    eval " ${CTOEO} ${FILE} -- -d ${FILE%%.c}/env/eo/ > ${FILE%%.c}/${NAME%%.c}.details 2>${FILE%%.c}/${NAME%%.c}.log"
+    eval " ${CTOEO} ${FILE} -- -d ${FILE%%.c}/env/eo/c2eo/ > ${FILE%%.c}/${NAME%%.c}.details 2>${FILE%%.c}/${NAME%%.c}.log"
     while read -r line; do
-        if [[ "$line" == "var"*"> g_"* ]]; then
-            echo "    stdout (g.${line#*> }.toString)" >>  ${FILE%%.c}/env/eo/app.eo
-            echo "    stdout \"\n\""  >>  ${FILE%%.c}/env/eo/app.eo
+        if [[ "$line" == *"> g_"* ]]; then
+            echo "    stdout (g.${line#*> }.toString)" >>  ${FILE%%.c}/env/eo/c2eo/app.eo
+            echo "    stdout \"\n\""  >>  ${FILE%%.c}/env/eo/c2eo/app.eo
         fi
-    done < "./glob.global"
+    done < ${FILE%%.c}/env/eo/c2eo/src/${NAME%%.c}.glob
     mvn -f ${FILE%%.c}/env/ clean compile >> test.log 2>> ${FILE%%.c}/${NAME%%.c}.log
     java -cp ${FILE%%.c}/env/target/classes:${FILE%%.c}/env/target/eo-runtime.jar org.eolang.phi.Main c2eo.app > ${FILE%%.c}/${NAME%%.c}.res_eo 2>${FILE%%.c}/${NAME%%.c}.log
     diff -a ${FILE%%.c}/${NAME%%.c}.res_c ${FILE%%.c}/${NAME%%.c}.res_eo > ${FILE%%.c}/${NAME%%.c}.diff

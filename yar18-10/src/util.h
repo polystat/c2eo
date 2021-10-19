@@ -8,23 +8,23 @@
 #include <vector>
 
 // Запись строки символов в указанный файл
-void str2file(std::string &str, std::string fileName);
+void str2file(std::string &str, std::string path, std::string fileName);
 
 // Чтение из файла в вектор строк
-void file2vector(std::string fileName, std::vector<std::string> &text);
+void file2vector(std::string path, std::string fileName, std::vector<std::string> &text);
 
 // Формирование текста с глобальными объектами
 // Пока формируется только для одной единицы компиляции
 // В дальнейшем нужно будет собирать множество разных файлов с одинаковыми расширениями.
-void createGlobal(std::vector<std::string> &text, std::string filename);
+void createGlobal(std::vector<std::string> &text, std::string path, std::string filename);
 
 // Формирование текста со статическими переменными
 // Генерируется файл filename.eo
-void createStatic(std::vector<std::string> &text, std::string filename);
+void createStatic(std::vector<std::string> &text, std::string path, std::string filename);
 
 
 
 // Запись сформированного файла с глобальными объектами
-void text2file(std::vector<std::string> &text, std::string fileName);
+void text2file(std::vector<std::string> &text, std::string path, std::string fileName);
 
 #endif // __UTIL__

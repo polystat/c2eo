@@ -34,7 +34,7 @@ void GlobalFuncGen::Generate(std::string &str) {
     } else {
         for(auto paramName: paramNames) {
             str += paramName;
-            str += ", ";
+            str += " ";
         }
         str += "ret_param_xxxx] > ";
         str += name;
@@ -42,7 +42,7 @@ void GlobalFuncGen::Generate(std::string &str) {
     }
     // Далее идет формирование тела функции, которое пока не прописано
     str += "    seq > @\n";
-    str += "      ...\n";
+    //str += "      ...\n";
 }
 
 void GlobalFuncGen::GenValue(std::string &str) {
@@ -91,7 +91,7 @@ void ApplicationGen::Generate(std::string &str) {
     str = R""""(+package c2eo
 
 +alias c2eo.global
-+alias c2eo.testVarDeclInt05
++alias c2eo.)"""" + str + R""""(
 
 +alias org.eolang.io.stdout
 +alias org.eolang.txt.sprintf
@@ -99,13 +99,6 @@ void ApplicationGen::Generate(std::string &str) {
 [args...] > app
   seq > @
     global args > g!
-    testVarDeclInt05 args > m!
-    stdout
-      sprintf
-        "%s %s %s\n"
-        g.g_intVar01.toString
-        m.gs_intVar00.toString
-        m.ls_intVar02.toString
 )"""";
 }
 

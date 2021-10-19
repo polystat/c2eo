@@ -44,7 +44,7 @@ int main(int argc, const char **argv) {
         argc -= 2;
     }
 
-    auto ExpectedParser 
+    auto ExpectedParser
         = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
 
     if (!ExpectedParser) {
@@ -64,7 +64,7 @@ int main(int argc, const char **argv) {
     MatchFinder finder;
     addMatchers(finder);
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
-// 
+//
     auto result = Tool.run(newFrontendActionFactory(&finder).get());
 
 //         CodeGenerator::getCodeToConsole();

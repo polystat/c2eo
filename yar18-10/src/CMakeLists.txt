@@ -3,12 +3,9 @@ cmake_minimum_required(VERSION 3.18)
 project(c2eo)
 
 set(PATH_TO_LLVM_SOURCE "~/llvm-clang/" CACHE PATH [FORCE])
-# message(STATUS "PATH_TO_LLVM_SOURCE: ${PATH_TO_LLVM_SOURCE}")
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
-# message(STATUS "PATH_TO_LLVM_BUILD: ${PATH_TO_LLVM_BUILD}")
 
-# set(CMAKE_C_COMPILER путь/до/компилятора)
-#set(CMAKE_CXX_COMPILER "${PATH_TO_LLVM_SOURCE}/build/bin/clang")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
 include_directories("${PATH_TO_LLVM_SOURCE}/llvm/include")
