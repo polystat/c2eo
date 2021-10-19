@@ -1,0 +1,57 @@
++package test02
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
+[x] > cover
+  x > @
+
+# cover 555 > value
+
+[] > app
+  memory > m1!
+  memory > m2!
+  memory > m3!
+  cover 555 > value
+  "It is simple string" > strvalue
+  seq > @
+    stdout
+      sprintf
+        "%d\n%s\n"
+        value
+        strvalue
+    m1.write 666
+    stdout
+      sprintf
+        "%d\n"
+        m1
+    m2.write "I want save this string in memory object"
+    stdout
+      sprintf
+        "%s\n"
+        m2
+    m3.write m1
+    stdout
+      sprintf
+        "%d\n"
+        m3
+    m3.write m2
+    stdout
+      sprintf
+        "%s\n"
+        m3
+    m3.write value
+    stdout
+      sprintf
+        "%d\n"
+        m3
+    m2.write m3
+    m1.write m2
+    stdout
+      sprintf
+        "%d\n"
+        m1
+    m3.write "the end"
+    stdout
+      sprintf
+        "%d\n"
+        m1

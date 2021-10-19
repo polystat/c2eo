@@ -1,0 +1,9 @@
++package c2eo
+
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
++alias c2eo.src.global
+
+[args...] > app
+  global args > @

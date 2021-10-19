@@ -1,0 +1,6 @@
++package test11
++alias stdout org.eolang.io.stdout
+
+[] > app
+  stdout > @
+    "Hello!\n"

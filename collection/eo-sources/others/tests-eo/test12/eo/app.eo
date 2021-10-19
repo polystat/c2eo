@@ -1,0 +1,38 @@
++package test12
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
+[] > var
+  memory > value!
+  [y] > set
+    ^.value.write y > @
+  [] > get
+    ^.value > @
+
+[] > varInt
+  "int" > type
+  var > @
+
+  [] > toString
+    sprintf > @
+      "%d"
+      ^.get
+
+# Попытка выполнить цикл
+[] > app
+  varInt > i!
+  seq > @
+    i.set 1
+    while.
+      less.
+        i.get
+        10
+      seq
+        stdout
+          sprintf
+            "i = %d"
+            i.get
+        i.write
+          add.
+            1
+            i.get

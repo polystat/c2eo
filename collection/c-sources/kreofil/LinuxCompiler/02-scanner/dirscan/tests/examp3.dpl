@@ -1,0 +1,9 @@
+/* Суммирование элементов из входного потока */
+begin
+  var a, i, s, n: int;
+  i,s := 0,0;
+  read n;
+  loop i < n -> read a; s,i := s+a,i+1
+  end;
+  write s
+end

@@ -1,0 +1,12 @@
+/* Алгоритм Евклида */
+begin
+  var x, y: int;
+  read x, y;
+  loop x != y -> case
+		   x > y -> x := x - y
+		 or
+		   y > x -> y := y - x
+		 end
+  end;
+  write "x = ", x, skip 5, "y = ", y, "Баста!!!"
+end

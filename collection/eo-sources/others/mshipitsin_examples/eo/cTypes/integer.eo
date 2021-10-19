@@ -1,0 +1,13 @@
++package c2eo.types
+
++alias sprintf org.eolang.txt.sprintf
+
+[] > integer
+
+  memory > @
+
+  "int" > type
+
+  sprintf > toString
+    "%d"
+    $

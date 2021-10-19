@@ -1,0 +1,40 @@
+It don't work:
+
+```
++package test10
++alias stdOut org.eolang.io.stdout
+
+# Попытка выполнить цикл
+[] > app
+  stdOut > @
+    "Hello!\n"
+
+...
+[INFO] File /home/al/Projects/git/eo/tests/test10/target/04-pre/app.eo.xml/05-to-java.xml saved (2877 bytes)
+[ERROR] [app.eo:2] The alias is invalid: "stdOut org.eolang.io.stdout" (broken-aliases:4)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.725 s
+[INFO] Finished at: 2021-09-15T11:05:36+03:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.eolang:eo-maven-plugin:0.1.19:compile (default) on project quick-start: Execution default of goal org.eolang:eo-maven-plugin:0.1.19:compile failed: There are 1 errors in app.eo, see log above -> [Help 1]
+[ERROR]
+...
+```
+
+But it works:
+
+```
++package test10
++alias stdout org.eolang.io.stdout
+
+# Попытка выполнить цикл
+[] > app
+  stdout > @
+    "Hello!\n"
+
+    
+$ ./run.sh 
+Hello!
+```

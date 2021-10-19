@@ -1,0 +1,14 @@
+/* Сортировка элементов вектора */
+begin
+  var A[100], i, n: int;
+  i := 0;
+  read n;
+  loop i < n -> read A[i]; i := i+1 end;
+  i := 0;
+  loop i < n-1 -> case A[i] >  A[i+1] -> A[i],A[i+1],i := A[i+1],A[i],0
+		  or   A[i] <= A[i+1]  -> i := i+1
+		  end
+  end;
+  i := 0;
+  loop i < n -> write A[i], skip; i := i+1 end
+end

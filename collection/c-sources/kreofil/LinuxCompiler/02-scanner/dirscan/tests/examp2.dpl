@@ -1,0 +1,11 @@
+/* Одновременное нахождение НОД и НОК */
+begin
+  var x, y, u, v: int;
+  read x,y;
+  u, v := y, x;
+  loop x > y -> x, v := x - y, v + u
+  or   y > x -> y, u := y - x, u + v
+  end;
+  write (x+y)/2, skip 5, y;  /* НОД */
+  write skip 5, (u+v)/2      /* НОК */
+end

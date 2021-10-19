@@ -1,0 +1,20 @@
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > enum2C
+
+  6 > currentDay
+  c_int32 > someday
+  c_int32 > anotherDay
+
+  currentDay > getSomeDay
+
+  seq > main
+    someday.write 2
+    stdout (sprintf "enum2 someday = %d\n" someday)
+    anotherDay.write getSomeDay
+    stdout (sprintf "enum2 another day = %d\n" anotherDay)

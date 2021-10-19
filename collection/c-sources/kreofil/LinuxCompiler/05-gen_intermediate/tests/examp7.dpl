@@ -1,0 +1,26 @@
+/* Сортировка элементов вектора */
+begin
+    var A[10], i, n: int;
+
+    n := 3;
+    A[0] := 10;
+    A[1] := 7;
+    A[2] := 5;
+
+    i := 0;
+    loop i < n-1 -> 
+        case A[i] >  A[i+1] -> 
+            A[i], A[i+1], i := A[i+1], A[i], 0
+        or   A[i] <= A[i+1]  ->
+            i := i+1
+        end;
+        write i, tab, A[i], tab, A[i+1], skip
+    end;
+
+    write skip 2;
+    i := 0;
+    loop i < n -> 
+        write A[i], skip; 
+        i := i+1
+    end
+end

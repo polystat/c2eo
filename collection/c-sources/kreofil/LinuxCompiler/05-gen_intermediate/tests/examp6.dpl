@@ -1,0 +1,13 @@
+/* Проверка оператора присваивания */
+begin
+  var A[3], a, b, c, d, i: int;
+  a, b, c, d := 1+1, 2+2, 3+3, 4+4;
+  a, b, c, d := d, c, b, a;
+  write a, tab, b, tab, c, tab, d, skip;
+  
+  i := 0;
+  A[i], A[i+1] := 10, 20;
+  write A[0], tab, A[1], tab, i, skip;
+  A[i], A[i+1], i := A[i+1], A[i], 0;
+  write A[0], tab, A[1], tab, i, skip
+end
