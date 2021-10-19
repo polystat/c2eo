@@ -30,7 +30,7 @@
                 seq
                 ^.number1.write ((^.number1.mul 3).add 1)
       number1
-      error "Unexpected behavior"
+      seq
 
   [] > main
 
