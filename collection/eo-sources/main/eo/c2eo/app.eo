@@ -26,7 +26,7 @@
 +alias c2eo.examples.pointers1C
 +alias c2eo.examples.pointers2C
 +alias c2eo.examples.pointers3C
-
++alias diagnostics.exception
 
 # (typeCastingC args).main
 # (functionPointersC args).main
@@ -117,4 +117,8 @@
 
     stdout "pointers3C\n"
     (pointers3C args).main
+    stdout "\n"
+
+    stdout "exception\n"
+    exception "exception work!"
     stdout "\n"
