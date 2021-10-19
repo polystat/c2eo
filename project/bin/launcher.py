@@ -3,6 +3,7 @@
 
 #------------------------------------------------------------------------------
 import os
+import sys
 import glob
 import shutil
 
@@ -18,7 +19,10 @@ assemblyDir = "../assembly/"
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
-    print("Test out")
+    argc = len(sys.argv)
+    print(f'argc = {argc}')
+    argv = sys.argv
+    print(f'argv = {argv}')
     # Получение текущего каталога
     print(f'Current Working Directory is: {os.getcwd()}')
     # Проверка наличия нужного каталога
@@ -38,10 +42,25 @@ if __name__ == '__main__':
     assemlyFileList = list(glob.glob(os.path.join(assemblyDir, '*.c')))
     print(f'Directory {assemblyDir} contain: {assemlyFileList}')
 
+    # Запуск транспилятора
+    if argc < 2:
+        print(f'Incorrect number of argument = {argc}')
+        exit(1)
+
+    c2eoProgram =  os.getcwd() + '/c2eo ' + argv[1] + ' --'
+    print(f'c2eoProgram = {c2eoProgram}')
+    #os.system(r'c:/"Program Files"/"Mozilla Firefox"/firefox.exe')
+    #os.startfile(r'./c2eo  --')
+
     #for file in list(glob.glob(os.path.join(assemblyDir, '*.c'))):
     #    shutil.move(file, resultDir)
 
-    # Удаление всех файлов, находящихся в каталоге resultDir
+    # Запуск сборщика
+    collectorScript = os.getcwd() + '/collector.py'
+    os.system(collectorScript)
+    #os.startfile(r'./collector')
+
+   # Удаление всех файлов, находящихся в каталоге resultDir
     for file in list(glob.glob(os.path.join(resultDir, '*'))):
         os.remove(file)
 
@@ -52,6 +71,6 @@ if __name__ == '__main__':
         print(f'File global.eo is absence in: {assemblyDir}')
 
     # Удаление всех файлов, находящихся в каталоге assemblyDir
-    #for file in list(glob.glob(os.path.join(assemblyDir, '*'))):
-    #    os.remove(file)
+    for file in list(glob.glob(os.path.join(assemblyDir, '*'))):
+        os.remove(file)
 
