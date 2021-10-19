@@ -16,7 +16,7 @@ for fn in `find ../tests -name "*.c"`; do
     eval " ${CTOEO} ${FILE} -- -d ${FILE%%.c}/env/eo/c2eo/ > ${FILE%%.c}/${NAME%%.c}.details 2>${FILE%%.c}/${NAME%%.c}.log"
     while read -r line; do
         if [[ "$line" == *"> g_"* ]]; then
-            echo "    stdout (g.${line#*> }.toString)" >>  ${FILE%%.c}/env/eo/c2eo/app.eo
+            echo "    stdout (g.${line#*> }.as-string)" >>  ${FILE%%.c}/env/eo/c2eo/app.eo
             echo "    stdout \"\n\""  >>  ${FILE%%.c}/env/eo/c2eo/app.eo
         fi
     done < ${FILE%%.c}/env/eo/c2eo/src/${NAME%%.c}.glob
