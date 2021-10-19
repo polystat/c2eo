@@ -27,6 +27,7 @@
 +alias c2eo.examples.pointers2C
 +alias c2eo.examples.pointers3C
 +alias diagnostics.exception
++alias diagnostics.assert
 
 # (typeCastingC args).main
 # (functionPointersC args).main
@@ -121,4 +122,12 @@
 
     stdout "exception\n"
     exception "exception work!"
+    stdout "\n"
+
+    stdout "True assert"
+    assert TRUE "True assert dont work"
+    stdout "\n"
+
+    stdout "False assert"
+    assert FALSE "False assert work!"
     stdout "\n"
