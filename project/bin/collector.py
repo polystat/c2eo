@@ -16,6 +16,22 @@ resultDir = "../../result/eo/c2eo/src/"
 # каталог проекта на EO
 assemblyDir = "../assembly/"
 
+# Фрагмент данных с метаинформацией и началом глобального объекта
+meta = '''+package c2eo
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_char
++alias c2eo.ctypes.c_float64
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
+
+[arg] > global
+
+'''
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
     print("Hello from collector!!!!")
@@ -27,15 +43,37 @@ if __name__ == '__main__':
         print(f'Resul Directory is: {assemblyDir}')
 
     # Получение содержимого каталога
-    print(f'Directory {assemblyDir} contain: {os.listdir(assemblyDir)}')
+    #print(f'Directory {assemblyDir} contain: {os.listdir(assemblyDir)}')
     assemlyStaticFileList = list(glob.glob(os.path.join(assemblyDir, '*.stat')))
-    print(f'Directory {assemblyDir} contain: {assemlyStaticFileList}')
-    assemlyGlobalFileList = list(glob.glob(os.path.join(assemblyDir, '*.stat')))
-    print(f'Directory {assemblyDir} contain: {assemlyGlobalFileList}')
+    print(f'Static objects. Directory {assemblyDir} contain files: {assemlyStaticFileList}')
+    assemlyGlobalFileList = list(glob.glob(os.path.join(assemblyDir, '*.glob')))
+    print(f'Global objects. Directory {assemblyDir} contain files: {assemlyGlobalFileList}')
 
-    # Начало сборки файла global.eo
+    # Сборка файла global.eo
+    # Формирование всех глобальных объектов
+    collectInfo = meta
+    for globalFile in assemlyGlobalFileList:
+        with open(globalFile, "r") as f:
+            for line in f:
+                #print(line)
+                collectInfo += '  '
+                collectInfo +=line
 
-    # Получение имени файла для обозначения статического объекта
-    # Делается обход по списку файлов, содержащих информацию о статических объектах
-    ##name = os.path.basename(r'C:\python3\file.txt ')
-    ##name = os.path.splitext("/path/to/some/file.txt")[0]
+    # Добавление в файл всех статических объектов
+    for staticFile in assemlyStaticFileList:
+        # Получение имени файла для использования в качестве имени статического объекта
+        name = os.path.basename(staticFile)
+        name = os.path.splitext(name)[0]
+        print(f'Static object name = {name}')
+        collectInfo += '\n  [] > ' + name + '\n'
+        with open(staticFile, "r") as f:
+            for line in f:
+                print(line)
+                collectInfo += '    '
+                collectInfo +=line
+
+
+    print(collectInfo)
+    with open("../assembly/global.eo", "w") as f:
+        f.write(collectInfo)
+

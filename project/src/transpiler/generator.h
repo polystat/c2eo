@@ -23,7 +23,7 @@ struct AbstractGen {
 // Генератор кода для глобального пространства
 // Наряду с константной оберткой обеспечивает запись глобальных объектов
 struct SpaceGen: AbstractGen {
-    std::vector<AbstractGen*> globalObjects;
+    std::vector<AbstractGen*> objects;
     std::string space;      // строка с собранным глобальным пространством
 
     // Добавление очередного объекта к глобальному пространству

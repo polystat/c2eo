@@ -28,11 +28,7 @@ if __name__ == '__main__':
     # Проверка наличия нужного каталога
     if os.path.exists(resultDir):
         print(f'Resul Directory is: {resultDir}')
-    # Проверка наличия файла в каталоге
-    if os.path.exists(os.path.join(resultDir, 'README.md')):
-        print(f'File README.md is in: {resultDir}')
-    else:
-        print(f'File README.md is absence in: {resultDir}')
+
     # Получение содержимого каталога
     print(f'Directory {resultDir} contain: {os.listdir(resultDir)}')
     print(f'Directory {assemblyDir} contain: {os.listdir(assemblyDir)}')
@@ -42,16 +38,22 @@ if __name__ == '__main__':
     assemlyFileList = list(glob.glob(os.path.join(assemblyDir, '*.c')))
     print(f'Directory {assemblyDir} contain: {assemlyFileList}')
 
+    # Удаление всех файлов, находящихся в каталоге assemblyDir
+    for file in list(glob.glob(os.path.join(assemblyDir, '*'))):
+        os.remove(file)
     # Запуск транспилятора
+
     if argc < 2:
         print(f'Incorrect number of argument = {argc}')
         exit(1)
 
-    c2eoProgram =  os.getcwd() + '/c2eo ' + argv[1] + ' --'
+    c2eoProgram =  os.getcwd() + '/c2eo ' + argv[1] + ' static01'
     print(f'c2eoProgram = {c2eoProgram}')
-    #os.system(r'c:/"Program Files"/"Mozilla Firefox"/firefox.exe')
-    #os.startfile(r'./c2eo  --')
 
+
+    os.system(c2eoProgram)
+    #os.startfile(c2eoProgram)
+    
     #for file in list(glob.glob(os.path.join(assemblyDir, '*.c'))):
     #    shutil.move(file, resultDir)
 
@@ -64,13 +66,12 @@ if __name__ == '__main__':
     for file in list(glob.glob(os.path.join(resultDir, '*'))):
         os.remove(file)
 
-    # Проверка наличия файла в каталоге
+    # Проверка наличия файла global.eo в каталоге assembly
     if os.path.exists(os.path.join(assemblyDir, 'global.eo')):
         shutil.move(os.path.join(assemblyDir, 'global.eo'), resultDir)
     else:
         print(f'File global.eo is absence in: {assemblyDir}')
+        exit(2)
 
-    # Удаление всех файлов, находящихся в каталоге assemblyDir
-    for file in list(glob.glob(os.path.join(assemblyDir, '*'))):
-        os.remove(file)
+    print('Launcher: OK!')
 

@@ -24,13 +24,11 @@ static cl::extrahelp MoreHelp("\nMore help text...\n");
 //                    std::string initFilename) ;
 void generateSpace(SpaceGen &globGen, std::string objFilename);
 
-std::string getShortFilename(const std::string &filename);
+const char **transform_argv(const char *const *argv);
 
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
-    std::string filename = getShortFilename(argv[1]);
-
     SpaceGen globGen, staticGen;
     VarGen::globalSpaceGenPtr = &globGen;
     VarGen::staticSpaceGenPtr = &staticGen;
@@ -42,13 +40,18 @@ int main(int argc, const char **argv) {
     ApplicationGen appGen;
     std::string appCode;
 
-    if (argc < 2) {
-        llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> --\n";
+    if (argc < 3) {
+        llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> item-name\n";
         return -1;
     }
 
+    int parser_argc = 3;
+    const char **parser_argv = transform_argv(argv);
+    std::string filename = argv[2];
+
+
     auto ExpectedParser
-            = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
+            = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
 
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
@@ -78,34 +81,25 @@ int main(int argc, const char **argv) {
 
 //     generateSpace(globGen, filename + ".glob", filename + ".glob.seq");
 //     generateSpace(staticGen, filename + ".stat", filename + ".stat.seq");
-    generateSpace(globGen, filename + ".glob");
-    generateSpace(staticGen, filename + ".stat");
+    if (!globGen.objects.empty()) {
+        generateSpace(globGen, "../assembly/" + filename + ".glob");
+    }
+    if (!staticGen.objects.empty()) {
+        generateSpace(staticGen, "../assembly/" + filename + ".stat");
+    }
 
 
-    // Тестовое формирование глобального объекта с инициализацией
-    std::vector<std::string> glob;
-    createGlobal(glob, filename);
-    text2file(glob, "global.eo");
-
-    std::vector<std::string> stat;
-    createStatic(stat, filename);
-    text2file(stat, filename+".eo");
-
-    llvm::outs() << "\n===================================\n";
-    appGen.Generate(appCode);
-    llvm::outs() << appCode;
-    str2file(appCode, "app.eo");
-
-    return result;
+   return result;
 }
 
-// Получение имени файла, как то что находится между /(если есть) и .с
-std::string getShortFilename(const std::string &filename) {
-    size_t st = filename.find_last_of("/");
-    st =  st != std::string::npos ? st + 1 : 0;
-    size_t end = filename.find_last_of(".c") - 1;
-    return filename.substr(st, end - st);
+const char **transform_argv(const char *const *argv) {
+    const char** parser_argv = new const char*[3];
+    parser_argv[0] = argv[0];
+    parser_argv[1] = argv[1];
+    parser_argv[2] = "--";
+    return parser_argv;
 }
+
 
 // void generateSpace(SpaceGen &globGen, std::string objFilename,
 //         std::string initFilename) {
