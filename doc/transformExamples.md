@@ -1713,31 +1713,40 @@ int main() {
 
 static int a = 10;
 
-int main() {
-    int* pa = &a;
-    int a = 20;
+int foo() {
+    a += 1;
+    printf("a = %d\n", a);
+    static int* pa = &a;
+    static int a = 20;
+    a += 3;
     printf("a = %d\n", a);
     {
-        int a = 30;
+        static int a = 30;
+        a += 7;
         printf("a = %d\n", a);
         {
-            int a = 40;
+            static int a = 40;
+            a += 15;
             printf("a = %d\n", a);
             {
-                int a = 50;
+                static int a = 50;
+                a += 31;
                 printf("a = %d\n", a);
             }
         }
     }
-
     printf("a = %d\n", *pa);
+}
+
+int main() {
+    foo();
+    foo();
 }
 ```
 
 - EO
 
 ```java
-
 +package c2eo.examples
 
 +alias org.eolang.io.stdout
@@ -1783,4 +1792,63 @@ int main() {
     seq > @
       ^.foo
       ^.foo
+```
+
+## 33. nestedBlocksMain
+
+- C
+
+```c
+#include <stdio.h>
+
+static int a = 10;
+
+int main() {
+    static int* pa = &a;
+    static int a = 20;
+    printf("a = %d\n", a);
+    {
+        static int a = 30;
+        printf("a = %d\n", a);
+        {
+            static int a = 40;
+            printf("a = %d\n", a);
+            {
+                static int a = 50;
+                printf("a = %d\n", a);
+            }
+        }
+    }
+    printf("a = %d\n", *pa);
+}
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > nestedBlocksMainC
+
+  c_int32 10 > a
+
+  [] > main
+
+    c_int32 20 > a
+    c_int32 30 > a_1
+    c_int32 40 > a_1_1
+    c_int32 50 > a_1_1_1
+
+    seq > @
+      stdout (sprintf "a = %d\n" a)
+      stdout (sprintf "a = %d\n" a_1)
+      stdout (sprintf "a = %d\n" a_1_1)
+      stdout (sprintf "a = %d\n" a_1_1_1)
+      stdout (sprintf "a = %d\n" (^.a))
+
 ```
