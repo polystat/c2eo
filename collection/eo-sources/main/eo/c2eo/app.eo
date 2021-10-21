@@ -26,6 +26,7 @@
 +alias c2eo.examples.pointers1C
 +alias c2eo.examples.pointers2C
 +alias c2eo.examples.pointers3C
++alias c2eo.examples.nestedBlocksC
 +alias c2eo.collections.array
 +alias diagnostics.exception
 +alias diagnostics.assert
@@ -119,6 +120,10 @@
 
     stdout "pointers3C\n"
     (pointers3C args).main
+    stdout "\n"
+
+    stdout "nestedBlocksC\n"
+    (nestedBlocksC args).main
     stdout "\n"
 
     stdout "array\n"
