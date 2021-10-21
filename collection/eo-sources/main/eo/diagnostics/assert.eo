@@ -1,0 +1,11 @@
++package diagnostics
+
++alias diagnostics.exception
+
++alias org.eolang.io.stdout
+
+[condition error_msg] > assert
+  if. > @
+    condition
+    TRUE
+    exception error_msg

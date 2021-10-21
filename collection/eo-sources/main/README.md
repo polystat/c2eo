@@ -9,7 +9,7 @@ installed):
 
 ```bash
 $ git clone https://github.com/polystat/c2eo.git
-$ cd c2eo/eolang/main
+$ cd c2eo/collection/eo-sources/main
 ```
 
 Then, compile the code (you will need [Maven 3.3+](https://maven.apache.org/)
@@ -26,6 +26,11 @@ by Java SDK to Java bytecode. Finally, just run the bytecode program through JRE
 
 ```bash
 $ ./run.sh 5
+... many lines of code result
+```
+
+```cmd
+run.cmd 5
 ... many lines of code result
 ```
 

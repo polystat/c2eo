@@ -49,9 +49,9 @@
               a.write (a.add 5)
               isReturn.write TRUE
               result.write a
-            error "Unexpected behavior"
+            seq
       result
-      error "Unexpected behavior"
+      seq
 
   [] > main
     c_int32 > a

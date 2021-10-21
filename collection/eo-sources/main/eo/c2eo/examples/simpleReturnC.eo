@@ -15,7 +15,7 @@
       seq
         c.write (a.add b)
       c
-      error "Unexpected behavior"
+      seq
 
   [] > main
     c_int32 > a
