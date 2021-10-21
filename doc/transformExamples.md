@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
             seq
 
       result
-      error "Unexpected behavior"
+      seq
 
   [] > main
 
@@ -612,9 +612,9 @@ int main(int argc, char** argv) {
               a.write (a.add 5)
               isReturn.write TRUE
               result.write a
-            error "Unexpected behavior"
+            seq
       result
-      error "Unexpected behavior"
+      seq
 
   [] > main
     c_int32 > a
@@ -693,7 +693,7 @@ int main(int argc, char** argv) {
                 seq
                 ^.number1.write ((^.number1.mul 3).add 1)
       number1
-      error "Unexpected behavior"
+      seq
 
   [] > main
 
@@ -1432,7 +1432,7 @@ int main(int argc, char** argv) {
       seq
         c.write (a.add b)
       c
-      error "Unexpected behavior"
+      seq
 
   [] > main
     c_int32 > a
@@ -1639,4 +1639,148 @@ int main(int argc, char** argv) {
         seq > @
           stdout (sprintf "while[%d] " (^.i))
           ^.i.write (^.i.add 1)
+```
+
+## 31. nestedBlocks
+
+- C
+
+```c
+#include <stdio.h>
+
+static int a = 10;
+
+int main() {
+    int* pa = &a;
+    int a = 20;
+    printf("a = %d\n", a);
+    {
+        int a = 30;
+        printf("a = %d\n", a);
+        {
+            int a = 40;
+            printf("a = %d\n", a);
+            {
+                int a = 50;
+                printf("a = %d\n", a);
+            }
+        }
+    }
+
+    printf("a = %d\n", *pa);
+}
+```
+
+- EO
+
+```java
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > nestedBlocksC
+
+  [] > main
+
+    c_int32 20 > a
+
+    seq > @
+      stdout (sprintf "a = %d\n" a)
+      []
+        c_int32 30 > a
+        seq > @
+          stdout (sprintf "a = %d\n" a)
+          []
+            c_int32 40 > a
+            seq > @
+              stdout (sprintf "a = %d\n" a)
+              []
+                c_int32 50 > a
+                seq > @
+                  stdout (sprintf "a = %d\n" a)
+      stdout (sprintf "a = %d\n" a)
+```
+
+## 32. nestedBlocksStatic
+
+- C
+
+```c
+#include <stdio.h>
+
+static int a = 10;
+
+int main() {
+    int* pa = &a;
+    int a = 20;
+    printf("a = %d\n", a);
+    {
+        int a = 30;
+        printf("a = %d\n", a);
+        {
+            int a = 40;
+            printf("a = %d\n", a);
+            {
+                int a = 50;
+                printf("a = %d\n", a);
+            }
+        }
+    }
+
+    printf("a = %d\n", *pa);
+}
+```
+
+- EO
+
+```java
+
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > nestedBlocksStaticC
+
+  c_int32 10 > a
+
+  [] > foo
+    c_int32 20 > a
+    seq > @
+      ^.a.write (^.a.add 1)
+      stdout (sprintf "a = %d\n" (^.a))
+      a.write (a.add 3)
+      stdout (sprintf "a = %d\n" a)
+      foo_1
+      stdout (sprintf "a = %d\n" (^.a))
+
+    [] > foo_1
+      c_int32 30 > a
+      seq > @
+        a.write (a.add 7)
+        stdout (sprintf "a = %d\n" a)
+        foo_2
+
+      [] > foo_2
+        c_int32 40 > a
+        seq > @
+          a.write (a.add 15)
+          stdout (sprintf "a = %d\n" a)
+          foo_3
+
+        [] > foo_3
+          c_int32 50 > a
+          seq > @
+            a.write (a.add 31)
+            stdout (sprintf "a = %d\n" a)
+
+  [] > main
+    seq > @
+      ^.foo
+      ^.foo
 ```
