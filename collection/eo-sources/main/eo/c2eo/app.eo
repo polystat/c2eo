@@ -28,6 +28,7 @@
 +alias c2eo.examples.pointers3C
 +alias c2eo.examples.nestedBlocksC
 +alias c2eo.examples.nestedBlocksStaticC
++alias c2eo.examples.nestedBlocksMainC
 +alias c2eo.collections.array
 +alias diagnostics.exception
 +alias diagnostics.assert
@@ -129,6 +130,10 @@
 
     stdout "nestedBlocksStaticC\n"
     (nestedBlocksStaticC args).main
+    stdout "\n"
+
+    stdout "nestedBlocksMainC\n"
+    (nestedBlocksMainC args).main
     stdout "\n"
 
     stdout "array\n"
