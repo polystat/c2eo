@@ -1,0 +1,45 @@
++package c2eo.examples
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_int32
+
+[args] > nestedBlocksStaticC
+
+  c_int32 10 > a
+
+  [] > foo
+    c_int32 20 > a
+    seq > @
+      ^.a.write (^.a.add 1)
+      stdout (sprintf "a = %d\n" (^.a))
+      a.write (a.add 3)
+      stdout (sprintf "a = %d\n" a)
+      foo_1
+      stdout (sprintf "a = %d\n" (^.a))
+
+    [] > foo_1
+      c_int32 30 > a
+      seq > @
+        a.write (a.add 7)
+        stdout (sprintf "a = %d\n" a)
+        foo_2
+
+      [] > foo_2
+        c_int32 40 > a
+        seq > @
+          a.write (a.add 15)
+          stdout (sprintf "a = %d\n" a)
+          foo_3
+
+        [] > foo_3
+          c_int32 50 > a
+          seq > @
+            a.write (a.add 31)
+            stdout (sprintf "a = %d\n" a)
+
+  [] > main
+    seq > @
+      ^.foo
+      ^.foo
