@@ -17,7 +17,7 @@ resultDir = "../../result/eo/c2eo/src/"
 assemblyDir = "../assembly/"
 
 # Фрагмент данных с метаинформацией и началом глобального объекта
-meta = '''+package c2eo
+meta = '''+package c2eo.src
 +alias stdout org.eolang.io.stdout
 +alias sprintf org.eolang.txt.sprintf
 
@@ -56,7 +56,8 @@ if __name__ == '__main__':
         with open(globalFile, "r") as f:
             for line in f:
                 #print(line)
-                collectInfo += '  '
+                if line != '\n':
+                    collectInfo += '  '
                 collectInfo +=line
 
     # Добавление в файл всех статических объектов
@@ -69,7 +70,8 @@ if __name__ == '__main__':
         with open(staticFile, "r") as f:
             for line in f:
                 print(line)
-                collectInfo += '    '
+                if line != '\n':
+                    collectInfo += '    '
                 collectInfo +=line
 
 

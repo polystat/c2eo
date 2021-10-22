@@ -29,17 +29,6 @@ const char **transform_argv(const char *const *argv);
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
-    SpaceGen globGen, staticGen;
-    VarGen::globalSpaceGenPtr = &globGen;
-    VarGen::staticSpaceGenPtr = &staticGen;
-
-
-    std::string staticObj;
-    std::string staticInit;
-
-    ApplicationGen appGen;
-    std::string appCode;
-
     if (argc < 3) {
         llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> item-name\n";
         return -1;
@@ -47,7 +36,19 @@ int main(int argc, const char **argv) {
 
     int parser_argc = 3;
     const char **parser_argv = transform_argv(argv);
+    const char* inputFileName = argv[1];
     std::string filename = argv[2];
+
+    SpaceGen globGen, staticGen;
+    VarGen::globalSpaceGenPtr = &globGen;
+    VarGen::staticSpaceGenPtr = &staticGen;
+    AbstractGen::filename = filename;
+
+    std::string staticObj;
+    std::string staticInit;
+
+    ApplicationGen appGen;
+    std::string appCode;
 
 
     auto ExpectedParser

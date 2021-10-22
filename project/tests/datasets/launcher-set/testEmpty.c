@@ -1,4 +1,10 @@
 //clang -Xclang -ast-dump -fsyntax-only main.cpp
+int a;
+int b;
+int c;
 int main() {
-    return 0;
+    -a;
+    //b;
+    //b;
+    //return 0;
 }

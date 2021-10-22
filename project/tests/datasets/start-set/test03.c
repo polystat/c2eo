@@ -1,12 +1,24 @@
-int main(int argc, char **argv);
+//clang -Xclang -ast-dump -fsyntax-only main.cpp
 
-int a = 3;
-int b = 4;
+int a = 4;
+int b = 3;
 int c;
+int d;
+int e;
+int f;
+int g;
+int h;
+int i;
+
  
 int main(int argc, char **argv) {
     c = a + b;
-    c = a;
-    a = b;
-    b = c;
+    d = a - b;
+    e = a * b;
+    f = a / b;
+    g = a % b;
+    h = -a;
+    i = a;
+    a; b; c; d; e; f; g; h; i;
+
 }

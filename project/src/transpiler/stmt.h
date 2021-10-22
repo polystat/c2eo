@@ -15,6 +15,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 
 #include "clang/AST/ASTContext.h"
+#include "generator.h"
 
 using namespace clang::tooling;
 using namespace llvm;
@@ -28,6 +29,7 @@ using namespace clang;
 
 // Определение и тестовый вывод основных параметров составного оператора
 void getCompoundStmtParameters(const CompoundStmt* CS, int shift = 0);
+CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,  int shift = 0,bool isDecorator = false) ;
 
 // Анализ полученного начального значения с последующим использованием
 //void initValueAnalysis(const VarDecl *VD, std::string &str);
