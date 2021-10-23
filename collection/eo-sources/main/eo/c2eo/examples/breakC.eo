@@ -18,8 +18,8 @@
     if. > @
       seq
         a1.write a
-        isBreak.write FALSE
-        isReturn.write FALSE
+        isBreak.write 0
+        isReturn.write 0
         while.
           TRUE.and (isBreak.not) (isReturn.not)
           [i]
@@ -27,12 +27,12 @@
               if.
                 (^.a1.mod 5).eq 0
                 seq
-                  ^.isBreak.write TRUE
+                  ^.isBreak.write 1
                 seq
               if.
                 (^.a1.mod 3).eq 0
                 seq
-                  ^.isReturn.write TRUE
+                  ^.isReturn.write 1
                   ^.result.write 1
                 seq
               if.

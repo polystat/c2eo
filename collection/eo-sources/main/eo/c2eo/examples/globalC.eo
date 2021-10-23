@@ -26,14 +26,14 @@
 
   seq > non_initialized
 
-    b_1.write FALSE
+    b_1.write 0
     c_1.write 'a'
     f64_1.write 3.1415
     i16_1.write 127
     i32_1.write 255
     i64_1.write 511
 
-    stdout (sprintf "b_1 = %b\n" b_1)
+    stdout (sprintf "b_1 = %d\n" (b_1.as-int))
     stdout (sprintf "c_1 = %c\n" c_1)
     stdout (sprintf "f64_1 = %f\n" f64_1)
     stdout (sprintf "i16_1 = %d\n" i16_1)
@@ -41,7 +41,7 @@
     stdout (sprintf "i64_1 = %d\n" i64_1)
 
 
-  c_bool TRUE > b_2
+  c_bool 100 > b_2
   c_char 'b' > c_2
   c_float64 3.1415 > f64_2
   c_int16 128 > i16_2
@@ -49,7 +49,7 @@
   c_int64 512 > i64_2
 
   seq > initialized
-    stdout (sprintf "b_2 = %b\n" b_2)
+    stdout (sprintf "b_2 = %d\n" (b_2.as-int))
     stdout (sprintf "c_2 = %c\n" c_2)
     stdout (sprintf "f64_2 = %f\n" f64_2)
     stdout (sprintf "i16_2 = %d\n" i16_2)

@@ -14,7 +14,7 @@
 
     if. > @
       seq
-        isReturn.write FALSE
+        isReturn.write 0
         if.
           a.eq 1
           seq
@@ -25,13 +25,13 @@
           a.eq 2
           seq
             a.write (a.add 2)
-            isReturn.write TRUE
+            isReturn.write 1
             result.write 2
           if.
             a.eq 3
             seq
               a.write (a.add 3)
-              isReturn.write TRUE
+              isReturn.write 1
               result.write 3
             seq
 
@@ -47,7 +47,7 @@
                 seq
             seq
               a.write (a.add 5)
-              isReturn.write TRUE
+              isReturn.write 1
               result.write a
             seq
       result

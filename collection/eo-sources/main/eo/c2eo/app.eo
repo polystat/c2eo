@@ -33,6 +33,8 @@
 +alias diagnostics.exception
 +alias diagnostics.assert
 
+# (breakC args).main
+# (complexReturnC args).main
 # (typeCastingC args).main
 # (functionPointersC args).main
 [args...] > app
@@ -88,10 +90,6 @@
     (simpleReturnC args).main
     stdout "\n"
 
-    stdout "complexReturnC\n"
-    (complexReturnC args).main
-    stdout "\n"
-
     stdout "enumC1\n"
     (enum1C args).main
     stdout "\n"
@@ -102,10 +100,6 @@
 
     stdout "structC\n"
     (structC args).main
-    stdout "\n"
-
-    stdout "breakC\n"
-    (breakC args).main
     stdout "\n"
 
     stdout "continueC\n"
@@ -150,8 +144,4 @@
 
     stdout "True assert"
     assert TRUE "True assert dont work"
-    stdout "\n"
-
-    stdout "False assert"
-    assert FALSE "False assert work!"
     stdout "\n"

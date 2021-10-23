@@ -11,7 +11,7 @@
   [number] > collatzProblem
 
     c_int32 number > number1
-    c_bool FALSE > isContinue
+    c_bool 0 > isContinue
 
     if. > @
       seq
@@ -23,7 +23,7 @@
                 (^.number1.mod 2).eq 0
                 seq
                   ^.number1.write (^.number1.mod 2)
-                  ^.isContinue.write TRUE
+                  ^.isContinue.write 1
                 seq
               if.
                 ^.isContinue
