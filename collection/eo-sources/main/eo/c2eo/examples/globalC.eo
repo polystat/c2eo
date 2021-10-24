@@ -7,6 +7,7 @@
 +alias c2eo.ctypes.c_int16
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_int64
++alias c2eo.ctypes.c_uint16
 +alias c2eo.ctypes.c_uint32
 
 [] > globalC
@@ -22,6 +23,7 @@
   c_int16 > i16_1
   c_int32 > i32_1
   c_int64 > i64_1
+  c_uint16 > ui16_1
   c_uint32 > ui32_1
 
   seq > non_initialized
@@ -32,6 +34,7 @@
     i16_1.write 127
     i32_1.write 255
     i64_1.write 511
+    ui16_1.write 352
     ui32_1.write 231
 
     printf "b_1 = %d\n" (b_1.as-int)
@@ -40,6 +43,7 @@
     printf "i16_1 = %d\n" i16_1
     printf "i32_1 = %d\n" i32_1
     printf "i64_1 = %d\n" i64_1
+    printf "ui16_1 = %d\n" ui16_1
     printf "ui32_1 = %d\n" ui32_1
 
 
@@ -49,6 +53,7 @@
   c_int16 128 > i16_2
   c_int32 256 > i32_2
   c_int64 512 > i64_2
+  c_uint16 323 > ui16_2
   c_uint32 123 > ui32_2
 
   seq > initialized
@@ -58,4 +63,5 @@
     printf "i16_2 = %d\n" i16_2
     printf "i32_2 = %d\n" i32_2
     printf "i64_2 = %d\n" i64_2
+    printf "ui16_2 = %d\n" ui16_2
     printf "ui32_2 = %d\n" ui32_2
