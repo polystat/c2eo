@@ -8,4 +8,4 @@
   if. > @
     condition
     TRUE
-    exception error_msg
+    stdout (exception error_msg)

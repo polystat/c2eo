@@ -4,4 +4,4 @@
 +alias org.eolang.io.stdout
 
 [message] > exception
-  stdout (sprintf "\n[\033[31mERROR\033[0m] %s\n" message) > @
+  sprintf "\n[\033[31mERROR\033[0m] %s\n" message > @
