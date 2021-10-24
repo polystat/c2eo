@@ -9,13 +9,19 @@
   if. > @
     mem.is-empty
     if.
-      mem.write initial
+      write initial
       mem
       seq
     mem
 
-  mem.write > write
+  [value] > write
+    if. > @
+      value.eq 0
+      ^.mem.write FALSE
+      ^.mem.write TRUE
 
-  sprintf "%b" $ > as-string
+  sprintf "%d" as-int > as-string
+
+  $.if 1 0 > as-int
 
   "bool" > type
