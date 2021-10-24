@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > switchC
@@ -11,18 +9,18 @@
 
   seq > main
     a.write (args.get 0).as-int
-    stdout (sprintf "switch[%d] = " a)
+    printf "switch[%d] = " a
     if.
       a.eq 0
       seq
-        stdout "0"
+        printf "0"
       if.
         a.eq 1
         seq
-          stdout "1"
+          printf "1"
         if.
           a.eq 5
           seq
-            stdout "5"
+            printf "5"
           seq
-            stdout "default"
+            printf "default"

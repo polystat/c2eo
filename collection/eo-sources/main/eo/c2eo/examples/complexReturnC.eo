@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_bool
 
@@ -60,4 +58,4 @@
     seq > @
       a.write (^.args.get 0).as-int
       result.write (^.f a)
-      stdout (sprintf "complexReturn[%d] = %d\n" a result)
+      printf "complexReturn[%d] = %d\n" a result

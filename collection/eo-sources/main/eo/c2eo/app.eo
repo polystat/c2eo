@@ -1,8 +1,5 @@
 +package c2eo
 
-+alias org.eolang.txt.sprintf
-+alias org.eolang.io.stdout
-
 +alias c2eo.examples.globalC
 +alias c2eo.examples.operationsC
 +alias c2eo.examples.overflowC
@@ -41,110 +38,110 @@
 [args...] > app
 
   seq > @
-    stdout "\n"
+    printf "\n"
 
-    stdout "globalC\n"
+    printf "globalC\n"
     globalC
-    stdout "\n"
+    printf "\n"
 
-    stdout "operationsC\n"
+    printf "operationsC\n"
     operationsC
-    stdout "\n"
+    printf "\n"
 
-    stdout "overflowC\n"
+    printf "overflowC\n"
     overflowC
-    stdout "\n"
+    printf "\n"
 
-    stdout "factorialC\n"
+    printf "factorialC\n"
     (factorialC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "fibonacciC\n"
+    printf "fibonacciC\n"
     (fibonacciC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "piC\n"
+    printf "piC\n"
     (piC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "switchC\n"
+    printf "switchC\n"
     (switchC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "ifC\n"
+    printf "ifC\n"
     (ifC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "whileC\n"
+    printf "whileC\n"
     (whileC args).main
-    stdout "\n\n"
+    printf "\n\n"
 
-    stdout "dowhileC\n"
+    printf "dowhileC\n"
     (dowhileC args).main
-    stdout "\n\n"
+    printf "\n\n"
 
-    stdout "forC\n"
+    printf "forC\n"
     (forC args).main
-    stdout "\n\n"
+    printf "\n\n"
 
-    stdout "simpleReturnC\n"
+    printf "simpleReturnC\n"
     (simpleReturnC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "enumC1\n"
+    printf "enumC1\n"
     (enum1C args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "enum2C\n"
+    printf "enum2C\n"
     (enum2C args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "structC\n"
+    printf "structC\n"
     (structC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "continueC\n"
+    printf "continueC\n"
     (continueC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "pointers1C\n"
+    printf "pointers1C\n"
     (pointers1C args).main
-    stdout "\n\n"
+    printf "\n\n"
 
-    stdout "pointers2C\n"
+    printf "pointers2C\n"
     (pointers2C args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "pointers3C\n"
+    printf "pointers3C\n"
     (pointers3C args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "nestedBlocksC\n"
+    printf "nestedBlocksC\n"
     (nestedBlocksC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "nestedBlocksStaticC\n"
+    printf "nestedBlocksStaticC\n"
     (nestedBlocksStaticC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "nestedBlocksMainC\n"
+    printf "nestedBlocksMainC\n"
     (nestedBlocksMainC args).main
-    stdout "\n"
+    printf "\n"
 
-    stdout "array\n"
-    stdout (sprintf "(array 1 2 3 4 5).length = %d" (array 1 2 3 4 5).length)
-    stdout "\n"
+    printf "array\n"
+    printf "(array 1 2 3 4 5).length = %d" ((array 1 2 3 4 5).length)
+    printf "\n"
 
-    stdout "\n\nFalse assert"
+    printf "\n\nFalse assert"
     assert FALSE "False assert work!"
 
-    stdout "\n\nexception\n"
-    stdout (exception "exception work!")
+    printf "\n\nexception\n"
+    printf (exception "exception work!")
 
-    stdout "\n\nTrue assert"
+    printf "\n\nTrue assert"
     assert TRUE "True assert dont work"
 
-    stdout "\n\nprintf\n"
+    printf "\n\nprintf\n"
     printf "simple\n"
     printf "simple %d\n" 1
     printf "simple %d %d\n" 1 2

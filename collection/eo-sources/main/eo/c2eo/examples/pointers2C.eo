@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.txt.sprintf
-+alias org.eolang.io.stdout
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > pointers2C
@@ -16,4 +14,4 @@
     seq > @
       ^.x.write 25
       y.write (^.x)
-      stdout (sprintf "x = %d\ny = %d\n*p = %d\n" (^.x) y y)
+      printf "x = %d\ny = %d\n*p = %d\n" (^.x) y y

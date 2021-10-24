@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > dowhileC
@@ -12,7 +10,7 @@
 
   [] > cycle_body
     seq > @
-      stdout (sprintf "dowhile[%d] " (^.i))
+      printf "dowhile[%d] " (^.i)
       ^.i.write (^.i.add 1)
 
   seq > main

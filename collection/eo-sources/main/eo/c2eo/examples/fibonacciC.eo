@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.txt.sprintf
-+alias org.eolang.io.stdout
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > fibonacciC
@@ -26,6 +24,6 @@
     result.write 1
     lastResult.write 0
     n.write (args.get 0).as-int
-    stdout (sprintf "fibonacci[%d] = " n)
+    printf "fibonacci[%d] = " n
     fibonacci
-    stdout (sprintf "%d\n" result)
+    printf "%d\n" result

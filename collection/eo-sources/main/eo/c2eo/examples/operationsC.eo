@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [] > operationsC
@@ -13,16 +11,16 @@
 
   seq > @
 
-    stdout (sprintf "a = %d\n" a)
-    stdout (sprintf "b = %d\n" b)
+    printf "a = %d\n" a
+    printf "b = %d\n" b
 
     c.write (a.add b)
-    stdout (sprintf "c = a + b  ->  c = %d + %d  ->  c = %d\n" a b c)
+    printf "c = a + b  ->  c = %d + %d  ->  c = %d\n" a b c
     c.write (a.sub b)
-    stdout (sprintf "c = a - b  ->  c = %d - %d  ->  c = %d\n" a b c)
+    printf "c = a - b  ->  c = %d - %d  ->  c = %d\n" a b c
     c.write (a.mul b)
-    stdout (sprintf "c = a * b  ->  c = %d * %d  ->  c = %d\n" a b c)
+    printf "c = a * b  ->  c = %d * %d  ->  c = %d\n" a b c
     c.write (a.div b)
-    stdout (sprintf "c = a / b  ->  c = %d / %d  ->  c = %d\n" a b c)
+    printf "c = a / b  ->  c = %d / %d  ->  c = %d\n" a b c
     c.write (a.mod b)
-    stdout (sprintf "c = a mod b  ->  c = %d mod %d  ->  c = %d\n" a b c)
+    printf "c = a mod b  ->  c = %d mod %d  ->  c = %d\n" a b c

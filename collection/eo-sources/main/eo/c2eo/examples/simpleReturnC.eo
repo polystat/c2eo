@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > simpleReturnC
@@ -24,4 +22,4 @@
     seq > @
       a.write (^.args.get 0).as-int
       result.write (^.f a a)
-      stdout (sprintf "simpleReturn[%d] = %d \n" a result)
+      printf "simpleReturn[%d] = %d \n" a result

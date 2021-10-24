@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int16
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_int64
@@ -11,7 +9,7 @@
 
   seq > @
     non_initialized
-    stdout "\n"
+    printf "\n"
     initialized
 
   c_int16 > i16_1
@@ -24,17 +22,17 @@
     i32_1.write 9223372036324
     i64_1.write 9223372036854775807
 
-    stdout (sprintf "int16 = %d  ->  int16 = %d\n" 65000 i16_1)
-    stdout (sprintf "int32 = %d  ->  int32 = %d\n" 9223372036324 i32_1)
-    stdout (sprintf "int64 = %d  ->  int64 = %d\n" 9223372036854775807 i64_1)
+    printf "int16 = %d  ->  int16 = %d\n" 65000 i16_1
+    printf "int32 = %d  ->  int32 = %d\n" 9223372036324 i32_1
+    printf "int64 = %d  ->  int64 = %d\n" 9223372036854775807 i64_1
 
     i16_1.write -65000
     i32_1.write -9223372036324
     i64_1.write -9223372036854775808
 
-    stdout (sprintf "int16 = %d  ->  int16 = %d\n" -65000 i16_1)
-    stdout (sprintf "int32 = %d  ->  int32 = %d\n" -9223372036324 i32_1)
-    stdout (sprintf "int64 = %d  ->  int64 = %d\n" -9223372036854775808 i64_1)
+    printf "int16 = %d  ->  int16 = %d\n" -65000 i16_1
+    printf "int32 = %d  ->  int32 = %d\n" -9223372036324 i32_1
+    printf "int64 = %d  ->  int64 = %d\n" -9223372036854775808 i64_1
 
 
   c_int16 65000 > i16_2
@@ -47,10 +45,10 @@
 
   seq > initialized
 
-    stdout (sprintf "int16 %d  ->  int16 = %d\n" 65000 i16_2)
-    stdout (sprintf "int32 %d  ->  int32 = %d\n" 9223372036324 i32_2)
-    stdout (sprintf "int64 %d  ->  int64 = %d\n" 9223372036854775807 i64_2)
+    printf "int16 %d  ->  int16 = %d\n" 65000 i16_2
+    printf "int32 %d  ->  int32 = %d\n" 9223372036324 i32_2
+    printf "int64 %d  ->  int64 = %d\n" 9223372036854775807 i64_2
 
-    stdout (sprintf "int16 %d  ->  int16 = %d\n" -65000 i16_3)
-    stdout (sprintf "int32 %d  ->  int32 = %d\n" -9223372036324 i32_3)
-    stdout (sprintf "int64 %d  ->  int64 = %d\n" -9223372036854775808 i64_3)
+    printf "int16 %d  ->  int16 = %d\n" -65000 i16_3
+    printf "int32 %d  ->  int32 = %d\n" -9223372036324 i32_3
+    printf "int64 %d  ->  int64 = %d\n" -9223372036854775808 i64_3

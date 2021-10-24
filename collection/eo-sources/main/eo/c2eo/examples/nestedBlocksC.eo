@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > nestedBlocksC
@@ -12,17 +10,17 @@
     c_int32 20 > a
 
     seq > @
-      stdout (sprintf "a = %d\n" a)
+      printf "a = %d\n" a
       []
         c_int32 30 > a
         seq > @
-          stdout (sprintf "a = %d\n" a)
+          printf "a = %d\n" a
           []
             c_int32 40 > a
             seq > @
-              stdout (sprintf "a = %d\n" a)
+              printf "a = %d\n" a
               []
                 c_int32 50 > a
                 seq > @
-                  stdout (sprintf "a = %d\n" a)
-      stdout (sprintf "a = %d\n" a)
+                  printf "a = %d\n" a
+      printf "a = %d\n" a

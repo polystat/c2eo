@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_bool
 +alias c2eo.ctypes.c_char
 +alias c2eo.ctypes.c_float64
@@ -14,7 +12,7 @@
 
   seq > @
     non_initialized
-    stdout "\n"
+    printf "\n"
     initialized
 
   c_bool > b_1
@@ -33,12 +31,12 @@
     i32_1.write 255
     i64_1.write 511
 
-    stdout (sprintf "b_1 = %d\n" (b_1.as-int))
-    stdout (sprintf "c_1 = %c\n" c_1)
-    stdout (sprintf "f64_1 = %f\n" f64_1)
-    stdout (sprintf "i16_1 = %d\n" i16_1)
-    stdout (sprintf "i32_1 = %d\n" i32_1)
-    stdout (sprintf "i64_1 = %d\n" i64_1)
+    printf "b_1 = %d\n" (b_1.as-int)
+    printf "c_1 = %c\n" c_1
+    printf "f64_1 = %f\n" f64_1
+    printf "i16_1 = %d\n" i16_1
+    printf "i32_1 = %d\n" i32_1
+    printf "i64_1 = %d\n" i64_1
 
 
   c_bool 100 > b_2
@@ -49,9 +47,9 @@
   c_int64 512 > i64_2
 
   seq > initialized
-    stdout (sprintf "b_2 = %d\n" (b_2.as-int))
-    stdout (sprintf "c_2 = %c\n" c_2)
-    stdout (sprintf "f64_2 = %f\n" f64_2)
-    stdout (sprintf "i16_2 = %d\n" i16_2)
-    stdout (sprintf "i32_2 = %d\n" i32_2)
-    stdout (sprintf "i64_2 = %d\n" i64_2)
+    printf "b_2 = %d\n" (b_2.as-int)
+    printf "c_2 = %c\n" c_2
+    printf "f64_2 = %f\n" f64_2
+    printf "i16_2 = %d\n" i16_2
+    printf "i32_2 = %d\n" i32_2
+    printf "i64_2 = %d\n" i64_2
