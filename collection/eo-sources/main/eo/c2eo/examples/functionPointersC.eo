@@ -1,13 +1,11 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_book
 
 [b] > f
   seq > @
-    stdout (sprintf "price is %d" b.price)
+    printf "price is %d" b.price
 
 [r b] > g
   seq > @

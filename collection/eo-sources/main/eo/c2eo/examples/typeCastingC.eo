@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_book
 
 [b] > f
@@ -11,7 +9,7 @@
 
   seq > @
     title.write (b.title)
-    stdout (sprintf "The title: %s" title)
+    printf "The title: %s" title
 
 [args] > typeCastingC
 

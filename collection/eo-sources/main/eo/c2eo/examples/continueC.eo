@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_bool
 +alias c2eo.ctypes.c_int32
 
@@ -40,4 +38,4 @@
     seq > @
       a.write (^.args.get 0).as-int
       result.write (^.collatzProblem a)
-      stdout (sprintf "collatzProblem(%d) = %d" a result)
+      printf "collatzProblem(%d) = %d" a result

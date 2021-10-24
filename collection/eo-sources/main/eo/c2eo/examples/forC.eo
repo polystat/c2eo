@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > forC
@@ -17,5 +15,5 @@
       i.less a
       [x]
         seq > @
-          stdout (sprintf "for[%d] " (^.i))
+          printf "for[%d] " (^.i)
           ^.i.write (^.i.add 1)

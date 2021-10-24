@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > enum2C
@@ -15,6 +13,6 @@
 
   seq > main
     someday.write 2
-    stdout (sprintf "enum2 someday = %d\n" someday)
+    printf "enum2 someday = %d\n" someday
     anotherDay.write getSomeDay
-    stdout (sprintf "enum2 another day = %d\n" anotherDay)
+    printf "enum2 another day = %d\n" anotherDay

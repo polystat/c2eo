@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.txt.sprintf
-+alias org.eolang.io.stdout
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_float64
 
@@ -36,6 +34,6 @@
     i.write 0
     divider.write 1.0
     result.write 0.0
-    stdout (sprintf "pi[%d] = " n)
+    printf "pi[%d] = " n
     pi
-    stdout (sprintf "%f\n" result)
+    printf "%f\n" result

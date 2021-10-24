@@ -1,0 +1,4 @@
++package c2eo.collections
+
+[elements...] > array
+  elements > @

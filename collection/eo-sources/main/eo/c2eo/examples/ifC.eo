@@ -1,8 +1,6 @@
 +package c2eo.examples
 
-+alias org.eolang.io.stdout
-+alias org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_int32
 
 [args] > ifC
@@ -15,33 +13,33 @@
     if.
       a.eq 5
       seq
-        stdout "IF work\n"
+        printf "IF work\n"
       seq
 
     if.
       a.eq 5
       seq
-        stdout "IF-else work\n"
+        printf "IF-else work\n"
       seq
-        stdout "if-ELSE work\n"
+        printf "if-ELSE work\n"
 
     if.
       a.eq 5
       seq
-        stdout "IF-else_if work\n"
+        printf "IF-else_if work\n"
       if.
         a.eq 6
         seq
-          stdout "if-ELSE_IF work\n"
+          printf "if-ELSE_IF work\n"
         seq
 
     if.
       a.eq 5
       seq
-        stdout "IF-else_if-else work\n"
+        printf "IF-else_if-else work\n"
       if.
         a.eq 6
         seq
-          stdout "if-ELSE_IF-else work\n"
+          printf "if-ELSE_IF-else work\n"
         seq
-          stdout "if-else_if_ELSE work\n"
+          printf "if-else_if_ELSE work\n"
