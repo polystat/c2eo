@@ -27,7 +27,6 @@ set(SOURCE_FILES
     matchers.h
     generator.h
     util.h
-    testing.h
 
     # Sources
     main.cpp
@@ -37,7 +36,6 @@ set(SOURCE_FILES
     matchers.cpp
     generator.cpp
     util.cpp
-    testing.cpp
 )
 
 

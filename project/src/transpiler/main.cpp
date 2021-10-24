@@ -89,6 +89,10 @@ int main(int argc, const char **argv) {
         generateSpace(staticGen, "../assembly/" + filename + ".stat");
     }
 
+    llvm::outs()<< std::is_base_of<StmtGen,UnaryStmtGen>::value << "\n";
+    llvm::outs()<< std::is_base_of<UnaryStmtGen,StmtGen>::value << "\n";
+    llvm::outs()<< std::is_base_of<UnaryStmtGen,BinaryStmtGen>::value << "\n";
+
 
    return result;
 }

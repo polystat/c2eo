@@ -16,7 +16,7 @@
 
   mem.write > write
 
-  sprintf "%f" $ > as-string
+  sprintf "%e" $ > as-string
 
   "float64" > type
 

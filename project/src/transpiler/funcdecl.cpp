@@ -4,6 +4,8 @@
 #include "stmt.h"
 #include "generator.h"
 
+
+
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров описания функции
 void getFuncDeclParameters(const FunctionDecl *FD) {
@@ -127,7 +129,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         // вложенного в функцию
 //        if(bodyTag == 8) { // Нужно разобраться с именами перчислимых типов
         if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
-            getCompoundStmtParameters(static_cast<CompoundStmt*>(body));
+            getCompoundStmtParameters(static_cast<CompoundStmt*>(body), &FD->getASTContext());
         }
     }
     //TODO добавить статику
@@ -146,7 +148,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         }
         Stmt::StmtClass stmtClass = body->getStmtClass();
         if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
-            func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),1,true);
+            func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),&FD->getASTContext(), 1,true);
         }
 
         func->globalSpaceGenPtr->Add(func);

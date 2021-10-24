@@ -15,7 +15,7 @@ struct AbstractGen {
     static SpaceGen* globalSpaceGenPtr;
     static SpaceGen* staticSpaceGenPtr;
     static std::string filename;
-    static std::map<int64_t ,std::string> identifiers;
+    static std::map<uint64_t ,std::string> identifiers;
 
     virtual void Generate(std::string &str) = 0;
     virtual void GenValue(std::string &str) {}
@@ -58,6 +58,7 @@ struct StmtGen: AbstractGen {
     std::string value;
     std::string postfix = "";
     int shift;
+    virtual bool is_unary() {return false;};
     std::string getIndentSpaces(int shift);
 
 };
@@ -70,6 +71,7 @@ struct CompoundStmtGen: StmtGen {
 
     void Add(StmtGen* stmt);
     virtual void Generate(std::string &str);
+
     ~CompoundStmtGen();
 
 
@@ -83,7 +85,10 @@ struct BinaryStmtGen: StmtGen {
     StmtGen* right = nullptr;
 
     virtual void Generate(std::string &str);
+
     ~BinaryStmtGen();
+
+    bool isLeftLinear(StmtGen *pGen);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -94,6 +99,7 @@ struct UnaryStmtGen: StmtGen {
     std::string op;
 
     virtual void Generate(std::string &str);
+    virtual bool is_unary() {return true;};
     ~UnaryStmtGen();
 };
 //-------------------------------------------------------------------------------------------------

@@ -9,6 +9,8 @@ import shutil
 #------------------------------------------------------------------------------
 # Каталог для размещения файлов на EO, полученных в ходе транспиляции и сборки
 # Указан относительно текущего каталога
+import sys
+
 resultDir = "../../result/eo/c2eo/src/"
 
 #------------------------------------------------------------------------------
@@ -36,18 +38,22 @@ meta = '''+package c2eo.src
 if __name__ == '__main__':
     print("Hello from collector!!!!")
 
+    argc = len(sys.argv)
+    argv = sys.argv
+    pathToCurrDir = argv[0].replace('collector.py', '')
+    
     # Получение текущего каталога
     print(f'Current Working Directory is: {os.getcwd()}')
     # Проверка наличия нужного каталога
-    if os.path.exists(assemblyDir):
-        print(f'Resul Directory is: {assemblyDir}')
+    if os.path.exists(pathToCurrDir + assemblyDir):
+        print(f'Resul Directory is: {pathToCurrDir + assemblyDir}')
 
     # Получение содержимого каталога
-    #print(f'Directory {assemblyDir} contain: {os.listdir(assemblyDir)}')
-    assemlyStaticFileList = list(glob.glob(os.path.join(assemblyDir, '*.stat')))
-    print(f'Static objects. Directory {assemblyDir} contain files: {assemlyStaticFileList}')
-    assemlyGlobalFileList = list(glob.glob(os.path.join(assemblyDir, '*.glob')))
-    print(f'Global objects. Directory {assemblyDir} contain files: {assemlyGlobalFileList}')
+    #print(f'Directory {pathToCurrDir + assemblyDir} contain: {os.listdir(pathToCurrDir + assemblyDir)}')
+    assemlyStaticFileList = list(glob.glob(os.path.join(pathToCurrDir + assemblyDir, '*.stat')))
+    print(f'Static objects. Directory {pathToCurrDir + assemblyDir} contain files: {assemlyStaticFileList}')
+    assemlyGlobalFileList = list(glob.glob(os.path.join(pathToCurrDir + assemblyDir, '*.glob')))
+    print(f'Global objects. Directory {pathToCurrDir + assemblyDir} contain files: {assemlyGlobalFileList}')
 
     # Сборка файла global.eo
     # Формирование всех глобальных объектов
@@ -76,6 +82,6 @@ if __name__ == '__main__':
 
 
     print(collectInfo)
-    with open("../assembly/global.eo", "w") as f:
+    with open(pathToCurrDir + assemblyDir + "global.eo", "w") as f:
         f.write(collectInfo)
 

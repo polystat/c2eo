@@ -1,5 +1,4 @@
 +package c2eo.src
-
 +alias stdout org.eolang.io.stdout
 +alias sprintf org.eolang.txt.sprintf
 
@@ -11,37 +10,20 @@
 +alias c2eo.ctypes.c_int64
 
 [arg] > global
-  c_int32 0 > g_intVar01
 
+  c_int32 0 > g_a
+  c_int32 10 > g_b
+  c_int32 30 > g_c
   [arg] > main
     seq > @
-      stdout
-        ^.g_intVar01.as-string
+      ^.g_a.write (^.g_b)
+      ^.g_b.write (^.g_c)
+      ^.g_c.write (^.g_a)
+      stdout (^.g_b.as-string)
       stdout "\n"
       stdout
-        ^.g_intVar01.as-string
-      stdout "\n"
-      stdout
-        ^.g_intVar02.as-string
-      stdout "\n"
-      stdout
-        ^.g_x.as-string
-      stdout "\n"
-      stdout
-        ^.g_t.as-string
-      stdout "\n"
-      stdout
-        ^.static01.ss_a.as-string
-      stdout "\n"
-      stdout
-        ^.static01.ss_zzz.as-string
-      stdout "\n"
+        sprintf
+          "%s\n"
+          (^.g_b.as-string)
+      stdout (sprintf "a = %s\n" (^.g_a.as-string))
   main arg > @
-
-  c_int32 8 > g_intVar02
-  c_int32 16 > g_x
-  c_int32 100 > g_t
-
-  [] > static01
-    c_int32 666 > ss_a
-    c_int32 0 > ss_zzz

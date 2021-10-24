@@ -10,12 +10,12 @@ import shutil
 #------------------------------------------------------------------------------
 # Каталог для размещения файлов на EO, полученных в ходе транспиляции и сборки
 # Указан относительно текущего каталога
-resultDir = "../../result/eo/c2eo/src/"
+resultRelDir = "../../result/eo/c2eo/src/"
 
 #------------------------------------------------------------------------------
 # Каталог в котором формируется файл global.eo для последующей пересылки в
 # каталог проекта на EO
-assemblyDir = "../assembly/"
+assemblyRelDir = "../assembly/"
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -23,16 +23,42 @@ if __name__ == '__main__':
     print(f'argc = {argc}')
     argv = sys.argv
     print(f'argv = {argv}')
-    # Получение текущего каталога
-    print(f'Current Working Directory is: {os.getcwd()}')
+ 
+    # Получение текущего  рабочего каталога
+    currentDir = os.getcwd()
+    ##print(f'Current Working Directory is: {currentDir}')
+
+    # Получение абсолютного пути до аргумента командной строки стартера
+    startDir = os.path.abspath(currentDir)
+    ##print(f'Start Working Directory is: {startDir}')
+    # Получение пути до аргумента передаваемого для анализа
+    argPath = startDir + '/' + argv[1]
+    ##print(f'Argument Path: {argPath}')
+ 
+    # Получение пути работающего скрипта (надеюсь, что данного)
+    launcherPath = os.path.realpath(__file__)
+    print(f'Launcher Directory is: {launcherPath}')
+    tmpDir = launcherPath if os.path.isdir(launcherPath) else os.path.dirname(launcherPath)
+    ##print(f'Tmp Directory is: {tmpDir}')
+    # Изменение рабочего каталога
+    os.chdir(tmpDir)
+ 
+    # Получение абсолютного пути до каталога src
+    resultDir = os.path.abspath(resultRelDir)
+    ##print(f'Result Directory is: {resultDir}')
+ 
+ 
+    # Получение абсолютного пути до каталога assembly
+    assemblyDir = os.path.abspath(assemblyRelDir)
+    ##print(f'Assembly Directory is: {assemblyDir}')
+ 
     # Проверка наличия нужного каталога
-    if os.path.exists(resultDir):
-        print(f'Resul Directory is: {resultDir}')
+    ##if os.path.exists(resultDir):
+    ##    print(f'Result Directory is: {resultDir}')
 
     # Получение содержимого каталога
-    print(f'Directory {resultDir} contain: {os.listdir(resultDir)}')
-    print(f'Directory {assemblyDir} contain: {os.listdir(assemblyDir)}')
-    #globFileList = glob.globlist(glob(os.path.join('sample_data', '*.csv')))
+    ##print(f'Directory {resultDir} contain: {os.listdir(resultDir)}')
+    ##print(f'Directory {assemblyDir} contain: {os.listdir(assemblyDir)}')
     resultFileList = list(glob.glob(os.path.join(resultDir, '*.eo')))
     print(f'Directory {resultDir} contain: {resultFileList}')
     assemlyFileList = list(glob.glob(os.path.join(assemblyDir, '*.c')))
@@ -47,13 +73,13 @@ if __name__ == '__main__':
         print(f'Incorrect number of argument = {argc}')
         exit(1)
 
-    c2eoProgram =  os.getcwd() + '/c2eo ' + argv[1] + ' static01'
+    c2eoProgram =  os.getcwd() + '/c2eo ' + argPath + ' static01'
     print(f'c2eoProgram = {c2eoProgram}')
 
 
     os.system(c2eoProgram)
     #os.startfile(c2eoProgram)
-    
+
     #for file in list(glob.glob(os.path.join(assemblyDir, '*.c'))):
     #    shutil.move(file, resultDir)
 

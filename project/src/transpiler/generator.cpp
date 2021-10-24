@@ -13,7 +13,8 @@
 SpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
 SpaceGen* AbstractGen::staticSpaceGenPtr = nullptr;
 std::string AbstractGen::filename = "";
-std::map<int64_t ,std::string> AbstractGen::identifiers = std::map<int64_t,std::string>();
+std::map<uint64_t ,std::string> AbstractGen::identifiers = std::map<uint64_t,std::string>();
+
 
 
 //--------------------------------------------------------------------------------------------------
@@ -148,15 +149,35 @@ std::string StmtGen::getIndentSpaces(int shift) {
 }
 
 void BinaryStmtGen::Generate(std::string &str) {
+    //str += value +"(";
+    bool leftLinear = isLeftLinear(left);
+    if (!leftLinear)
+        str +="(";
     left->Generate(str);
+    if (!leftLinear)
+        str +=")";
     str += value +"(";
     right->Generate(str);
     str += ")";
+
 }
 
 BinaryStmtGen::~BinaryStmtGen() {
     delete BinaryStmtGen::left;
     delete BinaryStmtGen::right;
+}
+
+
+
+bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
+    //Если когда-нибудь у UnaryStmtGen появятся наследники, то реализовать что-то подобное https://xakep.ru/2019/03/14/cpp-magic/#toc04
+    //На данный момент проверка заточена на этот класd
+    if  (!pGen->is_unary())
+        return false;
+    UnaryStmtGen* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
+    if (unaryStmtGen->nestedStmt != nullptr)
+        return isLeftLinear(unaryStmtGen->nestedStmt);
+    return true;
 }
 
 UnaryStmtGen::~UnaryStmtGen() {

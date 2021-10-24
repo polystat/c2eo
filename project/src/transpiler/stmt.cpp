@@ -1,19 +1,24 @@
 #include "stmt.h"
-UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator, int shift);
+UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift);
 BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift);
 
-UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr, int shift);
-UnaryStmtGen *getEmptyUnaryGen(const ImplicitCastExpr *pExpr, int shift);
+UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr,  int shift);
+UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr,  int shift);
 
 UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr);
 
 StmtGen *getStmtGen(ConstStmtIterator i, int shift);
 
-CompoundStmtGen *getCompoundStmtOutputGenerator(ImplicitCastExpr *pExpr, int shift);
+CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift);
+
+UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral, int shift);
+UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt, int shift);
+
+ASTContext* context;
 
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров составного оператора
-void getCompoundStmtParameters(const CompoundStmt* CS, int shift) {
+void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int shift) {
     std::string strShift = "";
     for(int i = 0; i < shift; i++) {strShift += "  ";}
     bool isBodyEmpty = CS->body_empty();
@@ -32,7 +37,7 @@ void getCompoundStmtParameters(const CompoundStmt* CS, int shift) {
         Stmt::StmtClass stmtClass = (*i)->getStmtClass();
         llvm::outs() << "      It is " << stmtName << " stmtClass = " <<  stmtClass << "\n";
         const clang::BinaryOperator* op = (BinaryOperator*)(*i);
-        llvm::outs() << "      operator: " << op->getOpcodeStr() <<"\n";
+        llvm::outs() << "      operator: " << op->getOpcodeStr() << " isEval " << op->isEvaluatable(*context) <<"\n";
         for(BinaryOperator::const_child_iterator i = op->child_begin(); i != op->child_end(); i++)
         {
             llvm::outs()  << "          stmt class   " <<(*i)->getStmtClassName() << "\n";
@@ -41,7 +46,7 @@ void getCompoundStmtParameters(const CompoundStmt* CS, int shift) {
                 const ImplicitCastExpr* exp = (ImplicitCastExpr*)(*i);
                 llvm::outs()  << "             stmt class   " <<exp->child_begin()->getStmtClassName() << "\n";
                 const DeclRefExpr* var = (DeclRefExpr*)(*(exp->child_begin()));
-                llvm::outs()  << "                var ref ID   " <<var->getDecl()->getID() << "\n";
+                llvm::outs()  << "                var ref ID   " <<var->getFoundDecl()<< "\n";
 
             }
         }
@@ -49,7 +54,8 @@ void getCompoundStmtParameters(const CompoundStmt* CS, int shift) {
     }
 }
 
-CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,  int shift, bool isDecorator) {
+CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* context, int shift, bool isDecorator) {
+    ::context = context;
     CompoundStmtGen* compoundStmt = new CompoundStmtGen;
     compoundStmt->value = "seq";
     if (isDecorator)
@@ -70,8 +76,8 @@ CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,  int shift, bo
     }
     return compoundStmt;
 }
-
-CompoundStmtGen *getCompoundStmtOutputGenerator(ImplicitCastExpr *pExpr, int shift) {
+//Временное решение для вывода
+CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift) {
     CompoundStmtGen* compoundStmt = new CompoundStmtGen;
     compoundStmt->value = "seq";
     compoundStmt->shift = shift;
@@ -98,14 +104,28 @@ StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
     if (strcmp(stmtName ,"BinaryOperator") == 0)
     {
         const BinaryOperator* op = (BinaryOperator*)(*i);
-        BinaryStmtGen* binaryStmtGen = getBinaryStatement(op, shift);
-        binaryStmtGen->shift  = shift;
-        stmtGen = binaryStmtGen;
+        if(op->isIntegerConstantExpr(*context))
+        {
+            Optional<llvm::APSInt> val = op->getIntegerConstantExpr(*context);
+            stmtGen = getASPIntIntegerLiteralGen(val.getValue(), true,shift);
+        }
+        else {
+            BinaryStmtGen *binaryStmtGen = getBinaryStatement(op, shift);
+            binaryStmtGen->shift = shift;
+            stmtGen = binaryStmtGen;
+        }
     }
     else if (strcmp(stmtName , "ParenExpr") == 0)
     {
-        const ImplicitCastExpr* op = (ImplicitCastExpr*)(*i);
+        const ParenExpr* op = (ParenExpr*)(*i);
         UnaryStmtGen* unaryStmtGen = getEmptyUnaryGen(op, shift);
+        unaryStmtGen->shift  = shift;
+        stmtGen = unaryStmtGen;
+    }
+    else if (strcmp(stmtName , "IntegerLiteral") == 0)
+    {
+        const IntegerLiteral* op = (IntegerLiteral*)(*i);
+        UnaryStmtGen* unaryStmtGen = getIntegerLiteralGen(op, shift);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
@@ -133,32 +153,45 @@ StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
     else if(strcmp(stmtName , "CompoundStmt") == 0)
     {
         const CompoundStmt* cs = (CompoundStmt*)(*i);
-        CompoundStmtGen* compoundStmtGen = getCompoundStmtGenerator(cs,shift);
+        CompoundStmtGen* compoundStmtGen = getCompoundStmtGenerator(cs,context,shift);
         stmtGen = compoundStmtGen;
     }
     return stmtGen;
 }
 
+UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral, int shift) {
+
+    return  getASPIntIntegerLiteralGen(pLiteral->getValue(),pLiteral->getType()->isSignedIntegerType(), shift);
+}
+
+UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt, int shift) {
+    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+    unaryStmtGen->value = pNum.toString(10,isSignedInt);
+    unaryStmtGen-> nestedStmt = nullptr;
+    return  unaryStmtGen;
+}
+
 // Метод для получения имени переменной.
 UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
-    unaryStmtGen->value = AbstractGen::identifiers[pExpr->getDecl()->getID()];
+    //pExpr->printPretty();
+    unaryStmtGen->value = AbstractGen::identifiers[reinterpret_cast<uint64_t>(pExpr->getFoundDecl())];
     unaryStmtGen-> nestedStmt = nullptr;
     return  unaryStmtGen;
 }
 
 UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr, int shift) {
-    return getEmptyUnaryGen(pExpr,shift);
+    return getEmptyUnaryGen(pExpr,shift + 1);
 }
 
-UnaryStmtGen *getEmptyUnaryGen(const ImplicitCastExpr *pExpr, int shift) {
+UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr, int shift) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     unaryStmtGen->value = "";
     unaryStmtGen-> nestedStmt =  getStmtGen(pExpr->child_begin(), shift + 1);
     return  unaryStmtGen;
 
 }
-UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator, int shift) {
+UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     std::string opName = pOperator->getOpcodeStr(pOperator->getOpcode()).str();
     if (opName.compare("-") == 0)
@@ -194,6 +227,30 @@ BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift) {
     else if (opName.compare("%") == 0)
     {
         binaryStmtGen->value = ".mod ";
+    }
+    else if (opName.compare("==") == 0)
+    {
+        binaryStmtGen->value = ".eq ";
+    }
+    else if (opName.compare("!=") == 0)
+    {
+        binaryStmtGen->value = ".neq ";
+    }
+    else if (opName.compare("<") == 0)
+    {
+        binaryStmtGen->value = ".less ";
+    }
+    else if (opName.compare("<=") == 0)
+    {
+        binaryStmtGen->value = ".leq ";
+    }
+    else if (opName.compare(">") == 0)
+    {
+        binaryStmtGen->value = ".greater ";
+    }
+    else if (opName.compare(">=") == 0)
+    {
+        binaryStmtGen->value = ".geq ";
     }
     else
     {

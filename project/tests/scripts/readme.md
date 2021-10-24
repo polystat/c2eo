@@ -1,15 +1,16 @@
-# Tests scripts
+# Testing:
 
-## Run tests
-
-```
-$ chmod 777 test.sh
-$ ./test.sh ../build/c2eo
+## to run all tests:
+```bash
+python3 utests.py -v
 ```
 
-## Remove output
-
+## to run specific test:
+```bash
+python -m unittest tests_file_name.TestClass.testname
 ```
-$ chmod 777 clean.sh
-$ ./clean.sh
+
+### example:
+```bash
+python -m unittest global_tests.GlobalTestCase.test_long_long_min
 ```

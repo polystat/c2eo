@@ -4,11 +4,13 @@
 #include "vardecl.h"
 #include "generator.h"
 
+std::string getIntTypeByVar(const VarDecl *VD);
+
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl *VD) {
     // Имя переменной
     auto varName = VD->getNameAsString();
-    auto varID = VD->getID();
+    auto varID = reinterpret_cast<uint64_t>(VD);
 #ifdef VAR_DECL_INFO
     llvm::outs() << "Name of Variable: " << varName << "\n";
     llvm::outs() << "  Var Kind Name: " << VD->getDeclKindName() << "\n";
@@ -71,7 +73,7 @@ void getVarDeclParameters(const VarDecl *VD) {
 #ifdef VAR_DECL_INFO
         llvm::outs() << "    -->isRealFloatingType\n";
 #endif
-        strType = "c_float";
+        strType = "c_float64";
     } else if (typePtr->isIntegerType()) {
 #ifdef VAR_DECL_INFO
         if (typePtr->isSignedIntegerType())
@@ -80,7 +82,7 @@ void getVarDeclParameters(const VarDecl *VD) {
             llvm::outs() << "    -->unsignedIntegerType\n";
 #endif
         //TODO доработать этот код для разных размеров
-        strType = "c_int32";
+        strType = getIntTypeByVar(VD);
     }
 #ifdef VAR_DECL_INFO
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
@@ -175,15 +177,19 @@ void getVarDeclParameters(const VarDecl *VD) {
     // Наличие начальной инициализации
     auto isInit = VD->hasInit();
     std::string strValue = "";
-#ifdef VAR_DECL_INFO
+
     if (isInit) {
+#ifdef VAR_DECL_INFO
         llvm::outs() << "  has Initializer\n";
+#endif
         initValueAnalysis(VD, strValue);
     } else {
+#ifdef VAR_DECL_INFO
         llvm::outs() << "  has not Initializer\n";
+#endif
         initZeroValueAnalysis(VD, strValue);
     }
-#endif
+
 
 
 
@@ -235,6 +241,46 @@ void getVarDeclParameters(const VarDecl *VD) {
     //VD->dump();
 }
 
+std::string getIntTypeByVar(const VarDecl *VD)
+{
+    auto qualType = VD->getType();      // квалифицированный тип (QualType)
+    auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
+    bool isSigned = qualType->isSignedIntegerType();
+    auto size = typeInfo.Width;
+    std::string result = "";
+    //TODO обработка беззнаковых, когда они появятся.
+    if (isSigned)
+    {
+        switch (size)
+        {
+            case 16:
+                result = "c_int16";
+                break;
+            case 32:
+                result = "c_int32";
+                break;
+            case 64:
+                result = "c_int64";
+                break;
+        }
+    } else
+    {
+        switch (size)
+        {
+            case 16:
+                result = "c_int16";
+                break;
+            case 32:
+                result = "c_int32";
+                break;
+            case 64:
+                result = "c_int64";
+                break;
+        }
+    }
+    return result;
+}
+
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
 void initValueAnalysis(const VarDecl *VD, std::string &str) {
@@ -252,10 +298,7 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
         if(initVal->isInt()) {
             auto intValue = initVal->getInt().getExtValue();
             //llvm::outs() << intValue;
-            if(typePtr->isBooleanType()) {
-                if(intValue == 0) {str = "false";}
-                else {str = "true";}
-            } else if(typePtr->isCharType()) {
+            if(typePtr->isCharType()) {
                 str = "'";
                 str += char(intValue);
                 str += "'";
@@ -287,11 +330,9 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
     // Анализ размера переменной для определения разновидности данных
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     auto size = typeInfo.Width;
-    if(typePtr->isBooleanType()) {
-        str = "false";
-    } else if(typePtr->isCharType()) {
+    if(typePtr->isCharType()) {
         str = "'\\0'";
-    } else if (typePtr->isIntegerType()){
+    } else if (typePtr->isIntegerType() || typePtr->isBooleanType()){
         str = "0";
     } else if(typePtr->isRealFloatingType()) {
         str = "0.0";

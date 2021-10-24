@@ -6,9 +6,6 @@
 #include "generator.h"
 #include "util.h"
 
-#ifdef _DEBUG
-#include "testing.h"
-#endif
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -25,7 +22,7 @@ static cl::extrahelp MoreHelp("\nMore help text...\n");
 
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
 
     GlobalSpaceGen globGen;
     GlobalVarGen::globalSpaceGenPtr = &globGen;
@@ -40,8 +37,16 @@ int main(int argc, const char **argv) {
         return -1;
     }
 
-    auto ExpectedParser 
-        = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
+    // TODO: fix
+    std::string path = "";
+    if (argc > 3 && strcmp("-d", argv[argc - 2]) == 0) {
+        path = argv[argc - 1];
+        llvm::errs() << path;
+        argc -= 2;
+    }
+
+    auto ExpectedParser
+            = CommonOptionsParser::create(argc, argv, MyToolCategory, llvm::cl::Optional);
 
     if (!ExpectedParser) {
         // Fail gracefully for unsupported options.
@@ -71,25 +76,19 @@ int main(int argc, const char **argv) {
     globGen.GenValue(globInit);
     llvm::outs() << "\n===================================\n";
     llvm::outs() << globObj;
-    str2file(globObj, "glob.global");
+    str2file(globObj, path + "glob.global");
     llvm::outs() << globInit;
-    str2file(globInit, "glob.seq");
+    str2file(globInit, path + "glob.seq");
 
     // Тестовое формирование глобального объекта с инициализацией
-    std::vector<std::string> text;
+    std::vector <std::string> text;
     createGlobal(text);
-    text2file(text, "global.eo");
+    text2file(text, path + "global.eo");
 
     llvm::outs() << "\n===================================\n";
-    appGen.Generate(appCode);
-
-    #ifdef _DEBUG
-    GlobalVarTest globalVarTest;
-    globalVarTest.Print(appCode, &globGen.globalObjects);
-    #endif
-
+    appGen.Generate(appCode, &globGen.globalObjects);
     llvm::outs() << appCode;
-    str2file(appCode, "app.eo");
+    str2file(appCode, path + "app.eo");
 
     return result;
 }

@@ -24,22 +24,22 @@ SOFTWARE.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.jcabi</groupId>
-    <artifactId>parent</artifactId>
-    <version>0.50.9</version>
-  </parent>
   <groupId>org.eolang</groupId>
-  <artifactId>quick-start</artifactId>
+  <artifactId>sandbox-canonical</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <name>Quick Start: C Constants Simulation</name>
-  <url>https://www.eolang.org/</url>
   <properties>
-    <eolang.version>0.1.19</eolang.version>
+    <eolang.version>0.14.0</eolang.version>
   </properties>
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>8</source>
+          <target>8</target>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.eolang</groupId>
         <artifactId>eo-maven-plugin</artifactId>
@@ -47,9 +47,9 @@ SOFTWARE.
         <executions>
           <execution>
             <goals>
-              <goal>parse</goal>
-              <goal>optimize</goal>
-              <goal>compile</goal>
+              <goal>register</goal>
+              <goal>assemble</goal>
+              <goal>transpile</goal>
             </goals>
             <configuration>
               <sourcesDir>${project.basedir}/eo</sourcesDir>
@@ -58,38 +58,6 @@ SOFTWARE.
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>compile</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-              <artifactItems>
-                <artifactItem>
-                  <groupId>org.eolang</groupId>
-                  <artifactId>eo-runtime</artifactId>
-                  <version>${eolang.version}</version>
-                  <type>jar</type>
-                  <overWrite>true</overWrite>
-                  <outputDirectory>${project.build.directory}</outputDirectory>
-                  <destFileName>eo-runtime.jar</destFileName>
-                </artifactItem>
-              </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>org.eolang</groupId>
-      <artifactId>eo-runtime</artifactId>
-      <version>${eolang.version}</version>
-    </dependency>
-  </dependencies>
 </project>
