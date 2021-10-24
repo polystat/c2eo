@@ -1,7 +1,0 @@
-+package diagnostics
-
-+alias org.eolang.txt.sprintf
-+alias org.eolang.io.stdout
-
-[format args...] > printf
-  stdout (sprintf format args) > @

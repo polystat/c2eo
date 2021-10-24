@@ -30,6 +30,7 @@
 +alias c2eo.examples.nestedBlocksStaticC
 +alias c2eo.examples.nestedBlocksMainC
 +alias c2eo.collections.array
++alias c2eo.stdio.printf
 +alias diagnostics.exception
 +alias diagnostics.assert
 
@@ -134,14 +135,18 @@
     stdout (sprintf "(array 1 2 3 4 5).length = %d" (array 1 2 3 4 5).length)
     stdout "\n"
 
-    stdout "False assert"
+    stdout "\n\nFalse assert"
     assert FALSE "False assert work!"
-    stdout "\n"
 
-    stdout "exception\n"
-    exception "exception work!"
-    stdout "\n"
+    stdout "\n\nexception\n"
+    stdout (exception "exception work!")
 
-    stdout "True assert"
+    stdout "\n\nTrue assert"
     assert TRUE "True assert dont work"
-    stdout "\n"
+
+    stdout "\n\nprintf\n"
+    printf "simple\n"
+    printf "simple %d\n" 1
+    printf "simple %d %d\n" 1 2
+    printf "simple %d %d %d\n" 1 2 3
+    printf "simple %d %d %d\n" 1 2 3 4 5 6 7 8 9
