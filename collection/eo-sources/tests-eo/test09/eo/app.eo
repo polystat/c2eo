@@ -1,0 +1,19 @@
++package test09
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
+# Попытка выполнить цикл
+[] > app
+  memory > i
+  seq > @
+    i.write 1
+    while.
+      less.
+        i
+        10
+      seq
+        stdout
+          sprintf
+            "i = %d"
+            i
+        i.write (i.add 1)

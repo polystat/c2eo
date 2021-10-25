@@ -67,8 +67,8 @@ if __name__ == '__main__':
     # Удаление всех файлов, находящихся в каталоге assemblyDir
     for file in list(glob.glob(os.path.join(assemblyDir, '*'))):
         os.remove(file)
-    # Запуск транспилятора
 
+    # Запуск транспилятора
     if argc < 2:
         print(f'Incorrect number of argument = {argc}')
         exit(1)

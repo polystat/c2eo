@@ -1,0 +1,26 @@
++package c2eo
+
++alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
+[] > c_int64
+  memory > @
+  sprintf "%d" $ > toString
+  "int64" > type
+  8 > bytes
+  -9223372036854775808 > min
+  9223372036854775807 > max
+
+[arg] > glob
+  c_int64 > g_intVar01
+  seq > @
+    g_intVar01.write 10
+
+[args...] > app
+  glob > g
+  seq > @
+    g args
+    stdout
+      sprintf
+        "%s"
+        g.g_intVar01.toString

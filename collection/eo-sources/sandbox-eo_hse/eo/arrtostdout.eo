@@ -1,0 +1,14 @@
++package sandbox
++alias arrtostrarr sandbox.arrtostrarr
++alias strarrtostdout sandbox.strarrtostdout
+
+[arr format] > arrtostdout
+  strarrtostdout > @
+    arrtostrarr
+      arr
+      format
+
+[args...] > appArrStdOut
+  arrtostdout > @
+    (* 1 2 3)
+    "%d"

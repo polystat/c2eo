@@ -1,0 +1,16 @@
++alias sandbox.strarrtointarr
++package sandbox
+
+[args...] > appSum
+  sum > @
+    strarrtointarr args
+
+[arr] > sum
+  reduce. > @
+    arr
+    0
+    []
+      [accum current] > reduce
+        add. > @
+          accum
+          current

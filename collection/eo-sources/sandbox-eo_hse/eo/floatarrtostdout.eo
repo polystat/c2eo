@@ -1,0 +1,14 @@
++package sandbox
++alias arrtostdout sandbox.arrtostdout
+
+[arr] > floatarrtostdout
+  arrtostdout > @
+    arr
+    "%f"
+
+[args...] > appFloatArrToStdOut
+  floatarrtostdout > @
+    *
+      5.0
+      2.2
+      3.1

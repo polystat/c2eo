@@ -1,0 +1,98 @@
++package c2eo
+
++alias varint c2eo.varInt
++alias varfloat c2eo.varFloat
+
++alias negint c2eo.negInt
++alias addint c2eo.addInt
++alias subint c2eo.subInt
++alias mulint c2eo.mulInt
++alias divint c2eo.divInt
++alias modint c2eo.modInt
++alias powint c2eo.powInt
+
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
+# variables
+[args...] > app
+  (args.get 0).toInt > n
+
+  varint > i1!
+  varint > i2!
+  varint > i3!
+
+  varfloat > f1!
+
+  int 5 > j1!
+
+  seq > @
+    stdout
+      sprintf
+        "j1: %d\n"
+        j1
+
+    i1.set n
+    stdout
+      sprintf
+        "i1: %s\n"
+        i1.toString
+
+    i2.set 3
+    stdout
+      sprintf
+        "i2: %s\n"
+        i2.toString
+
+    negint
+      i1
+      i3
+    stdout
+      sprintf
+        "negInt i1->i3: %s\n"
+        i3.toString
+
+    addint
+      i1
+      i2
+      i3
+    stdout
+      sprintf
+        "addInt i1,i2->i3: %s\n"
+        i3.toString
+
+    subint i1 i2 i3
+    stdout
+      sprintf
+        "subInt i1,i2->i3: %s\n"
+        i3.toString
+
+    mulint i1 i2 i3
+    stdout
+      sprintf
+        "mulInt i1,i2->i3: %s\n"
+        i3.toString
+
+    divint i1 i2 i3
+    stdout
+      sprintf
+        "divInt i1,i2->i3: %s\n"
+        i3.toString
+
+    modint i1 i2 i3
+    stdout
+      sprintf
+        "modInt i1,i2->i3: %s\n"
+        i3.toString
+
+    powint i1 i2 i3
+    stdout
+      sprintf
+        "powInt i1,i2->i3: %s\n"
+        i3.toString
+
+    f1.set 3.14
+    stdout
+      sprintf
+        "f1: %s\n"
+        f1.toString
