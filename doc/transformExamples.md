@@ -30,14 +30,20 @@
   if. > @
     mem.is-empty
     if.
-      mem.write initial
+      write initial
       mem
       seq
     mem
 
-  mem.write > write
+  [value] > write
+    if. > @
+      value.eq 0
+      ^.mem.write FALSE
+      ^.mem.write TRUE
 
-  sprintf "%b" $ > as-string
+  sprintf "%d" as-int > as-string
+
+  $.if 1 0 > as-int
 
   "bool" > type
 ```
@@ -87,7 +93,7 @@
 
   mem.write > write
 
-  sprintf "%f" $ > as-string
+  sprintf "%e" $ > as-string
 
   "float64" > type
 
@@ -213,7 +219,93 @@
   9223372036854775807 > max
 ```
 
-## 8. Сonstants
+## 8. c_uint16
+
+```java
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[initial] > c_uint16
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
+
+  [value] > write
+    0 > min
+    65535 > max
+    65536 > range
+
+    if. > @
+      value.greater max
+      ^.mem.write (value.mod range)
+      if.
+        value.less min
+        ^.mem.write (range.add (value.mod range))
+        ^.mem.write value
+
+  sprintf "%d" $ > as-string
+
+  "uint16" > type
+
+  2 > bytes
+
+  0 > min
+
+  65535 > max
+```
+
+## 9. c_uint32
+
+```java
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[initial] > c_uint32
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
+
+  [value] > write
+    0 > min
+    4294967295 > max
+    4294967296 > range
+
+    if. > @
+      value.greater max
+      ^.mem.write (value.mod range)
+      if.
+        value.less min
+        ^.mem.write (range.add (value.mod range))
+        ^.mem.write value
+
+  sprintf "%d" $ > as-string
+
+  "uint32" > type
+
+  4 > bytes
+
+  0 > min
+
+  4294967295 > max
+```
+
+## 10. Сonstants
 
 ### Int
 
@@ -255,7 +347,7 @@ const char constantName = 'a';
 "a" > constantName
 ```
 
-## 9. globalc
+## 11. globalc
 
 ```java
 +package c2eo.examples
@@ -317,7 +409,7 @@ const char constantName = 'a';
     stdout (sprintf "i64_2 = %d\n" i64_2)
 ```
 
-## 10. operationsc
+## 12. operationsc
 
 ```java
 +package c2eo.examples
@@ -350,7 +442,7 @@ const char constantName = 'a';
     stdout (sprintf "c = a mod b  ->  c = %d mod %d  ->  c = %d\n" a b c)
 ```
 
-## 11. overflowc
+## 13. overflowc
 
 ```java
 +package c2eo.examples
@@ -411,7 +503,7 @@ const char constantName = 'a';
     stdout (sprintf "int64 %d  ->  int64 = %d\n" -9223372036854775808 i64_3)
 ```
 
-## 12. break
+## 14. break
 
 - C
 
@@ -516,7 +608,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "breakOrReturn = %d" result)
 ```
 
-## 13. complexreturn
+## 15. complexreturn
 
 - C
 
@@ -626,7 +718,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "complexReturn[%d] = %d\n" a result)
 ```
 
-## 14. continue
+## 16. continue
 
 - C
 
@@ -706,7 +798,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "collatzProblem(%d) = %d" a result)
 ```
 
-## 15. dowhile
+## 17. dowhile
 
 - C
 
@@ -756,7 +848,7 @@ int main(int argc, char** argv) {
         ^.cycle_body > @
 ```
 
-## 16. enum
+## 18. enum
 
 - C
 
@@ -841,7 +933,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "enum2 another day = %d\n" anotherDay)
 ```
 
-## 17. factorial
+## 19. factorial
 
 - C
 
@@ -901,7 +993,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%d\n" result)
 ```
 
-## 18. fibonacci
+## 20. fibonacci
 
 - C
 
@@ -970,7 +1062,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%d\n" result)
 ```
 
-## 19. for
+## 21. for
 
 - C
 
@@ -1012,7 +1104,7 @@ int main(int argc, char** argv) {
           ^.i.write (^.i.add 1)
 ```
 
-## 20. functionpointers
+## 22. functionpointers
 
 - C
 
@@ -1066,7 +1158,7 @@ int main(int argc, char** argv) {
     g f b
 ```
 
-## 21. if
+## 23. if
 
 - C
 
@@ -1167,7 +1259,7 @@ int main(int argc, char** argv) {
           stdout "if-else_if_ELSE work\n"
 ```
 
-## 22. pi
+## 24. pi
 
 - C
 
@@ -1246,7 +1338,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "%f\n" result)
 ```
 
-## 23. pointers1
+## 25. pointers1
 
 - C
 
@@ -1293,7 +1385,7 @@ int main() {
       stdout (sprintf "x = %d\ny = %d\n*p = %d\n" (^.x) y y)
 ```
 
-## 24. pointers2
+## 26. pointers2
 
 - C
 
@@ -1341,7 +1433,7 @@ int main() {
       stdout (sprintf "x = %d\ny = %d\n*p = %d\n" (^.x) y y)
 ```
 
-## 25. pointers3
+## 27. pointers3
 
 - C
 
@@ -1392,7 +1484,7 @@ int main() {
       stdout (sprintf "x = %d\ny = %d\n*p = %d\n**pp = %d\n***ppp = %d\n" (^.x) y y y y)
 ```
 
-## 26. simplereturn
+## 28. simplereturn
 
 - C
 
@@ -1444,7 +1536,7 @@ int main(int argc, char** argv) {
       stdout (sprintf "simpleReturn[%d] = %d \n" a result)
 ```
 
-## 27. struct
+## 29. struct
 
 - C
 
@@ -1485,7 +1577,7 @@ int main(int argc, char** argv) {
     stdout (sprintf "Book.title = %s \n" (b.title))
 ```
 
-## 28. switch
+## 30. switch
 
 - C
 
@@ -1546,7 +1638,7 @@ int main(int argc, char** argv) {
             stdout "default"
 ```
 
-## 29. typecasting
+## 31. typecasting
 
 - C
 
@@ -1596,7 +1688,7 @@ int main() {
 
 ```
 
-## 30. while
+## 32. while
 
 - C
 
@@ -1641,7 +1733,7 @@ int main(int argc, char** argv) {
           ^.i.write (^.i.add 1)
 ```
 
-## 31. nestedBlocks
+## 33. nestedBlocks
 
 - C
 
@@ -1704,7 +1796,7 @@ int main() {
       stdout (sprintf "a = %d\n" a)
 ```
 
-## 32. nestedBlocksStatic
+## 34. nestedBlocksStatic
 
 - C
 
@@ -1794,7 +1886,7 @@ int main() {
       ^.foo
 ```
 
-## 33. nestedBlocksMain
+## 35. nestedBlocksMain
 
 - C
 
