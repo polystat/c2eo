@@ -27,6 +27,7 @@
                 ^.isContinue
                 seq
                 ^.number1.write ((^.number1.mul 3).add 1)
+        TRUE
       number1
       seq
 
