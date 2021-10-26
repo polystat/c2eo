@@ -23,8 +23,16 @@ if __name__ == '__main__':
     sys.stdout = open(system_vars.path + system_vars.full_log, 'w')
 
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(global_tests.GlobalTestCase))
-    suite.addTest(unittest.makeSuite(static_tests.StaticTestCase))
+    # IntegerTests
+    suite.addTest(unittest.makeSuite(global_tests.GlobalIntegerTestCase))
+    suite.addTest(unittest.makeSuite(static_tests.StaticIntegerTestCase))
+    # SpecificTests
+    suite.addTest(unittest.makeSuite(global_tests.GlobalSpecificTestCase))
+    suite.addTest(unittest.makeSuite(static_tests.StaticSpecificTestCase))
+    # FloatTests
+    suite.addTest(unittest.makeSuite(global_tests.GlobalFloatTestCase))
+    suite.addTest(unittest.makeSuite(static_tests.StaticFloatTestCase))
+
     unittest.TextTestRunner(verbosity=2).run(suite)
 
     sys.stdout.close()
