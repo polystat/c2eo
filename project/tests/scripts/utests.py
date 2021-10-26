@@ -11,8 +11,13 @@ if __name__ == '__main__':
     argv = sys.argv
     system_vars.path = argv[0].replace('utests.py', '')
 
-    if not os.path.exists(system_vars.path + 'env/'):
-        os.makedirs(system_vars.path + 'env/')
+    while not os.path.exists(system_vars.path + system_vars.directory):
+        os.makedirs(system_vars.path + system_vars.directory)
+
+    with open(system_vars.path + system_vars.logfile1, 'w') as log1:
+        log1.write('')
+    with open(system_vars.path + system_vars.logfile2, 'w') as log2:
+        log2.write('')
 
     system_vars.full_log = datetime.datetime.now().strftime("%y-%m-%d#%H-%M.log")
     sys.stdout = open(system_vars.path + system_vars.full_log, 'w')

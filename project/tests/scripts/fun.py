@@ -56,10 +56,11 @@ def compare():
                 tofile=eo_out,
             )
             # to log
+            diff = list(diff)
             print("\nDIFF:")
             for line in diff:
                 print(line, end='')
-            return len(list(diff)) == 0, 'there are some diffs'
+            return (len(diff) == 0), 'there are some diffs'
 
 
 def showname():

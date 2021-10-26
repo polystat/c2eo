@@ -11,25 +11,11 @@
 
 [arg] > global
 
-  c_float64 0.0 > g_d01
-  c_float64 8.000000 > g_d02
-  c_float64 3.140000 > g_d03
+  c_bool 0 > g_var
   [arg] > main
     seq > @
       seq
-        stdout (^.g_d01.as-string)
-        stdout "\n"
-      seq
-        stdout (^.g_d02.as-string)
-        stdout "\n"
-      seq
-        stdout (^.g_d03.as-string)
-        stdout "\n"
-      seq
-        stdout (^.static01.s_d04.as-string)
+        stdout (^.g_var.as-string)
         stdout "\n"
   main arg > @
 
-
-  [] > static01
-    c_float64 3.140000 > s_d04
