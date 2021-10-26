@@ -1,11 +1,12 @@
-# Testing:
-
-## to run all tests:
+# Functions description
+## utests.py
+###runs all tests:
 ```bash
 python3 utests.py -v
 ```
 
-## to run specific test:
+## unittest module: 
+###runs specific test:
 ```bash
 python -m unittest <tests_file_name>.<TestClass>.<testname>
 ```
@@ -26,9 +27,7 @@ test_<var_type>_<min/max>
 test_<var_type>_<min/max>_overflow
 ```
 
-## Functions description
-### utests.py
-runs all possible combinations of unit tests
+## Other functions
 ### global_tests.py
 contains classes for different types of global variables
 and has functions for each test type
