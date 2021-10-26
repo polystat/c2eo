@@ -3,7 +3,7 @@ from system_vars import *
 import fun
 
 
-class StaticTestCase(unittest.TestCase):
+class StaticIntegerTestCase(unittest.TestCase):
     # Long Long Tests
     def test_long_long_min(self):
         fun.showname()
@@ -501,6 +501,8 @@ class StaticTestCase(unittest.TestCase):
         res, msg = fun.compare()
         self.assertTrue(res, msg=msg)
 
+
+class StaticSpecificTestCase(unittest.TestCase):
     # Char Tests
     def test_char_min(self):
         fun.showname()
@@ -714,6 +716,8 @@ class StaticTestCase(unittest.TestCase):
         res, msg = fun.compare()
         self.assertTrue(res, msg=msg)
 
+
+class StaticFloatTestCase(unittest.TestCase):
     # Float Tests
     def test_float_min(self):
         fun.showname()

@@ -13,13 +13,13 @@ def compile_run():
         return False, 'can not run c-code'
     if os.system(' '.join([path + launcher, f'{path}{filename1}', f'>>{path}{logfile1}', f'2>>{path}{logfile2}'])) != 0:
         return False, 'can not transpile c-code to eo-code'
-    if os.system(' '.join(
-            ['mvn -f', path + resultDir, 'clean compile', f'>>{path}{logfile1}', f'2>>{path}{logfile2}'])) != 0:
-        return False, 'can not compile eo-code using mvn'
     # to log
     print("\nRESULT:")
     with open(f'{path}{resultDir}/eo/c2eo/src/global.eo', 'r') as glob:
         print(glob.read())
+    if os.system(' '.join(
+            ['mvn -f', path + resultDir, 'clean compile', f'>>{path}{logfile1}', f'2>>{path}{logfile2}'])) != 0:
+        return False, 'can not compile eo-code using mvn'
     if os.system(' '.join(['java', '-cp', f'{path}{resultDir}/target/classes:'
                                           f'{path}{resultDir}/target/eo-runtime.jar',
                            'org.eolang.Main', 'c2eo.app', f'>{path}{eo_out}', f'2>>{path}{logfile2}'])) != 0:
@@ -56,10 +56,11 @@ def compare():
                 tofile=eo_out,
             )
             # to log
+            diff = list(diff)
             print("\nDIFF:")
             for line in diff:
                 print(line, end='')
-            return len(list(diff)) == 0, 'there are some diffs'
+            return (len(diff) == 0), 'there are some diffs'
 
 
 def showname():
