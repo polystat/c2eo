@@ -77,4 +77,8 @@ crashlytics-build.properties
 fabric.properties
 
 # EO target directory
-**/target
+**/target**
+
+global.eo
+*.glob
+*.stat

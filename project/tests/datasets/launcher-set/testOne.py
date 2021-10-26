@@ -7,6 +7,14 @@ import shutil
 if __name__ == '__main__':
     # Фиксация текущего каталога
     currentDir = os.getcwd()
+
+    # Получение пути до работающего скрипта
+    myPath = os.path.realpath(__file__)
+    #print(f'testOne Directory is: {myPath}')
+    tmpDir = myPath if os.path.isdir(myPath) else os.path.dirname(myPath)
+    # Изменение рабочего каталога на каталог скрипта
+    os.chdir(tmpDir)
+
     # Проверка числа аргументов командной строки
     argc = len(sys.argv)
     argv = sys.argv
@@ -18,7 +26,7 @@ if __name__ == '__main__':
         print(f'1) Numer of files =  {argc} Incorrect')
         exit(1)
     # Проверка, что данный каталог существует
-    testedDir = currentDir + '/tests/' + argv[1]
+    testedDir = tmpDir + '/tests/' + argv[1]
     if os.path.exists(testedDir):
         print(f'Tested Directory is: {testedDir}')
     else:

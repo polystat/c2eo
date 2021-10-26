@@ -2,6 +2,8 @@
 # Прохождение всех тестов в заданном каталоге
 import os
 import sys
+import glob
+#import shutil
 
 if __name__ == '__main__':
     # Фиксация текущего каталога
@@ -15,22 +17,25 @@ if __name__ == '__main__':
     os.chdir(tmpDir)
 
    # Получение списка каталогов в каждом из которых содержится один тест
-    testedFileList = os.listdir('./tests')
-    print(testedFileList)
+    cleanDirList = os.listdir('./tests')
+    print(cleanDirList)
 
-    testCount = 0
-    passCount = 0
-    print('Test Started')
+    print('Cleanup Started')
     testResults = [] # Информация о результататах
-    for testedFile in testedFileList:
-        value = os.system(tmpDir + '/testOne.py ' + testedFile)
-        testCount += 1
-        if value == 0:
-            message = 'PASS'
-            passCount += 1
-        else:
-            message = 'FAIL'
-        testResults.append(str(testCount) + ': ' + testedFile + '  ' + message)
+    for cleanDir in cleanDirList:
+        cleanDir = tmpDir + '/tests/' + cleanDir
+        # Очистка каталога от ненужных файлов
+        for file in list(glob.glob(os.path.join(cleanDir, '*.txt'))):
+            os.remove(file)
+        for file in list(glob.glob(os.path.join(cleanDir, '*-eo.c'))):
+            os.remove(file)
+        for file in list(glob.glob(os.path.join(cleanDir, '*.eo'))):
+            os.remove(file)
+        for file in list(glob.glob(os.path.join(cleanDir, '*.out'))):
+            os.remove(file)
+        for file in list(glob.glob(os.path.join(cleanDir, '*.log'))):
+            os.remove(file)
+        print(f'Derwctory {cleanDir} is clean')
 
     # print(testResults)
     for testResult in testResults:
