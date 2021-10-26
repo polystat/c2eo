@@ -15,7 +15,7 @@ if __name__ == '__main__':
     print('Test Started')
     testResults = [] # Информация о результататах
     for testedFile in testedFileList:
-        value = os.system(currentDir + '/startTest.py ' + testedFile)
+        value = os.system(currentDir + '/testOne.py ' + testedFile)
         testCount += 1
         if value == 0:
             message = 'PASS'
