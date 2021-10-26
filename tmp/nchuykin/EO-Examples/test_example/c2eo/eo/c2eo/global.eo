@@ -1,9 +1,0 @@
-+package c2eo
-
-+alias c2eo.ctypes.c_int32
-
-
-[arg] > global
-  c_int32 > g_intVar01
-  seq > @
-    g_intVar01.write 0
