@@ -1,4 +1,5 @@
 #include "stmt.h"
+//#define STM_DEB
 UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift);
 BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift);
 
@@ -19,6 +20,7 @@ ASTContext* context;
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров составного оператора
 void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int shift) {
+#ifdef STM_DEB
     std::string strShift = "";
     for(int i = 0; i < shift; i++) {strShift += "  ";}
     bool isBodyEmpty = CS->body_empty();
@@ -52,6 +54,7 @@ void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int s
         }
         //auto isAssigmentOperator = ;
     }
+#endif
 }
 
 CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* context, int shift, bool isDecorator) {
