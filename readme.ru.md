@@ -33,9 +33,8 @@ Tools:
 4. [cmake](https://cmake.org/download/)
 5. [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/)
 6. [g++](https://pkgs.org/download/g++)
-7. [codeblocks](https://www.codeblocks.org/downloads/)
-8. [ninja-build](https://ninja-build.org/)
-9. [python3.+](https://www.python.org/downloads/)
+7. [ninja-build](https://ninja-build.org/)
+8. [python3.+](https://www.python.org/downloads/)
 
 ```bash
 # Installation tools for Ubuntu
@@ -46,7 +45,6 @@ $ sudo apt install git
 $ sudo apt install cmake
 $ sudo apt install gcc
 $ sudo apt install g++
-$ sudo apt install codeblocks
 $ sudo apt install ninja-build
 $ sudo apt install python3
 ```
@@ -82,8 +80,8 @@ $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 &nbsp;
 ## Step 5. Configuration C2EO
 
-Конфигурация транспилятора c2eo связано с его компиляцией из исходных текстов. При расположении llvm и clang  в ~/llvm-clang используемые в каталогах project и project/src/transpiler файлы CMakeLists.txt остаются неизменными.
-Поэтому для выполнения компиляции нужно войти в project/build и выполнить в нем команду `cmake ..`
+Конфигурация транспилятора c2eo связано с его компиляцией из исходных текстов. При расположении llvm и clang  в `~/llvm-clang` используемые в каталогах `project` и `project/src/transpiler` файлы `CMakeLists.txt` остаются неизменными.
+Поэтому для выполнения компиляции нужно войти в `project/build` и выполнить в нем команду `cmake ..`
 После этого в том же каталоге запустить сбрку проекта командой `make` или `cmake --build .`
 
 &nbsp;
