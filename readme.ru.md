@@ -35,6 +35,7 @@ Tools:
 6. [g++](https://pkgs.org/download/g++)
 7. [codeblocks](https://www.codeblocks.org/downloads/)
 8. [ninja-build](https://ninja-build.org/)
+9. [python3.+](https://www.python.org/downloads/)
 
 ```bash
 # Installation tools for Ubuntu
@@ -47,6 +48,7 @@ $ sudo apt install gcc
 $ sudo apt install g++
 $ sudo apt install codeblocks
 $ sudo apt install ninja-build
+$ sudo apt install python3
 ```
 
 &nbsp;
