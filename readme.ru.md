@@ -5,7 +5,7 @@ Semantic-preserving translation of C programs to EOLANG programs.
 
 The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
 
-*Read this in other languages: [Russian](readme.ru.md)*
+*Read this in other languages: [English](readme.md)*
 &nbsp;
 ### Useful links:
 
