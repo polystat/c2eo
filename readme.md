@@ -53,7 +53,7 @@ $ sudo apt install python3
 ## Step 2. Install LLVM + CLANG
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
-$ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz
+$ tar -xvf llvmorg-12.0.1.tar.gz
 ```
 > [github](https://github.com/llvm/llvm-project) page of the LLVM project
 
