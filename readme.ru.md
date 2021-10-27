@@ -147,7 +147,7 @@ Now the generated files in this [dir](result/eo/c2eo/src/)
 This [quick start](https://github.com/cqfn/eo#quick-start) for running your first eo project
 
 &nbsp;
-## Additional step 8. Project testing
+## Additional step. Project testing
 * ### [Tests 1](./project/tests/scripts)
 * ### [Tests 2](./project/tests/datasets/launcher-set/)
 
