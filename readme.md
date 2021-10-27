@@ -79,18 +79,11 @@ $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 ```
 &nbsp;
 ## Step 5. Configuration C2EO
-> Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
 
-> Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables 
-(works only for ../kam/src);
-```bash
-$ cd c2eo
-$ # rm -rf build
-$ mkdir build && cd $_
-$ cmake -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM_SOURCE=~/path/to/llvm-clang/ \
-  -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" ../al/src
-$ cmake --build . --target c2eo -- -j 6
-```
+Конфигурация транспилятора c2eo связано с его компиляцией из исходных текстов. При расположении llvm и clang  в ~/llvm-clang используемые в каталогах project и project/src/transpiler файлы CMakeLists.txt остаются неизменными.
+Поэтому для выполнения компиляции нужно войти в project/build и выполнить в нем команду `cmake ..`
+После этого в том же каталоге запустить сбрку проекта командой `make` или `cmake --build .`
+
 &nbsp;
 ## Step 6. Run transpilation
 > Use `--` at the end of command below to skip all errors:
