@@ -4,7 +4,10 @@ Here are collected tests to check the C2EO project
 &nbsp;
 # Getting started guide
 
+Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
+we will fix it.
 
+&nbsp;
 ## Step 1. Main guide
 You have to make sure you have completed this [guide](https://github.com/polystat/c2eo#2-build-llvm--clang)
 

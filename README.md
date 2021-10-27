@@ -17,7 +17,6 @@ The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
 &nbsp;
 # Getting started guide
 
-
 Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
 we will fix it.
 
