@@ -1,26 +1,62 @@
-<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="100px" />
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" />
 
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
+Semantic-preserving translation of C programs to EOLANG programs.
+
 The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
 
-
-# C2EO
-Semantic-preserving translation of C programs to EOLANG programs.
+*Read this in other languages: [Russian](readme.ru.md)*
+&nbsp;
+### Useful links:
 
 * #### [Document with C2EO transform examples](./doc/transformExamples.md)
 
 * #### [Project for playing with examples](./collection/eo-sources/main)
 
 * #### [Tests](./project/tests/scripts)
+&nbsp;
+# Getting started guide
 
-## 1. Install LLVM + CLANG
+
+Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
+we will fix it.
+
+## Step 1. OS and tools
+You need a [Linux](https://www.linux.org/pages/download/) operating system (we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download))
+
+Tools:
+
+1. [Wget](https://www.tecmint.com/install-wget-in-linux/)
+2. [Tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/)
+3. [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+4. [cmake](https://cmake.org/download/)
+5. [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/)
+6. [g++](https://pkgs.org/download/g++)
+7. [codeblocks](https://www.codeblocks.org/downloads/)
+
+```bash
+# Installation tools for Ubuntu
+
+$ sudo apt install wget
+$ sudo apt install tar
+$ sudo apt install git
+$ sudo apt install cmake
+$ sudo apt install gcc
+$ sudo apt install g++
+$ sudo apt install codeblocks
+```
+
+&nbsp;
+## Step 2. Install LLVM + CLANG
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
 $ mkdir llvm-clang
 $ tar -C llvm-clang -xvf llvmorg-12.0.1.tar.gz
 ```
+> [github](https://github.com/llvm/llvm-project) page of the LLVM project
+
 &nbsp;
-## 2. Build LLVM + CLANG
+## Step 3. Build LLVM + CLANG
 ```bash
 $ cd llvm-clang
 $ # rm -rf build
@@ -32,13 +68,13 @@ $ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUI
 $ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 ```
 &nbsp;
-## 3. Install C2EO
+## Step 4. Install C2EO
 ```bash
 $ cd ../..
 $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 ```
 &nbsp;
-## 4. Configuration C2EO
+## Step 5. Configuration C2EO
 > Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
 
 > Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables 
@@ -52,13 +88,23 @@ $ cmake -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM_SOURCE=~/path/to/llvm-clang/ \
 $ cmake --build . --target c2eo -- -j 6
 ```
 &nbsp;
-## 5. Run 
+## Step 6. Run transpilation
 > Use `--` at the end of command below to skip all errors:
 ```bash
-$ ./c2eo file-name.c
+$ ./c2eo file-name.c file-out
 ```
 
-## Project structure
+## Step 7. Run eo generated files
+
+[There](https://github.com/cqfn/eo) github page of EO project when you can learn about EO language
+
+This [quick start](https://github.com/cqfn/eo#quick-start) for running your first eo project
+
+&nbsp;
+
+&nbsp;
+
+# Project structure
 
     .
     ├── collection
@@ -88,90 +134,84 @@ $ ./c2eo file-name.c
     └── tmp 
 
 * ### collection
-  Каталог `collection` содержит исходные тексты программ на языках программирования C и EO, которые предполагается использовать как для интеграционного тестирования транспилятора, так и для проверки возможных вариантов трансформации в EO. Программы на C размещаются в подкаталоге `c-sources`. Они формируют наборы данных, позволяющие оценить работоспособность разрабатываемого транспилятора. В подкаталоге `eo-sources` размещаются программы на EO, которые используются для анализа различных вариантов кодогенерации, а также для анализа возможности трансформации программ с C в EO.
+  The `collection` directory contains source codes for programs in the C and EO programming languages, which are supposed to be used both for integration testing of the transpiler and for testing possible options for transforming into EO. C programs are located in the `c-sources` subdirectory. They form data sets that allow assessing the performance of the transpiler being developed. The subdirectory `eo-sources` contains programs on EO, which are used to analyze various variants of code generation, as well as to analyze the possibility of transforming programs from C to EO.
 
 * ### doc
-  Каталог `doc` содержит документацию, формируемую в ходе работы над проектом.
+  The `doc` directory contains the documentation generated during the work on the project.
 
 
 * ### llvm-clang
-  Каталог `llvm-clang` предназначен для хранения сборки проекта llvm. Предполагается, что данная сборка будет формироваться на уровне бинарных кодов под конкретную автономную реализацию (докер, ВМ) и впоследствии не будет меняться. Вряд ли в ходе разработки проекта стоит переходить на более свежую версию llvm без особых на то оснований. Нахождение внутри проекта позволит ее распространять вместе с результатом работы. При этом можно посмотреть и выкинуть все лишнее, что не нужно для проекта, тем самым сократив 8 гигабайт до более приемлемого значения.
+  The `llvm-clang` directory is for storing the build of the llvm project. It is assumed that this assembly will be formed at the level of binary codes for a specific autonomous implementation (docker, VM) and will not change subsequently. It is unlikely that during the development of the project it is worth switching to a more recent version of llvm without special reason. Being within the project will allow it to be distributed along with the result of the work. At the same time, you can look at and throw away all unnecessary things that are not needed for the project, thereby reducing 8 gigabytes to a more acceptable value.
 
 * ### project
-  Каталог `project` содержит все то, что является результатом разработки. В данный момент в нем просматриваются следующие каталоги:
+  The `project` directory contains everything that is the result of development. The following directories are currently being viewed in it:
 
   * #### assembly
-    Каталог, предназначенный для хранения промежуточных результатов, а также окончательного результата работы транспилятора. Из отдельных промежуточных файлов в нем формируется окончательный файл `global.eo`, который затем копируется (пересылается) в соответствующий подкаталог каталога `result`.
+    A directory intended for storing intermediate results, as well as the final result of the transpiler operation. The final file `global.eo` is formed from individual intermediate files in it, which is then copied (sent) to the corresponding subdirectory of the` result` directory.
 
   * #### bin
-    Каталог, в котором группируются все исполняемые файлы и скрипты, обеспечивающие работу транспилятора.
+    The directory in which all executable files and scripts that provide the transpiler operation are grouped.
 
   * #### build
-    Каталог предназначенный для сборки проекта. Предполагается сборка проекта с использованием `cmake`.В связи с этим используется иерархическая организация файлов в каждом из подпроектов, обеспечивающих выполнение отдельных функций, при необходимости должен размещаться свой  файл `CMakeLists.txt`. Также корневой файл `CMakeLists.txt` располагается в каталоге `project`.
+    The directory for building the project. It is supposed to build the project using `cmake`. In this regard, the hierarchical organization of files is used in each of the subprojects that provide the execution of individual functions, if necessary, a separate` CMakeLists.txt` file should be placed. Also, the root file `CMakeLists.txt` is located in the` project` directory.
 
   * #### lib
-    Каталог, предназначеный для хранения статических и (или) динамических библиотек, формируемых в процессе создания проекта, если таковые появятся.
+    A directory intended for storing static and (or) dynamic libraries generated during project creation, if any.
 
   * #### src
-    Каталог `src` является ключевым для разработки. На данном этапе просматриваются два основных проекта, размещенные в соответствующих каталогах. В целом его содержание скорее всего будет меняться.
+    The src directory is key for development. At this stage, two main projects are viewed, placed in the respective catalogs. In general, its content is likely to change.
 
     * ##### transpiler
-      Транспилятор, осуществляющий разбор AST одной единицы компиляции и формирующий на выходе объекты EO.Эти объекты размещаются в каталоге assembly и разделяются по двум файлам. В одном собираются все объекты, соответствующие глобальным артефактам, а в другом статическим. Учитывая специфику анализа AST, данный проект реализуется на C++.
+      A transpiler that parses the AST of a single compilation unit and produces EO objects as output. These objects are located in the assembly directory and split over two files. One collects all objects corresponding to global artifacts, and the other - static. Taking into account the specifics of the AST analysis, this project is implemented in C ++.
 
     * ##### collector
-      Каталог, в котором разрабатывается сборщик файла `global.eo`.В общем случае после обработки транспилятором всех единиц компиляции он осуществляет компоновку из множества файлов, содержащих как статические, так и глобальные объекты, единый файл объектов на EO. Разработка данной программы может вестись на языке сценариев.
+      The directory in which the `global.eo` file collector is developed. In general, after the transpiler has processed all compilation units, it links from multiple files containing both static and global objects into a single object file on EO. The development of this program can be carried out in the scripting language.
 
     * ##### launcher
-      Каталог, содержащий программу, котора осуществляет многократный запуск транспилятора по числу единиц компиляции, после чего передает управление сборщику полученных отдельных файлов в монолит. После завершения сборки данная программа  осуществляет перенос сформированного файла `global.eo` в каталог `result/eo/c2eo/src`.
+      A directory containing a program that runs the transpiler several times according to the number of compilation units, and then transfers control to the collector of the resulting individual files into the monolith. After completing the build, this program transfers the generated file `global.eo` to the directory` result / eo / c2eo / src`.
 
   * #### [tests](./project/tests/scripts)
-    Каталог с различными тестовыми программами и данными, проверяющими работоспособность разрабатываемого кода.
+    A directory with various test programs and data that check the functionality of the code being developed.
 
 * ### result
-  Каталог для хранения данных, используемых компилятором EO. В нем содержится информация о проекте на EO, обновляемая каждый раз при обновлении проекта этого компилятора
+  Directory for storing data used by the EO compiler. It contains information about the project on EO, updated every time the project of this compiler is updated.
 
   * #### README.md
-    Описание компилируемого проекта, которое формируется разработчиками c2eo и практически не меняется (может только корректироваться);
+    Description of the compiled project, which is formed by the c2eo developers and practically does not change (it can only be corrected);
 
   * #### run.sh
-    Cкрипт, осуществляющий запуск откомпилированного приложения;
+    A script that launches the compiled application;
 
   * #### eo
-    Каталог, содержащий используемые библиотеки, написанные на EO для поддержки артефактов языка C, а также исходные тексты на EO, порождаемые транспилятором или сформированные вручную. Внутри каталога `eo` структура сформирована подкаталогов. Непосредственно в `eo` находится каталог `c2eo`, определяющий общее название пакета. В нем располагаются:
+    A directory containing the libraries used, written in EO to support C artifacts, as well as EO sources generated by the transpiler or generated by hand. Within the `eo` directory, the structure is formed by subdirectories. Directly under `eo` is the` c2eo` directory, which defines the common name of the package. It contains:
 
     * ##### app.eo
-      Отвечает за запуск приложения (он пишется вручную и не изменяется);
+      Responsible for launching the application (it is written manually and does not change);
 
     * ##### ctypes
-      Каталог, который по сути определяет некоторую библиотеку объектов, написанную на EO и предназначенную для моделирования различных артефактов языка C;
+      A directory that essentially defines some library of objects written in EO and designed to simulate various artifacts of the C language;
 
     * ##### src
-      Каталог, в который записывается файл `global.eo` с объектами, порожденными транспилятором в ходе анализа программы на C (он содержит объект `global`, в котором собраны все артефакты в виде соответствующих объектов).
+      The directory where the file `global.eo` is written with objects generated by the transpiler during the analysis of a C program (it contains a `global` object, in which all artifacts are collected in the form of corresponding objects).
 
-Формирование файла `global.eo` по сути является основной задачей транспилятора и обеспечивает путем сборки множества единиц компиляции исходной программы на языке C.
+The formation of the `global.eo` file is essentially the main task of the transpiler and provides, by assembling many units, the compilation of the source C program.
 
 &nbsp;
-## Размещение программы на EO, полученной в ходе транспиляции
-Представленная структура стала возможной из-за использования начальной инициализации объектов, имитирующих переменные языка C.
+## Placing a program on EO obtained during transpilation
+The presented structure became possible due to the use of initial initialization of objects that mimic C variables.
 
-Транспиляция осуществляется отдельно для каждой единицы компиляции, которая на выходе формирует два файла:
+Transpilation is carried out separately for each compilation unit, which generates two files at the output:
 
-* файл с описанием всех глобальных объектов, к которым относятся абстрактные объекты, полученные при трансформации абстрактных типов данных, глобальных переменных, глобальных описаний функций;
+* a file with a description of all global objects, which include abstract objects obtained by transforming abstract data types, global variables, global function descriptions;
 
-* файл с описанием всех статических объектов, которые трансформируются из описаний статических переменных и функций, расположенных в глобальном пространстве, статических переменных, размещенных внутри функций.
+* a file with a description of all static objects that are transformed from the descriptions of static variables and functions located in the global space, static variables located inside functions.
 
-Эти два файла являются базовой заготовкой для дальнейшей сборки после транспиляции всех единиц компиляции проекта. Сама сборка на текущий момент заключается в формировании общего файла на языке программирования EO. В нем формируется глобаальный объект `global`, который содержит все объекты, полученные в результате компиляции абстрактных типов данных, внешних переменных, внешних функций, а также объектов, которые получены из файлов, описывающих статические объекты.
+These two files are a basic stub for further build after transpilation of all compilation units of the project. The assembly itself at the moment consists in the formation of a common file in the EO programming language. It forms a global object `global`, which contains all objects obtained as a result of compilation of abstract data types, external variables, external functions, as well as objects that are obtained from files describing static objects.
 
-Количество статических объектов определяется количеством файлов со статическими артефактами. Размещение в едином объекте `global` всех данных позволяет без проблем обеспечить доступ как со стороны глобальных объектов к своим статическим данным, так и со стороных статических объектов к глобальным данным. Сборщик этого файла может в принципе быть отдельной программой, реализованной на любом удобном языке программирования.
+The number of static objects is determined by the number of files with static artifacts. Placing all data in a single object `global` allows you to easily provide access both from global objects to their static data and from external static objects to global data. The compiler of this file can, in principle, be a separate program implemented in any convenient programming language.
 
-При наличии в одной из единиц компиляции функции `main`, она преобразуется в соответствующий объект глобального пространства. А сразу за его описанием следует описание ее запуска. Функция может располагаться в любом месте глобального объекта.
+If there is a `main` function in one of the compilation units, it is converted to the corresponding object of the global space. And immediately after its description, a description of its launch follows. The function can be located anywhere in the global object.
 
-В целом порядок сборки файла с глобальными объектами и статическими объектами несущественен.
+In general, the order in which a file with global objects and static objects is assembled is irrelevant.
 
-Представленная схема обеспечивает полную автономность формирование программы на EO. Объект, запускающий приложение содержит только датаизацию глобального объекта. Он не меняется, оставаясь постоянным независимо от транспилируемого проекта.
-
-
-
-
-
-
+The presented scheme provides complete autonomy for the formation of the program on EO. The object that launches the application contains only the dateization of the global object. It does not change, remaining constant regardless of the transpiled project.
