@@ -148,7 +148,6 @@ This [quick start](https://github.com/cqfn/eo#quick-start) for running your firs
 
 &nbsp;
 ## Additional step 8. Project testing
-&nbsp;
 * ### [Tests 1](./project/tests/scripts)
 * ### [Tests 2](./project/tests/datasets/launcher-set/)
 
