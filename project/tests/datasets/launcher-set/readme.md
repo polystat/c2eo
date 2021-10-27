@@ -2,6 +2,8 @@
 
 *Read this in other languages: [Russian](readme.ru.md)*
 
+You have to make sure you have completed this [guide](https://github.com/polystat/c2eo#2-build-llvm--clang)
+
 ## Directory Hierarchy
 
 Tests are placed in the `tests` directory. Each test, a C file, is in a separate subdirectory. The program file name is the same as the directory name and has the extension `.c`. During testing, additional data with test information is created in these test directories.

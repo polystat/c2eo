@@ -2,6 +2,8 @@
 
 *Read this in other languages: [Russian](readme.ru.md)*
 
+You have to make sure you have completed this [guide](https://github.com/polystat/c2eo#2-build-llvm--clang)
+
 ## Directory Hierarchy
 
 These files are located in the `project / bin` directory
