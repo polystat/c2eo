@@ -93,6 +93,7 @@ $ cmake --build . --target c2eo -- -j 6
 $ ./c2eo file-name.c file-out
 ```
 
+&nbsp;
 ## Step 7. Run eo generated files
 
 [There](https://github.com/cqfn/eo) github page of EO project when you can learn about EO language
