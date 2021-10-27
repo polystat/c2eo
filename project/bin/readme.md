@@ -1,5 +1,7 @@
 # Executable transpiler file and scripts for building the program on EO
 
+*Read this in other languages: [Russian](readme.ru.md)*
+
 ## Directory Hierarchy
 
 These files are located in the `project / bin` directory
