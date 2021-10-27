@@ -26,13 +26,14 @@ You need a [Linux](https://www.linux.org/pages/download/) operating system (we r
 
 Tools:
 
-1. [Wget](https://www.tecmint.com/install-wget-in-linux/)
-2. [Tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/)
-3. [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+1. [wget](https://www.tecmint.com/install-wget-in-linux/)
+2. [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/)
+3. [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 4. [cmake](https://cmake.org/download/)
 5. [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/)
 6. [g++](https://pkgs.org/download/g++)
 7. [codeblocks](https://www.codeblocks.org/downloads/)
+8. [ninja](https://ninja-build.org/)
 
 ```bash
 # Installation tools for Ubuntu
@@ -44,6 +45,7 @@ $ sudo apt install cmake
 $ sudo apt install gcc
 $ sudo apt install g++
 $ sudo apt install codeblocks
+$ sudo apt install ninja
 ```
 
 &nbsp;
