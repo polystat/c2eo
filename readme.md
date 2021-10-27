@@ -32,7 +32,7 @@ Tools:
 5. [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/)
 6. [g++](https://pkgs.org/download/g++)
 7. [codeblocks](https://www.codeblocks.org/downloads/)
-8. [ninja](https://ninja-build.org/)
+8. [ninja-build](https://ninja-build.org/)
 9. [python3.+](https://www.python.org/downloads/)
 
 ```bash
@@ -45,7 +45,7 @@ $ sudo apt install cmake
 $ sudo apt install gcc
 $ sudo apt install g++
 $ sudo apt install codeblocks
-$ sudo apt install ninja
+$ sudo apt install ninja-build
 $ sudo apt install python3
 ```
 
