@@ -31,9 +31,8 @@ Tools:
 4. [cmake](https://cmake.org/download/)
 5. [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/)
 6. [g++](https://pkgs.org/download/g++)
-7. [codeblocks](https://www.codeblocks.org/downloads/)
-8. [ninja-build](https://ninja-build.org/)
-9. [python3.+](https://www.python.org/downloads/)
+7. [ninja-build](https://ninja-build.org/)
+8. [python3.+](https://www.python.org/downloads/)
 
 ```bash
 # Installation tools for Ubuntu
@@ -44,7 +43,6 @@ $ sudo apt install git
 $ sudo apt install cmake
 $ sudo apt install gcc
 $ sudo apt install g++
-$ sudo apt install codeblocks
 $ sudo apt install ninja-build
 $ sudo apt install python3
 ```
@@ -79,18 +77,11 @@ $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 ```
 &nbsp;
 ## Step 5. Configuration C2EO
-> Set `PATH_TO_LLVM_SOURCE` variable to the LLVM+CLANG directory when invoking CMake;
 
-> Set `-DCMAKE_BUILD_TYPE` variable to the Debug state, if you want to output the values of all global variables
-(works only for ../kam/src);
-```bash
-$ cd c2eo
-$ # rm -rf build
-$ mkdir build && cd $_
-$ cmake -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM_SOURCE=~/path/to/llvm-clang/ \
-  -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" ../al/src
-$ cmake --build . --target c2eo -- -j 6
-```
+The c2eo transpiler configuration is related to its compilation from source. By placing llvm and clang in `~/llvm-clang`, the `CMakeLists.txt` files used in the `project` and `project/src/transpiler` directories remain unchanged.
+Therefore, to perform compilation, you need to enter `project/build` and execute the command `cmake ..` in it.
+After that, in the same directory, run the project build with the command `make` or` cmake --build. `
+
 &nbsp;
 ## Step 6. Run transpilation
 > Use `--` at the end of command below to skip all errors:
