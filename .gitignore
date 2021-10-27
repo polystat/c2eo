@@ -82,3 +82,8 @@ fabric.properties
 global.eo
 *.glob
 *.stat
+
+# Test temp files and dirs
+project/tests/scripts/env/
+project/tests/scripts/__pycache__/
+*.log
