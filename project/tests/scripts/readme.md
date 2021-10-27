@@ -12,29 +12,7 @@ we will fix it.
 You have to make sure you have completed this [guide](https://github.com/polystat/c2eo#2-build-llvm--clang)
 
 &nbsp;
-## Step 2. Tools
-
-Before installation make sure, you use last version of apt
-
-```bash
-# Upgrade apt for Ubuntu
-
-$ sudo apt upgrade
-```
-
-Tools:
-
-1. [Python3.+](https://www.python.org/downloads/)
-2. [Pip3](https://pypi.org/project/pip/#files)
-
-```bash
-# Installation tools for Ubuntu
-
-$ sudo apt install python3
-$ sudo apt install python3-pip
-```
-
-## Step 3. Run tests
+## Step 2. Run tests
 There are some variants of running test
 
 &nbsp;
