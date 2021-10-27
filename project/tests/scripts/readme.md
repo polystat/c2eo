@@ -1,41 +1,94 @@
-# Functions description
-## utests.py
-### runs all tests:
+# Tests
+Here are collected tests to check the C2EO project
+
+&nbsp;
+# Getting started guide
+
+Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
+we will fix it.
+
+&nbsp;
+## Step 1. Main guide
+You have to make sure you have completed this [guide](https://github.com/polystat/c2eo#2-build-llvm--clang)
+
+&nbsp;
+## Step 2. Tools
+
+Before installation make sure, you use last version of apt
+
 ```bash
-python3 utests.py -v
+# Upgrade apt for Ubuntu
+
+$ sudo apt upgrade
 ```
 
-## unittest module: 
-### runs specific test:
+Tools:
+
+1. [Python3.+](https://www.python.org/downloads/)
+2. [Pip3](https://pypi.org/project/pip/#files)
+
 ```bash
-python -m unittest <tests_file_name>.<TestClass>.<testname>
-```
-### example:
-```bash
-python -m unittest global_tests.GlobalTestCase.test_long_long_min
-```
-possible tests combinations:
-```
-global_tests / static_tests
-.
-GlobalIntegerTestCase / StaticIntegerTestCase
-GlobalSpecificTestCase / StaticSpecificTestCase
-GlobalFloatTestCase / StaticFloatTestCase
-.
-test_<var_type>_<1/2/3>
-test_<var_type>_<min/max>
-test_<var_type>_<min/max>_overflow
+# Installation tools for Ubuntu
+
+$ sudo apt install python3
+$ sudo apt install python3-pip
 ```
 
-## Other functions
-### global_tests.py
-contains classes for different types of global variables
+## Step 3. Run tests
+There are some variants of running test
+
+&nbsp;
+* run all tests:
+
+  ```bash
+  $ python3 utests.py -v
+  ```
+&nbsp;
+* run specific test:
+
+    ```bash
+    $ python3 -m unittest <tests_file_name>.<TestClass>.<testname>
+    ```
+
+    > one of the possible specific tests
+    ```bash
+    $ python3 -m unittest global_tests.GlobalTestCase.test_long_long_min
+    ```
+
+&nbsp;
+* run a combination of tests:
+
+    ```bash
+    global_tests / static_tests
+    .
+    GlobalIntegerTestCase / StaticIntegerTestCase
+    GlobalSpecificTestCase / StaticSpecificTestCase
+    GlobalFloatTestCase / StaticFloatTestCase
+    .
+    test_<var_type>_<1/2/3>
+    test_<var_type>_<min/max>
+    test_<var_type>_<min/max>_overflow
+    ```
+
+
+&nbsp;
+# Files description
+
+* ### `utests.py`
+  generate and run all sets of tests
+
+* ### `global_tests.py`
+  contains classes for different types of global variables
 and has functions for each test type
-### static_tests.py
-contains classes for different types of static variables
+
+* ### `static_tests.py`
+  contains classes for different types of static variables
 and has functions for each test type
-### system_vars.py
-contains constants for test and folder's templates
-### fun.py
-runs C compiler, Eolang compiler and compares result 
+
+* ### `system_vars.py`
+  contains constants for test and folder's templates
+
+* ### `fun.py`
+  runs C compiler, Eolang compiler and compares result 
 generates C tests wint prinf
+
