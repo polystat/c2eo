@@ -34,6 +34,7 @@
 **/cmake-build-debug/**
 **/CMakeFiles/**
 **/build/**
+!**/build/.gitkeep
 **/src/result/**
 *.cmake
 CMakeCache.txt
