@@ -20,7 +20,6 @@ ASTContext* context;
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров составного оператора
 void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int shift) {
-#ifdef STM_DEB
     std::string strShift = "";
     for(int i = 0; i < shift; i++) {strShift += "  ";}
     bool isBodyEmpty = CS->body_empty();
@@ -32,6 +31,7 @@ void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int s
     unsigned bodySize = CS->size();
     llvm::outs() << "  Body size = " << bodySize << " \n";
 
+#ifdef STM_DEB
     //getCompoundStmtGenerator(CS, 0);
 
     for(CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
@@ -66,8 +66,10 @@ CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* con
     compoundStmt->shift = shift;
     for(CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
         // Костыльное решение для тестового выводо
-        char* stmtName = (char*)((*i)->getStmtClassName());
-        if (strcmp(stmtName , "ImplicitCastExpr") == 0)
+//         char* stmtName = (char*)((*i)->getStmtClassName());
+//         if (strcmp(stmtName , "ImplicitCastExpr") == 0)
+        Stmt::StmtClass stmtClass = (*i)->getStmtClass();
+        if(stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
         {
             CompoundStmtGen *stmtGen = getCompoundStmtOutputGenerator((ImplicitCastExpr*)(*i),shift + 1);
             compoundStmt->Add(stmtGen);
@@ -77,6 +79,10 @@ CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* con
         if (stmtGen != nullptr)
             compoundStmt->Add(stmtGen);
     }
+//     CompoundStmtGen * trueStmt = new CompoundStmtGen;
+//     trueStmt->value = "  TRUE";
+//     trueStmt->shift = shift;
+//     compoundStmt->Add(trueStmt);
     return compoundStmt;
 }
 //Временное решение для вывода

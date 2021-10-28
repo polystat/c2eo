@@ -129,6 +129,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         // вложенного в функцию
 //        if(bodyTag == 8) { // Нужно разобраться с именами перчислимых типов
         if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
+            llvm::outs() << "   Start getCompoundStmtParameters function\n";
             getCompoundStmtParameters(static_cast<CompoundStmt*>(body), &FD->getASTContext());
         }
     }
@@ -148,6 +149,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         }
         Stmt::StmtClass stmtClass = body->getStmtClass();
         if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
+            llvm::outs() << "   Start getCompoundStmtGenerator\n";
             func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),&FD->getASTContext(), 1,true);
         }
 

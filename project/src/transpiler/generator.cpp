@@ -119,15 +119,19 @@ void CompoundStmtGen::Generate(std::string &str) {
         stmt->Generate(strobj);
         lines.push_back(strobj);
     }
-    std::string res = std::accumulate(
-            std::next(lines.begin()),
-            lines.end(),
-            lines[0],
-            [](std::string a, std::string b) {
-                return a + "\n" + b;
-            }
-    );
-    str += res;
+///!!! Косяк где-то в этом коде.
+    if(lines.size() != 0) {
+        std::string res = std::accumulate(
+                std::next(lines.begin()), lines.end(),
+                lines[0],
+                [](std::string a, std::string b) {
+                    return a + "\n" + b;
+                }
+        );
+        str += res;
+    } else {
+        str += "    TRUE";
+    }
    //  lines[0];
 
 }

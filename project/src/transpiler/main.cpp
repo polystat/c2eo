@@ -121,9 +121,9 @@ const char **transform_argv(const char *const *argv) {
 
 void generateSpace(SpaceGen &globGen, std::string objFilename) {
     std::string obj;
-    std::string init;
+    //std::string init;
     globGen.Generate(obj);
-    globGen.GenValue(init);
+    //globGen.GenValue(init);
     outs() << "\n===================================\n";
     outs() << obj;
     str2file(obj, objFilename);

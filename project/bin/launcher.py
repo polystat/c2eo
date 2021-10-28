@@ -39,7 +39,7 @@ if __name__ == '__main__':
     launcherPath = os.path.realpath(__file__)
     print(f'Launcher Directory is: {launcherPath}')
     tmpDir = launcherPath if os.path.isdir(launcherPath) else os.path.dirname(launcherPath)
-    ##print(f'Tmp Directory is: {tmpDir}')
+    print(f'Tmp Directory is: {tmpDir}')
     # Изменение рабочего каталога
     os.chdir(tmpDir)
  
