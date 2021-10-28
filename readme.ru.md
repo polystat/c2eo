@@ -82,7 +82,7 @@ $ git clone https://github.com/kreofil/C2EO-draft.git c2eo
 
 Конфигурация транспилятора c2eo связано с его компиляцией из исходных текстов. При расположении llvm и clang  в `~/llvm-clang` используемые в каталогах `project` и `project/src/transpiler` файлы `CMakeLists.txt` остаются неизменными.
 Поэтому для выполнения компиляции нужно войти в `project/build` и выполнить в нем команду `cmake ..`
-После этого в том же каталоге запустить сбрку проекта командой `make` или `cmake --build .`
+После этого в том же каталоге запустить сборку проекта командой `make` или `cmake --build .`
 
 &nbsp;
 ## Step 6. Run transpilation
