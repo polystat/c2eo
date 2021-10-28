@@ -84,6 +84,7 @@ global.eo
 *.stat
 
 # Test temp files and dirs
-project/tests/scripts/env/
+project/tests/scripts/env/*.c
+project/tests/scripts/env/*.txt
 project/tests/scripts/__pycache__/
 *.log
