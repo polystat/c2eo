@@ -30,7 +30,7 @@ There are some variants of running test
 
     > one of the possible specific tests
     ```bash
-    $ python3 -m unittest global_tests.GlobalTestCase.test_long_long_min
+    $ python3 -m unittest global_tests.GlobalIntegerTestCase.test_long_long_min
     ```
 
 &nbsp;
