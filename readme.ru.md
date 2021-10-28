@@ -50,7 +50,7 @@ $ sudo apt install python3
 ```
 
 &nbsp;
-## Step 2. Install LLVM + CLANG
+## Step 2. Установка LLVM + CLANG
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
 $ tar -xvf llvmorg-12.0.1.tar.gz
@@ -58,7 +58,7 @@ $ tar -xvf llvmorg-12.0.1.tar.gz
 > [github](https://github.com/llvm/llvm-project) page of the LLVM project
 
 &nbsp;
-## Step 3. Build LLVM + CLANG
+## Step 3. Сборка LLVM + CLANG
 ```bash
 $ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
 $ cd llvm-clang
@@ -72,20 +72,22 @@ $ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 ```
 
 &nbsp;
-## Step 4. Install C2EO
+## Step 4. Установка C2EO
 ```bash
 $ cd ../..
 $ git clone https://github.com/polystat/c2eo.git
 ```
 &nbsp;
-## Step 5. Configuration C2EO
+## Step 5. Сборка C2EO
+
+> ВАЖНО. Каждый раз когда код транспилятора меняется, вам необходимо выполнить этот шаг повторно
 
 Конфигурация транспилятора c2eo связано с его компиляцией из исходных текстов. При расположении llvm и clang  в `~/llvm-clang` используемые в каталогах `project` и `project/src/transpiler` файлы `CMakeLists.txt` остаются неизменными.
 Поэтому для выполнения компиляции нужно войти в `project/build` и выполнить в нем команду `cmake ..`
 После этого в том же каталоге запустить сборку проекта командой `make` или `cmake --build .`
 
 &nbsp;
-## Step 6. Run transpilation
+## Step 6. Запуск транспиляции
 > Use `--` at the end of command below to skip all errors:
 ```bash
 $ cd ./project/bin
