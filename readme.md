@@ -76,11 +76,15 @@ $ cd ../..
 $ git clone https://github.com/polystat/c2eo.git
 ```
 &nbsp;
-## Step 5. Configuration C2EO
+## Step 5. Build C2EO
+
+> IMPORTANT. Every time the transpiler code changes, you need to repeat this step
 
 The c2eo transpiler configuration is related to its compilation from source. By placing llvm and clang in `~/llvm-clang`, the `CMakeLists.txt` files used in the `project` and `project/src/transpiler` directories remain unchanged.
 Therefore, to perform compilation, you need to enter `project/build` and execute the command `cmake ..` in it.
 After that, in the same directory, run the project build with the command `make` or` cmake --build. `
+
+
 
 &nbsp;
 ## Step 6. Run transpilation
