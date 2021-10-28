@@ -44,7 +44,7 @@ Makefile2
 # Sensitive or high-churn files:
 .idea/dataSources.ids
 .idea/dataSources.xml
-.idea/dataSources.local.xml
+.idea/dataSources.local.xmlproject/tests/scripts/env/*.c
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
@@ -84,6 +84,7 @@ global.eo
 *.stat
 
 # Test temp files and dirs
-project/tests/scripts/env/
+project/tests/scripts/env/*.c
+project/tests/scripts/env/*.txt
 project/tests/scripts/__pycache__/
 *.log

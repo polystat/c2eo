@@ -33,6 +33,6 @@ if __name__ == '__main__':
     suite.addTest(unittest.makeSuite(global_tests.GlobalFloatTestCase))
     suite.addTest(unittest.makeSuite(static_tests.StaticFloatTestCase))
 
-    unittest.TextTestRunner(verbosity=2, failfast=True).run(suite)
+    unittest.TextTestRunner(verbosity=2, failfast=True, buffer=True).run(suite)
 
     sys.stdout.close()
