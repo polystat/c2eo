@@ -22,34 +22,10 @@ jobs:
           cmake --version
           sudo apt install ninja-build
           ninja --version
+          echo ____________________________________
+          pwd
+          cd ~
+          pwd
+          ls
 
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v2
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
 
-      - name: Download LLVM
-        if: steps.cache-llvm.outputs.cache-hit != 'true'
-        run: wget "https://downloader.disk.yandex.ru/disk/626111da2188d316b0bfc5114d67c9078aaedfb47b3715a40fc00a37968f5c05/617c643b/JroLO1yaOTj526hVR0DS-KMCEQ-xtAnj0U4D4TNlmDlCjsRUA3lnepjN4MBM-YrVR3z0_qXBUWsEPi0w8J9KKg%3D%3D?uid=0&filename=llvm-clang.tar.gz&disposition=attachment&hash=%2BGP65LbM4n4Lr6ol25Msla056LuT4IsBPNMSN7xecbuBiXQxs11ZHTQui8i0ef%2B5q/J6bpmRyOJonT3VoXnDag%3D%3D%3A&limit=0&content_type=application%2Fx-gzip&owner_uid=131663598&fsize=3049305531&hid=319522705e3e3a8d1e4153c391073f8d&media_type=compressed&tknv=v2" -O llvm-clang.tar.gz
-        
-      - name: Download CMakeLists
-        run: wget "https://drive.google.com/uc?export=download&id=1h1tM3_m65U0bwcMoRwPdRv2uZEmCAUWa" -O CMakeLists.txt
-      
-      - name: Unpack LLVM
-        run: tar -xvf llvm-clang.tar.gz > /dev/null
-        
-      - name: Clone c2eo
-        run: git clone https://github.com/polystat/c2eo.git > /dev/null
-          
-      - name: Replace CMake
-        run: |
-          rm c2eo/project/src/transpiler/CMakeLists.txt
-          mv CMakeLists.txt c2eo/project/src/transpiler/
-      
-      - name: Buld and test c2eo
-        run: |
-          cd c2eo/project/build
-          cmake ..
-          make
