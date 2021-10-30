@@ -1,4 +1,4 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" />
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)
 
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
 Semantic-preserving translation of C programs to EOLANG programs.
