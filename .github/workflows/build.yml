@@ -12,7 +12,8 @@ jobs:
           - { name: "Ubuntu", os: ubuntu-latest, cc: "gcc", cxx: "g++", archiver: "7z a", generators: "Ninja" }
 
     steps:
-      - name: Tools versoins
+    
+      - name: Check tools version
         run: |
           gcc --version
           g++ --version
@@ -29,35 +30,41 @@ jobs:
         with:
           path: llvm-clang.tar.gz
           key: ${{ runner.os }}-llvm-clang
-          
+
       - name: Download LLVM
         if: steps.cache-llvm.outputs.cache-hit != 'true'
         uses: Difegue/action-megacmd@master
         with:
           args: get https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA .
 
-      - name: Cache CMakeLists
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz > /dev/null
+        
+      - name: Clone c2eo
+        run: git clone https://github.com/polystat/c2eo.git > /dev/null
+    
+      - name: Delete CMake
+        run: rm c2eo/project/src/transpiler/CMakeLists.txt
+  
+      - name: Cache CMakeLists.txt
         id: cache-cmakelists
         uses: actions/cache@v2
         with:
-          path: CMakeLists.txt
+          path: c2eo/project/src/transpiler/CMakeLists.txt
           key: ${{ runner.os }}-cmakelists
-
+  
       - name: Download CMakeLists
         if: steps.cache-cmakelists.outputs.cache-hit != 'true'
         uses: Difegue/action-megacmd@master
         with:
-          args: get https://mega.nz/file/BE9W2IqK#3F_s3W_TSnmSDGcPv4zR4X1WeyGFualSodOt1x7RqY0 .
-
-      - name: Unpack LLVM
-        run: sudo tar -xvf llvm-clang.tar.gz > /dev/null
-
-      - name: Clone c2eo
-        run: git clone https://github.com/polystat/c2eo.git > /dev/null
-
-      - name: Replace CMake
+          args: get https://mega.nz/file/BE9W2IqK#3F_s3W_TSnmSDGcPv4zR4X1WeyGFualSodOt1x7RqY0
+      
+      - name: Move CMakeLists
+        if: steps.cache-cmakelists.outputs.cache-hit != 'true'
         run: |
-          rm c2eo/project/src/transpiler/CMakeLists.txt
+          sudo chmod ugo+rwx CMakeLists.txt
           mv CMakeLists.txt c2eo/project/src/transpiler/
       
       - name: Buld and test c2eo
