@@ -1,6 +1,8 @@
 name: Build C2EO
 
-on: push
+on:
+  schedule:
+    - cron:  '0 23 * * *'
 
 jobs:
   build:
@@ -45,10 +47,10 @@ jobs:
       - name: Clone c2eo
         run: git clone https://github.com/polystat/c2eo.git > /dev/null
     
-      - name: Delete CMake
+      - name: Delete CMakeLists
         run: rm c2eo/project/src/transpiler/CMakeLists.txt
   
-      - name: Cache CMakeLists.txt
+      - name: Cache CMakeLists
         id: cache-cmakelists
         uses: actions/cache@v2
         with:
@@ -67,7 +69,7 @@ jobs:
           sudo chmod ugo+rwx CMakeLists.txt
           mv CMakeLists.txt c2eo/project/src/transpiler/
       
-      - name: Buld and test c2eo
+      - name: Build and test c2eo
         run: |
           cd c2eo/project/build
           cmake ..
