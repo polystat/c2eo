@@ -1,8 +1,6 @@
 name: Build C2EO
 
-on:
-  schedule:
-    - cron:  '0 23 * * *'
+on: push
 
 jobs:
   build:
@@ -74,3 +72,5 @@ jobs:
           cd c2eo/project/build
           cmake ..
           make
+          cd ../tests/scripts
+          python3 -m unittest global_tests.GlobalIntegerTestCase.test_long_long_min
