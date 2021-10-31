@@ -27,8 +27,6 @@
         ^.mem.write (range.add (value.mod range))
         ^.mem.write value
 
-  sprintf "%d" $ > as-string
-
   "uint32" > type
 
   4 > bytes

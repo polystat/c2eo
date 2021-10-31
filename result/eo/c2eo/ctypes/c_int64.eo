@@ -16,8 +16,6 @@
 
   mem.write > write
 
-  sprintf "%d" $ > as-string
-
   "int64" > type
 
   8 > bytes
