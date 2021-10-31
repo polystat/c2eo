@@ -41,6 +41,6 @@ if __name__ == '__main__':
     for testResult in testResults:
         print(testResult)
 
-    print(f'The End. {testCount} tests evaluated, {passCount} tests passed')
+    print('The End.')
 
     os.chdir(currentDir)
