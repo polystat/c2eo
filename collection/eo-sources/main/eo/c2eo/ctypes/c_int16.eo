@@ -27,8 +27,6 @@
         ^.mem.write (((value.add 32769).mod range).add max)
         ^.mem.write value
 
-  sprintf "%d" $ > as-string
-
   "int16" > type
 
   4 > bytes
