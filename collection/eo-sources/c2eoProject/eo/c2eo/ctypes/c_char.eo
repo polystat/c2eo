@@ -1,5 +1,4 @@
 +package c2eo.ctypes
-
 +alias org.eolang.txt.sprintf
 
 [initial] > c_char

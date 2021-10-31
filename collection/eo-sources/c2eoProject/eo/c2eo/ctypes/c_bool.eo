@@ -3,9 +3,7 @@
 +alias org.eolang.txt.sprintf
 
 [initial] > c_bool
-
   memory > mem
-
   if. > @
     mem.is-empty
     if.
@@ -13,9 +11,6 @@
       mem
       seq
     mem
-
   mem.write > write
-
   sprintf "%b" $ > as-string
-
   "bool" > type

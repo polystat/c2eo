@@ -72,7 +72,7 @@ if __name__ == '__main__':
         name = os.path.basename(staticFile)
         name = os.path.splitext(name)[0]
         print(f'Static object name = {name}')
-        collectInfo += '\n  [] > ' + name + '\n'
+        collectInfo += '  [] > ' + name + '\n'
         with open(staticFile, "r") as f:
             for line in f:
                 print(line)
