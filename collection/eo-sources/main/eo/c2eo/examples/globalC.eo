@@ -46,7 +46,6 @@
     printf "ui16_1 = %d\n" ui16_1
     printf "ui32_1 = %d\n" ui32_1
 
-
   c_bool 100 > b_2
   c_char 'b' > c_2
   c_float64 3.1415 > f64_2

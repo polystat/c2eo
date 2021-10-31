@@ -14,7 +14,6 @@
       seq
     mem
 
-
   [value] > write
     -32768 > min
     32767 > max
