@@ -3,6 +3,18 @@ import os
 import sys
 import glob
 import shutil
+import re
+
+def isFloat(strNum):
+    # Проверка на соответствие числу через регулярное выражение
+    result = re.fullmatch(r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?', strNum)
+    if result:
+        ####re.sub(r',', r'.', strNum)
+        #print(f'strNum = {strNum}. It is float number')
+        return True
+    else:
+        #print(f'strNum = {strNum}. It is not float number')
+        return False
 
 if __name__ == '__main__':
     # Фиксация текущего каталога
@@ -87,10 +99,16 @@ if __name__ == '__main__':
     # При наличии global.eo начинается процесс компиляции
     eoMavenCode = os.system('mvn clean compile')
     print('eoMavenCode = ', eoMavenCode)
+    if eoMavenCode != 0:
+        print('Incorrect Maven Project Assembly')
+        exit(-4)
 
     # Запуск программы на EO с переносом результата в файл для сравнения
     eoRunCode = os.system('./run.sh > ' + testedDir + '/' + 'eoResult.txt')
     print('eoRunCode = ', eoRunCode)
+    if eoRunCode != 0:
+        print('Incorrect EO runtime')
+        exit(-3)
 
     # Сравнение результатов полученных при выполнении программ на C и EO
     cFile =  open(testedDir + '/cResult.txt', "r")
@@ -101,12 +119,33 @@ if __name__ == '__main__':
     erCount = 0
     cLine = cFile.readline()
     eoLine = eoFile.readline()
+
+    # Сравнение длин списков перед их сопоставлением
+    #if len(cLine) != len(eoLine):
+        #Списки несопоставимы. Тест провален
+        #print(f'Test FAIL: different results between sorce end transpiled programs')
+        #exit(-2)
+
     iLine = 1
     while cLine and eoLine:
         if cLine != eoLine:
-            print(f'  Noequal in line = {iLine}')   #: c({cLine}) != eo({eoLine})')
-            logFile.write(f'  Noequal in line = {iLine}\n')
-            erCount += 1
+            # Проверка на числа с плавающей точкой и их эквивалентность
+            if not(isFloat(cLine[:-1]) and isFloat(eoLine[:-1])):
+                # Констатация различия
+                print(f'  Noequal in line = {iLine}')   #: c({cLine}) != eo({eoLine})')
+                logFile.write(f'  Noequal in line = {iLine}\n')
+                erCount += 1
+            else:   # Числа с плавающей точкой
+                # Получение и сравнение этих чисел с заданной (небольшой) точностью
+                if abs(float(cLine) - float(eoLine)) < 0.0001:
+                    # Числа идентичны
+                    print(f'  line = {iLine} is OK')        #: c({cLine}) == eo({eoLine})')
+                    logFile.write(f'  line = {iLine} is OK\n')
+                else:
+                    # Числа не совпадают
+                    print(f'  Noequal float numbers in line = {iLine}')
+                    logFile.write(f'  Noequal float numbers in line = {iLine}\n')
+                    erCount += 1
         else:
             print(f'  line = {iLine} is OK')        #: c({cLine}) == eo({eoLine})')
             logFile.write(f'  line = {iLine} is OK\n')

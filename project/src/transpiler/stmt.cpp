@@ -66,8 +66,8 @@ CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* con
     compoundStmt->shift = shift;
     for(CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
         // Костыльное решение для тестового выводо
-//         char* stmtName = (char*)((*i)->getStmtClassName());
-//         if (strcmp(stmtName , "ImplicitCastExpr") == 0)
+        // char* stmtName = (char*)((*i)->getStmtClassName());
+        // if (strcmp(stmtName , "ImplicitCastExpr") == 0)
         Stmt::StmtClass stmtClass = (*i)->getStmtClass();
         if(stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
         {
@@ -109,8 +109,10 @@ CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift) {
 
 StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
     StmtGen* stmtGen = nullptr;
-    char* stmtName = (char*)((*i)->getStmtClassName());
-    if (strcmp(stmtName ,"BinaryOperator") == 0)
+    //!!char* stmtName = (char*)((*i)->getStmtClassName());
+    //if (strcmp(stmtName ,"BinaryOperator") == 0)
+    Stmt::StmtClass stmtClass = (*i)->getStmtClass();
+    if(stmtClass == Stmt::BinaryOperatorClass)
     {
         const BinaryOperator* op = (BinaryOperator*)(*i);
         if(op->isIntegerConstantExpr(*context))
@@ -124,45 +126,51 @@ StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
             stmtGen = binaryStmtGen;
         }
     }
-    else if (strcmp(stmtName , "ParenExpr") == 0)
-    {
+    //else if (strcmp(stmtName , "ParenExpr") == 0)
+    else if(stmtClass == Stmt::ParenExprClass)
+   {
         const ParenExpr* op = (ParenExpr*)(*i);
         UnaryStmtGen* unaryStmtGen = getEmptyUnaryGen(op, shift);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
-    else if (strcmp(stmtName , "IntegerLiteral") == 0)
+    //else if (strcmp(stmtName , "IntegerLiteral") == 0)
+    else if(stmtClass == Stmt::IntegerLiteralClass)
     {
         const IntegerLiteral* op = (IntegerLiteral*)(*i);
         UnaryStmtGen* unaryStmtGen = getIntegerLiteralGen(op, shift);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
-    else if (strcmp(stmtName , "ImplicitCastExpr") == 0)
+    //else if (strcmp(stmtName , "ImplicitCastExpr") == 0)
+    else if(stmtClass == Stmt::ImplicitCastExprClass)
     {
         const ImplicitCastExpr* op = (ImplicitCastExpr*)(*i);
         UnaryStmtGen* unaryStmtGen = getCastGen(op, shift);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
-    else if(strcmp(stmtName , "DeclRefExpr") == 0)
+    //else if(strcmp(stmtName , "DeclRefExpr") == 0)
+    else if(stmtClass == Stmt::DeclRefExprClass)
     {
         const DeclRefExpr* op = (DeclRefExpr*)(*i);
         UnaryStmtGen* unaryStmtGen = getDeclName(op);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
-    else if (strcmp(stmtName ,"UnaryOperator") == 0)
+    //else if (strcmp(stmtName ,"UnaryOperator") == 0)
+    else if(stmtClass == Stmt::UnaryOperatorClass)
     {
         const UnaryOperator* op = (UnaryOperator*)(*i);
         UnaryStmtGen* unaryStmtGen = getUnaryOpertorStatement(op, shift);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
-    else if(strcmp(stmtName , "CompoundStmt") == 0)
+    //else if(strcmp(stmtName , "CompoundStmt") == 0)
+    else if(stmtClass == Stmt::CompoundStmtClass)
     {
         const CompoundStmt* cs = (CompoundStmt*)(*i);
-        CompoundStmtGen* compoundStmtGen = getCompoundStmtGenerator(cs,context,shift);
+        CompoundStmtGen* compoundStmtGen = getCompoundStmtGenerator(cs,context,shift,false);
         stmtGen = compoundStmtGen;
     }
     return stmtGen;
