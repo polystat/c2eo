@@ -14,6 +14,8 @@ The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
 * #### [Project for playing with examples](./collection/eo-sources/main)
 
 * #### [Tests](./project/tests/scripts)
+
+* #### [Other variant of testing](./project/tests/any)
 &nbsp;
 # Getting started guide
 
