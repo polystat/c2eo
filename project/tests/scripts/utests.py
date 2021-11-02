@@ -3,6 +3,7 @@ import unittest
 import datetime
 import system_vars
 import global_tests
+import file_tests
 import static_tests
 import sys
 

@@ -17,8 +17,9 @@ real = [
     ['Lf', 'long double', 1.79769e+308, -1.79769e+308]
 ]
 
+# todo: fix path
 path = ''
-directory = './env'
+directory = 'env'
 filename1 = f'{directory}/code1.c'
 filename2 = f'{directory}/code2.c'
 logfile1 = f'{directory}/log1.txt'
