@@ -52,8 +52,6 @@ $ mkdir build && cd $_
 <pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 $ cd ../..
 </code></pre>
-<code><pre>$ tar -xvf llvmorg-12.0.1.tar.gz
-</code></pre>
 </details>
 
 ## Step 3. Install C2EO
