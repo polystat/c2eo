@@ -91,8 +91,10 @@ def compare():
             return (len(diff) == 0), 'there are some diffs'
 
 
-def showname():
+def showname(name=None):
     sys.stdout.flush()
     print()
     print('#' * 16)
     print(sys._getframe(1).f_globals['__name__'], sys._getframe(1).f_code.co_name)
+    if name:
+        print(name)

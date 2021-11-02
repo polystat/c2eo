@@ -8,6 +8,7 @@ import static_tests
 import sys
 
 if __name__ == '__main__':
+    # todo: options
     argc = len(sys.argv)
     argv = sys.argv
     system_vars.path = argv[0].replace('utests.py', '')
@@ -22,7 +23,7 @@ if __name__ == '__main__':
 
     system_vars.full_log = datetime.datetime.now().strftime("%y-%m-%d#%H-%M.log")
     sys.stdout = open(system_vars.path + system_vars.full_log, 'w')
-
+    # todo: check stdout, fix path
     suite = unittest.TestSuite()
     # IntegerTests
     suite.addTest(unittest.makeSuite(global_tests.GlobalIntegerTestCase))
@@ -33,6 +34,14 @@ if __name__ == '__main__':
     # FloatTests
     suite.addTest(unittest.makeSuite(global_tests.GlobalFloatTestCase))
     suite.addTest(unittest.makeSuite(static_tests.StaticFloatTestCase))
+    # FilesTests
+    directory = 'dataset'
+    for root, _, files in os.walk(system_vars.path + directory):
+        for file in files:
+            if '.c' == file[-2:]:
+                tests = file_tests.FileTests
+                tests.file_name = os.path.join(root, file)
+                suite.addTest(unittest.makeSuite(tests))
 
     unittest.TextTestRunner(verbosity=2, failfast=True, buffer=True).run(suite)
 
