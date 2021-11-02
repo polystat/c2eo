@@ -15,6 +15,11 @@ jobs:
 
     steps:
     
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: c2eo
+          
       - name: Check tools version
         run: |
           gcc --version
@@ -43,10 +48,7 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz > /dev/null
-        
-      - name: Clone c2eo
-        run: git clone https://github.com/polystat/c2eo.git > /dev/null
-    
+
       - name: Delete CMakeLists
         run: rm c2eo/project/src/transpiler/CMakeLists.txt
   
