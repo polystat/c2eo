@@ -6,6 +6,7 @@ import global_tests
 import file_tests
 import static_tests
 import sys
+import big_tests
 
 if __name__ == '__main__':
     # todo: options
@@ -34,6 +35,8 @@ if __name__ == '__main__':
     # FloatTests
     suite.addTest(unittest.makeSuite(global_tests.GlobalFloatTestCase))
     suite.addTest(unittest.makeSuite(static_tests.StaticFloatTestCase))
+    # BigTypeTests
+    suite.addTest(unittest.makeSuite(big_tests.BigTests))
     # FilesTests
     directory = 'dataset'
     for root, _, files in os.walk(system_vars.path + directory):
@@ -43,6 +46,6 @@ if __name__ == '__main__':
                 tests.file_name = os.path.join(root, file)
                 suite.addTest(unittest.makeSuite(tests))
 
-    unittest.TextTestRunner(verbosity=2, failfast=True, buffer=True).run(suite)
+    unittest.TextTestRunner(verbosity=2, failfast=False, buffer=True).run(suite)
 
     sys.stdout.close()
