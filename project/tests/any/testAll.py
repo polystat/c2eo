@@ -1,9 +1,12 @@
 #! /usr/bin/python3
 # Прохождение всех тестов в заданном каталоге
 import os
-import sys
+# import sys
+import time
+from datetime import timedelta
 
 if __name__ == '__main__':
+    start_time = time.monotonic()
     # Фиксация текущего каталога
     currentDir = os.getcwd()
 
@@ -37,5 +40,9 @@ if __name__ == '__main__':
         print(testResult)
 
     print(f'The End. {testCount} tests evaluated, {passCount} tests passed')
+
+    end_time: float = time.monotonic()
+    delta = timedelta(seconds=end_time - start_time)
+    print(f'testAll execution time is {delta}')
 
     os.chdir(currentDir)

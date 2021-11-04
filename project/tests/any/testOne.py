@@ -4,19 +4,22 @@ import sys
 import glob
 import shutil
 import re
+import time
+from datetime import timedelta
 
 def isFloat(strNum):
     # Проверка на соответствие числу через регулярное выражение
     result = re.fullmatch(r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?', strNum)
     if result:
-        ####re.sub(r',', r'.', strNum)
-        #print(f'strNum = {strNum}. It is float number')
+        # re.sub(r',', r'.', strNum)
+        # print(f'strNum = {strNum}. It is float number')
         return True
     else:
         #print(f'strNum = {strNum}. It is not float number')
         return False
 
 if __name__ == '__main__':
+    start_time = time.monotonic()
     # Фиксация текущего каталога
     currentDir = os.getcwd()
 
@@ -36,6 +39,7 @@ if __name__ == '__main__':
     else:
         # Пока выход
         print(f'1) Numer of files =  {argc} Incorrect')
+        os.chdir(currentDir)
         exit(1)
     # Проверка, что данный каталог существует
     testedDir = tmpDir + '/tests/' + argv[1]
@@ -44,6 +48,7 @@ if __name__ == '__main__':
     else:
         # Пока выход
         print(f'2) Tested Directory {testedDir} is absent')
+        os.chdir(currentDir)
         exit(2)
     # Имя программы на C должно совпадать с именем каталога
     cProgramName = testedDir + '/' + argv[1] + '.c'
@@ -52,6 +57,7 @@ if __name__ == '__main__':
     else:
         # Пока выход
         print(f'3) C file {cProgramName} is absent')
+        os.chdir(currentDir)
         exit(3)
 
     # Предварительная очистка тестового каталога от лишних файлов.
@@ -78,9 +84,10 @@ if __name__ == '__main__':
     os.system('clang ' + cProgramName)
     os.system('./a.out > cResult.txt')
     # Далее запускается стартер
-    os.system('../../../../../bin/launcher.py ' + cEoOnlyName)
+    launcherStart = '../../../../bin/launcher.py ' + cEoOnlyName
+    os.system(launcherStart)
 
-    resultDir = '../../../../../../result/'
+    resultDir = '../../../../../result/'
     # Получение абсолютного пути до каталога с проектом на EO
     resultDir = os.path.abspath(resultDir)
     os.chdir(resultDir)
@@ -94,6 +101,7 @@ if __name__ == '__main__':
     else:
         print(f'File global.eo is absence in: {globalFileDir}')
         # Нет смысла продолжать дальше, так как тест не пройдет из-за отсутствия global.eo
+        os.chdir(currentDir)
         exit(-1)
 
     # При наличии global.eo начинается процесс компиляции
@@ -101,6 +109,7 @@ if __name__ == '__main__':
     print('eoMavenCode = ', eoMavenCode)
     if eoMavenCode != 0:
         print('Incorrect Maven Project Assembly')
+        os.chdir(currentDir)
         exit(-4)
 
     # Запуск программы на EO с переносом результата в файл для сравнения
@@ -108,6 +117,7 @@ if __name__ == '__main__':
     print('eoRunCode = ', eoRunCode)
     if eoRunCode != 0:
         print('Incorrect EO runtime')
+        os.chdir(currentDir)
         exit(-3)
 
     # Сравнение результатов полученных при выполнении программ на C и EO
@@ -153,6 +163,14 @@ if __name__ == '__main__':
         eoLine = eoFile.readline()
         iLine += 1
 
+    # Проверка, что после выхода обе строки имеют одинаковое значение
+    # Противное может показывать, что число строк в результатах запуска не совпадает.
+    # То есть, это будет сигнализировать о непрохождении теста.
+    if cLine != eoLine:
+        print(f'Test FAIL: different number of strings in C-code and EO-code')
+        os.chdir(currentDir)
+        exit(-5)
+
     if erCount > 0:
         print(f'Test FAIL: {erCount} errors')
         logFile.write(f'FAIL: {erCount} errors :-(\n')
@@ -163,6 +181,10 @@ if __name__ == '__main__':
     cFile.close()
     eoFile.close()
     logFile.close()
+
+    end_time: float = time.monotonic()
+    delta = timedelta(seconds=end_time - start_time)
+    print(f'testOne execution time is {delta}')
 
     os.chdir(currentDir)
     exit(erCount)

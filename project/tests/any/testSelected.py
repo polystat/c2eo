@@ -3,20 +3,22 @@
 # расположенном в каталоге configuration
 import os
 import sys
-import glob
-import shutil
+# import glob
+# import shutil
+import time
+from datetime import timedelta
 
 if __name__ == '__main__':
+    start_time = time.monotonic()
     # Фиксация текущего каталога
     currentDir = os.getcwd()
 
     # Получение пути до работающего скрипта
     myPath = os.path.realpath(__file__)
-    #print(f'Splitter Directory is: {myPath}')
+    # print(f'Splitter Directory is: {myPath}')
     tmpDir = myPath if os.path.isdir(myPath) else os.path.dirname(myPath)
     # Изменение рабочего каталога на каталог скрипта
     os.chdir(tmpDir)
-
 
     # Проверка числа аргументов командной строки
     argc = len(sys.argv)
@@ -70,6 +72,9 @@ if __name__ == '__main__':
         print(testResult)
 
     print(f'The End. {testCount} tests evaluated, {passCount} tests passed')
+
+    end_time: float = time.monotonic()
+    delta = timedelta(seconds=end_time - start_time)
+    print(f'testSelected execution time is {delta}')
+
     os.chdir(currentDir)
-
-

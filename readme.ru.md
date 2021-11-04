@@ -1,23 +1,9 @@
 # C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" />
 
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
-Semantic-preserving translation of C programs to EOLANG programs.
+Semantic-preserving translation of C programs to EOLANG programs. *Другие языки*: [English](readme.md)*
 
-The 1st step is C to [EOLANG](https://www.eolang.org) S2S compiler.
-
-*Прочитать на другом языке: [English](readme.md)*
-
-&nbsp;
-### Useful links:
-
-* #### [Document with C2EO transform examples](./doc/transformExamples.md)
-
-* #### [Project for playing with examples](./collection/eo-sources/main)
-
-* #### [Tests](./project/tests/scripts)
-&nbsp;
 # Getting started guide
-
 
 Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
 we will fix it.
@@ -26,59 +12,54 @@ we will fix it.
 You need a [Linux](https://www.linux.org/pages/download/) operating system (we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download))
 
 Tools:
-
-1. [wget](https://www.tecmint.com/install-wget-in-linux/)
-2. [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/)
-3. [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-4. [cmake](https://cmake.org/download/)
-5. [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/)
-6. [g++](https://pkgs.org/download/g++)
-7. [ninja-build](https://ninja-build.org/)
-8. [python3.+](https://www.python.org/downloads/)
+[wget](https://www.tecmint.com/install-wget-in-linux/), 
+[tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
+[git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
+[cmake](https://cmake.org/download/), 
+[gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
+[g++](https://pkgs.org/download/g++), [ninja-build](https://ninja-build.org/), [python3.+](https://www.python.org/downloads/)
 
 ```bash
 # Installation tools for Ubuntu
-
-$ sudo apt install wget
-$ sudo apt install tar
-$ sudo apt install git
-$ sudo apt install cmake
-$ sudo apt install gcc
-$ sudo apt install g++
-$ sudo apt install ninja-build
-$ sudo apt install python3
+$ sudo apt install wget tar git cmake gcc g++ ninja-build python3
 ```
 
-&nbsp;
 ## Step 2. Установка LLVM + CLANG
+
+[Link to the archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA)
+
 ```bash
-$ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
+# After downloading
 $ tar -xvf llvmorg-12.0.1.tar.gz
 ```
-> [github](https://github.com/llvm/llvm-project) page of the LLVM project
 
-&nbsp;
-## Step 3. Сборка LLVM + CLANG
-```bash
-$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
+<details>
+<summary> Old variant </summary>
+
+<h2>Step 2. Загрузка LLVM + CLANG</h2>
+<pre><code>
+$ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
+$ tar -xvf llvmorg-12.0.1.tar.gz
+</code></pre>
+
+<h2>Step 2.1 Сборка LLVM + CLANG</h2>
+<pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
 $ cd llvm-clang
 $ mkdir build && cd $_
-```
-```bash
-$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
-```
-```bash
-$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
-```
-
-&nbsp;
-## Step 4. Установка C2EO
-```bash
+</code></pre>
+<pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
+</code></pre>
+<pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 $ cd ../..
+</code></pre>
+</details>
+
+## Step 3. Установка C2EO
+```bash
 $ git clone https://github.com/polystat/c2eo.git
 ```
 &nbsp;
-## Step 5. Сборка C2EO
+## Step 4. Сборка C2EO
 
 > ВАЖНО. Каждый раз когда код транспилятора меняется, вам необходимо выполнить этот шаг повторно
 
@@ -87,7 +68,7 @@ $ git clone https://github.com/polystat/c2eo.git
 После этого в том же каталоге запустить сборку проекта командой `make` или `cmake --build .`
 
 &nbsp;
-## Step 6. Запуск транспиляции
+## Step 5. Запуск транспиляции
 > Use `--` at the end of command below to skip all errors:
 ```bash
 $ cd ./project/bin
@@ -134,7 +115,7 @@ Based on intermediate files located in the `project / assembly` directory, it al
 
 
 &nbsp;
-## Step 7. Run eo generated files
+## Step 6. Запуск сгенерированных файлов eo
 
 Now the generated files in this [dir](result/eo/c2eo/src/)
 
@@ -143,9 +124,8 @@ Now the generated files in this [dir](result/eo/c2eo/src/)
 This [quick start](https://github.com/cqfn/eo#quick-start) for running your first eo project
 
 &nbsp;
-## Additional step. Project testing
-* ### [Tests 1](./project/tests/scripts)
-* ### [Tests 2](./project/tests/datasets/launcher-set/)
+## Дополнительный шаг. Примеры тестов
+### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
 
 &nbsp;
 

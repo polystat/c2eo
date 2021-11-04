@@ -3,9 +3,11 @@
 import os
 import sys
 import glob
-#import shutil
+import time
+from datetime import timedelta
 
 if __name__ == '__main__':
+    start_time = time.monotonic()
     # Фиксация текущего каталога
     currentDir = os.getcwd()
 
@@ -41,6 +43,9 @@ if __name__ == '__main__':
     for testResult in testResults:
         print(testResult)
 
+    end_time: float = time.monotonic()
+    delta = timedelta(seconds=end_time - start_time)
+    print(f'cleanAll execution time is {delta}')
     print('The End.')
 
     os.chdir(currentDir)
