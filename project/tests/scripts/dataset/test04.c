@@ -5,7 +5,7 @@ struct{
     union {struct {
             int alltypes;
         } n;}q;
-} a;
+}a;
 union {
     struct {
         int alltypes;
@@ -18,6 +18,7 @@ union {
         int type;
         double doublenode;
     } nf;
+    struct {};
 } u;
 int main(){
     a;
