@@ -13,6 +13,16 @@ void addFuncDeclMatcher(MatchFinder &finder) {
 }
 
 //------------------------------------------------------------------------------
+// Сопоставитель с определением структур и объединений
+void addRecordDeclMatcher(MatchFinder &finder) {
+    static RecordDeclAnalyzer recordDeclAnalyzer;
+    static DeclarationMatcher recordDeclMatcher =
+            recordDecl().bind("recordDecl");
+
+    finder.addMatcher(recordDeclMatcher, &recordDeclAnalyzer);
+}
+
+//------------------------------------------------------------------------------
 // Сопоставитель с определением глобальной переменной базового типа
 void addDeclBaseVarGlobalMemoryMatcher(MatchFinder &finder) {
     static DeclBaseVarGlobalMemoryAnalyzer declBaseVarGlobalMemoryAnalyzer;
@@ -69,6 +79,7 @@ void addIntVarDeclGlobalMemoryMatcher(MatchFinder &finder) {
 void addMatchers(MatchFinder &finder) {
     addFuncDeclMatcher(finder);
     addDeclBaseVarGlobalMemoryMatcher(finder);
+    addRecordDeclMatcher(finder);
 ////    addIntVarDeclMatcher(finder);
 ////    addIntVarDeclGlobalMemoryMatcher(finder);
 ////    addLoopMatcher(finder);

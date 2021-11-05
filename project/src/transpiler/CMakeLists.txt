@@ -21,6 +21,7 @@ set(SOURCE_FILES
     # Headers
     vardecl.h
     funcdecl.h
+    recorddecl.h
     stmt.h
     analyzers.h
     matchers.h
@@ -31,6 +32,7 @@ set(SOURCE_FILES
     main.cpp
     vardecl.cpp
     funcdecl.cpp
+    recorddecl.cpp
     stmt.cpp
     analyzers.cpp
     matchers.cpp
