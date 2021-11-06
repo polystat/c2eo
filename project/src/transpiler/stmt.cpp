@@ -1,9 +1,12 @@
 #include "stmt.h"
+#include "generator.h"
+
 //#define STM_DEB
 UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift);
 BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift);
 
 UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr,  int shift);
+UnaryStmtGen *getEmptyUnaryGen();
 UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr,  int shift);
 
 UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr);
@@ -14,6 +17,8 @@ CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift);
 
 UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral, int shift);
 UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt, int shift);
+
+UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral, int shift);
 
 ASTContext* context;
 
@@ -108,7 +113,8 @@ CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift) {
 }
 
 StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
-    StmtGen* stmtGen = nullptr;
+    //TODO подумать над утечкой памяти
+    StmtGen* stmtGen = getEmptyUnaryGen();
     //!!char* stmtName = (char*)((*i)->getStmtClassName());
     //if (strcmp(stmtName ,"BinaryOperator") == 0)
     Stmt::StmtClass stmtClass = (*i)->getStmtClass();
@@ -139,6 +145,13 @@ StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
     {
         const IntegerLiteral* op = (IntegerLiteral*)(*i);
         UnaryStmtGen* unaryStmtGen = getIntegerLiteralGen(op, shift);
+        unaryStmtGen->shift  = shift;
+        stmtGen = unaryStmtGen;
+    }
+    else if(stmtClass == Stmt::FloatingLiteralClass)
+    {
+        const FloatingLiteral* op = (FloatingLiteral*)(*i);
+        UnaryStmtGen* unaryStmtGen = getFloatingLiteralGen(op, shift);
         unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
@@ -176,6 +189,14 @@ StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
     return stmtGen;
 }
 
+UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral, int shift) {
+    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+    auto  floatValue = pLiteral->getValue().convertToDouble();
+    unaryStmtGen->value = std::to_string(floatValue);
+    unaryStmtGen-> nestedStmt = nullptr;
+    return  unaryStmtGen;
+}
+
 UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral, int shift) {
 
     return  getASPIntIntegerLiteralGen(pLiteral->getValue(),pLiteral->getType()->isSignedIntegerType(), shift);
@@ -199,6 +220,13 @@ UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr) {
 
 UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr, int shift) {
     return getEmptyUnaryGen(pExpr,shift + 1);
+}
+
+UnaryStmtGen *getEmptyUnaryGen() {
+    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+    unaryStmtGen->value = "";
+    unaryStmtGen-> nestedStmt = nullptr;
+    return  unaryStmtGen;
 }
 
 UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr, int shift) {

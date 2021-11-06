@@ -5,7 +5,6 @@
 #include "generator.h"
 
 
-
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров описания функции
 void getFuncDeclParameters(const FunctionDecl *FD) {
@@ -137,7 +136,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
     // Формируется глобальная функция со всеми атрибутами
 
     if(isGlobal) {
-        GlobalFuncGen* func = new GlobalFuncGen;
+        FuncGen* func = new FuncGen;
         if(funcName == "main") {
             func->name = "main";
         } else {

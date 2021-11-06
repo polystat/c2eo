@@ -8,7 +8,7 @@
 #include <vector>
 
 // Запись строки символов в указанный файл
-void str2file(std::string &str, std::string fileName);
+void str2file(std::string str, std::string fileName);
 
 // Чтение из файла в вектор строк
 void file2vector(std::string fileName, std::vector<std::string> &text);
