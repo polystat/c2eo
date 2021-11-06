@@ -1,6 +1,8 @@
 import os
 import difflib
 import sys
+from collections import defaultdict
+from typing import List
 
 from system_vars import *
 
@@ -27,23 +29,49 @@ def compile_run():
     return True, 'too easily'
 
 
-def generate(c_type, value, static=False):
-    code = '\n'.join([f'{"static " if static else ""}{c_type[1]} var = {value};',
-                      'int main() {', '\t%svar%s;', '\treturn 0;', '}'])
+def generate1(c_types, declaration, names):
+    code = '\n'.join([declaration, 'int main() {',
+                      *[f'\t{names[i]};' for i in range(len(names))],
+                      '\treturn 0;', '}'])
     with open(path + filename1, 'w') as fout:
-        print(code % ('', ''),
-              file=fout)
+        print(code, file=fout)
     # to log
     print("\nCODE#1:")
-    print(code % ('', ''))
+    print(code)
 
-    code = '\n'.join(['#include "stdio.h"', code])
+
+def generate2(c_types, declaration, names):
+    code = '\n'.join(['#include "stdio.h"', declaration, 'int main() {',
+                      *[f'\tprintf("%{c_types[i][0]}\\n", {names[i]});' for i in range(len(names))],
+                      '\treturn 0;', '}'])
     with open(path + filename2, 'w') as fout:
-        print(code % (f'printf("%{c_type[0]}\\n", ', ')'),
-              file=fout)
+        print(code, file=fout)
     # to log
     print("\nCODE#2:")
-    print(code % (f'printf("%{c_type[0]}\\n", ', ')'))
+    print(code)
+
+
+def generate_vars(c_types, values=None, static=None):
+    N = len(c_types)
+    if (values and N != len(values)) or \
+            (static and N != len(static)):
+        return '', []
+    names: List[str] = []
+    counter = defaultdict(int)
+    declaration = ''
+    for i in range(N):
+        if static and static[i]:
+            declaration += 'static' + ' '
+        declaration += c_types[i][1] + ' '
+        name = c_types[i][0]
+        if c_types[i][1] == '_Bool':
+            name = 'b'
+        counter[name] += 1
+        names.append(name + str(counter[name]))
+        declaration += names[-1] + ' '
+        if values:
+            declaration += '= ' + str(values[i]) + ';\n'
+    return declaration, names
 
 
 def compare():
@@ -63,8 +91,10 @@ def compare():
             return (len(diff) == 0), 'there are some diffs'
 
 
-def showname():
+def showname(name=None):
     sys.stdout.flush()
     print()
-    print('#'*16)
+    print('#' * 16)
     print(sys._getframe(1).f_globals['__name__'], sys._getframe(1).f_code.co_name)
+    if name:
+        print(name)
