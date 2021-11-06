@@ -36,7 +36,7 @@ set(SOURCE_FILES
     matchers.cpp
     generator.cpp
     util.cpp
-)
+        ../../tests/datasets/start-set/test06.c)
 
 #add_executable(recvistor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})

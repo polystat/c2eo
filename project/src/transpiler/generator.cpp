@@ -176,7 +176,7 @@ BinaryStmtGen::~BinaryStmtGen() {
 bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
     //Если когда-нибудь у UnaryStmtGen появятся наследники, то реализовать что-то подобное https://xakep.ru/2019/03/14/cpp-magic/#toc04
     //На данный момент проверка заточена на этот класd
-    if  (!pGen->is_unary())
+    if  (pGen == nullptr || !pGen->is_unary())
         return false;
     UnaryStmtGen* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
     if (unaryStmtGen->nestedStmt != nullptr)
