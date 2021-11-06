@@ -47,8 +47,6 @@ int main(int argc, const char **argv) {
     std::string staticObj;
     std::string staticInit;
 
-    ApplicationGen appGen;
-    std::string appCode;
 
 
     auto ExpectedParser
@@ -120,13 +118,13 @@ const char **transform_argv(const char *const *argv) {
 // }
 
 void generateSpace(SpaceGen &globGen, std::string objFilename) {
-    std::string obj;
+    std::stringstream obj;
     //std::string init;
     globGen.Generate(obj);
     //globGen.GenValue(init);
     outs() << "\n===================================\n";
-    outs() << obj;
-    str2file(obj, objFilename);
+    outs() << obj.str();
+    str2file(obj.str(), objFilename);
     //outs() << init;
     //str2file(init, initFilename);
 }

@@ -1,4 +1,6 @@
 #include "stmt.h"
+#include "generator.h"
+
 //#define STM_DEB
 UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift);
 BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift);
