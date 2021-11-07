@@ -41,6 +41,13 @@ struct AbstractGen {
 
     GenKind getKind() const {return  Kind;}
 
+    friend std::ostream& operator<<(std::ostream & out, AbstractGen* generator)
+    {
+        if (generator)
+            generator->Generate(out);
+        return out;
+    }
+
     explicit AbstractGen(GenKind K) : Kind(K) {}
     virtual void Generate(std::ostream &out) = 0;
     virtual ~AbstractGen() = default;
@@ -71,7 +78,7 @@ struct VarGen: AbstractGen {
 struct StmtGen : AbstractGen {
     std::string value;
     std::string postfix;
-    static std::string getIndentSpaces(int shift);
+    static std::string getIndentSpaces();
 
     static bool classof(const AbstractGen *S) {
         return S->getKind() >= GK_StmtGen &&

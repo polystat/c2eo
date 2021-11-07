@@ -1,4 +1,4 @@
-//clang -Xclang -ast-dump -fsyntax-only main.cpp
+//clang -Xclang -ast-dump -fsyntax-only test03.c
 
 int a = 4;
 int b = 3;

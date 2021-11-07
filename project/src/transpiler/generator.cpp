@@ -24,11 +24,7 @@ SourceGen::~SourceGen() {
 }
 
 
-std::ostream& operator<<(AbstractGen& generator, std::ostream & out)
-{
-    generator.Generate(out);
-    return out;
-}
+
 
 //--------------------------------------------------------------------------------------------------
 void VarGen::Generate(std::ostream &out) {
@@ -37,9 +33,9 @@ void VarGen::Generate(std::ostream &out) {
 
 //--------------------------------------------------------------------------------------------------
 /// shift is indentation level. shift 2 is equal to 4 spaces
-std::string StmtGen::getIndentSpaces(int shift) {
+std::string StmtGen::getIndentSpaces() {
 
-    return std::string(' ',shift*2);
+    return std::string(shift*2,' ');
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -51,7 +47,7 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
     int lines = 0;
 
     for (int i = 0; i < statements.size(); ++i) {
-        out << getIndentSpaces(AbstractGen::shift);
+        out << getIndentSpaces();
         out << statements[i];
         if (i+1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i]))
         {
@@ -95,7 +91,7 @@ void FuncGen::Generate(std::ostream &out) {
         out << "\n";
     }
     // Далее идет формирование тела функции
-    out << getIndentSpaces(AbstractGen::shift);
+    out << getIndentSpaces();
     AbstractGen::shift++;
     out << body;
     AbstractGen::shift--;
