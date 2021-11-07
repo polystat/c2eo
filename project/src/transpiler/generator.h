@@ -31,6 +31,7 @@ struct AbstractGen {
         GK_MultilineStmtGen,
         GK_FuncGen,
         GK_CmpStmtGen,
+        GK_IfStmtGen,
         GK_LastMultilineStmtGen,
         GK_LastStmtGen,
         GK_SpaceGen,
@@ -113,10 +114,8 @@ protected:
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для набора инструкций.
 // Накапливает необходимые значения в MultiLineStmt.
-struct CompoundStmtGen : MultiLineStmtGen {
+struct CompoundStmtGen : public MultiLineStmtGen {
 
-
-    MultiLineStmtGen* nested = nullptr ;
     virtual void Generate(std::ostream &out);
     CompoundStmtGen() : MultiLineStmtGen(GK_CmpStmtGen){};
 
@@ -232,6 +231,26 @@ struct SpaceGen: AbstractGen {
     }
 
     ~SpaceGen();
+};
+
+
+
+//-------------------------------------------------------------------------------------------------
+// Генератор кода для условного оператора
+// Наряду с константной оберткой обеспечивает запись глобальных объектов
+struct IfStmtGen: MultiLineStmtGen {
+    // Добавление очередного объекта к глобальному пространству
+
+    void Generate(std::ostream &out) override;
+
+    IfStmtGen(): MultiLineStmtGen(GK_IfStmtGen){}
+
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_IfStmtGen;
+    }
+
+    ~IfStmtGen() override;
 };
 
 #endif // __GENERATOR__

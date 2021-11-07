@@ -149,7 +149,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         Stmt::StmtClass stmtClass = body->getStmtClass();
         if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
             llvm::outs() << "   Start getCompoundStmtGenerator\n";
-            func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),&FD->getASTContext(), 1,true);
+            func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),&FD->getASTContext(), true);
         }
 
         func->globalSpaceGenPtr->Add(func);

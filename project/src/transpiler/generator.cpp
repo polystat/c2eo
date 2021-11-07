@@ -40,6 +40,10 @@ std::string StmtGen::getIndentSpaces() {
 
 //--------------------------------------------------------------------------------------------------
 void MultiLineStmtGen::Add(StmtGen *stmt) {
+    UnaryStmtGen* st = llvm::dyn_cast<UnaryStmtGen>(stmt);
+    //TODO Вынести Empty как отдельный тип или метод
+    if (st && st->op == "" && st->value == "" && st->nestedStmt== nullptr)
+        return;
     statements.push_back(stmt);
 }
 
@@ -47,7 +51,8 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
     int lines = 0;
 
     for (int i = 0; i < statements.size(); ++i) {
-        out << getIndentSpaces();
+        if (!llvm::isa<MultiLineStmtGen>(statements[i]))
+            out << getIndentSpaces();
         out << statements[i];
         if (i+1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i]))
         {
@@ -56,10 +61,7 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
         }
     }
 
-    if(!lines) {
-        //TODO учесть кол-во пробелов
-        out << "    TRUE";
-    }
+
 }
 
 MultiLineStmtGen::~MultiLineStmtGen() {
@@ -68,10 +70,16 @@ MultiLineStmtGen::~MultiLineStmtGen() {
 
 
 void CompoundStmtGen::Generate(std::ostream &out) {
+    out << getIndentSpaces();
     out << value;
     out << "\n";
     AbstractGen::shift++;
-    out << nested;
+    if (!statements.empty()) {
+        MultiLineStmtGen::Generate(out);
+        out << "\n";
+    }
+    out << getIndentSpaces();
+    out << "TRUE";
     AbstractGen::shift--;
 }
 
@@ -91,7 +99,7 @@ void FuncGen::Generate(std::ostream &out) {
         out << "\n";
     }
     // Далее идет формирование тела функции
-    out << getIndentSpaces();
+
     AbstractGen::shift++;
     out << body;
     AbstractGen::shift--;
@@ -121,9 +129,7 @@ BinaryStmtGen::~BinaryStmtGen() {
 }
 
 bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
-    //Если когда-нибудь у UnaryStmtGen появятся наследники, то реализовать что-то подобное https://xakep.ru/2019/03/14/cpp-magic/#toc04
-    //На данный момент проверка заточена на этот класd
-    if  (pGen == nullptr || llvm::isa<UnaryStmtGen>(pGen))
+    if  (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen))
         return false;
     auto* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
     if (unaryStmtGen->nestedStmt != nullptr)
@@ -167,4 +173,18 @@ void SpaceGen::Add(AbstractGen* obj) {
 
 SpaceGen::~SpaceGen() {
     objects.clear();
+}
+
+
+
+void IfStmtGen::Generate(std::ostream &out) {
+    out << getIndentSpaces();
+    out << "if.\n";
+    AbstractGen::shift++;
+    MultiLineStmtGen::Generate(out);
+    AbstractGen::shift--;
+}
+
+IfStmtGen::~IfStmtGen() {
+   MultiLineStmtGen::~MultiLineStmtGen();
 }
