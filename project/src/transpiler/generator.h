@@ -31,6 +31,7 @@ struct AbstractGen {
         GK_MultilineStmtGen,
         GK_FuncGen,
         GK_CmpStmtGen,
+        GK_IfStmtGen,
         GK_LastMultilineStmtGen,
         GK_LastStmtGen,
         GK_SpaceGen,
@@ -40,6 +41,13 @@ struct AbstractGen {
     const GenKind Kind;
 
     GenKind getKind() const {return  Kind;}
+
+    friend std::ostream& operator<<(std::ostream & out, AbstractGen* generator)
+    {
+        if (generator)
+            generator->Generate(out);
+        return out;
+    }
 
     explicit AbstractGen(GenKind K) : Kind(K) {}
     virtual void Generate(std::ostream &out) = 0;
@@ -71,7 +79,7 @@ struct VarGen: AbstractGen {
 struct StmtGen : AbstractGen {
     std::string value;
     std::string postfix;
-    static std::string getIndentSpaces(int shift);
+    static std::string getIndentSpaces();
 
     static bool classof(const AbstractGen *S) {
         return S->getKind() >= GK_StmtGen &&
@@ -106,10 +114,8 @@ protected:
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для набора инструкций.
 // Накапливает необходимые значения в MultiLineStmt.
-struct CompoundStmtGen : MultiLineStmtGen {
+struct CompoundStmtGen : public MultiLineStmtGen {
 
-
-    MultiLineStmtGen* nested = nullptr ;
     virtual void Generate(std::ostream &out);
     CompoundStmtGen() : MultiLineStmtGen(GK_CmpStmtGen){};
 
@@ -225,6 +231,26 @@ struct SpaceGen: AbstractGen {
     }
 
     ~SpaceGen();
+};
+
+
+
+//-------------------------------------------------------------------------------------------------
+// Генератор кода для условного оператора
+// Наряду с константной оберткой обеспечивает запись глобальных объектов
+struct IfStmtGen: MultiLineStmtGen {
+    // Добавление очередного объекта к глобальному пространству
+
+    void Generate(std::ostream &out) override;
+
+    IfStmtGen(): MultiLineStmtGen(GK_IfStmtGen){}
+
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_IfStmtGen;
+    }
+
+    ~IfStmtGen() override;
 };
 
 #endif // __GENERATOR__
