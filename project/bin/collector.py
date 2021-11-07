@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 # collector.py - запуск транспилятора и сборщика, очистка промежуточных хранилищ.
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 import os
 import glob
 import shutil
@@ -13,7 +13,7 @@ import sys
 
 resultDir = "../../result/eo/c2eo/src/"
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Каталог в котором формируется файл global.eo для последующей пересылки в
 # каталог проекта на EO
 assemblyDir = "../assembly/"
@@ -34,7 +34,7 @@ meta = '''+package c2eo.src
 
 '''
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 if __name__ == '__main__':
     print("Hello from collector!!!!")
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
         print(f'Resul Directory is: {pathToCurrDir + assemblyDir}')
 
     # Получение содержимого каталога
-    #print(f'Directory {pathToCurrDir + assemblyDir} contain: {os.listdir(pathToCurrDir + assemblyDir)}')
+    # print(f'Directory {pathToCurrDir + assemblyDir} contain: {os.listdir(pathToCurrDir + assemblyDir)}')
     assemlyStaticFileList = list(glob.glob(os.path.join(pathToCurrDir + assemblyDir, '*.stat')))
     print(f'Static objects. Directory {pathToCurrDir + assemblyDir} contain files: {assemlyStaticFileList}')
     assemlyGlobalFileList = list(glob.glob(os.path.join(pathToCurrDir + assemblyDir, '*.glob')))
