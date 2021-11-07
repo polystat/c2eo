@@ -16,6 +16,21 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
 }
 
 //------------------------------------------------------------------------------
+// Анализ на структуру или объединение
+void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
+    ASTContext *context = Result.Context;
+    const RecordDecl *RD = Result.Nodes.getNodeAs<RecordDecl>("recordDecl");
+    // We do not want to convert header files!
+    ////if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
+    if (!RD)
+        return;
+
+    getRecordDeclSubObjects(RD);
+
+    //RD->dump();
+}
+
+//------------------------------------------------------------------------------
 // Анализ на глобальную переменную
 void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
     ASTContext *context = Result.Context;

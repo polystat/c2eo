@@ -3,7 +3,7 @@
 #include "util.h"
 
 // Запись строки символов в указанный файл
-void str2file(std::string &str, std::string fileName) {
+void str2file(std::string str, std::string fileName) {
     std::ofstream out;          // поток для записи
     out.open(fileName); // окрываем файл для записи
     if (out.is_open()) {

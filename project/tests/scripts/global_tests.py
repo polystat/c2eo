@@ -9,7 +9,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -19,7 +21,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -29,7 +33,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -39,7 +45,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -49,7 +57,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -59,7 +69,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -69,7 +81,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[0]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -80,7 +94,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -90,7 +106,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -100,7 +118,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -110,7 +130,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -120,7 +142,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -130,7 +154,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -140,7 +166,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[1]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -151,7 +179,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -161,7 +191,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -171,7 +203,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -181,7 +215,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -191,7 +227,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -201,7 +239,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -211,7 +251,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[2]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -222,7 +264,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -232,7 +276,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -242,7 +288,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -252,7 +300,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -262,7 +312,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -272,7 +324,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -282,7 +336,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[3]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -293,7 +349,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -303,7 +361,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -313,7 +373,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -323,7 +385,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -333,7 +397,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -343,7 +409,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -353,7 +421,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[4]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -364,7 +434,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -374,7 +446,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -384,7 +458,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -394,7 +470,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -404,7 +482,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -414,7 +494,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -424,7 +506,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[5]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -435,7 +519,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -445,7 +531,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -455,7 +543,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -465,7 +555,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-2] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -475,7 +567,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -485,7 +579,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -495,7 +591,9 @@ class GlobalIntegerTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[6]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -508,7 +606,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -518,7 +618,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -528,7 +630,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -538,7 +642,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -548,7 +654,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -558,7 +666,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -568,7 +678,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[7]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -579,7 +691,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -589,7 +703,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -599,7 +715,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -609,7 +727,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -619,7 +739,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -629,7 +751,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -639,7 +763,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[8]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -650,7 +776,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -660,7 +788,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -670,7 +800,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-1] - 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -680,7 +812,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-2] + 18
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -690,7 +824,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 1
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -700,7 +836,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -710,7 +848,9 @@ class GlobalSpecificTestCase(unittest.TestCase):
         fun.showname()
         c_type = integer[9]
         value = c_type[-1] + (c_type[-2] + 1 - c_type[-1]) // 4 * 3
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -723,7 +863,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -733,7 +875,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -743,7 +887,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = f'{c_type[-1]} * 2'
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -753,7 +899,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = f'{c_type[-2]} * 2'
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -763,7 +911,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = c_type[-1] // 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -773,7 +923,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = 1 / 9
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -783,7 +935,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[0]
         value = c_type[-2] // 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -794,7 +948,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -804,7 +960,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -814,7 +972,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = f'{c_type[-1]} * 2'
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -824,7 +984,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = f'{c_type[-2]} * 2'
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -834,7 +996,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = c_type[-1] // 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -844,7 +1008,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = 1 / 9
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -854,7 +1020,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[1]
         value = c_type[-2] // 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -865,7 +1033,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = c_type[-1]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -875,7 +1045,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = c_type[-2]
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -885,7 +1057,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = f'{c_type[-1]} * 2'
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -895,7 +1069,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = f'{c_type[-2]} * 2'
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -905,7 +1081,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = c_type[-1] // 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -915,7 +1093,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = 1 / 9
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
@@ -925,7 +1105,9 @@ class GlobalFloatTestCase(unittest.TestCase):
         fun.showname()
         c_type = real[2]
         value = c_type[-2] // 2
-        fun.generate(c_type, value)
+        declaration, names = fun.generate_vars([c_type], [value])
+        fun.generate1([c_type], declaration, names)
+        fun.generate2([c_type], declaration, names)
         res, msg = fun.compile_run()
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()

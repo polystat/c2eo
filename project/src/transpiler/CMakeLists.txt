@@ -21,22 +21,26 @@ set(SOURCE_FILES
     # Headers
     vardecl.h
     funcdecl.h
+    recorddecl.h
     stmt.h
     analyzers.h
     matchers.h
-    generator.h
+        generator.h
+
     util.h
 
     # Sources
     main.cpp
     vardecl.cpp
     funcdecl.cpp
+    recorddecl.cpp
     stmt.cpp
     analyzers.cpp
     matchers.cpp
-    generator.cpp
-    util.cpp
-)
+        generator.cpp
+
+
+        util.cpp)
 
 #add_executable(recvistor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})
