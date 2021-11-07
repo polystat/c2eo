@@ -64,7 +64,7 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
         llvm::outs() << "      type - " << qt.getAsString() << "\n";
 #endif
     }
-    RG->staticSpaceGenPtr->Add(RG);
+    RG->globalSpaceGenPtr->Add(RG);
 #ifdef RECORD_DECL_INFO
     llvm::outs() << "\033[0m";
 #endif
