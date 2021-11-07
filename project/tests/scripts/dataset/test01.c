@@ -1,27 +1,20 @@
-struct {
-    int a;
+const struct q{
+    int a1;
 } a;
-struct st{
-    int a;
-} b;
-struct q{};
-/*
-#####1#####
-[] > a
-    c_int > a
-    "struct" > type
-[] > b
-    c_int > a
-    "struct" > type
-[] > c
-    c_int > a
-    "struct" > type
 
-#####2#####
-[] > anonym
-    c_int > a
-    "struct" > type
-anonym > a
-anonym > b
-anonym > c
-*/
+const struct q1{
+    int a1;
+    int a2;
+} b;
+
+const struct q2{
+    int a1;
+    float b1;
+} c;
+
+int _g;
+float _h;
+
+int main(){
+    return 0;
+}

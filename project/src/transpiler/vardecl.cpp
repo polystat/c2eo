@@ -5,7 +5,7 @@
 #include "generator.h"
 
 std::string getIntTypeByVar(const VarDecl *VD);
-
+size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl *VD) {
     // Имя переменной
@@ -83,6 +83,11 @@ void getVarDeclParameters(const VarDecl *VD) {
 #endif
         //TODO доработать этот код для разных размеров
         strType = getIntTypeByVar(VD);
+    } else{
+        // todo: ???
+        std::vector<std::string> v;
+        split(qualType.getAsString(), v, ' ' );
+        strType = *(v.end()-1);
     }
 #ifdef VAR_DECL_INFO
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
@@ -247,37 +252,11 @@ std::string getIntTypeByVar(const VarDecl *VD)
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     bool isSigned = qualType->isSignedIntegerType();
     auto size = typeInfo.Width;
-    std::string result = "";
-    //TODO обработка беззнаковых, когда они появятся.
-    if (isSigned)
-    {
-        switch (size)
-        {
-            case 16:
-                result = "c_int16";
-                break;
-            case 32:
-                result = "c_int32";
-                break;
-            case 64:
-                result = "c_int64";
-                break;
-        }
-    } else
-    {
-        switch (size)
-        {
-            case 16:
-                result = "c_int16";
-                break;
-            case 32:
-                result = "c_int32";
-                break;
-            case 64:
-                result = "c_int64";
-                break;
-        }
-    }
+    std::string result = "c_";
+    //TODO обработка беззнаковых, когда они появятся. (нет только c_uint64)
+    if (!isSigned)
+        result += 'u';
+    result += "int" + std::to_string(size);
     return result;
 }
 
@@ -341,3 +320,23 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
     }
 }
 
+
+size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
+{
+    size_t pos = txt.find( ch );
+    size_t initialPos = 0;
+    strs.clear();
+
+    // Decompose statement
+    while( pos != std::string::npos ) {
+        strs.push_back( txt.substr( initialPos, pos - initialPos ) );
+        initialPos = pos + 1;
+
+        pos = txt.find( ch, initialPos );
+    }
+
+    // Add the last one
+    strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+
+    return strs.size();
+}

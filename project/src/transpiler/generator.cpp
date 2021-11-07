@@ -199,3 +199,16 @@ void UnaryStmtGen::Generate(std::string &str) {
     if (!empty)
         str += ")";
 }
+
+//--------------------------------------------------------------------------------------------------
+void RecordGen::Generate(std::string &str) {
+    str = "[] > " + name;
+    str += "\n  ";
+    str += "\"" + type + "\" > type";
+    for (VarGen* vg : fields){
+        str += "\n  ";
+        std::string field;
+        vg->Generate(field);
+        str += field;
+    }
+}
