@@ -1,90 +1,168 @@
-#include <sstream>
-#include <iostream>
 #include <string>
-#include <fstream>
 #include <numeric>
-
+#include "llvm/Support/Casting.h"
 
 #include "generator.h"
 
 
-//--------------------------------------------------------------------------------------------------
+// void VarGen::GenValue(std::string &str) {
+//     str = name;
+//     str << ".write ";
+//     str << value;
+// }
+
 
 SpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
 SpaceGen* AbstractGen::staticSpaceGenPtr = nullptr;
-std::string AbstractGen::filename = "";
+std::string AbstractGen::filename;
 std::map<uint64_t ,std::string> AbstractGen::identifiers = std::map<uint64_t,std::string>();
+int AbstractGen::shift = 0;
 
-
-
-//--------------------------------------------------------------------------------------------------
-void VarGen::Generate(std::string &str) {
-    str = type + " ";
-    str += value;
-    str += " > ";
-    str += name;
+SourceGen::~SourceGen() {
+    delete glob;
+    delete stat;
 }
 
-// void VarGen::GenValue(std::string &str) {
-//     str = name;
-//     str += ".write ";
-//     str += value;
-// }
+
+
 
 //--------------------------------------------------------------------------------------------------
-void GlobalFuncGen::Generate(std::string &str) {
-    // Первоначально осуществляется генерация списка атрибутов
-    str = "[";
-    if(name == "main") {
-        str += "arg] > main\n";
-    } else {
-        for(auto paramName: paramNames) {
-            str += paramName;
-            str += ", ";
+void VarGen::Generate(std::ostream &out) {
+    out << type << " " << value << " > " << name;
+}
+
+//--------------------------------------------------------------------------------------------------
+/// shift is indentation level. shift 2 is equal to 4 spaces
+std::string StmtGen::getIndentSpaces() {
+
+    return std::string(shift*2,' ');
+}
+
+//--------------------------------------------------------------------------------------------------
+void MultiLineStmtGen::Add(StmtGen *stmt) {
+    UnaryStmtGen* st = llvm::dyn_cast<UnaryStmtGen>(stmt);
+    //TODO Вынести Empty как отдельный тип или метод
+    if (st && st->op == "" && st->value == "" && st->nestedStmt== nullptr)
+        return;
+    statements.push_back(stmt);
+}
+
+void MultiLineStmtGen::Generate(std::ostream &out) {
+    int lines = 0;
+
+    for (int i = 0; i < statements.size(); ++i) {
+        if (!llvm::isa<MultiLineStmtGen>(statements[i]))
+            out << getIndentSpaces();
+        out << statements[i];
+        if (i+1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i]))
+        {
+            out << "\n";
+            lines++;
         }
-        str += "ret_param_xxxx] > ";
-        str += name;
-        str += "\n";
+    }
+
+
+}
+
+MultiLineStmtGen::~MultiLineStmtGen() {
+    statements.clear();
+}
+
+
+void CompoundStmtGen::Generate(std::ostream &out) {
+    out << getIndentSpaces();
+    out << value;
+    out << "\n";
+    AbstractGen::shift++;
+    if (!statements.empty()) {
+        MultiLineStmtGen::Generate(out);
+        out << "\n";
+    }
+    out << getIndentSpaces();
+    out << "TRUE";
+    AbstractGen::shift--;
+}
+
+//--------------------------------------------------------------------------------------------------
+void FuncGen::Generate(std::ostream &out) {
+    // Первоначально осуществляется генерация списка атрибутов
+    out << "[";
+    if(name == "main") {
+        out << "arg] > main\n";
+    } else {
+        for(const auto& paramName: paramNames) {
+            out << paramName;
+            out << ", ";
+        }
+        out << "ret_param_xxxx] > ";
+        out << name;
+        out << "\n";
     }
     // Далее идет формирование тела функции
-    str += getIndentSpaces(body->shift);
-    body->Generate(str);
-    str += "\n";
+
+    AbstractGen::shift++;
+    out << body;
+    AbstractGen::shift--;
+    out << "\n";
     if(name == "main") {
-        str += "main arg > @\n";
+        out << "main arg > @\n";
     }
 }
 
-void GlobalFuncGen::GenValue(std::string &str) {
-    if(name == "main") {
-        str += "\n    main arg\n";
-    }
+void BinaryStmtGen::Generate(std::ostream &out) {
+    //str << value +"(";
+    bool leftLinear = isLeftLinear(left);
+    if (!leftLinear)
+        out <<"(";
+    out << left;
+    if (!leftLinear)
+        out <<")";
+    out << value + "(";
+    out << right;
+    out << ")";
+
+}
+
+BinaryStmtGen::~BinaryStmtGen() {
+    delete BinaryStmtGen::left;
+    delete BinaryStmtGen::right;
+}
+
+bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
+    if  (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen))
+        return false;
+    auto* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
+    if (unaryStmtGen->nestedStmt != nullptr)
+        return isLeftLinear(unaryStmtGen->nestedStmt);
+    return true;
+}
+
+
+UnaryStmtGen::~UnaryStmtGen() {
+    delete UnaryStmtGen::nestedStmt;
+}
+
+void UnaryStmtGen::Generate(std::ostream &out) {
+    bool empty = value.empty() || nestedStmt == nullptr;
+    out << value;
+    if (!empty)
+        out << "(";
+    if (nestedStmt != nullptr)
+        nestedStmt->Generate(out);
+    out << postfix;
+    if (!empty)
+        out << ")";
 }
 
 //--------------------------------------------------------------------------------------------------
-void SpaceGen::Generate(std::string &str) {
-    str = "";
+void SpaceGen::Generate(std::ostream &out) {
     // Формирование списка глобальных объектов
     //
     for(auto globalObject: objects) {
-        std::string strObj = "";
-        globalObject->Generate(strObj);
-        str += strObj;
-        str += "\n";
+        out << globalObject;
+        out << "\n";
     }
 
-}
-
-void SpaceGen::GenValue(std::string &str) {
-    // Формирование списка инициализаций
-    for(auto globalObject: objects) {
-        std::string strInit = "";
-        globalObject->GenValue(strInit);
-        str += "    ";
-        str += strInit;
-        str += "\n";
-    }
-    //str += "\n";
 }
 
 //........................................................................
@@ -97,109 +175,18 @@ SpaceGen::~SpaceGen() {
     objects.clear();
 }
 
-//--------------------------------------------------------------------------------------------------
-void ApplicationGen::Generate(std::string &str) {
-    str = R""""()"""";
+
+
+void IfStmtGen::Generate(std::ostream &out) {
+    out << getIndentSpaces();
+    out << "if.\n";
+    AbstractGen::shift++;
+    MultiLineStmtGen::Generate(out);
+    AbstractGen::shift--;
 }
 
-//--------------------------------------------------------------------------------------------------
-void FullGen::Generate(std::string &str) {
-    
+IfStmtGen::~IfStmtGen() {
 }
-
-
-void CompoundStmtGen::Generate(std::string &str) {
-    str += value;
-    str += "\n";
-    std::vector<std::string> lines;
-    for (auto stmt : statements)
-    {
-        std::string strobj = "";
-        strobj += getIndentSpaces(stmt->shift);
-        stmt->Generate(strobj);
-        lines.push_back(strobj);
-    }
-///!!! Косяк где-то в этом коде.
-    if(lines.size() != 0) {
-        std::string res = std::accumulate(
-                std::next(lines.begin()), lines.end(),
-                lines[0],
-                [](std::string a, std::string b) {
-                    return a + "\n" + b;
-                }
-        );
-        str += res;
-    } else {
-        str += "    TRUE";
-    }
-   //  lines[0];
-
-}
-
-CompoundStmtGen::~CompoundStmtGen() {
-    CompoundStmtGen::statements.clear();
-}
-
-void CompoundStmtGen::Add(StmtGen* stmtGen) {
-    CompoundStmtGen::statements.push_back(stmtGen);
-}
-
-std::string StmtGen::getIndentSpaces(int shift) {
-    std::string res = "";
-    for (int i = 0; i < shift; ++i) {
-        res += "  ";
-    }
-    return res;
-}
-
-void BinaryStmtGen::Generate(std::string &str) {
-    //str += value +"(";
-    bool leftLinear = isLeftLinear(left);
-    if (!leftLinear)
-        str +="(";
-    left->Generate(str);
-    if (!leftLinear)
-        str +=")";
-    str += value +"(";
-    right->Generate(str);
-    str += ")";
-
-}
-
-BinaryStmtGen::~BinaryStmtGen() {
-    delete BinaryStmtGen::left;
-    delete BinaryStmtGen::right;
-}
-
-
-
-bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
-    //Если когда-нибудь у UnaryStmtGen появятся наследники, то реализовать что-то подобное https://xakep.ru/2019/03/14/cpp-magic/#toc04
-    //На данный момент проверка заточена на этот класd
-    if  (!pGen->is_unary())
-        return false;
-    UnaryStmtGen* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
-    if (unaryStmtGen->nestedStmt != nullptr)
-        return isLeftLinear(unaryStmtGen->nestedStmt);
-    return true;
-}
-
-UnaryStmtGen::~UnaryStmtGen() {
-    delete UnaryStmtGen::nestedStmt;
-}
-
-void UnaryStmtGen::Generate(std::string &str) {
-    bool empty = value.empty() || nestedStmt == nullptr;
-    str += value;
-    if (!empty)
-        str += "(";
-    if (nestedStmt != nullptr)
-        nestedStmt->Generate(str);
-    str += postfix;
-    if (!empty)
-        str += ")";
-}
-
 //--------------------------------------------------------------------------------------------------
 void RecordGen::Generate(std::string &str) {
     str = "[] > " + name;

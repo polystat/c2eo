@@ -7,6 +7,7 @@ import re
 import time
 from datetime import timedelta
 
+
 def isFloat(strNum):
     # Проверка на соответствие числу через регулярное выражение
     result = re.fullmatch(r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?', strNum)
@@ -15,8 +16,9 @@ def isFloat(strNum):
         # print(f'strNum = {strNum}. It is float number')
         return True
     else:
-        #print(f'strNum = {strNum}. It is not float number')
+        # print(f'strNum = {strNum}. It is not float number')
         return False
+
 
 if __name__ == '__main__':
     start_time = time.monotonic()
@@ -25,7 +27,7 @@ if __name__ == '__main__':
 
     # Получение пути до работающего скрипта
     myPath = os.path.realpath(__file__)
-    #print(f'testOne Directory is: {myPath}')
+    # print(f'testOne Directory is: {myPath}')
     tmpDir = myPath if os.path.isdir(myPath) else os.path.dirname(myPath)
     # Изменение рабочего каталога на каталог скрипта
     os.chdir(tmpDir)
@@ -121,7 +123,7 @@ if __name__ == '__main__':
         exit(-3)
 
     # Сравнение результатов полученных при выполнении программ на C и EO
-    cFile =  open(testedDir + '/cResult.txt', "r")
+    cFile = open(testedDir + '/cResult.txt', "r")
     eoFile = open(testedDir + '/eoResult.txt', "r")
     # Создается файл для формирования результатов сравнения
     logFile = open(testedDir + '/test.log', "w")
@@ -131,25 +133,25 @@ if __name__ == '__main__':
     eoLine = eoFile.readline()
 
     # Сравнение длин списков перед их сопоставлением
-    #if len(cLine) != len(eoLine):
-        #Списки несопоставимы. Тест провален
-        #print(f'Test FAIL: different results between sorce end transpiled programs')
-        #exit(-2)
+    # if len(cLine) != len(eoLine):
+    # Списки несопоставимы. Тест провален
+    # print(f'Test FAIL: different results between sorce end transpiled programs')
+    # exit(-2)
 
     iLine = 1
     while cLine and eoLine:
         if cLine != eoLine:
             # Проверка на числа с плавающей точкой и их эквивалентность
-            if not(isFloat(cLine[:-1]) and isFloat(eoLine[:-1])):
+            if not (isFloat(cLine[:-1]) and isFloat(eoLine[:-1])):
                 # Констатация различия
-                print(f'  Noequal in line = {iLine}')   #: c({cLine}) != eo({eoLine})')
+                print(f'  Noequal in line = {iLine}')  #: c({cLine}) != eo({eoLine})')
                 logFile.write(f'  Noequal in line = {iLine}\n')
                 erCount += 1
-            else:   # Числа с плавающей точкой
+            else:  # Числа с плавающей точкой
                 # Получение и сравнение этих чисел с заданной (небольшой) точностью
                 if abs(float(cLine) - float(eoLine)) < 0.0001:
                     # Числа идентичны
-                    print(f'  line = {iLine} is OK')        #: c({cLine}) == eo({eoLine})')
+                    print(f'  line = {iLine} is OK')  #: c({cLine}) == eo({eoLine})')
                     logFile.write(f'  line = {iLine} is OK\n')
                 else:
                     # Числа не совпадают
@@ -157,7 +159,7 @@ if __name__ == '__main__':
                     logFile.write(f'  Noequal float numbers in line = {iLine}\n')
                     erCount += 1
         else:
-            print(f'  line = {iLine} is OK')        #: c({cLine}) == eo({eoLine})')
+            print(f'  line = {iLine} is OK')  #: c({cLine}) == eo({eoLine})')
             logFile.write(f'  line = {iLine} is OK\n')
         cLine = cFile.readline()
         eoLine = eoFile.readline()

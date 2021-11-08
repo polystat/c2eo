@@ -1,27 +1,34 @@
 #include "stmt.h"
-//#define STM_DEB
-UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift);
-BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift);
+#include "generator.h"
 
-UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr,  int shift);
-UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr,  int shift);
+//#define STM_DEB
+UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator);
+BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator);
+
+UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr);
+UnaryStmtGen *getEmptyUnaryGen();
+UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr);
 
 UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr);
 
-StmtGen *getStmtGen(ConstStmtIterator i, int shift);
+StmtGen *getStmtGen(const Stmt * i) ;
 
-CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift);
+StmtGen * getCompoundStmtOutputGenerator(const Stmt *pExpr);
 
-UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral, int shift);
-UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt, int shift);
+UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral);
+UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt);
+
+UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral);
+
+StmtGen *getIfStmtGenerator(const IfStmt *pStmt);
 
 ASTContext* context;
 
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров составного оператора
-void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int shift) {
-    std::string strShift = "";
-    for(int i = 0; i < shift; i++) {strShift += "  ";}
+void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context) {
+    std::string strShift = "  ";
+  //  for(int i = 0; i < shift; i++) {strShift += "  ";}
     bool isBodyEmpty = CS->body_empty();
     if(isBodyEmpty) {
         llvm::outs() << "  Body is Empty\n";
@@ -35,17 +42,17 @@ void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int s
     //getCompoundStmtGenerator(CS, 0);
 
     for(CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
-        char* stmtName = (char*)((*i)->getStmtClassName());
-        Stmt::StmtClass stmtClass = (*i)->getStmtClass();
+        char* stmtName = (char*)(i->getStmtClassName());
+        Stmt::StmtClass stmtClass = i->getStmtClass();
         llvm::outs() << "      It is " << stmtName << " stmtClass = " <<  stmtClass << "\n";
-        const clang::BinaryOperator* op = (BinaryOperator*)(*i);
+        const clang::BinaryOperator* op = (BinaryOperator*)i;
         llvm::outs() << "      operator: " << op->getOpcodeStr() << " isEval " << op->isEvaluatable(*context) <<"\n";
         for(BinaryOperator::const_child_iterator i = op->child_begin(); i != op->child_end(); i++)
         {
-            llvm::outs()  << "          stmt class   " <<(*i)->getStmtClassName() << "\n";
-            if (std::string((*i)->getStmtClassName()).compare("ImplicitCastExpr")==0)
+            llvm::outs()  << "          stmt class   " <<i->getStmtClassName() << "\n";
+            if (std::string(i->getStmtClassName()).compare("ImplicitCastExpr")==0)
             {
-                const ImplicitCastExpr* exp = (ImplicitCastExpr*)(*i);
+                const ImplicitCastExpr* exp = (ImplicitCastExpr*)i;
                 llvm::outs()  << "             stmt class   " <<exp->child_begin()->getStmtClassName() << "\n";
                 const DeclRefExpr* var = (DeclRefExpr*)(*(exp->child_begin()));
                 llvm::outs()  << "                var ref ID   " <<var->getFoundDecl()<< "\n";
@@ -57,25 +64,24 @@ void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context ,int s
 #endif
 }
 
-CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* context, int shift, bool isDecorator) {
+CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* context, bool isDecorator) {
     ::context = context;
     CompoundStmtGen* compoundStmt = new CompoundStmtGen;
     compoundStmt->value = "seq";
     if (isDecorator)
         compoundStmt->value += " > @";
-    compoundStmt->shift = shift;
     for(CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
         // Костыльное решение для тестового выводо
-        // char* stmtName = (char*)((*i)->getStmtClassName());
+        // char* stmtName = (char*)(i->getStmtClassName());
         // if (strcmp(stmtName , "ImplicitCastExpr") == 0)
         Stmt::StmtClass stmtClass = (*i)->getStmtClass();
         if(stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
         {
-            CompoundStmtGen *stmtGen = getCompoundStmtOutputGenerator((ImplicitCastExpr*)(*i),shift + 1);
+            StmtGen *stmtGen = getCompoundStmtOutputGenerator(*i);
             compoundStmt->Add(stmtGen);
             continue;
         }
-        StmtGen *stmtGen = getStmtGen(i, shift + 1);
+        StmtGen *stmtGen = getStmtGen(*i);
         if (stmtGen != nullptr)
             compoundStmt->Add(stmtGen);
     }
@@ -86,102 +92,133 @@ CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* con
     return compoundStmt;
 }
 //Временное решение для вывода
-CompoundStmtGen *getCompoundStmtOutputGenerator(Expr *pExpr, int shift) {
-    CompoundStmtGen* compoundStmt = new CompoundStmtGen;
-    compoundStmt->value = "seq";
-    compoundStmt->shift = shift;
+StmtGen * getCompoundStmtOutputGenerator(const Stmt *pExpr) {
+    MultiLineStmtGen* compoundStmt = new MultiLineStmtGen;
+    if (pExpr->children().empty())
+        return compoundStmt;
+    //compoundStmt->value = "";
     // Вывод переменной
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
-    unaryStmtGen-> shift = shift + 1;
     unaryStmtGen->value = "stdout ";
     unaryStmtGen->postfix = ".as-string";
-    DeclRefExpr *declExpr = (DeclRefExpr *)(*(pExpr->child_begin()));
+    DeclRefExpr *declExpr = (DeclRefExpr *)(*pExpr->child_begin());
     unaryStmtGen->nestedStmt = getDeclName(declExpr);
     compoundStmt->Add(unaryStmtGen);
     // Вывод перевода строки
     unaryStmtGen = new UnaryStmtGen;
-    unaryStmtGen-> shift = shift + 1;
     unaryStmtGen-> value = R"(stdout "\n")";
     unaryStmtGen-> nestedStmt = nullptr;
     compoundStmt->Add(unaryStmtGen);
     return compoundStmt;
 }
 
-StmtGen *getStmtGen(ConstStmtIterator i, int shift) {
-    StmtGen* stmtGen = nullptr;
-    //!!char* stmtName = (char*)((*i)->getStmtClassName());
+StmtGen *getStmtGen(const Stmt * i) {
+    //TODO подумать над утечкой памяти
+    StmtGen* stmtGen = getEmptyUnaryGen();
+    //!!char* stmtName = (char*)(i->getStmtClassName());
     //if (strcmp(stmtName ,"BinaryOperator") == 0)
-    Stmt::StmtClass stmtClass = (*i)->getStmtClass();
+    Stmt::StmtClass stmtClass = i->getStmtClass();
     if(stmtClass == Stmt::BinaryOperatorClass)
     {
-        const BinaryOperator* op = (BinaryOperator*)(*i);
+        const BinaryOperator* op = (BinaryOperator*)(i);
         if(op->isIntegerConstantExpr(*context))
         {
             Optional<llvm::APSInt> val = op->getIntegerConstantExpr(*context);
-            stmtGen = getASPIntIntegerLiteralGen(val.getValue(), true,shift);
+            stmtGen = getASPIntIntegerLiteralGen(val.getValue(), true);
         }
         else {
-            BinaryStmtGen *binaryStmtGen = getBinaryStatement(op, shift);
-            binaryStmtGen->shift = shift;
+            BinaryStmtGen *binaryStmtGen = getBinaryStatement(op);
             stmtGen = binaryStmtGen;
         }
     }
     //else if (strcmp(stmtName , "ParenExpr") == 0)
     else if(stmtClass == Stmt::ParenExprClass)
    {
-        const ParenExpr* op = (ParenExpr*)(*i);
-        UnaryStmtGen* unaryStmtGen = getEmptyUnaryGen(op, shift);
-        unaryStmtGen->shift  = shift;
+        const ParenExpr* op = (ParenExpr*)i;
+        UnaryStmtGen* unaryStmtGen = getEmptyUnaryGen(op);
         stmtGen = unaryStmtGen;
     }
     //else if (strcmp(stmtName , "IntegerLiteral") == 0)
     else if(stmtClass == Stmt::IntegerLiteralClass)
     {
-        const IntegerLiteral* op = (IntegerLiteral*)(*i);
-        UnaryStmtGen* unaryStmtGen = getIntegerLiteralGen(op, shift);
-        unaryStmtGen->shift  = shift;
+        const IntegerLiteral* op = (IntegerLiteral*)i;
+        UnaryStmtGen* unaryStmtGen = getIntegerLiteralGen(op);
+        stmtGen = unaryStmtGen;
+    }
+    else if(stmtClass == Stmt::FloatingLiteralClass)
+    {
+        const FloatingLiteral* op = (FloatingLiteral*)i;
+        UnaryStmtGen* unaryStmtGen = getFloatingLiteralGen(op);
         stmtGen = unaryStmtGen;
     }
     //else if (strcmp(stmtName , "ImplicitCastExpr") == 0)
     else if(stmtClass == Stmt::ImplicitCastExprClass)
     {
-        const ImplicitCastExpr* op = (ImplicitCastExpr*)(*i);
-        UnaryStmtGen* unaryStmtGen = getCastGen(op, shift);
-        unaryStmtGen->shift  = shift;
+        const ImplicitCastExpr* op = (ImplicitCastExpr*)i;
+        UnaryStmtGen* unaryStmtGen = getCastGen(op);
         stmtGen = unaryStmtGen;
     }
     //else if(strcmp(stmtName , "DeclRefExpr") == 0)
     else if(stmtClass == Stmt::DeclRefExprClass)
     {
-        const DeclRefExpr* op = (DeclRefExpr*)(*i);
+        const DeclRefExpr* op = (DeclRefExpr*)i;
         UnaryStmtGen* unaryStmtGen = getDeclName(op);
-        unaryStmtGen->shift  = shift;
         stmtGen = unaryStmtGen;
     }
     //else if (strcmp(stmtName ,"UnaryOperator") == 0)
     else if(stmtClass == Stmt::UnaryOperatorClass)
     {
-        const UnaryOperator* op = (UnaryOperator*)(*i);
-        UnaryStmtGen* unaryStmtGen = getUnaryOpertorStatement(op, shift);
-        unaryStmtGen->shift  = shift;
+        const UnaryOperator* op = (UnaryOperator*)i;
+        UnaryStmtGen* unaryStmtGen = getUnaryOpertorStatement(op);
         stmtGen = unaryStmtGen;
     }
     //else if(strcmp(stmtName , "CompoundStmt") == 0)
     else if(stmtClass == Stmt::CompoundStmtClass)
     {
-        const CompoundStmt* cs = (CompoundStmt*)(*i);
-        CompoundStmtGen* compoundStmtGen = getCompoundStmtGenerator(cs,context,shift,false);
+        const CompoundStmt* cs = (CompoundStmt*)i;
+        CompoundStmtGen* compoundStmtGen = getCompoundStmtGenerator(cs,context,false);
         stmtGen = compoundStmtGen;
+    }
+    else if(stmtClass == Stmt::IfStmtClass)
+    {
+        const IfStmt* cs = (IfStmt*)i;
+        stmtGen = getIfStmtGenerator(cs);
     }
     return stmtGen;
 }
 
-UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral, int shift) {
-
-    return  getASPIntIntegerLiteralGen(pLiteral->getValue(),pLiteral->getType()->isSignedIntegerType(), shift);
+StmtGen *getIfStmtGenerator(const IfStmt *pStmt) {
+    IfStmtGen *gen = new IfStmtGen;
+    auto cond = getStmtGen(pStmt->getCond());
+    gen->Add(cond);
+    auto then_c = getStmtGen(pStmt->getThen());
+    gen->Add(then_c);
+    if (pStmt->hasElseStorage()) {
+        auto else_c = getStmtGen(pStmt->getElse());
+        gen->Add(else_c);
+    } else
+    {
+        CompoundStmtGen* empt = new CompoundStmtGen;
+        empt->value ="seq";
+        gen->Add(empt);
+    }
+    return gen;
 }
 
-UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt, int shift) {
+UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral) {
+    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+    auto  floatValue = pLiteral->getValue().convertToDouble();
+    unaryStmtGen->value = std::to_string(floatValue);
+    unaryStmtGen-> nestedStmt = nullptr;
+    return  unaryStmtGen;
+}
+
+UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral) {
+
+    return  getASPIntIntegerLiteralGen(pLiteral->getValue(),pLiteral->getType()->isSignedIntegerType());
+}
+
+UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     unaryStmtGen->value = pNum.toString(10,isSignedInt);
     unaryStmtGen-> nestedStmt = nullptr;
@@ -197,28 +234,35 @@ UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr) {
     return  unaryStmtGen;
 }
 
-UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr, int shift) {
-    return getEmptyUnaryGen(pExpr,shift + 1);
+UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr) {
+    return getEmptyUnaryGen(pExpr);
 }
 
-UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr, int shift) {
+UnaryStmtGen *getEmptyUnaryGen() {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     unaryStmtGen->value = "";
-    unaryStmtGen-> nestedStmt =  getStmtGen(pExpr->child_begin(), shift + 1);
+    unaryStmtGen-> nestedStmt = nullptr;
+    return  unaryStmtGen;
+}
+
+UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr) {
+    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+    unaryStmtGen->value = "";
+    unaryStmtGen-> nestedStmt =  getStmtGen(*pExpr->child_begin());
     return  unaryStmtGen;
 
 }
-UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator,  int shift) {
+UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     std::string opName = pOperator->getOpcodeStr(pOperator->getOpcode()).str();
-    if (opName.compare("-") == 0)
+    if (opName == "-")
     {
         unaryStmtGen->postfix = ".neg";
     }
-    unaryStmtGen-> nestedStmt =  getStmtGen(pOperator->child_begin(), shift + 1);
+    unaryStmtGen-> nestedStmt =  getStmtGen(*pOperator->child_begin());
     return  unaryStmtGen;
 }
-BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift) {
+BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator) {
     BinaryStmtGen* binaryStmtGen = new BinaryStmtGen;
     std::string opName = pOperator->getOpcodeStr().str();
     if (opName.compare("=") == 0)
@@ -253,7 +297,7 @@ BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift) {
     {
         binaryStmtGen->value = ".neq ";
     }
-    else if (opName.compare("<") == 0)
+    else if (opName == "<")
     {
         binaryStmtGen->value = ".less ";
     }
@@ -273,8 +317,8 @@ BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator, int shift) {
     {
         binaryStmtGen->value = "";
     }
-    binaryStmtGen -> left = getStmtGen(pOperator->child_begin(), shift + 1);
-    binaryStmtGen -> right = getStmtGen(++pOperator->child_begin(), shift + 1);
+    binaryStmtGen -> left = getStmtGen(*pOperator->child_begin());
+    binaryStmtGen -> right = getStmtGen(*(++pOperator->child_begin()));
 
 
     return binaryStmtGen;

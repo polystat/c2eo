@@ -35,6 +35,7 @@
 # (complexReturnC args).main
 # (typeCastingC args).main
 # (functionPointersC args).main
+# (whileC args).main
 [args...] > app
 
   seq > @
@@ -71,10 +72,6 @@
     printf "ifC\n"
     (ifC args).main
     printf "\n"
-
-    printf "whileC\n"
-    (whileC args).main
-    printf "\n\n"
 
     printf "dowhileC\n"
     (dowhileC args).main

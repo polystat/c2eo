@@ -3,12 +3,14 @@
 +alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_bool
 +alias c2eo.ctypes.c_char
++alias c2eo.ctypes.c_float32
 +alias c2eo.ctypes.c_float64
 +alias c2eo.ctypes.c_int16
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_int64
 +alias c2eo.ctypes.c_uint16
 +alias c2eo.ctypes.c_uint32
++alias c2eo.ctypes.c_uint64
 
 [] > globalC
 
@@ -19,48 +21,58 @@
 
   c_bool > b_1
   c_char > c_1
+  c_float32 > f32_1
   c_float64 > f64_1
   c_int16 > i16_1
   c_int32 > i32_1
   c_int64 > i64_1
   c_uint16 > ui16_1
   c_uint32 > ui32_1
+  c_uint64 > ui64_1
 
   seq > non_initialized
 
     b_1.write 0
     c_1.write 'a'
+    f32_1.write 3.1415
     f64_1.write 3.1415
     i16_1.write 127
     i32_1.write 255
     i64_1.write 511
     ui16_1.write 352
     ui32_1.write 231
+    ui64_1.write 2342
 
     printf "b_1 = %d\n" (b_1.as-int)
     printf "c_1 = %c\n" c_1
+    printf "f32_1 = %f\n" f32_1
     printf "f64_1 = %f\n" f64_1
     printf "i16_1 = %d\n" i16_1
     printf "i32_1 = %d\n" i32_1
     printf "i64_1 = %d\n" i64_1
     printf "ui16_1 = %d\n" ui16_1
     printf "ui32_1 = %d\n" ui32_1
+    printf "ui64_1 = %d\n" ui64_1
 
   c_bool 100 > b_2
   c_char 'b' > c_2
+  c_float32 3.1415 > f32_2
   c_float64 3.1415 > f64_2
   c_int16 128 > i16_2
   c_int32 256 > i32_2
   c_int64 512 > i64_2
   c_uint16 323 > ui16_2
   c_uint32 123 > ui32_2
+  c_uint64 253 > ui64_2
 
   seq > initialized
     printf "b_2 = %d\n" (b_2.as-int)
     printf "c_2 = %c\n" c_2
+    printf "f32_2 = %f\n" f32_2
     printf "f64_2 = %f\n" f64_2
     printf "i16_2 = %d\n" i16_2
     printf "i32_2 = %d\n" i32_2
     printf "i64_2 = %d\n" i64_2
     printf "ui16_2 = %d\n" ui16_2
     printf "ui32_2 = %d\n" ui32_2
+    printf "ui64_2 = %d\n" ui64_2

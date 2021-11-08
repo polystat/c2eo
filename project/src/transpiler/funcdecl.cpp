@@ -5,7 +5,6 @@
 #include "generator.h"
 
 
-
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров описания функции
 void getFuncDeclParameters(const FunctionDecl *FD) {
@@ -137,7 +136,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
     // Формируется глобальная функция со всеми атрибутами
 
     if(isGlobal) {
-        GlobalFuncGen* func = new GlobalFuncGen;
+        FuncGen* func = new FuncGen;
         if(funcName == "main") {
             func->name = "main";
         } else {
@@ -150,7 +149,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
         Stmt::StmtClass stmtClass = body->getStmtClass();
         if(stmtClass == Stmt::CompoundStmtClass) { // Нужно разобраться с именами перчислимых типов
             llvm::outs() << "   Start getCompoundStmtGenerator\n";
-            func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),&FD->getASTContext(), 1,true);
+            func-> body = getCompoundStmtGenerator(static_cast<CompoundStmt*>(body),&FD->getASTContext(), true);
         }
 
         func->globalSpaceGenPtr->Add(func);
