@@ -186,5 +186,4 @@ void IfStmtGen::Generate(std::ostream &out) {
 }
 
 IfStmtGen::~IfStmtGen() {
-   MultiLineStmtGen::~MultiLineStmtGen();
 }
