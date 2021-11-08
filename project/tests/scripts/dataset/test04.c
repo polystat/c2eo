@@ -1,11 +1,11 @@
 struct{
     char a;
     int b:5, c:11,:0, d:8;
-    struct { int ee:8; } e;
+    struct we{ int ee:8; } e;
     union {struct {
             int alltypes;
         } n;}q;
-}a;
+}a, b;
 union {
     struct {
         int alltypes;
