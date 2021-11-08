@@ -52,6 +52,7 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
             VG->name = "f_" + it->getNameAsString();
         else
             VG->name = "field" + std::to_string(RG->fields.size());
+        //VG->name += "_" + std::to_string(it->getFieldIndex());
         VG->type = "c_" + qt.getAsString() + std::to_string(typeInfo.Width);
         VG->value = "0";
         if (it->isBitField())

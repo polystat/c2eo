@@ -35,7 +35,8 @@ struct AbstractGen {
         GK_LastMultilineStmtGen,
         GK_LastStmtGen,
         GK_SpaceGen,
-        GK_SourceGen
+        GK_SourceGen,
+        GK_RecordDecl
     };
 
     const GenKind Kind;
@@ -88,9 +89,13 @@ struct RecordGen: AbstractGen {
     std::string name;
     std::string type;
     std::vector<VarGen*> fields;
-    size_t count = 0;
-    virtual void Generate(std::string &str);
+    //size_t count = 0;
+    virtual void Generate(std::ostream &out);
 //    virtual void GenValue(std::string &str);
+    RecordGen(): AbstractGen(GenKind::GK_RecordDecl) {}
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_RecordDecl;
+    }
 };
 
 

@@ -15,15 +15,13 @@
 SpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
 SpaceGen* AbstractGen::staticSpaceGenPtr = nullptr;
 std::string AbstractGen::filename;
-std::map<uint64_t ,std::string> AbstractGen::identifiers = std::map<uint64_t,std::string>();
+std::map <uint64_t, std::string> AbstractGen::identifiers = std::map<uint64_t, std::string>();
 int AbstractGen::shift = 0;
 
 SourceGen::~SourceGen() {
     delete glob;
     delete stat;
 }
-
-
 
 
 //--------------------------------------------------------------------------------------------------
@@ -35,14 +33,14 @@ void VarGen::Generate(std::ostream &out) {
 /// shift is indentation level. shift 2 is equal to 4 spaces
 std::string StmtGen::getIndentSpaces() {
 
-    return std::string(shift*2,' ');
+    return std::string(shift * 2, ' ');
 }
 
 //--------------------------------------------------------------------------------------------------
-void MultiLineStmtGen::Add(StmtGen *stmt) {
+void MultiLineStmtGen::Add(StmtGen* stmt) {
     UnaryStmtGen* st = llvm::dyn_cast<UnaryStmtGen>(stmt);
     //TODO Вынести Empty как отдельный тип или метод
-    if (st && st->op == "" && st->value == "" && st->nestedStmt== nullptr)
+    if (st && st->op == "" && st->value == "" && st->nestedStmt == nullptr)
         return;
     statements.push_back(stmt);
 }
@@ -54,8 +52,7 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
         if (!llvm::isa<MultiLineStmtGen>(statements[i]))
             out << getIndentSpaces();
         out << statements[i];
-        if (i+1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i]))
-        {
+        if (i + 1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i])) {
             out << "\n";
             lines++;
         }
@@ -87,10 +84,10 @@ void CompoundStmtGen::Generate(std::ostream &out) {
 void FuncGen::Generate(std::ostream &out) {
     // Первоначально осуществляется генерация списка атрибутов
     out << "[";
-    if(name == "main") {
+    if (name == "main") {
         out << "arg] > main\n";
     } else {
-        for(const auto& paramName: paramNames) {
+        for (const auto &paramName: paramNames) {
             out << paramName;
             out << ", ";
         }
@@ -104,7 +101,7 @@ void FuncGen::Generate(std::ostream &out) {
     out << body;
     AbstractGen::shift--;
     out << "\n";
-    if(name == "main") {
+    if (name == "main") {
         out << "main arg > @\n";
     }
 }
@@ -113,10 +110,10 @@ void BinaryStmtGen::Generate(std::ostream &out) {
     //str << value +"(";
     bool leftLinear = isLeftLinear(left);
     if (!leftLinear)
-        out <<"(";
+        out << "(";
     out << left;
     if (!leftLinear)
-        out <<")";
+        out << ")";
     out << value + "(";
     out << right;
     out << ")";
@@ -128,8 +125,8 @@ BinaryStmtGen::~BinaryStmtGen() {
     delete BinaryStmtGen::right;
 }
 
-bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
-    if  (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen))
+bool BinaryStmtGen::isLeftLinear(StmtGen* pGen) {
+    if (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen))
         return false;
     auto* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
     if (unaryStmtGen->nestedStmt != nullptr)
@@ -158,7 +155,7 @@ void UnaryStmtGen::Generate(std::ostream &out) {
 void SpaceGen::Generate(std::ostream &out) {
     // Формирование списка глобальных объектов
     //
-    for(auto globalObject: objects) {
+    for (auto globalObject: objects) {
         out << globalObject;
         out << "\n";
     }
@@ -176,7 +173,6 @@ SpaceGen::~SpaceGen() {
 }
 
 
-
 void IfStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
     out << "if.\n";
@@ -187,15 +183,24 @@ void IfStmtGen::Generate(std::ostream &out) {
 
 IfStmtGen::~IfStmtGen() {
 }
+
 //--------------------------------------------------------------------------------------------------
-void RecordGen::Generate(std::string &str) {
-    str = "[] > " + name;
-    str += "\n  ";
-    str += "\"" + type + "\" > type";
-    for (VarGen* vg : fields){
-        str += "\n  ";
-        std::string field;
-        vg->Generate(field);
-        str += field;
+void RecordGen::Generate(std::ostream &out) {
+    out << "[";
+    if (!fields.empty())
+        out << fields[0]->name << "_init";
+    for (size_t i = 1; i < fields.size(); i++)
+        out << " " << fields[i]->name << "_init";
+    out << "] > " << name;
+    out << "\n  ";
+    out << "\"" << type << "\" > type\n";
+    for (VarGen* vg: fields) {
+        out << "\n  " << vg->type << " "<< vg->name << "_init > " << vg->name;
     }
+    if (!fields.empty())
+        out << "\n";
+    out << "\n  " << "[value] > write\n" << "    seq > @";
+    for (VarGen* vg: fields)
+        out << "\n      ^." << vg->name << ".write (value." << vg->name << ")";
+    out << "\n      TRUE\n";
 }
