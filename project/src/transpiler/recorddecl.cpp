@@ -25,9 +25,11 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
         RG->type = "struct";
     }
 
-    RG->name = "anonymous";
+    //RG->name = "anonymous";
     if (RD->hasNameForLinkage())
         RG->name = RD->getNameAsString();
+    else
+        RG->name = RG->type + std::to_string(reinterpret_cast<uint64_t>(RD));
 #ifdef RECORD_DECL_INFO
     llvm::outs() << "  name - " << RG->name << "\n";
 #endif

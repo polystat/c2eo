@@ -4,17 +4,17 @@
 #include "vardecl.h"
 #include "generator.h"
 
-std::string getIntTypeByVar(const VarDecl *VD);
-size_t split(const std::string &txt, std::vector<std::string> &strs, char ch);
+std::string getIntTypeByVar(const VarDecl* VD);
+
 // Определение и тестовый вывод основных параметров описания переменных
-void getVarDeclParameters(const VarDecl *VD) {
+void getVarDeclParameters(const VarDecl* VD) {
     // Имя переменной
     auto varName = VD->getNameAsString();
     auto varID = reinterpret_cast<uint64_t>(VD);
 #ifdef VAR_DECL_INFO
     llvm::outs() << "Name of Variable: " << varName << "\n";
     llvm::outs() << "  Var Kind Name: " << VD->getDeclKindName() << "\n";
-    llvm::outs() << "  Var ID: " << varID<< "\n";
+    llvm::outs() << "  Var ID: " << varID << "\n";
 #endif
     TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
     auto typeSize = typeInfo.Width;
@@ -27,7 +27,7 @@ void getVarDeclParameters(const VarDecl *VD) {
     ///StringRef varTypeName(typeName);
     ////auto qualType = VD->getType();
     QualType qualType = VD->getType();
-    const IdentifierInfo *typeId = qualType.getBaseTypeIdentifier();
+    const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
     ////varTypeName = typeId->getName();
     ////llvm::outs() << "  Type is " << varTypeName << "\n";
 #ifdef VAR_DECL_INFO
@@ -83,11 +83,26 @@ void getVarDeclParameters(const VarDecl *VD) {
 #endif
         //TODO доработать этот код для разных размеров
         strType = getIntTypeByVar(VD);
-    } else{
-        // todo: ???
-        std::vector<std::string> v;
-        split(qualType.getAsString(), v, ' ' );
-        strType = *(v.end()-1);
+    } else if (typePtr->isUnionType()) {
+        RecordDecl* RD = typePtr->getAsRecordDecl();
+        if (RD->hasNameForLinkage())
+            strType = RD->getNameAsString();
+        else {
+            strType = "union" + std::to_string(reinterpret_cast<uint64_t>(RD));
+#ifdef VAR_DECL_INFO
+            llvm::outs() << "  " << strType << "\n";
+#endif
+        }
+    } else if (typePtr->isStructureType()) {
+        RecordDecl* RD = typePtr->getAsRecordDecl();
+        if (RD->hasNameForLinkage())
+            strType = RD->getNameAsString();
+        else {
+            strType = "struct" + std::to_string(reinterpret_cast<uint64_t>(RD));
+#ifdef VAR_DECL_INFO
+            llvm::outs() << "  " << strType << "\n";
+#endif
+        }
     }
 #ifdef VAR_DECL_INFO
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
@@ -201,53 +216,51 @@ void getVarDeclParameters(const VarDecl *VD) {
     // Проверка, что переменная является глобальной
     if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
         // Формируется глобальная переменная со всеми атрибутами
-        VarGen *var = new VarGen;
+        VarGen* var = new VarGen;
 
         var->name = "g_" + varName;
         var->type = strType;
         var->value = strValue;
-        var->identifiers[varID] = "^."+var->name;
+        var->identifiers[varID] = "^." + var->name;
         var->globalSpaceGenPtr->Add(var);
-    } else if (globalStorage && !extStorage)
-    {
+    } else if (globalStorage && !extStorage) {
         VarGen* var = new VarGen;
         var->name = "s_" + varName;
         var->type = strType;
-        var->value  = strValue;
-        var->identifiers[varID] = "^."+AbstractGen::filename+"."+var->name;
+        var->value = strValue;
+        var->identifiers[varID] = "^." + AbstractGen::filename + "." + var->name;
         var->staticSpaceGenPtr->Add(var);
     }
 
- /*
-    // Проверка, что переменная является статической.
-    if (globalStorage && !extStorage && !staticLocal)
-    {
-        // Формируется глобальная переменная со всеми атрибутами
-        VarGen* var = new VarGen;
+    /*
+       // Проверка, что переменная является статической.
+       if (globalStorage && !extStorage && !staticLocal)
+       {
+           // Формируется глобальная переменная со всеми атрибутами
+           VarGen* var = new VarGen;
 
-        var->name = "g_" + varName;
-        var->type = strType;
-        var->value  = strValue;
-        var->globalSpaceGenPtr->Add(var);
-    }
+           var->name = "g_" + varName;
+           var->type = strType;
+           var->value  = strValue;
+           var->globalSpaceGenPtr->Add(var);
+       }
 
-    // Проверка, что переменная является статической.
-     else if (staticLocal)
-    {
-        // Формируется глобальная переменная со всеми атрибутами
-        StaticVarGen* var = new StaticVarGen;
+       // Проверка, что переменная является статической.
+        else if (staticLocal)
+       {
+           // Формируется глобальная переменная со всеми атрибутами
+           StaticVarGen* var = new StaticVarGen;
 
-        var->name = "s_" + varName;
-        var->type = strType;
-        var->value  = strValue;
-        var->globalSpaceGenPtr->Add(var);
-    } */
+           var->name = "s_" + varName;
+           var->type = strType;
+           var->value  = strValue;
+           var->globalSpaceGenPtr->Add(var);
+       } */
 
     //VD->dump();
 }
 
-std::string getIntTypeByVar(const VarDecl *VD)
-{
+std::string getIntTypeByVar(const VarDecl* VD) {
     auto qualType = VD->getType();      // квалифицированный тип (QualType)
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     bool isSigned = qualType->isSignedIntegerType();
@@ -262,7 +275,7 @@ std::string getIntTypeByVar(const VarDecl *VD)
 
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
-void initValueAnalysis(const VarDecl *VD, std::string &str) {
+void initValueAnalysis(const VarDecl* VD, std::string &str) {
     // Анализ типа переменной для корректного преобразования в тип Eolang
     auto qualType = VD->getType();      // квалифицированный тип (QualType)
     auto typePtr = qualType.getTypePtr();   // указатель на тип (Type)
@@ -271,24 +284,24 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     auto size = typeInfo.Width;
     //auto align = typeInfo.Align;  // не нужен
-    APValue *initVal = VD->evaluateValue();
-    if(initVal != nullptr) {
+    APValue* initVal = VD->evaluateValue();
+    if (initVal != nullptr) {
         llvm::outs() << "    Initial Value = ";
-        if(initVal->isInt()) {
+        if (initVal->isInt()) {
             auto intValue = initVal->getInt().getExtValue();
             //llvm::outs() << intValue;
-            if(typePtr->isCharType()) {
+            if (typePtr->isCharType()) {
                 str = "'";
                 str += char(intValue);
                 str += "'";
             } else {
                 str = std::to_string(intValue); // просто целое число
             }
-        } else if(initVal->isFloat() && (size == 64)) {
+        } else if (initVal->isFloat() && (size == 64)) {
             auto floatValue = initVal->getFloat().convertToDouble();
             //llvm::outs() << floatValue;
             str = std::to_string(floatValue);
-        } else if(initVal->isFloat() && (size == 32)) {
+        } else if (initVal->isFloat() && (size == 32)) {
             auto floatValue = initVal->getFloat().convertToFloat();
             //llvm::outs() << floatValue;
             str = std::to_string(floatValue);
@@ -301,7 +314,7 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
 
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
-void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
+void initZeroValueAnalysis(const VarDecl* VD, std::string &str) {
     // Анализ типа переменной для корректного преобразования в тип Eolang
     auto qualType = VD->getType();      // квалифицированный тип (QualType)
     auto typePtr = qualType.getTypePtr();   // указатель на тип (Type)
@@ -309,34 +322,14 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
     // Анализ размера переменной для определения разновидности данных
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     auto size = typeInfo.Width;
-    if(typePtr->isCharType()) {
+    if (typePtr->isCharType()) {
         str = "'\\0'";
-    } else if (typePtr->isIntegerType() || typePtr->isBooleanType()){
+    } else if (typePtr->isIntegerType() || typePtr->isBooleanType()) {
         str = "0";
-    } else if(typePtr->isRealFloatingType()) {
+    } else if (typePtr->isRealFloatingType()) {
         str = "0.0";
     } else {
         str = "";
     }
 }
 
-
-size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
-{
-    size_t pos = txt.find( ch );
-    size_t initialPos = 0;
-    strs.clear();
-
-    // Decompose statement
-    while( pos != std::string::npos ) {
-        strs.push_back( txt.substr( initialPos, pos - initialPos ) );
-        initialPos = pos + 1;
-
-        pos = txt.find( ch, initialPos );
-    }
-
-    // Add the last one
-    strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
-
-    return strs.size();
-}
