@@ -12,24 +12,27 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
     llvm::outs() << "\x1B[33m";
 #endif
 
-    if (RD->isUnion()){
+    if (RD->isUnion()) {
 #ifdef RECORD_DECL_INFO
         llvm::outs() << "Union \n";
 #endif
         RG->type = "union";
+        RG->name = "un_";
     }
     if (RD->isStruct()) {
 #ifdef RECORD_DECL_INFO
         llvm::outs() << "Struct \n";
 #endif
         RG->type = "struct";
+        RG->name = "st_";
     }
 
     //RG->name = "anonymous";
+
     if (RD->hasNameForLinkage())
-        RG->name = RD->getNameAsString();
+        RG->name += RD->getNameAsString();
     else
-        RG->name = RG->type + std::to_string(reinterpret_cast<uint64_t>(RD));
+        RG->name += std::to_string(reinterpret_cast<uint64_t>(RD));
 #ifdef RECORD_DECL_INFO
     llvm::outs() << "  name - " << RG->name << "\n";
 #endif
@@ -46,11 +49,13 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
         const clang::QualType qt = it->getType();
         VarGen* VG = new VarGen;
         if (!it->isUnnamedBitfield())
-            VG->name = it->getNameAsString();
+            VG->name = "f_" + it->getNameAsString();
         else
-            VG->name = "field"+std::to_string(RG->fields.size());
+            VG->name = "field" + std::to_string(RG->fields.size());
         VG->type = "c_" + qt.getAsString() + std::to_string(typeInfo.Width);
         VG->value = "0";
+        if (it->isBitField())
+            VG->value = std::to_string(it->getBitWidthValue(it->getASTContext()));
         RG->fields.push_back(VG);
 
 #ifdef RECORD_DECL_INFO
@@ -64,6 +69,9 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
         llvm::outs() << "      size - " << typeInfo.Width << "\n";
         llvm::outs() << "      align - " << typeInfo.Align << "\n";
         llvm::outs() << "      type - " << qt.getAsString() << "\n";
+        if (it->isBitField()) {
+            llvm::outs() << "      bit field - " << VG->value << "\n";
+        }
 #endif
     }
     RG->globalSpaceGenPtr->Add(RG);

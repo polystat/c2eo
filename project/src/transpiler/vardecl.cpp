@@ -88,7 +88,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         if (RD->hasNameForLinkage())
             strType = RD->getNameAsString();
         else {
-            strType = "union" + std::to_string(reinterpret_cast<uint64_t>(RD));
+            strType = "un_" + std::to_string(reinterpret_cast<uint64_t>(RD));
 #ifdef VAR_DECL_INFO
             llvm::outs() << "  " << strType << "\n";
 #endif
@@ -98,7 +98,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         if (RD->hasNameForLinkage())
             strType = RD->getNameAsString();
         else {
-            strType = "struct" + std::to_string(reinterpret_cast<uint64_t>(RD));
+            strType = "st_" + std::to_string(reinterpret_cast<uint64_t>(RD));
 #ifdef VAR_DECL_INFO
             llvm::outs() << "  " << strType << "\n";
 #endif
@@ -265,6 +265,38 @@ std::string getIntTypeByVar(const VarDecl* VD) {
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
     bool isSigned = qualType->isSignedIntegerType();
     auto size = typeInfo.Width;
+    /*
+    std::string result = "";
+    //TODO обработка беззнаковых, когда они появятся.
+    if (isSigned)
+    {
+        switch (size)
+        {
+            case 16:
+                result = "c_int16";
+                break;
+            case 32:
+                result = "c_int32";
+                break;
+            case 64:
+                result = "c_int64";
+                break;
+        }
+    } else
+    {
+        switch (size)
+        {
+            case 16:
+                result = "c_int16";
+                break;
+            case 32:
+                result = "c_int32";
+                break;
+            case 64:
+                result = "c_int64";
+                break;
+        }
+    }*/
     std::string result = "c_";
     //TODO обработка беззнаковых, когда они появятся. (нет только c_uint64)
     if (!isSigned)
