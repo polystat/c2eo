@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # Проверка числа аргументов командной строки
     argc = len(sys.argv)
     argv = sys.argv
-    # При одном аргументе запускается задается одна конфигурацич
+    # При одном аргументе запускается задается одна конфигурация
     # из каталога configuration
     if argc == 2:
         print(f'Config is in directory {argv[1]}')
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         print(f'1) Numer of files =  {argc} Incorrect')
         exit(1)
 
-    # Проверка, что данный каталог существует
+    # Проверка, что данный конфигурационный файл существует
     configFileName = tmpDir + '/configuration/' + argv[1]
     if os.path.isfile(configFileName):
         print(f'Configuration  file is: {configFileName}')
@@ -48,6 +48,7 @@ if __name__ == '__main__':
     passCount = 0
     testCount = 0
     testedDirName = configFile.readline()[0:-1]
+
     while testedDirName:
         # Проверка на существование данного каталога
         testedDir = tmpDir + '/tests/' + testedDirName
