@@ -1,0 +1,36 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[initial] > c_uint32
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
+
+  [value] > write
+    0 > min
+    4294967295 > max
+    4294967296 > range
+
+    if. > @
+      value.greater max
+      ^.mem.write (value.mod range)
+      if.
+        value.less min
+        ^.mem.write (range.add (value.mod range))
+        ^.mem.write value
+
+  "uint32" > type
+
+  4 > bytes
+
+  0 > min
+
+  4294967295 > max

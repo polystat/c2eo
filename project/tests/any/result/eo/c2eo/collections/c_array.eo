@@ -1,0 +1,27 @@
++package c2eo.collections
+
++alias org.eolang.txt.sprintf
+
++alias c2eo.collections.array
++alias diagnostics.assert
+
+[size elements...] > c_array
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      and.
+        assert (size.less 1) (sprintf "Array size cannot be less than 1. Your size: %d" size)
+        assert (elements.length.leq size) (sprintf "The number of elements is greater than the size of the array. Your size: %d size. Your array size %d" size (elements.length))
+        mem.write elements
+      mem
+      seq
+    mem
+
+  [index element] > write
+    if. > @
+      assert (^.size.less 1) (sprintf "Index out of range. Your index: %d" (^.size))
+      (^.mem.get index).write element
+      seq

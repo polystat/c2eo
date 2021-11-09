@@ -1,0 +1,25 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[initial] > c_int64
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
+
+  "int64" > type
+
+  8 > bytes
+
+  -9223372036854775808 > min
+
+  9223372036854775807 > max

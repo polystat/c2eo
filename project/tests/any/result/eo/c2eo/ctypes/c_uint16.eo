@@ -1,0 +1,36 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[initial] > c_uint16
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      write initial
+      mem
+      seq
+    mem
+
+  [value] > write
+    0 > min
+    65535 > max
+    65536 > range
+
+    if. > @
+      value.greater max
+      ^.mem.write (value.mod range)
+      if.
+        value.less min
+        ^.mem.write (range.add (value.mod range))
+        ^.mem.write value
+
+  "uint16" > type
+
+  2 > bytes
+
+  0 > min
+
+  65535 > max
