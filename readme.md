@@ -3,7 +3,7 @@
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
 *Other languages: [Russian](readme.ru.md)*
 If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
-we will fix it.
+we will fix.
 
 # Getting started guide
 
@@ -25,7 +25,8 @@ $ sudo apt install wget tar git cmake gcc g++ ninja-build python3
 
 ## Step 2. Install LLVM + CLANG
 
-Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then 
+Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then
+
 ```bash
 $ tar -xvf llvmorg-12.0.1.tar.gz
 ```
@@ -60,8 +61,7 @@ $ git clone https://github.com/polystat/c2eo.git
 
 > IMPORTANT. Every time the transpiler code changes, you need to repeat this step
 
-Default path to llvm-clang is `~/llvm-clang` . If your llvm-clang is in different dir, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then
-
+Default path to `llvm-clang` is `~/llvm-clang` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then
 
 ```bash
 $ cd ./c2eo/project/build
@@ -71,6 +71,7 @@ $ make # or $ cmake --build
 
 ## Step 5. Run transpilation
 > Use `--` at the end of command below to skip all errors:
+
 ```bash
 $ cd ../bin
 $ python3 launcher.py <file-of-c-program> # or $ ./launcher.py <file-of-c-program>
@@ -114,10 +115,10 @@ Based on intermediate files located in the `project/assembly` directory, it also
 ---
 </details>
 
-## Step 6. Run eo generated files
+## Step 6. Run generated project
 
-Now the generated eo-project in this [dir](result/eo/c2eo/src/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start) . 
-Github page of [EO project]((https://github.com/cqfn/eo)) when you can learn about EO language.
+Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start) . 
+Github page of [EO project]((https://github.com/cqfn/eo)) where you can learn about EO language.
 
 &nbsp;
 ## Additional step. Tests examples
