@@ -1,8 +1,6 @@
 name: Build C2EO
 
-on:
-  schedule:
-    - cron:  '0 23 * * *'
+on: push
 
 jobs:
   build:
@@ -14,12 +12,14 @@ jobs:
           - { name: "Ubuntu", os: ubuntu-latest, cc: "gcc", cxx: "g++", archiver: "7z a", generators: "Ninja" }
 
     steps:
-    
       - name: Checkout
         uses: actions/checkout@v2
         with:
           path: c2eo
-          
+ 
+      - name: Move c2eo dir
+        run: mv c2eo ~
+
       - name: Check tools version
         run: |
           gcc --version
@@ -38,42 +38,14 @@ jobs:
           path: llvm-clang.tar.gz
           key: ${{ runner.os }}-llvm-clang
 
-      - name: Download LLVM
-        if: steps.cache-llvm.outputs.cache-hit != 'true'
-        uses: Difegue/action-megacmd@master
-        with:
-          args: get https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA .
-
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz > /dev/null
-
-      - name: Delete CMakeLists
-        run: rm c2eo/project/src/transpiler/CMakeLists.txt
-  
-      - name: Cache CMakeLists
-        id: cache-cmakelists
-        uses: actions/cache@v2
-        with:
-          path: c2eo/project/src/transpiler/CMakeLists.txt
-          key: ${{ runner.os }}-cmakelists
-  
-      - name: Download CMakeLists
-        if: steps.cache-cmakelists.outputs.cache-hit != 'true'
-        uses: Difegue/action-megacmd@master
-        with:
-          args: get https://mega.nz/file/BE9W2IqK#3F_s3W_TSnmSDGcPv4zR4X1WeyGFualSodOt1x7RqY0
-      
-      - name: Move CMakeLists
-        if: steps.cache-cmakelists.outputs.cache-hit != 'true'
-        run: |
-          sudo chmod ugo+rwx CMakeLists.txt
-          mv CMakeLists.txt c2eo/project/src/transpiler/
+          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
       
       - name: Build and test c2eo
         run: |
-          cd c2eo/project/build
+          cd ~/c2eo/project/build
           cmake ..
           make
           cd ../tests/scripts
