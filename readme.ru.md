@@ -1,16 +1,14 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" />
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
 Транспилятор C/C++ в [EOLANG](https://www.eolang.org).
-*Другие языки: [English](readme.md)*
+Если что-то пошло не так, [создайте issue](https://github.com/polystat/c2eo/issues),
+мы исправим.
+*Другие языки: [Английский](readme.md)*
 
 # Быстрый старт
 
-Если что-то пошло не так, создайте [issue](https://github.com/polystat/c2eo/issues),
-мы исправим.
-
 ## Шаг 1. ОС и инструменты
-Вам нужна операционная система [Linux](https://www.linux.org/pages/download/) (мы рекомендуем использовать [Ubuntu 20.+ ver.](https://ubuntu.com/download))
-
+Вам нужна операционная система [Linux](https://www.linux.org/pages/download/) ( мы рекомендуем использовать [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
 Инструменты:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
@@ -20,13 +18,12 @@
 [g++](https://pkgs.org/download/g++), [ninja-build](https://ninja-build.org/), [python3.+](https://www.python.org/downloads/)
 
 ```bash
-# Установка инструментов для Ubuntu
-$ sudo apt install wget tar git cmake gcc g++ ninja-build python3
+$ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Установка для Ubuntu
 ```
 
 ## Шаг 2. Установка LLVM + CLANG
 
-Нужно скачать этот [архив](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), затем
+Нужно скачать этот [архив](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), затем выполнить следующую команду
 
 ```bash
 $ tar -xvf llvmorg-12.0.1.tar.gz
@@ -118,8 +115,8 @@ Based on intermediate files located in the `project / assembly` directory, it al
 
 ## Шаг 6. Запуск сгенерированного проекта
 
-Теперь сгенерированный проект находится [dir](result/) . Для запуска этого проекта вам необходим данный [гайд](https://github.com/cqfn/eo#quick-start) . 
-Гитхаб страница [EO project]((https://github.com/cqfn/eo)) где вы можете узнать о языке EO.
+Теперь сгенерированный проект находится [dir](result/). Для запуска этого проекта вам необходим данный [гайд](https://github.com/cqfn/eo#quick-start) . 
+Гитхаб страница [EO project](https://github.com/cqfn/eo) где вы можете узнать о языке EO.
 
 &nbsp;
 ## Дополнительный шаг. Примеры тестов
