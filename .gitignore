@@ -89,3 +89,6 @@ project/tests/scripts/env/*.c
 project/tests/scripts/env/*.txt
 project/tests/scripts/__pycache__/
 *.log
+
+# Compiled c2eo
+project/bin/c2eo
