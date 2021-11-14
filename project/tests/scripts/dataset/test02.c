@@ -1,8 +1,6 @@
-//#include "stdio.h"
-unsigned u1 = 1;
-
-int main() {
-    u1;
-    //printf("%u\n", u1);
-    return 0;
-}
+struct q{
+    struct a{
+        int a, b;
+    } a;
+    int b;
+}d = {{1,2}, 3};

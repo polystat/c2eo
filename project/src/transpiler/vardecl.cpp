@@ -3,7 +3,7 @@
 
 #include "vardecl.h"
 #include "generator.h"
-#include "type.h"
+
 
 std::string getIntTypeByVar(const VarDecl* VD);
 
@@ -54,7 +54,8 @@ void getVarDeclParameters(const VarDecl* VD) {
 #endif
     //auto kind = typePtr->getKind();
 
-    std::string strType = getTypeName(VD);
+    std::string strType = "";
+    getTypeName(VD, strType);
 /*
     if (typePtr->isCharType()) {
 #ifdef VAR_DECL_INFO
@@ -341,6 +342,12 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
         }
         llvm::outs() << str << "\n";
     } else {
+        str = "";
+        for (InitListExpr::iterator it = ((clang::InitListExpr * )(VD->getInit()))->begin();
+             it != ((clang::InitListExpr * )(VD->getInit()))->end(); it++) {
+            if (!str.empty()) str += " ";
+            getValue(*it, str);
+        }
         llvm::outs() << "    no Initial Value\n";
     }
 }
@@ -361,8 +368,66 @@ void initZeroValueAnalysis(const VarDecl* VD, std::string &str) {
         str = "0";
     } else if (typePtr->isRealFloatingType()) {
         str = "0.0";
+    } else if (typePtr->isUnionType() || typePtr->isStructureType()) {
+        const RecordDecl* RD = typePtr->getAsRecordDecl();
+        str = "";
+        for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
+            if (!str.empty()) str += " ";
+            std::string fieldVal = "";
+            initZeroValueAnalysis((const VarDecl*) (*it), fieldVal);
+            str += fieldVal;
+        }
     } else {
         str = "";
     }
+
 }
 
+
+void getTypeName(const ValueDecl* VD, std::string &str) {
+    TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
+    uint64_t typeSize = typeInfo.Width;
+    unsigned fieldAlign = typeInfo.Align;
+    const QualType qualType = VD->getType();
+    const clang::Type* typePtr = qualType.getTypePtr();
+    str = "c_";
+
+    if (typePtr->isBooleanType()) {
+        str += "bool";
+        return;
+    }
+    if (typePtr->isFloatingType()) {
+        str += "float" + std::to_string(typeSize);
+        return;
+    }
+
+    if (!typePtr->isSignedIntegerType())
+        str += "u";
+    if (typePtr->isCharType()) {
+        str += "char";
+        return;
+    }
+    if (typePtr->isIntegerType()) {
+        str += "int" + std::to_string(typeSize);
+        return;
+    }
+
+
+    if (typePtr->isUnionType())
+        str = "un_";
+    if (typePtr->isStructureType())
+        str = "st_";
+    if (typePtr->isUnionType() || typePtr->isStructureType()) {
+        RecordDecl* RD = typePtr->getAsRecordDecl();
+        if (RD->hasNameForLinkage())
+            str += RD->getNameAsString();
+        else
+            str += std::to_string(reinterpret_cast<uint64_t>(RD));
+        return;
+    }
+}
+
+void getValue(const Stmt* stmt, std::string &str) {
+
+    str += "0";
+}

@@ -26,7 +26,6 @@ set(SOURCE_FILES
     analyzers.h
     matchers.h
     generator.h
-    type.h
 
 
     util.h
@@ -40,7 +39,6 @@ set(SOURCE_FILES
     analyzers.cpp
     matchers.cpp
     generator.cpp
-    type.cpp
 
 
     util.cpp)

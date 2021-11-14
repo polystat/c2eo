@@ -5,7 +5,7 @@
 #include "stmt.h"
 #include "generator.h"
 #include "recorddecl.h"
-#include "type.h"
+#include "vardecl.h"
 
 void getRecordDeclSubObjects(const RecordDecl* RD) {
     RecordGen* RG = new RecordGen;
@@ -44,7 +44,8 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
 #endif
 
     for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
-        std::string strType = getTypeName(*it);
+        std::string strType = "";
+        getTypeName(*it, strType);
         VarGen* VG = new VarGen;
         if (!it->isUnnamedBitfield())
             VG->name = "f_" + it->getNameAsString();
