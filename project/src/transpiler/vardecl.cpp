@@ -3,6 +3,7 @@
 
 #include "vardecl.h"
 #include "generator.h"
+#include "type.h"
 
 std::string getIntTypeByVar(const VarDecl* VD);
 
@@ -53,8 +54,8 @@ void getVarDeclParameters(const VarDecl* VD) {
 #endif
     //auto kind = typePtr->getKind();
 
-    std::string strType = "";
-
+    std::string strType = getTypeName(VD);
+/*
     if (typePtr->isCharType()) {
 #ifdef VAR_DECL_INFO
         if (typePtr->isSignedIntegerType()) {
@@ -85,25 +86,25 @@ void getVarDeclParameters(const VarDecl* VD) {
         strType = getIntTypeByVar(VD);
     } else if (typePtr->isUnionType()) {
         RecordDecl* RD = typePtr->getAsRecordDecl();
+        strType = "un_";
         if (RD->hasNameForLinkage())
-            strType = RD->getNameAsString();
-        else {
-            strType = "un_" + std::to_string(reinterpret_cast<uint64_t>(RD));
+            strType += RD->getNameAsString();
+        else
+            strType += std::to_string(reinterpret_cast<uint64_t>(RD));
 #ifdef VAR_DECL_INFO
             llvm::outs() << "  " << strType << "\n";
 #endif
-        }
     } else if (typePtr->isStructureType()) {
         RecordDecl* RD = typePtr->getAsRecordDecl();
+        strType = "st_";
         if (RD->hasNameForLinkage())
-            strType = RD->getNameAsString();
-        else {
-            strType = "st_" + std::to_string(reinterpret_cast<uint64_t>(RD));
+            strType += RD->getNameAsString();
+        else
+            strType += std::to_string(reinterpret_cast<uint64_t>(RD));
 #ifdef VAR_DECL_INFO
             llvm::outs() << "  " << strType << "\n";
 #endif
-        }
-    }
+    }*/
 #ifdef VAR_DECL_INFO
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
 #endif

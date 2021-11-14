@@ -24,9 +24,6 @@ using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
-
-using namespace clang;
-
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый объектов структуры или объединения
 void getRecordDeclSubObjects(const RecordDecl *RD);
