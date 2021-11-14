@@ -368,7 +368,7 @@ void initZeroValueAnalysis(const VarDecl* VD, std::string &str) {
         str = "0";
     } else if (typePtr->isRealFloatingType()) {
         str = "0.0";
-    } else if (typePtr->isUnionType() || typePtr->isStructureType()) {
+    } else if (typePtr->isRecordType()) {
         const RecordDecl* RD = typePtr->getAsRecordDecl();
         str = "";
         for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {

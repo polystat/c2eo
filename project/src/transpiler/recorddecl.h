@@ -18,6 +18,8 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Decl.h"
 
+#include "generator.h"
+
 
 using namespace clang::tooling;
 using namespace llvm;
@@ -27,6 +29,8 @@ using namespace clang::ast_matchers;
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый объектов структуры или объединения
 void getRecordDeclSubObjects(const RecordDecl *RD);
+
+void setSubFields(RecordGen* RG, const RecordDecl* RD);
 
 
 #endif //__RECORDDECL__

@@ -188,19 +188,23 @@ IfStmtGen::~IfStmtGen() {
 void RecordGen::Generate(std::ostream &out) {
     out << "[";
     if (!fields.empty())
-        out << fields[0]->name << "_init";
-    for (size_t i = 1; i < fields.size(); i++)
-        out << " " << fields[i]->name << "_init";
+        out << "field_init_0";
+    for (size_t i = 1; i < count; i++)
+        out << " field_init_" << i;
     out << "] > " << name;
     out << "\n  ";
     out << "\"" << type << "\" > type\n";
-    for (VarGen* vg: fields) {
-        out << "\n  " << vg->type << " "<< vg->name << "_init > " << vg->name;
+    size_t j = 0;
+    for (RecordGen* rg: fields) {
+        out << "\n  " << rg->type << " ";
+        for (size_t i = 0; i < rg->count; i++, j++)
+            out << "field_init_" << j << " ";
+        out << "> " << rg->name;
     }
     if (!fields.empty())
         out << "\n";
     out << "\n  " << "[value] > write\n" << "    seq > @";
-    for (VarGen* vg: fields)
+    for (RecordGen* vg: fields)
         out << "\n      ^." << vg->name << ".write (value." << vg->name << ")";
     out << "\n      TRUE\n";
 }

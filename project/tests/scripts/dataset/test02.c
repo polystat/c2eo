@@ -3,4 +3,9 @@ struct q{
         int a, b;
     } a;
     int b;
-}d = {{1,2}, 3};
+};
+struct q a,b;
+
+int main(){
+    return 0;
+}
