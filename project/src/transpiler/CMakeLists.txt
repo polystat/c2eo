@@ -25,7 +25,8 @@ set(SOURCE_FILES
     stmt.h
     analyzers.h
     matchers.h
-        generator.h
+    generator.h
+
 
     util.h
 
@@ -37,10 +38,10 @@ set(SOURCE_FILES
     stmt.cpp
     analyzers.cpp
     matchers.cpp
-        generator.cpp
+    generator.cpp
 
 
-        util.cpp)
+    util.cpp)
 
 #add_executable(recvistor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})

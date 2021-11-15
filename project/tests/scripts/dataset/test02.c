@@ -1,8 +1,11 @@
-//#include "stdio.h"
-unsigned u1 = 1;
+struct q{
+    struct a{
+        int a, b;
+    } a;
+    int b;
+};
+struct q a,b;
 
-int main() {
-    u1;
-    //printf("%u\n", u1);
+int main(){
     return 0;
 }

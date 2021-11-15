@@ -74,21 +74,14 @@ struct VarGen: AbstractGen {
 };
 
 
-/*//-------------------------------------------------------------------------------------------------
-// Генератор кода для глобальных переменных.
-// Накапливает необходимые значения в соответствующих строках.
-struct FieldGen: VarGen {
-    virtual void Generate(std::string &str);
-//    virtual void GenValue(std::string &str);
-};*/
-
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для структур и объединений.
 // Накапливает необходимые значения в соответствующих строках.
 struct RecordGen: AbstractGen {
     std::string name;
     std::string type;
-    std::vector<VarGen*> fields;
+    std::vector<RecordGen*> fields;
+    size_t count = 0;
     //size_t count = 0;
     virtual void Generate(std::ostream &out);
 //    virtual void GenValue(std::string &str);
