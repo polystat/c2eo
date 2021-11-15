@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.18)
 #set(CMAKE_CXX_COMPILER "${PATH_TO_LLVM_SOURCE}/build/bin/clang")
 
 #  llvm_config
-set(PATH_TO_LLVM_SOURCE "~/llvm-clang/" CACHE PATH [FORCE])
+set(PATH_TO_LLVM_SOURCE "../../../../llvm-clang/" CACHE PATH [FORCE])
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
 
 include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
