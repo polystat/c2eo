@@ -26,10 +26,6 @@ UnaryStmtGen* getFloatingLiteralGen(const FloatingLiteral* pLiteral);
 
 StmtGen* getIfStmtGenerator(const IfStmt* pStmt);
 
-StmtGen *getFuncCallGenerator(const CallExpr *pExpr);
-
-StmtGen *getReturnStmtGenerator(const ReturnStmt *pStmt);
-
 ASTContext* context;
 
 //-------------------------------------------------------------------------------------------------
@@ -180,91 +176,7 @@ StmtGen* getStmtGen(const Stmt* i) {
         const IfStmt* cs = (IfStmt*) i;
         stmtGen = getIfStmtGenerator(cs);
     }
-    else if(stmtClass == Stmt::CallExprClass)
-    {
-        const CallExpr* ep = (CallExpr*)i;
-        stmtGen = getFuncCallGenerator(ep);
-    }
-    else if(stmtClass == Stmt::ReturnStmtClass)
-    {
-        const ReturnStmt* rs = (ReturnStmt*)i;
-        stmtGen = getReturnStmtGenerator(rs);
-    }
     return stmtGen;
-}
-
-//StmtGen *getFuncCallGenerator(const CallExpr *pExpr) {
-//    return nullptr;
-//}
-
-StmtGen *getReturnStmtGenerator(const ReturnStmt *pStmt) {
-    UnaryStmtGen *returnStmt = new UnaryStmtGen;
-    returnStmt->value = "ret_param_xxxx.write ";
-    returnStmt->postfix = "0"; // дефолтовое значение
-//    auto t = getCastGen(pStmt->getRetValue());
-//    llvm::outs() << "!!!!!!!!   " << pStmt->getStmtClassName() << "\n";
-//    llvm::outs() << "!!!!    VALUE : " << t->value << "\n\n";
-
-//    if(pStmt->getRetValue()->getType()->isIntegerType()) {
-        llvm::outs() << "\nCLASS NAME : " << pStmt->getRetValue()->getReferencedDeclOfCallee()->getDeclKindName() << "\n\n";
-//        returnStmt->value += char(val);
-//    }
-    return returnStmt;
-}
-
-StmtGen *getFuncCallGenerator(const CallExpr *pExpr) {
-    auto funcDecl = pExpr->getDirectCallee();
-    UnaryStmtGen *unaryExprStmt = new UnaryStmtGen;
-    unaryExprStmt->value = "^.g_" + funcDecl->getNameAsString();
-    unaryExprStmt->postfix = " (";
-
-    llvm::outs() << "  call function name: " << funcDecl->getNameAsString() << "\n";
-    llvm::outs() << "    parameters amount: " << pExpr->getNumArgs() << " arguments\n";     /// TODO: Понять как вытаскивать значения передаваемых в функцию параметров
-
-    for (auto argument : pExpr->arguments()) {
-        std::string paramDeclClass = argument->getStmtClassName();
-        UnaryStmtGen *gen = (UnaryStmtGen*)getStmtGen(argument);
-
-        if(paramDeclClass.find("ImplicitCastExpr") != std::string::npos) {
-            unaryExprStmt->postfix += gen->nestedStmt->value;
-            unaryExprStmt->postfix += " ";
-        }
-        if(paramDeclClass.find("IntegerLiteral") != std::string::npos ||
-                paramDeclClass.find("FloatingLiteral") != std::string::npos) {
-            unaryExprStmt->postfix += gen->value;
-            unaryExprStmt->postfix += " ";
-        }
-    }
-    unaryExprStmt->postfix.erase(unaryExprStmt->postfix.end() - 1); // убираем лишний пробел
-
-    if (funcDecl->param_empty()) {
-        unaryExprStmt->postfix = "";
-    } else {
-        unaryExprStmt->postfix += ")";
-    }
-
-    if(funcDecl->isNoReturn()) {
-        return unaryExprStmt;
-    } else {
-        //TODO : фозврат значения из функции
-        auto returnType = funcDecl->getReturnType().getTypePtr();
-
-        if(returnType->isIntegerType()) {
-            llvm::outs() << "    returns int\n";
-        }
-        if(returnType->isCharType()) {
-            llvm::outs() << "    returns char\n";
-        }
-        if(returnType->isBooleanType()) {
-            llvm::outs() << "    returns bool\n";
-        }
-        if(returnType->isRealFloatingType()) {
-            llvm::outs() << "    returns real\n";
-        }
-    }
-
-
-    return unaryExprStmt;
 }
 
 StmtGen* getIfStmtGenerator(const IfStmt* pStmt) {

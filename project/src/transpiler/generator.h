@@ -33,7 +33,6 @@ struct AbstractGen {
         GK_CmpStmtGen,
         GK_IfStmtGen,
         GK_LastMultilineStmtGen,
-        GK_ReturnStmtGen,
         GK_LastStmtGen,
         GK_SpaceGen,
         GK_SourceGen,
@@ -148,8 +147,7 @@ struct CompoundStmtGen : public MultiLineStmtGen {
 // Генератор кода для функций.
 // Накапливает необходимые значения в соответствующих строках.
 struct FuncGen: MultiLineStmtGen {
-    std::string name; // имя объекта-функции
-    std::string returnType;
+    std::string name;       // имя объекта-функции
     std::vector<std::string> paramNames;    // список имен параметров (типы не нужны).
     CompoundStmtGen* body = nullptr;
     // Возращаемый параметры передается как дополнительный атрибут с некоторым именем,
