@@ -1,9 +1,9 @@
-// Файл util.h с реализацией вспомогательных утилит
+// Файл util.h с реализацией вспомогатеьлных утилит
 
 #include "util.h"
 
 // Запись строки символов в указанный файл
-void str2file(std::string str, std::string fileName) {
+void str2file(std::string &str, std::string fileName) {
     std::ofstream out;          // поток для записи
     out.open(fileName); // окрываем файл для записи
     if (out.is_open()) {
@@ -13,7 +13,7 @@ void str2file(std::string str, std::string fileName) {
 
 // Чтение из файла в вектор строк
 void file2vector(std::string fileName, std::vector<std::string> &text) {
-    std::ifstream in;          // поток для чтения
+    std::ifstream in;          // поток для xntybz
     in.open(fileName); // окрываем файл для записи
     std::string line;
     if (in.is_open()) {
@@ -26,26 +26,21 @@ void file2vector(std::string fileName, std::vector<std::string> &text) {
 // Формирование строк для файла с глобальными объектами
 // Пока формируется только для одной единицы компиляции
 // В дальнейшем нужно будет собирать множество разных файлов с одинаковыми расширениями.
-void createGlobal(std::vector<std::string> &text, std::string filename) {
+void createGlobal(std::vector<std::string> &text) {
     // Создается заголовок, определяющий глобальный объект
-    text.push_back( R""""(+package c2eo
+    text.push_back(
+        "+package c2eo\n\n"
+        "+alias varint c2eo.varInt\n"
+        "+alias varfloat c2eo.varFloat\n\n"
 
-+alias c2eo.ctypes.c_bool
-+alias c2eo.ctypes.c_char
-+alias c2eo.ctypes.c_float64
-+alias c2eo.ctypes.c_int16
-+alias c2eo.ctypes.c_int32
-+alias c2eo.ctypes.c_int64
-
-[arg] > global
-)""""
+        "[arg] > global\n"
     );
     // Читаются сформированные глобальные объекты
-    file2vector(filename+".glob", text);
+    file2vector("glob.global", text);
     // Формируется начало последовательности инициализаций
-//!    text.push_back("\n  seq > @");
+    text.push_back("\n  seq > @");
     // Читаются инициализации объектов
-//!    file2vector(filename+".glob.seq", text);
+    file2vector("glob.seq", text);
 }
 
 // Запись сформированного файла с глобальными объектами
@@ -57,26 +52,5 @@ void text2file(std::vector<std::string> &text, std::string fileName) {
             out << line << "\n";
         }
     }
-}
-
-void createStatic(std::vector<std::string> &text, std::string filename) {
-    // Создается заголовок, определяющий статический объект
-    text.push_back( R""""(+package c2eo
-
-+alias c2eo.ctypes.c_bool
-+alias c2eo.ctypes.c_char
-+alias c2eo.ctypes.c_float64
-+alias c2eo.ctypes.c_int16
-+alias c2eo.ctypes.c_int32
-+alias c2eo.ctypes.c_int64
-
-[arg] > )""""+filename+ "\n");
-    // Читаются сформированные статические объекты
-    file2vector(filename+".stat", text);
-    // Формируется начало последовательности инициализаций
-//!    text.push_back("\n  seq > @");
-    // Читаются инициализации объектов
-//!    file2vector(filename+".stat.seq", text);
-
 }
 

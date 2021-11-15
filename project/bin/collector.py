@@ -26,12 +26,9 @@ meta = '''+package c2eo.src
 +alias c2eo.ctypes.c_bool
 +alias c2eo.ctypes.c_char
 +alias c2eo.ctypes.c_float64
-+alias c2eo.ctypes.c_float32
 +alias c2eo.ctypes.c_int16
 +alias c2eo.ctypes.c_int32
 +alias c2eo.ctypes.c_int64
-+alias c2eo.ctypes.c_uint16
-+alias c2eo.ctypes.c_uint32
 
 [arg] > global
 
