@@ -231,11 +231,15 @@ StmtGen *getFuncCallGenerator(const CallExpr *pExpr) {
 
     for (auto argument : pExpr->arguments()) {
         std::string paramDeclClass = argument->getStmtClassName();
+        UnaryStmtGen *gen = (UnaryStmtGen*)getStmtGen(argument);
 
         if(paramDeclClass.find("ImplicitCastExpr") != std::string::npos) {
-            UnaryStmtGen *gen = getCastGen((ImplicitCastExpr*)argument);
-
             unaryExprStmt->postfix += gen->nestedStmt->value;
+            unaryExprStmt->postfix += " ";
+        }
+        if(paramDeclClass.find("IntegerLiteral") != std::string::npos ||
+                paramDeclClass.find("FloatingLiteral") != std::string::npos) {
+            unaryExprStmt->postfix += gen->value;
             unaryExprStmt->postfix += " ";
         }
     }
