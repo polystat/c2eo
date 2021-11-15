@@ -1,6 +1,6 @@
 ---
 name: Empty blank
-about: Describe this issue here.
+about: Describe the issue here.
 title: ''
 labels: ''
 assignees: ''
