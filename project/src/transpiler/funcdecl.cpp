@@ -91,15 +91,20 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
     }
 
     // Определение типа возвращаемого значения
+    std::string retType = "";
     QualType returnType = FD->getReturnType();
     auto typePtr = returnType.getTypePtr();   // указатель на тип (Type)
     if(typePtr->isBooleanType()) {
+        retType = "c_bool";
         llvm::outs() << "  Returns bool type\n";
     } else if(typePtr->isCharType()) {
+        retType = "c_char";
         llvm::outs() << "  Returns char type\n";
     } else if (typePtr->isIntegerType()){
+        retType = "c_int32"; //TODO открорректировать для 16, 64
         llvm::outs() << "  Returns integer type\n";
     } else if(typePtr->isRealFloatingType()) {
+        retType = "c_float64";
         llvm::outs() << "  Returns real type\n";
     } else {
         llvm::outs() << "  Returns other type\n";
@@ -141,6 +146,7 @@ void getFuncDeclParameters(const FunctionDecl *FD) {
             func->name = "main";
         } else {
             func->name = "g_" + funcName;
+            func->returnType = retType;
         }
         // Осуществляется перенос имен атрибутов в глобальную функцию
         for(auto paramName: paramNames) {
