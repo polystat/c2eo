@@ -25,7 +25,7 @@ $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation
 Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command
 
 ```bash
-$ tar -xvf llvmorg-12.0.1.tar.gz
+$ tar -xvf llvm-clang.tar.gz
 ```
 
 <details>
