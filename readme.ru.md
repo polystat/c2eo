@@ -26,7 +26,7 @@ $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Устано
 Нужно скачать этот [архив](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), затем выполнить следующую команду
 
 ```bash
-$ tar -xvf llvmorg-12.0.1.tar.gz
+$ tar -xvf llvm-clang.tar.gz
 ```
 
 <details>
@@ -59,7 +59,7 @@ $ git clone https://github.com/polystat/c2eo.git
 
 > ВАЖНО. Каждый раз когда код транспилятора меняется, вам необходимо выполнить этот шаг повторно
 
-По умолчанию путь до `llvm-clang` - это `~/llvm-clang` . Если ваш `llvm-clang` расположен в другом месте, пропишите нужный путь в этой строчке [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Затем
+По умолчанию считается, что ваш `llvm-clang` располагается в одной папке с `c2eo` . Если ваш `llvm-clang` расположен в другом месте, пропишите нужный путь в этой строчке [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Затем
 
 ```bash
 $ cd ./c2eo/project/build
