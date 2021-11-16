@@ -1,11 +1,8 @@
-struct q{
-    struct a{
-        int a, b;
-    } a;
-    int b;
-};
-struct q a,b;
+//#include "stdio.h"
+unsigned u1 = 1;
 
-int main(){
+int main() {
+    u1;
+    //printf("%u\n", u1);
     return 0;
 }

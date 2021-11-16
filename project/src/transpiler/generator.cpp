@@ -87,27 +87,17 @@ void FuncGen::Generate(std::ostream &out) {
     if (name == "main") {
         out << "arg] > main\n";
     } else {
-        int paramCounter = 0;
         for (const auto &paramName: paramNames) {
-            ++paramCounter; // с лишним пробелом в параметрах не компилируется
-            if(paramCounter != paramName.size()) {
-                out << " ";
-            }
-
             out << paramName;
+            out << ", ";
         }
-        out << "] > ";
-//        out << "ret_param_xxxx] > ";
+        out << "ret_param_xxxx] > ";
         out << name;
         out << "\n";
     }
     // Далее идет формирование тела функции
 
     AbstractGen::shift++;
-    if(!returnType.empty()) { // проверка на void
-        out << getIndentSpaces() << returnType << " > ret_param_xxxx";
-        out << "\n";
-    }
     out << body;
     AbstractGen::shift--;
     out << "\n";
@@ -198,23 +188,19 @@ IfStmtGen::~IfStmtGen() {
 void RecordGen::Generate(std::ostream &out) {
     out << "[";
     if (!fields.empty())
-        out << "field_init_0";
-    for (size_t i = 1; i < count; i++)
-        out << " field_init_" << i;
+        out << fields[0]->name << "_init";
+    for (size_t i = 1; i < fields.size(); i++)
+        out << " " << fields[i]->name << "_init";
     out << "] > " << name;
     out << "\n  ";
     out << "\"" << type << "\" > type\n";
-    size_t j = 0;
-    for (RecordGen* rg: fields) {
-        out << "\n  " << rg->type << " ";
-        for (size_t i = 0; i < rg->count; i++, j++)
-            out << "field_init_" << j << " ";
-        out << "> " << rg->name;
+    for (VarGen* vg: fields) {
+        out << "\n  " << vg->type << " "<< vg->name << "_init > " << vg->name;
     }
     if (!fields.empty())
         out << "\n";
     out << "\n  " << "[value] > write\n" << "    seq > @";
-    for (RecordGen* vg: fields)
+    for (VarGen* vg: fields)
         out << "\n      ^." << vg->name << ".write (value." << vg->name << ")";
     out << "\n      TRUE\n";
 }
