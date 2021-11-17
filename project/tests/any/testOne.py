@@ -123,10 +123,10 @@ if __name__ == '__main__':
         exit(-3)
 
     # Сравнение результатов полученных при выполнении программ на C и EO
-    cFile = open(testedDir + '/cResult.txt', "r")
-    eoFile = open(testedDir + '/eoResult.txt', "r")
+    cFile = open(testedDir + '/cResult.txt', 'r')
+    eoFile = open(testedDir + '/eoResult.txt', 'r')
     # Создается файл для формирования результатов сравнения
-    logFile = open(testedDir + '/test.log', "w")
+    logFile = open(testedDir + '/test.log', 'w')
 
     erCount = 0
     cLine = cFile.readline()
@@ -144,19 +144,22 @@ if __name__ == '__main__':
             # Проверка на числа с плавающей точкой и их эквивалентность
             if not (isFloat(cLine[:-1]) and isFloat(eoLine[:-1])):
                 # Констатация различия
-                print(f'  Noequal in line = {iLine}')  #: c({cLine}) != eo({eoLine})')
+                #: c({cLine}) != eo({eoLine})')
+                print(f'  Noequal in line = {iLine}')
                 logFile.write(f'  Noequal in line = {iLine}\n')
                 erCount += 1
             else:  # Числа с плавающей точкой
                 # Получение и сравнение этих чисел с заданной (небольшой) точностью
                 if abs(float(cLine) - float(eoLine)) < 0.0001:
                     # Числа идентичны
-                    print(f'  line = {iLine} is OK')  #: c({cLine}) == eo({eoLine})')
+                    #: c({cLine}) == eo({eoLine})')
+                    print(f'  line = {iLine} is OK')
                     logFile.write(f'  line = {iLine} is OK\n')
                 else:
                     # Числа не совпадают
                     print(f'  Noequal float numbers in line = {iLine}')
-                    logFile.write(f'  Noequal float numbers in line = {iLine}\n')
+                    logFile.write(
+                        f'  Noequal float numbers in line = {iLine}\n')
                     erCount += 1
         else:
             print(f'  line = {iLine} is OK')  #: c({cLine}) == eo({eoLine})')

@@ -16,7 +16,7 @@ def compile_run():
     if os.system(' '.join([path + launcher, f'{path}{filename1}', f'>>{path}{logfile1}', f'2>>{path}{logfile2}'])) != 0:
         return False, 'can not transpile c-code to eo-code'
     # to log
-    print("\nRESULT:")
+    print('\nRESULT:')
     with open(f'{path}{resultDir}/eo/c2eo/src/global.eo', 'r') as glob:
         print(glob.read())
     if os.system(' '.join(
@@ -36,7 +36,7 @@ def generate1(c_types, declaration, names):
     with open(path + filename1, 'w') as fout:
         print(code, file=fout)
     # to log
-    print("\nCODE#1:")
+    print('\nCODE#1:')
     print(code)
 
 
@@ -47,7 +47,7 @@ def generate2(c_types, declaration, names):
     with open(path + filename2, 'w') as fout:
         print(code, file=fout)
     # to log
-    print("\nCODE#2:")
+    print('\nCODE#2:')
     print(code)
 
 
@@ -85,7 +85,7 @@ def compare():
             )
             # to log
             diff = list(diff)
-            print("\nDIFF:")
+            print('\nDIFF:')
             for line in diff:
                 print(line, end='')
             return (len(diff) == 0), 'there are some diffs'
@@ -95,6 +95,7 @@ def showname(name=None):
     sys.stdout.flush()
     print()
     print('#' * 16)
-    print(sys._getframe(1).f_globals['__name__'], sys._getframe(1).f_code.co_name)
+    print(sys._getframe(1).f_globals['__name__'],
+          sys._getframe(1).f_code.co_name)
     if name:
         print(name)

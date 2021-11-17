@@ -42,9 +42,9 @@ if __name__ == '__main__':
         exit(2)
 
     # Открытие конфигурационного файла и взятие из него списка каталогов с тестовыми файлами
-    configFile =  open(configFileName)
+    configFile = open(configFileName)
     print('Test Started')
-    testResults = [] # Информация о результататах
+    testResults = []  # Информация о результататах
     passCount = 0
     testCount = 0
     testedDirName = configFile.readline()[0:-1]
@@ -62,10 +62,12 @@ if __name__ == '__main__':
                 passCount += 1
             else:
                 message = 'FAIL'
-            testResults.append(str(testCount) + ': ' + testedDirName + '  ' + message)
+            testResults.append(str(testCount) + ': ' +
+                               testedDirName + '  ' + message)
         else:
             # Пропуск каталога с информацией о некорректном имени
-            print(f'Line {testCount}: Tested Directory {testedDir} is absent. Test Ignored')
+            print(
+                f'Line {testCount}: Tested Directory {testedDir} is absent. Test Ignored')
         testedDirName = configFile.readline()[0:-1]
 
     # print(testResults)
