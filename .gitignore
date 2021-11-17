@@ -23,10 +23,21 @@
 *.a
 *.lib
 
+#test result scripts
+**/*-eo.c
+**/cResult.txt
+**/eoResult.txt
+
 # Executables
 *.exe
 *.out
 *.app
+project/bin/c2eo
+
+#LLVM directory
+llvm-clang/**
+!llvm-clang/.gitkeep
+
 
 # User-specific stuff:
 **/.vscode/**
@@ -36,6 +47,7 @@
 **/build/**
 !**/build/.gitkeep
 **/src/result/**
+
 *.cmake
 CMakeCache.txt
 Makefile
@@ -80,7 +92,9 @@ fabric.properties
 # EO target directory
 **/target**
 
-global.eo
+# EO project files
+project/**/global.eo
+result/**/global.eo
 *.glob
 *.stat
 
