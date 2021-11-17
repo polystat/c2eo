@@ -24,7 +24,7 @@ if __name__ == '__main__':
     testCount = 0
     passCount = 0
     print('Test Started')
-    testResults = [] # Информация о результататах
+    testResults = []  # Информация о результататах
     for testedFile in testedFileList:
         value = os.system(tmpDir + '/testOne.py ' + testedFile)
         testCount += 1

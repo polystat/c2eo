@@ -10,12 +10,12 @@ import shutil
 # ------------------------------------------------------------------------------
 # Каталог для размещения файлов на EO, полученных в ходе транспиляции и сборки
 # Указан относительно текущего каталога
-resultRelDir = "../../result/eo/c2eo/src/"
+resultRelDir = '../../result/eo/c2eo/src/'
 
 # ------------------------------------------------------------------------------
 # Каталог в котором формируется файл global.eo для последующей пересылки в
 # каталог проекта на EO
-assemblyRelDir = "../assembly/"
+assemblyRelDir = '../assembly/'
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -38,7 +38,8 @@ if __name__ == '__main__':
     # Получение пути работающего скрипта (надеюсь, что данного)
     launcherPath = os.path.realpath(__file__)
     print(f'Launcher Directory is: {launcherPath}')
-    tmpDir = launcherPath if os.path.isdir(launcherPath) else os.path.dirname(launcherPath)
+    tmpDir = launcherPath if os.path.isdir(
+        launcherPath) else os.path.dirname(launcherPath)
     print(f'Tmp Directory is: {tmpDir}')
     # Изменение рабочего каталога
     os.chdir(tmpDir)

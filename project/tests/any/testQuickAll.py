@@ -12,6 +12,7 @@ app = '''[args...] > app
   global args > @
 '''
 
+
 def isFloat(strNum):
     # Проверка на соответствие числу через регулярное выражение
     result = re.fullmatch(r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?', strNum)
@@ -25,6 +26,8 @@ def isFloat(strNum):
 
 # Функция получает предыдущее имя и порождает следующее.
 # Диапазон имен: aaa-zzz
+
+
 def genNextName(lastName):
     # Проверка на стартовое имя
     if (lastName >= 'aaa') and (lastName < 'zzz'):
@@ -42,16 +45,18 @@ def genNextName(lastName):
             tmp_list[2] = chr(ord(tmp_list[2]) + 1)
     else:
         return 'aaa'
-    new_name: str = "".join(tmp_list)
+    new_name: str = ''.join(tmp_list)
     # print('lastName = ', lastName)
     return new_name
 
 # Сравнение результатов полученных при выполнении программ на C и EO
+
+
 def testDataCompare(testedDir):
-    cFile = open(testedDir + '/cResult.txt', "r")
-    eoFile = open(testedDir + '/eoResult.txt', "r")
+    cFile = open(testedDir + '/cResult.txt', 'r')
+    eoFile = open(testedDir + '/eoResult.txt', 'r')
     # Создается файл для формирования результатов сравнения
-    logFile = open(testedDir + '/test.log', "w")
+    logFile = open(testedDir + '/test.log', 'w')
 
     erCount = 0
     cLine = cFile.readline()
@@ -63,19 +68,22 @@ def testDataCompare(testedDir):
             # Проверка на числа с плавающей точкой и их эквивалентность
             if not (isFloat(cLine[:-1]) and isFloat(eoLine[:-1])):
                 # Констатация различия
-                print(f'  Noequal in line = {iLine}')  #: c({cLine}) != eo({eoLine})')
+                #: c({cLine}) != eo({eoLine})')
+                print(f'  Noequal in line = {iLine}')
                 logFile.write(f'  Noequal in line = {iLine}\n')
                 erCount += 1
             else:  # Числа с плавающей точкой
                 # Получение и сравнение этих чисел с заданной (небольшой) точностью
                 if abs(float(cLine) - float(eoLine)) < 0.0001:
                     # Числа идентичны
-                    print(f'  line = {iLine} is OK')  #: c({cLine}) == eo({eoLine})')
+                    #: c({cLine}) == eo({eoLine})')
+                    print(f'  line = {iLine} is OK')
                     logFile.write(f'  line = {iLine} is OK\n')
                 else:
                     # Числа не совпадают
                     print(f'  Noequal float numbers in line = {iLine}')
-                    logFile.write(f'  Noequal float numbers in line = {iLine}\n')
+                    logFile.write(
+                        f'  Noequal float numbers in line = {iLine}\n')
                     erCount += 1
         else:
             print(f'  line = {iLine} is OK')  #: c({cLine}) == eo({eoLine})')
@@ -104,6 +112,7 @@ def testDataCompare(testedDir):
 
     return bool(erCount)
 
+
 if __name__ == '__main__':
     # Фиксация времени начала работы скрипта
     start_time = time.monotonic()
@@ -129,6 +138,10 @@ if __name__ == '__main__':
 
     # Начальная установка генератора алиасов для файла со всеми резульатами программы на C
     cTestAliasName = '000'
+
+    os.chdir('../../bin')
+    os.system('python3 eo_version_update.py') # Update EO version in pom.xml
+    os.chdir('../tests/any')
 
     # Первоначально происходит компиляция и выполнение всех тестов на C
     # с сохранением результатов в локальных файлах.
@@ -188,7 +201,8 @@ if __name__ == '__main__':
         if os.path.exists(os.path.join(globalFileDir, 'global.eo')):
             shutil.copy(os.path.join(globalFileDir, 'global.eo'), testedDir)
         else:
-            print(f'FAIL. File global.eo is absence in {globalFileDir} for test {testedDirName}')
+            print(
+                f'FAIL. File global.eo is absence in {globalFileDir} for test {testedDirName}')
             # Нет смысла продолжать дальше, так как тест не пройдет из-за отсутствия global.eo
             # хотя бы для одного теста. Нужно смотреть ошибку. Она фатальная и убивает быстрый тест
             os.chdir(currentDir)
@@ -199,7 +213,7 @@ if __name__ == '__main__':
     # Формирование в отдельных подкаталогах пакетов с тестовым кодом на EO
     for nameEo in testedDirNameList:
         # Открытие и редактирование очередного файла на EO
-        testedEoFile = open(tmpDir + '/tests/' + nameEo + '/global.eo', "r")
+        testedEoFile = open(tmpDir + '/tests/' + nameEo + '/global.eo', 'r')
         # Чтение и модификация первой строки.
         tmpStr = testedEoFile.readline()
         eoAllCode = tmpStr[:-1] + '.' + nameEo + '\n'
@@ -265,4 +279,3 @@ if __name__ == '__main__':
     end_time: float = time.monotonic()
     delta = timedelta(seconds=end_time - start_time)
     print(f'testQuick execution time is {delta}')
-

@@ -29,4 +29,4 @@ c_out = f'{directory}/c_out.txt'
 c_bin = f'{directory}/a.out'
 launcher = '../../bin/launcher.py'
 full_log = None
-resultDir = "../../../result"
+resultDir = '../../../result'

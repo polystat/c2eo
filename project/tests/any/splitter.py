@@ -6,8 +6,8 @@ import sys
 # Установка комментариев на строки препроцессора и printf
 if __name__ == '__main__':
     argv = sys.argv
-    cFile =  open(argv[1], "r")
-    cEoFile =  open(argv[2], "w")
+    cFile = open(argv[1], 'r')
+    cEoFile = open(argv[2], 'w')
 
     # Получение текущего  рабочего каталога
     currentDir = os.getcwd()

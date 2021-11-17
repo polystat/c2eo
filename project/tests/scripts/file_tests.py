@@ -4,7 +4,7 @@ import fun
 
 
 class FileTests(unittest.TestCase):
-    file_name = ""
+    file_name = ''
 
     def test_file(self):
         fun.showname(self.file_name)
@@ -23,11 +23,11 @@ class FileTests(unittest.TestCase):
         with open(path + filename1, 'w') as fout:
             print(code, file=fout)
         # to log
-        print("\nCODE#1:")
+        print('\nCODE#1:')
         print(code)
         code = code.replace('//', '')
         with open(path + filename2, 'w') as fout:
             print(code, file=fout)
         # to log
-        print("\nCODE#2:")
+        print('\nCODE#2:')
         print(code)

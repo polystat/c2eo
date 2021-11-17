@@ -75,4 +75,3 @@ class BigTests(unittest.TestCase):
         self.assertTrue(res, msg=msg)
         res, msg = fun.compare()
         self.assertTrue(res, msg=msg)
-

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print(cleanDirList)
 
     print('Cleanup Started')
-    testResults = [] # Информация о результататах
+    testResults = []  # Информация о результататах
     for cleanDir in cleanDirList:
         cleanDir = tmpDir + '/tests/' + cleanDir
         # Очистка каталога от ненужных файлов
