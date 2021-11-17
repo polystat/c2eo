@@ -139,6 +139,10 @@ if __name__ == '__main__':
     # Начальная установка генератора алиасов для файла со всеми резульатами программы на C
     cTestAliasName = '000'
 
+    os.chdir('../../bin')
+    os.system('python3 eo_version_update.py') # Update EO version in pom.xml
+    os.chdir('../tests/any')
+
     # Первоначально происходит компиляция и выполнение всех тестов на C
     # с сохранением результатов в локальных файлах.
     testCount = 0  # счетчик тестов
