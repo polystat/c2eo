@@ -24,11 +24,23 @@ Only one test is executed, located in the specified subdirectory.
 
 All tests located in subdirectories of the `test` directory are run. Runs `testOne.py` in a loop to bypass all tests.
 
+### Run all tests faster
+
+`python3 testQuickAll.py`
+
+All tests located in subdirectories of the `test` directory are run. Unlike `testAll.py`, a common package is generated for assembly, which speeds up transpilation from EO to Java.
+
 ### Selectively run tests
 
 `python3 testSelected.py <file-of-configuration>`
 
 The tests located in the specified configuration file in the `configuration` directory are run. The number of configuration files and the number of tests in them can be arbitrary. To bypass the tests specified in the configuration, it runs `testOne.py` in a loop.
+
+### Faster selective test run
+
+`python3 testQuickSelected.py <file-of-configuration>`
+
+The tests located in the specified configuration file in the `configuration` directory are run. The number of configuration files and the number of tests in them can be arbitrary. Unlike `testSelected.py`, a general package is generated for assembly, which speeds up the transpilation from EO to Java.
 
 ### Clearing directories for all tests
 

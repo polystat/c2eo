@@ -1,16 +1,13 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-missing-red.svg)](https://github.com/polystat/c2eo/blob/master/LICENSE.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
-Semantic-preserving translation of C programs to EOLANG programs. *Other languages: [Russian](readme.ru.md)*
+If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
+we will fix. *Other languages: [Russian](readme.ru.md)*
 
 # Getting started guide
 
-Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
-we will fix it.
-
 ## Step 1. OS and tools
-You need a [Linux](https://www.linux.org/pages/download/) operating system (we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download))
-
+You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
 Tools:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
@@ -20,17 +17,15 @@ Tools:
 [g++](https://pkgs.org/download/g++), [ninja-build](https://ninja-build.org/), [python3.+](https://www.python.org/downloads/)
 
 ```bash
-# Installation tools for Ubuntu
-$ sudo apt install wget tar git cmake gcc g++ ninja-build python3
+$ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
 ```
 
 ## Step 2. Install LLVM + CLANG
 
-[Link to the archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA)
+Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command
 
 ```bash
-# After downloading
-$ tar -xvf llvmorg-12.0.1.tar.gz
+$ tar -xvf llvm-clang.tar.gz
 ```
 
 <details>
@@ -63,16 +58,20 @@ $ git clone https://github.com/polystat/c2eo.git
 
 > IMPORTANT. Every time the transpiler code changes, you need to repeat this step
 
-The c2eo transpiler configuration is related to its compilation from source. By placing llvm and clang in `~/llvm-clang`, the `CMakeLists.txt` files used in the `project` and `project/src/transpiler` directories remain unchanged.
-Therefore, to perform compilation, you need to enter `project/build` and execute the command `cmake ..` in it.
-After that, in the same directory, run the project build with the command `make` or` cmake --build. `
+It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then
+
+```bash
+$ cd ./c2eo/project/build
+$ cmake ..
+$ make # or $ cmake --build
+``` 
 
 ## Step 5. Run transpilation
 > Use `--` at the end of command below to skip all errors:
+
 ```bash
-$ cd ./project/bin
-$ python3 launcher.py <file-of-c-program>
-# or $ ./launcher.py <file-of-c-program>
+$ cd ../bin
+$ python3 launcher.py <file-of-c-program> # or $ ./launcher.py <file-of-c-program>
 ```
 
 <details>
@@ -84,7 +83,7 @@ $ python3 launcher.py <file-of-c-program>
 ---
 ## Directory Hierarchy
 
-These files are located in the `project / bin` directory
+These files are located in the `project/bin` directory
 
 &nbsp;
 ## Run scripts
@@ -93,7 +92,7 @@ These files are located in the `project / bin` directory
 
 `python3 launcher.py <file-of-c-program>`
 
-The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result / eo / c2eo / src /` of the project on EO.
+The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result/eo/c2eo/src/` of the project on EO.
 
 &nbsp;
 ## Support scripts and programs
@@ -102,30 +101,31 @@ The `c2eo` transpiler is launched, then the `collector.py` script is launched. A
 
 `c2eo <file-of-c-program> <name>`
 
-Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project / assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
+Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project/assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
 
 ### Generating the global.eo file
 
 `collector`
 
-Based on intermediate files located in the `project / assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
+Based on intermediate files located in the `project/assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
 
 ---
 </details>
 
-## Step 6. Run eo generated files
+## Step 6. Run generated project
 
-Now the generated files in this [dir](result/eo/c2eo/src/)
+Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start) . 
+Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
 
-[There](https://github.com/cqfn/eo) github page of EO project when you can learn about EO language
-
-This [quick start](https://github.com/cqfn/eo#quick-start) for running your first eo project
-
+&nbsp;
 ## Additional step. Tests examples
 ### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
 
 &nbsp;
 # Project structure
+
+<details>
+  <summary><bold>Additional information...</bold></summary>
 
     .
     ├── collection
@@ -236,3 +236,6 @@ If there is a `main` function in one of the compilation units, it is converted t
 In general, the order in which a file with global objects and static objects is assembled is irrelevant.
 
 The presented scheme provides complete autonomy for the formation of the program on EO. The object that launches the application contains only the dateization of the global object. It does not change, remaining constant regardless of the transpiled project.
+
+</details>
+

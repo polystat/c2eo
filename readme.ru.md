@@ -1,17 +1,15 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" />
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-missing-red.svg)](https://github.com/polystat/c2eo/blob/master/LICENSE.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
-This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
-Semantic-preserving translation of C programs to EOLANG programs. *Другие языки*: [English](readme.md)*
+Транспилятор C/C++ в [EOLANG](https://www.eolang.org).
+Если что-то пошло не так, [создайте issue](https://github.com/polystat/c2eo/issues),
+мы исправим.
+*Другие языки: [Английский](readme.md)*
 
-# Getting started guide
+# Быстрый старт
 
-Should work. If it doesn't, [submit an issue](https://github.com/polystat/c2eo/issues),
-we will fix it.
-
-## Step 1. OS and tools
-You need a [Linux](https://www.linux.org/pages/download/) operating system (we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download))
-
-Tools:
+## Шаг 1. ОС и инструменты
+Вам нужна операционная система [Linux](https://www.linux.org/pages/download/) ( мы рекомендуем использовать [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
+Инструменты:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
@@ -20,21 +18,19 @@ Tools:
 [g++](https://pkgs.org/download/g++), [ninja-build](https://ninja-build.org/), [python3.+](https://www.python.org/downloads/)
 
 ```bash
-# Installation tools for Ubuntu
-$ sudo apt install wget tar git cmake gcc g++ ninja-build python3
+$ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Установка для Ubuntu
 ```
 
-## Step 2. Установка LLVM + CLANG
+## Шаг 2. Установка LLVM + CLANG
 
-[Link to the archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA)
+Нужно скачать этот [архив](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), затем выполнить следующую команду
 
 ```bash
-# After downloading
-$ tar -xvf llvmorg-12.0.1.tar.gz
+$ tar -xvf llvm-clang.tar.gz
 ```
 
 <details>
-<summary> Old variant </summary>
+<summary> Старый вариант </summary>
 
 <h2>Step 2. Загрузка LLVM + CLANG</h2>
 <pre><code>
@@ -54,29 +50,33 @@ $ cd ../..
 </code></pre>
 </details>
 
-## Step 3. Установка C2EO
+## Шаг 3. Установка C2EO
 ```bash
 $ git clone https://github.com/polystat/c2eo.git
 ```
-&nbsp;
-## Step 4. Сборка C2EO
+
+## Шаг 4. Сборка C2EO
 
 > ВАЖНО. Каждый раз когда код транспилятора меняется, вам необходимо выполнить этот шаг повторно
 
-Конфигурация транспилятора c2eo связано с его компиляцией из исходных текстов. При расположении llvm и clang  в `~/llvm-clang` используемые в каталогах `project` и `project/src/transpiler` файлы `CMakeLists.txt` остаются неизменными.
-Поэтому для выполнения компиляции нужно войти в `project/build` и выполнить в нем команду `cmake ..`
-После этого в том же каталоге запустить сборку проекта командой `make` или `cmake --build .`
+По умолчанию считается, что ваш `llvm-clang` располагается в одной папке с `c2eo` . Если ваш `llvm-clang` расположен в другом месте, пропишите нужный путь в этой строчке [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Затем
 
-&nbsp;
-## Step 5. Запуск транспиляции
-> Use `--` at the end of command below to skip all errors:
 ```bash
-$ cd ./project/bin
-$ python3 launcher.py <file-of-c-program>
+$ cd ./c2eo/project/build
+$ cmake ..
+$ make # или $ cmake --build
+``` 
+
+## Шаг 5. Запуск транспиляции
+> Используйте `--` в конце команды, расположенной ниже, чтобы пропустить все ошибки:
+
+```bash
+$ cd ../bin
+$ python3 launcher.py <file-of-c-program> # или $ ./launcher.py <file-of-c-program>
 ```
 
 <details>
-    <summary>More information here...</summary>
+    <summary>Подробнее здесь...</summary>
 
 &nbsp;
 ## Executable transpiler file and scripts for building the program on EO
@@ -113,25 +113,20 @@ Based on intermediate files located in the `project / assembly` directory, it al
 ---
 </details>
 
+## Шаг 6. Запуск сгенерированного проекта
 
-&nbsp;
-## Step 6. Запуск сгенерированных файлов eo
-
-Now the generated files in this [dir](result/eo/c2eo/src/)
-
-[There](https://github.com/cqfn/eo) github page of EO project when you can learn about EO language
-
-This [quick start](https://github.com/cqfn/eo#quick-start) for running your first eo project
+Теперь сгенерированный проект находится [dir](result/). Для запуска этого проекта вам необходим данный [гайд](https://github.com/cqfn/eo#quick-start) . 
+Гитхаб страница [EO project](https://github.com/cqfn/eo) где вы можете узнать о языке EO.
 
 &nbsp;
 ## Дополнительный шаг. Примеры тестов
 ### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
 
 &nbsp;
+# Структура проекта
 
-&nbsp;
-
-## Project structure
+<details>
+  <summary><bold>Дополнительная информация...</bold></summary>
 
     .
     ├── collection
@@ -242,9 +237,4 @@ This [quick start](https://github.com/cqfn/eo#quick-start) for running your firs
 В целом порядок сборки файла с глобальными объектами и статическими объектами несущественен.
 
 Представленная схема обеспечивает полную автономность формирование программы на EO. Объект, запускающий приложение содержит только датаизацию глобального объекта. Он не меняется, оставаясь постоянным независимо от транспилируемого проекта.
-
-
-
-
-
-
+</details>

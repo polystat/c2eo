@@ -1,0 +1,21 @@
++package c2eo.ctypes
+
++alias org.eolang.txt.sprintf
+
+[initial] > c_float64
+
+  memory > mem
+
+  if. > @
+    mem.is-empty
+    if.
+      mem.write initial
+      mem
+      seq
+    mem
+
+  mem.write > write
+
+  "float64" > type
+
+  8 > bytes

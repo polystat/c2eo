@@ -102,6 +102,8 @@ def testDataCompare(testedDir):
     eoFile.close()
     logFile.close()
 
+    return bool(erCount)
+
 if __name__ == '__main__':
     # Фиксация времени начала работы скрипта
     start_time = time.monotonic()
@@ -186,8 +188,9 @@ if __name__ == '__main__':
         if os.path.exists(os.path.join(globalFileDir, 'global.eo')):
             shutil.copy(os.path.join(globalFileDir, 'global.eo'), testedDir)
         else:
-            print(f'File global.eo is absence in: {globalFileDir}')
+            print(f'FAIL. File global.eo is absence in {globalFileDir} for test {testedDirName}')
             # Нет смысла продолжать дальше, так как тест не пройдет из-за отсутствия global.eo
+            # хотя бы для одного теста. Нужно смотреть ошибку. Она фатальная и убивает быстрый тест
             os.chdir(currentDir)
             exit(-1)
 
@@ -227,8 +230,9 @@ if __name__ == '__main__':
     resultDirSandbox = 'result/'
     os.chdir(resultDirSandbox)
     eoMavenCode = os.system('mvn clean compile')
-    print('eoMavenCode = ', eoMavenCode)
+    # print('eoMavenCode = ', eoMavenCode)
     if eoMavenCode != 0:
+        # Если maven не проходит глобальную компиляцию, то это фатально.
         print('Incorrect Maven Project Assembly')
         os.chdir(currentDir)
         exit(-4)
@@ -237,15 +241,28 @@ if __name__ == '__main__':
     for nameEo in testedDirNameList:
         eoRunCode = os.system(
             './run-one.sh  c2eo.src.' + nameEo + '.app > ' + tmpDir + '/tests/' + nameEo + '/eoResult.txt')
-        print('eoRunCode = ', eoRunCode)
+        # print('eoRunCode = ', eoRunCode)
         if eoRunCode != 0:
-            print('Incorrect EO runtime')
+            print(f'Incorrect EO runtime for test {nameEo}')
             os.chdir(currentDir)
             exit(-3)
 
-    # Сравнение результатов в тестовых файлах
+    # Сравнение результатов в тестовых файлах только если все они сформировались.
+    stepCount = 0
+    passCount = 0
     for nameEo in testedDirNameList:
         print(f'{nameEo}:')
-        testDataCompare(tmpDir + '/tests/' + nameEo)
+        if not testDataCompare(tmpDir + '/tests/' + nameEo):
+            passCount += 1
+        stepCount += 1
+
     # print(сResultList)
+
+    # Формирование окончетельного отчета
+    print(f'{passCount} tests out of {stepCount} passed.')
+
+    # Формирование времени выполнения сценария
+    end_time: float = time.monotonic()
+    delta = timedelta(seconds=end_time - start_time)
+    print(f'testQuick execution time is {delta}')
 
