@@ -8,6 +8,7 @@ int c;
 int main() {
     if (a > b)
     {
+        int a = 1;
         c = a;
     }
     c;

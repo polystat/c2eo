@@ -98,8 +98,8 @@ result/**/global.eo
 project/tests/scripts/env/*.c
 project/tests/scripts/env/*.txt
 project/tests/scripts/__pycache__/
-project/tests/any/tests/
-!project/tests/any/tests/**/*[!-][!e][!o].c
+# project/tests/any/tests/
+# !project/tests/any/tests/**/*[!-][!e][!o].c
 *.log
 
 # Compiled c2eo
