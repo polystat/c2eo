@@ -52,7 +52,7 @@ def update_version_in_files(files, latest_version):
     return count_changed_files
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     latest_version = get_latest_version()
     file = 'latest_eo_version.txt'
     current_version = get_current_version(file)
