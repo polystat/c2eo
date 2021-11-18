@@ -21,7 +21,7 @@
         mem.write (((value.add 129).mod range).add max)
         mem.write value
 
-  "int16" > type
+  "char" > type
 
   4 > bytes
 

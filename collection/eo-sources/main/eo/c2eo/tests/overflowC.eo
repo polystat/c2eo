@@ -1,4 +1,4 @@
-+package c2eo.examples
++package c2eo.tests
 
 +alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_char
