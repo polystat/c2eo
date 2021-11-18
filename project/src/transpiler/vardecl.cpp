@@ -221,14 +221,14 @@ void getVarDeclParameters(const VarDecl* VD) {
         var->name = "g_" + varName;
         var->type = strType;
         var->value = strValue;
-        var->identifiers[varID] = "^." + var->name;
+        var->identifiers[varID] = var->name;
         var->globalSpaceGenPtr->Add(var);
     } else if (globalStorage && !extStorage) {
         VarGen* var = new VarGen;
         var->name = "s_" + varName;
         var->type = strType;
         var->value = strValue;
-        var->identifiers[varID] = "^." + AbstractGen::filename + "." + var->name;
+        var->identifiers[varID] = AbstractGen::filename + "." + var->name;
         var->staticSpaceGenPtr->Add(var);
     }
 

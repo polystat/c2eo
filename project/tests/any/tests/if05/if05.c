@@ -3,7 +3,7 @@ int x = 1;
 int y = 2;
 int r;
 int main() {
-    if (x)
+    if (x != 0)
     {
         r = x;
     } else {
@@ -13,4 +13,3 @@ int main() {
     r;
     return 0;
 }
-S

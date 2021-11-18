@@ -5,7 +5,9 @@ int r;
 int main() {
     if (x > y)
     {
-    } else {
+
+    }
+        else {
         r = y;
     }
     printf("%d\n", r);
