@@ -4,11 +4,11 @@ import re
 
 
 def get_latest_version():
-    print('Check latest version of EO')
+    print('Check latest EO version')
     url = 'https://search.maven.org/solrsearch/select?q=g:"org.eolang"a:"eo-parent"&rows=1&wt=json'
     data = requests.get(url).json()
     latest_version = data['response']['docs'][0]['latestVersion']
-    print(f'Latest version of EO = {latest_version}')
+    print(f'Latest EO version: "{latest_version}"')
     return latest_version
 
 
@@ -61,8 +61,8 @@ if __name__ == '__main__':
         print('We use latest EO version')
         exit()
 
-    print(f'We use old EO version {current_version}')
-    print('Start update')
+    print(f'We use old EO version: "{current_version}"')
+    print('Start updating')
 
     path = '../..'
     file_name = 'pom.xml'
