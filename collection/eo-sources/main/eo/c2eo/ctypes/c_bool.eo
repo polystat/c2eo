@@ -1,5 +1,7 @@
 +package c2eo.ctypes
 
++alias org.eolang.txt.sprintf
+
 [initial] > c_bool
 
   memory > mem
@@ -15,8 +17,12 @@
   [value] > write
     if. > @
       value.eq 0
-      mem.write 0
-      mem.write 1
+      mem.write FALSE
+      mem.write TRUE
+
+  sprintf "%d" as-int > as-string
+
+  $.if 1 0 > as-int
 
   "bool" > type
 
