@@ -102,15 +102,10 @@ StmtGen * getCompoundStmtOutputGenerator(const Stmt *pExpr) {
     //compoundStmt->value = "";
     // Вывод переменной
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
-    unaryStmtGen->value = "stdout ";
+    unaryStmtGen->value = R"(printf "%s\n" )";
     unaryStmtGen->postfix = ".as-string";
     DeclRefExpr *declExpr = (DeclRefExpr *)(*pExpr->child_begin());
     unaryStmtGen->nestedStmt = getDeclName(declExpr);
-    compoundStmt->Add(unaryStmtGen);
-    // Вывод перевода строки
-    unaryStmtGen = new UnaryStmtGen;
-    unaryStmtGen-> value = R"(stdout "\n")";
-    unaryStmtGen-> nestedStmt = nullptr;
     compoundStmt->Add(unaryStmtGen);
     return compoundStmt;
 }

@@ -1,8 +1,6 @@
 +package c2eo.src
 
-+alias stdout org.eolang.io.stdout
-+alias sprintf org.eolang.txt.sprintf
-
++alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_bool
 +alias c2eo.ctypes.c_char
 +alias c2eo.ctypes.c_float32
