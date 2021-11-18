@@ -1,7 +1,5 @@
 +package c2eo.ctypes
 
-+alias org.eolang.txt.sprintf
-
 [initial] > c_float64
 
   memory > mem

@@ -19,20 +19,8 @@ resultDir = '../../result/eo/c2eo/src/'
 assemblyDir = '../assembly/'
 
 # Фрагмент данных с метаинформацией и началом глобального объекта
-meta = '''+package c2eo.src
-+alias stdout org.eolang.io.stdout
-+alias sprintf org.eolang.txt.sprintf
-
-+alias c2eo.ctypes.c_bool
-+alias c2eo.ctypes.c_char
-+alias c2eo.ctypes.c_float64
-+alias c2eo.ctypes.c_int16
-+alias c2eo.ctypes.c_int32
-+alias c2eo.ctypes.c_int64
-
-[arg] > global
-
-'''
+with open('meta.txt', 'r') as f:
+    meta = f.read()
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':

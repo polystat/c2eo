@@ -26,16 +26,11 @@
 +alias c2eo.examples.nestedBlocksC
 +alias c2eo.examples.nestedBlocksStaticC
 +alias c2eo.examples.nestedBlocksMainC
-+alias c2eo.collections.array
 +alias c2eo.stdio.printf
+
 +alias diagnostics.exception
 +alias diagnostics.assert
 
-# (breakC args).main
-# (complexReturnC args).main
-# (typeCastingC args).main
-# (functionPointersC args).main
-# (whileC args).main
 [args...] > app
 
   seq > @
@@ -73,14 +68,6 @@
     (ifC args).main
     printf "\n"
 
-    printf "dowhileC\n"
-    (dowhileC args).main
-    printf "\n\n"
-
-    printf "forC\n"
-    (forC args).main
-    printf "\n\n"
-
     printf "simpleReturnC\n"
     (simpleReturnC args).main
     printf "\n"
@@ -95,10 +82,6 @@
 
     printf "structC\n"
     (structC args).main
-    printf "\n"
-
-    printf "continueC\n"
-    (continueC args).main
     printf "\n"
 
     printf "pointers1C\n"
@@ -123,10 +106,6 @@
 
     printf "nestedBlocksMainC\n"
     (nestedBlocksMainC args).main
-    printf "\n"
-
-    printf "array\n"
-    printf "(array 1 2 3 4 5).length = %d" ((array 1 2 3 4 5).length)
     printf "\n"
 
     printf "\n\nFalse assert"

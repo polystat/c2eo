@@ -17,11 +17,13 @@
   [value] > write
     if. > @
       value.eq 0
-      ^.mem.write FALSE
-      ^.mem.write TRUE
+      mem.write FALSE
+      mem.write TRUE
 
   sprintf "%d" as-int > as-string
 
   $.if 1 0 > as-int
 
   "bool" > type
+
+  1 > bytes
