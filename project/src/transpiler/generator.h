@@ -26,12 +26,16 @@ struct AbstractGen {
         GK_StmtGen,
         GK_UnaryStmtGen,
         GK_EmptyStmtGen,
+        GK_LiteralStmtGen,
         GK_LastUnaryStmtGen,
         GK_BinaryStmtGen,
+        GK_ObjectGen,
         GK_MultilineStmtGen,
         GK_FuncGen,
         GK_CmpStmtGen,
         GK_IfStmtGen,
+        GK_WhileStmtGen,
+        GK_DoWhileStmtGen,
         GK_LastMultilineStmtGen,
         GK_LastStmtGen,
         GK_SpaceGen,
@@ -141,6 +145,7 @@ protected:
 // Генератор кода для набора инструкций.
 // Накапливает необходимые значения в MultiLineStmt.
 struct CompoundStmtGen : public MultiLineStmtGen {
+    bool is_decorator = false;
 
     virtual void Generate(std::ostream &out);
     CompoundStmtGen() : MultiLineStmtGen(GK_CmpStmtGen){};
@@ -156,6 +161,7 @@ struct CompoundStmtGen : public MultiLineStmtGen {
 struct FuncGen: MultiLineStmtGen {
     std::string name;       // имя объекта-функции
     std::vector<std::string> paramNames;    // список имен параметров (типы не нужны).
+    // TODO нужен ли body?
     CompoundStmtGen* body = nullptr;
     // Возращаемый параметры передается как дополнительный атрибут с некоторым именем,
     // которое не должно нигде встречаться в другом контексте.
@@ -223,6 +229,17 @@ struct  EmptyStmtGen: UnaryStmtGen{
     }
 };
 
+struct  LiteralStmtGen: UnaryStmtGen{
+
+    void Generate(std::ostream &out) override ;
+
+    LiteralStmtGen() : UnaryStmtGen(AbstractGen::GK_LiteralStmtGen){}
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == AbstractGen::GK_LiteralStmtGen;
+    }
+};
+
 
 
 
@@ -277,6 +294,58 @@ struct IfStmtGen: MultiLineStmtGen {
     }
 
     ~IfStmtGen() override;
+};
+
+//-------------------------------------------------------------------------------------------------
+// Генератор кода для оператора цикла while
+// Наряду с константной оберткой обеспечивает запись глобальных объектов
+struct WhileStmtGen: MultiLineStmtGen {
+    // Добавление очередного объекта к глобальному пространству
+
+    void Generate(std::ostream &out) override;
+
+    WhileStmtGen(): MultiLineStmtGen(GK_WhileStmtGen){}
+
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_WhileStmtGen;
+    }
+
+    ~WhileStmtGen() override;
+};
+
+//-------------------------------------------------------------------------------------------------
+// Генератор кода для оператора цикла do-while
+// Наряду с константной оберткой обеспечивает запись глобальных объектов
+struct DoWhileStmtGen: MultiLineStmtGen {
+    // Добавление очередного объекта к глобальному пространству
+
+    void Generate(std::ostream &out) override;
+
+    DoWhileStmtGen(): MultiLineStmtGen(GK_DoWhileStmtGen){}
+
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_WhileStmtGen;
+    }
+
+    ~DoWhileStmtGen() override;
+};
+
+struct ObjectStmtGen: StmtGen {
+
+    StmtGen* body;
+    // Добавление очередного объекта к глобальному пространству
+    void Generate(std::ostream &out) override;
+
+    ObjectStmtGen(): StmtGen(GK_ObjectGen){}
+
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_ObjectGen;
+    }
+
+    ~ObjectStmtGen() override;
 };
 
 #endif // __GENERATOR__

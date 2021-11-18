@@ -22,6 +22,10 @@ UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral);
 
 StmtGen *getIfStmtGenerator(const IfStmt *pStmt);
 
+StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt);
+
+StmtGen *getDoWhileStmtGenerator(const DoStmt *pStmt);
+
 ASTContext* context;
 
 //-------------------------------------------------------------------------------------------------
@@ -67,9 +71,8 @@ void getCompoundStmtParameters(const CompoundStmt* CS,ASTContext* context) {
 CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS,ASTContext* context, bool isDecorator) {
     ::context = context;
     CompoundStmtGen* compoundStmt = new CompoundStmtGen;
-    compoundStmt->value = "seq";
-    if (isDecorator)
-        compoundStmt->value += " > @";
+    compoundStmt->is_decorator = isDecorator;
+
     for(CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
         // Костыльное решение для тестового выводо
         // char* stmtName = (char*)(i->getStmtClassName());
@@ -184,7 +187,53 @@ StmtGen *getStmtGen(const Stmt * i) {
         const IfStmt* cs = (IfStmt*)i;
         stmtGen = getIfStmtGenerator(cs);
     }
+    else if(stmtClass == Stmt::WhileStmtClass)
+    {
+        const WhileStmt* cs = (WhileStmt*)i;
+        stmtGen = getWhileStmtGenerator(cs);
+    }
+    if(stmtClass == Stmt::DoStmtClass)
+    {
+        const DoStmt* cs = (DoStmt*)i;
+        stmtGen = getDoWhileStmtGenerator(cs);
+    }
     return stmtGen;
+}
+
+StmtGen *getDoWhileStmtGenerator(const DoStmt *pStmt) {
+    auto *gen = new DoWhileStmtGen;
+    auto cond = getStmtGen(pStmt->getCond());
+    gen->Add(cond);
+    auto* objStmtGen = new ObjectStmtGen;
+    auto body = getStmtGen(pStmt->getBody());
+    auto* bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
+    if (!bodyCmp)
+    {
+        bodyCmp = new CompoundStmtGen;
+        bodyCmp->Add(body);
+    }
+    bodyCmp->is_decorator = true;
+    objStmtGen->body = bodyCmp;
+    gen->Add(objStmtGen);
+    return gen;
+}
+
+StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
+    WhileStmtGen *gen = new WhileStmtGen;
+    auto cond = getStmtGen(pStmt->getCond());
+    gen->Add(cond);
+    ObjectStmtGen* objStmtGen = new ObjectStmtGen;
+    auto body = getStmtGen(pStmt->getBody());
+    CompoundStmtGen* bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
+    if (!bodyCmp)
+    {
+        bodyCmp = new CompoundStmtGen;
+        bodyCmp->Add(body);
+    }
+    bodyCmp->is_decorator = true;
+    objStmtGen->body = bodyCmp;
+    gen->Add(objStmtGen);
+    return gen;
 }
 
 StmtGen *getIfStmtGenerator(const IfStmt *pStmt) {
@@ -199,18 +248,17 @@ StmtGen *getIfStmtGenerator(const IfStmt *pStmt) {
     } else
     {
         CompoundStmtGen* empt = new CompoundStmtGen;
-        empt->value ="seq";
         gen->Add(empt);
     }
     return gen;
 }
 
 UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral) {
-    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+    LiteralStmtGen* literalStmtGen = new LiteralStmtGen;
     auto  floatValue = pLiteral->getValue().convertToDouble();
-    unaryStmtGen->value = std::to_string(floatValue);
-    unaryStmtGen-> nestedStmt = nullptr;
-    return  unaryStmtGen;
+    literalStmtGen->value ="c_float64 " + std::to_string(floatValue);
+    literalStmtGen-> nestedStmt = nullptr;
+    return  literalStmtGen;
 }
 
 UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral) {
@@ -219,10 +267,10 @@ UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral) {
 }
 
 UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt) {
-    UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
-    unaryStmtGen->value = pNum.toString(10,isSignedInt);
-    unaryStmtGen-> nestedStmt = nullptr;
-    return  unaryStmtGen;
+    LiteralStmtGen* literalStmtGen = new LiteralStmtGen;
+    literalStmtGen->value = "c_int32 " + pNum.toString(10, isSignedInt);
+    literalStmtGen-> nestedStmt = nullptr;
+    return  literalStmtGen;
 }
 
 // Метод для получения имени переменной.

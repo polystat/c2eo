@@ -68,7 +68,9 @@ MultiLineStmtGen::~MultiLineStmtGen() {
 
 void CompoundStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
-    out << value;
+    out << "seq";
+    if (is_decorator)
+        out <<" > @";
     out << "\n";
     AbstractGen::shift++;
     if (!statements.empty()) {
@@ -114,9 +116,13 @@ void BinaryStmtGen::Generate(std::ostream &out) {
     out << left;
     if (!leftLinear)
         out << ")";
-    out << value + "(";
+    out << value;
+    bool rightLiteral = llvm::isa<LiteralStmtGen>(right);
+    if(!rightLiteral)
+        out << "(";
     out << right;
-    out << ")";
+    if(!rightLiteral)
+        out << ")";
 
 }
 
@@ -203,4 +209,53 @@ void RecordGen::Generate(std::ostream &out) {
     for (VarGen* vg: fields)
         out << "\n      ^." << vg->name << ".write (value." << vg->name << ")";
     out << "\n      TRUE\n";
+}
+
+void WhileStmtGen::Generate(std::ostream &out) {
+    out << getIndentSpaces();
+    out << "while.\n";
+    AbstractGen::shift++;
+    MultiLineStmtGen::Generate(out);
+    AbstractGen::shift--;
+}
+
+WhileStmtGen::~WhileStmtGen() {
+
+}
+
+void LiteralStmtGen::Generate(std::ostream &out) {
+    out << "(";
+    out << value;
+    out << ")";
+}
+//TODO универсвализировать, добавить параметры возможно наследовать от compgen
+void ObjectStmtGen::Generate(std::ostream &out) {
+    //out << getIndentSpaces();
+    out << "[i]\n";
+    AbstractGen::shift++;
+    body->Generate(out);
+    AbstractGen::shift--;
+}
+
+ObjectStmtGen::~ObjectStmtGen() {
+
+}
+
+void DoWhileStmtGen::Generate(std::ostream &out) {
+    StmtGen* s = nullptr;
+    ObjectStmtGen* body = llvm::dyn_cast<ObjectStmtGen>(statements[1]);
+    if (body)
+    {
+        body->body->Generate(out);
+        out << "\n";
+    }
+    out << getIndentSpaces();
+    out << "while.\n";
+    AbstractGen::shift++;
+    MultiLineStmtGen::Generate(out);
+    AbstractGen::shift--;
+}
+
+DoWhileStmtGen::~DoWhileStmtGen() {
+
 }
