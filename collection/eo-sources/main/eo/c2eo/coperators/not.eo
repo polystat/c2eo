@@ -1,0 +1,6 @@
++package c2eo.coperators
+
++alias c2eo.coperators.as-bool
+
+[a] > not
+  (as-bool a).if 0 1 > @

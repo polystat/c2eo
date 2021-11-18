@@ -1,4 +1,4 @@
-+package c2eo.examples
++package c2eo.tests
 
 +alias c2eo.stdio.printf
 +alias c2eo.ctypes.c_bool
@@ -43,7 +43,7 @@
     ui32_1.write 231
     ui64_1.write 2342
 
-    printf "b_1 = %d\n" (b_1.as-int)
+    printf "b_1 = %d\n" b_1
     printf "c_1 = %d\n" c_1
     printf "f32_1 = %f\n" f32_1
     printf "f64_1 = %f\n" f64_1
@@ -66,7 +66,7 @@
   c_uint64 253 > ui64_2
 
   seq > initialized
-    printf "b_2 = %d\n" (b_2.as-int)
+    printf "b_2 = %d\n" b_2
     printf "c_2 = %d\n" c_2
     printf "f32_2 = %f\n" f32_2
     printf "f64_2 = %f\n" f64_2
