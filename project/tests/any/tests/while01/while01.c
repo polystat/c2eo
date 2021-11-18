@@ -1,15 +1,12 @@
+//clang -Xclang -ast-dump -fsyntax-only test07.c
+
 #include "stdio.h"
-int x = 1;
-int y = 2;
-int r;
+int n = 5;
 int main() {
-    if (x > y)
-    {
-        r = x;
-    } else {
-        r = y;
+    while (n > 0) {
+        printf("%d\n", n);
+        n;
+        n = n - 1;
     }
-    printf("%d\n", r);
-    r;
     return 0;
 }

@@ -204,3 +204,15 @@ void RecordGen::Generate(std::ostream &out) {
         out << "\n      ^." << vg->name << ".write (value." << vg->name << ")";
     out << "\n      TRUE\n";
 }
+
+void WhileStmtGen::Generate(std::ostream &out) {
+    out << getIndentSpaces();
+    out << "while.\n";
+    AbstractGen::shift++;
+    MultiLineStmtGen::Generate(out);
+    AbstractGen::shift--;
+}
+
+WhileStmtGen::~WhileStmtGen() {
+
+}

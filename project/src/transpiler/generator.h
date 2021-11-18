@@ -32,6 +32,7 @@ struct AbstractGen {
         GK_FuncGen,
         GK_CmpStmtGen,
         GK_IfStmtGen,
+        GK_WhileStmtGen,
         GK_LastMultilineStmtGen,
         GK_LastStmtGen,
         GK_SpaceGen,
@@ -277,6 +278,24 @@ struct IfStmtGen: MultiLineStmtGen {
     }
 
     ~IfStmtGen() override;
+};
+
+//-------------------------------------------------------------------------------------------------
+// Генератор кода для оператора цикла while
+// Наряду с константной оберткой обеспечивает запись глобальных объектов
+struct WhileStmtGen: MultiLineStmtGen {
+    // Добавление очередного объекта к глобальному пространству
+
+    void Generate(std::ostream &out) override;
+
+    WhileStmtGen(): MultiLineStmtGen(GK_WhileStmtGen){}
+
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_WhileStmtGen;
+    }
+
+    ~WhileStmtGen() override;
 };
 
 #endif // __GENERATOR__

@@ -22,6 +22,8 @@ UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral);
 
 StmtGen *getIfStmtGenerator(const IfStmt *pStmt);
 
+StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt);
+
 ASTContext* context;
 
 //-------------------------------------------------------------------------------------------------
@@ -184,7 +186,21 @@ StmtGen *getStmtGen(const Stmt * i) {
         const IfStmt* cs = (IfStmt*)i;
         stmtGen = getIfStmtGenerator(cs);
     }
+    else if(stmtClass == Stmt::WhileStmtClass)
+    {
+        const WhileStmt* cs = (WhileStmt*)i;
+        stmtGen = getWhileStmtGenerator(cs);
+    }
     return stmtGen;
+}
+
+StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
+    WhileStmtGen *gen = new WhileStmtGen;
+    auto cond = getStmtGen(pStmt->getCond());
+    gen->Add(cond);
+    auto body = getStmtGen(pStmt->getBody());
+    gen->Add(body);
+    return gen;
 }
 
 StmtGen *getIfStmtGenerator(const IfStmt *pStmt) {
