@@ -141,6 +141,8 @@ if __name__ == '__main__':
 
     os.chdir('../../bin')
     os.system('python3 eo_version_update.py') # Update EO version in pom.xml
+    os.system('cmake ..') # Rebuild project
+    os.system('make')
     os.chdir('../tests/any')
 
     # Первоначально происходит компиляция и выполнение всех тестов на C
