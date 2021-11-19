@@ -4,6 +4,7 @@ import requests
 import os
 import re
 import glob
+import sys
 
 
 def main():
@@ -18,8 +19,7 @@ def main():
     print(f'We use old EO version: "{current_version}"')
     print('Start updating files')
 
-
-    path_to_files = '/../../**'
+    path_to_files = '../../**'
     file_pattern = 'pom.xml'
     found_files = search_files_by_pattern(path_to_files, file_pattern)
 
