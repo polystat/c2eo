@@ -9,15 +9,16 @@ import re
 
 
 def main():
-    print('Start collecting files')
+    print('\nStart collecting files\n')
     path_to_files = '../assembly'
     with open('meta.txt', 'r') as f:  # Read part of default code for global result
         result_code = f.read()
 
     result_code += read_code_from_global_files(path_to_files)
+    print()
     result_code += read_code_from_static_files(path_to_files)
 
-    print(result_code)
+    print_code("global.eo:", result_code)
     with open(os.path.join(path_to_files, 'global.eo'), 'w') as f:
         f.write(result_code)
     return
@@ -50,7 +51,8 @@ def search_files_by_pattern(dir, file_pattern):
     print(f'Looking for "{file_pattern}" files')
     path = os.path.join(dir, file_pattern)
     found_files = glob.glob(path)
-    print(f'Found {len(found_files)} files: {found_files}')
+    file_names = list(map(lambda x: os.path.basename(x), found_files))
+    print(f'Found {len(found_files)} files: {file_names}')
     return found_files
 
 
@@ -58,8 +60,15 @@ def read_code_from_file(file):
     with open(file, 'r') as f:
         code = f.read()
     # Add indentation to the code, except empty lines
-    code = re.sub(r'^(?=[^\n])', '  ', data)
+    code = re.sub(r'^(?=[^\n])', '  ', code)
     return code
+
+
+def print_code(title, code):
+    print(f'\n{title}')
+    print('-' * 50)
+    print(code)
+    print('-' * 50)
 
 
 if __name__ == '__main__':
