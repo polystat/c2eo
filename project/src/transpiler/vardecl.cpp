@@ -3,6 +3,7 @@
 
 #include "vardecl.h"
 #include "generator.h"
+#include "stmt.h"
 
 std::string getIntTypeByVar(const VarDecl* VD);
 
@@ -343,11 +344,10 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
         llvm::outs() << str << "\n";
     } else {
         str = "";
-        for (InitListExpr::iterator it = ((clang::InitListExpr * )(VD->getInit()))->begin();
-             it != ((clang::InitListExpr * )(VD->getInit()))->end(); it++) {
-            if (!str.empty()) str += " ";
-            getValue(*it, str);
-        }
+        Stmt* body = (Stmt*)((clang::InitListExpr * )(VD->getInit()));
+        llvm::outs() << "\x1B[33m";
+        getListValue(body, str);
+        llvm::outs() << "\033[0m";
         llvm::outs() << "    no Initial Value\n";
     }
 }
@@ -425,7 +425,21 @@ void getTypeName(const ValueDecl* VD, std::string &str) {
     }
 }
 
-void getValue(const Stmt* stmt, std::string &str) {
-
-    str += "0";
+void getListValue(const Stmt* stmt, std::string &str) {
+    for (InitListExpr::iterator it = ((clang::InitListExpr * )stmt)->begin();
+         it != ((clang::InitListExpr * )stmt)->end(); it++) {
+        char* stmtName = (char*)((*it)->getStmtClassName());
+        //llvm::outs() << stmtName <<"\n";
+        if((*it)->getStmtClass() == Stmt::InitListExprClass){
+            //(*it)->dump();
+            llvm::outs() << stmtName <<"Class\n\n";
+            getListValue(*it, str);
+        } else {
+            (*it)->dump();
+            llvm::outs() << stmtName <<"Class\n\n";
+            StmtGen* asg = getStmtGen((Stmt*) (*it));
+            if (!str.empty()) str += " ";
+            str += "(" + asg->value + ")";
+        }
+    }
 }

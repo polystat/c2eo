@@ -37,6 +37,6 @@ void initValueAnalysis(const VarDecl *VD, std::string &str);
 void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 
 void getTypeName(const ValueDecl* VD, std::string &str);
-void getValue(const Stmt* stmt, std::string &str);
+void getListValue(const Stmt* stmt, std::string &str);
 
 #endif // __VARDECL__

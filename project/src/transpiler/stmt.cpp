@@ -14,8 +14,6 @@ UnaryStmtGen* getEmptyUnaryGen(const Expr* pExpr);
 
 UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr);
 
-StmtGen* getStmtGen(const Stmt* i);
-
 StmtGen* getCompoundStmtOutputGenerator(const Stmt* pExpr);
 
 UnaryStmtGen* getIntegerLiteralGen(const IntegerLiteral* pLiteral);
@@ -117,7 +115,6 @@ StmtGen* getCompoundStmtOutputGenerator(const Stmt* pExpr) {
         unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
         declExpr = (DeclRefExpr * )(*declExpr->child_begin());
     }
-    llvm::outs() << (*pExpr->child_begin())->getStmtClassName() << "\n";
     unaryStmtGen->nestedStmt = getDeclName(declExpr);
     compoundStmt->Add(unaryStmtGen);
     return compoundStmt;
@@ -267,8 +264,6 @@ UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     //pExpr->printPretty();
     unaryStmtGen->value = AbstractGen::identifiers[reinterpret_cast<uint64_t>(pExpr->getFoundDecl())];
-    pExpr->dump();
-    llvm::outs() << unaryStmtGen->value << "\n";
     unaryStmtGen->nestedStmt = nullptr;
     return unaryStmtGen;
 }
