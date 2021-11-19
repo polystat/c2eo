@@ -24,12 +24,16 @@ using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
+#include "generator.h"
+
 
 using namespace clang;
 
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый объектов структуры или объединения
 void getRecordDeclSubObjects(const RecordDecl *RD);
+
+void setSubFields(RecordGen* RG, const RecordDecl* RD);
 
 
 #endif //__RECORDDECL__

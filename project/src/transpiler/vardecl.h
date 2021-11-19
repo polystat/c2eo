@@ -15,6 +15,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 
 #include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
 
 using namespace clang::tooling;
 using namespace llvm;
@@ -34,5 +35,8 @@ void initValueAnalysis(const VarDecl *VD, std::string &str);
 
 // Анализ типа для неициализированных переменны с установко нулевого значения
 void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
+
+void getTypeName(const ValueDecl* VD, std::string &str);
+void getListValue(const Stmt* stmt, std::string &str);
 
 #endif // __VARDECL__
