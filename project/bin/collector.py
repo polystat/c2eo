@@ -27,7 +27,7 @@ def main():
 def read_code_from_global_files(dir):
     code = ''
     for file in search_files_by_pattern(dir, '*.glob'):
-        code += read_code_from_file(file)
+        code += read_code_from_file(file, indent='  ')
     return code
 
 
@@ -35,9 +35,8 @@ def read_code_from_static_files(dir):
     code = ''
     for file in search_files_by_pattern(dir, '*.stat'):
         name = get_only_file_name(file)
-        print(f'Static object name: "{name}"')
         code += f'  [] > {name}\n'
-        code += read_code_from_file(file)
+        code += read_code_from_file(file, indent='    ')
     return code
 
 
@@ -51,16 +50,19 @@ def search_files_by_pattern(dir, file_pattern):
     print(f'Looking for "{file_pattern}" files')
     path = os.path.join(dir, file_pattern)
     found_files = glob.glob(path)
+    # Keep only file basename
     file_names = list(map(lambda x: os.path.basename(x), found_files))
     print(f'Found {len(found_files)} files: {file_names}')
     return found_files
 
 
-def read_code_from_file(file):
+def read_code_from_file(file, indent):
+    code = ''
     with open(file, 'r') as f:
-        code = f.read()
-    # Add indentation to the code, except empty lines
-    code = re.sub(r'^(?=[^\n])', '  ', code)
+        for line in f:
+            if line != '\n':
+                code += indent
+            code += line
     return code
 
 
