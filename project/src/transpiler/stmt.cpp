@@ -263,8 +263,13 @@ UnaryStmtGen* getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt) {
 UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     //pExpr->printPretty();
+    /*if (pExpr->getStmtClass() == Stmt::MemberExprClass) {
+        unaryStmtGen->value = ".f_" + ((MemberExpr*)pExpr)->getMemberDecl()->getNameAsString();
+        unaryStmtGen->nestedStmt = getDeclName((DeclRefExpr * )(*pExpr->child_begin()));
+    } else {*/
     unaryStmtGen->value = AbstractGen::identifiers[reinterpret_cast<uint64_t>(pExpr->getFoundDecl())];
     unaryStmtGen->nestedStmt = nullptr;
+    //}
     return unaryStmtGen;
 }
 
