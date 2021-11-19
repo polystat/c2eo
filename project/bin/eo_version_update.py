@@ -24,9 +24,10 @@ def get_current_version(file):
     return current_version
 
 
-def search_files_by_name(path, file_pattern):
+def search_files_by_name(dir, file_pattern):
     print(f'Looking for {file_pattern} files')
-    found_files = glob.glob(path + file_pattern, recursive=True)
+    path = os.path.join(dir, file_pattern)
+    found_files = glob.glob(path, recursive=True)
     print(f'Found {len(found_files)} files')
     return found_files
 
@@ -63,9 +64,9 @@ if __name__ == '__main__':
         exit()
 
     print(f'We use old EO version: "{current_version}"')
-    print('Start updating')
+    print('Start updating files')
 
-    path = '../../**/'
+    path = '../../**'
     file_pattern = 'pom.xml'
     found_files = search_files_by_name(path, file_pattern)
 
