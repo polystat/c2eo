@@ -11,5 +11,26 @@
 +alias c2eo.ctypes.c_uint16
 +alias c2eo.ctypes.c_uint32
 +alias c2eo.ctypes.c_uint64
++alias c2eo.coperators.abs
++alias c2eo.coperators.add
++alias c2eo.coperators.and
++alias c2eo.coperators.as-bool
++alias c2eo.coperators.as-float
++alias c2eo.coperators.as-int
++alias c2eo.coperators.as-string
++alias c2eo.coperators.div
++alias c2eo.coperators.eq
++alias c2eo.coperators.geq
++alias c2eo.coperators.greater
++alias c2eo.coperators.leq
++alias c2eo.coperators.less
++alias c2eo.coperators.mod
++alias c2eo.coperators.mul
++alias c2eo.coperators.neg
++alias c2eo.coperators.neq
++alias c2eo.coperators.not
++alias c2eo.coperators.or
++alias c2eo.coperators.pow
++alias c2eo.coperators.sub
 
 [arg] > global
