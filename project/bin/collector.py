@@ -57,7 +57,8 @@ def search_files_by_pattern(dir, file_pattern):
 def read_code_from_file(file):
     with open(file, 'r') as f:
         code = f.read()
-    code = re.sub(r'^(?=[^\n])', '  ', data)  # Add indentation to the code, except empty lines
+    # Add indentation to the code, except empty lines
+    code = re.sub(r'^(?=[^\n])', '  ', data)
     return code
 
 
