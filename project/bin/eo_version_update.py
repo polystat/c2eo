@@ -6,6 +6,29 @@ import re
 import glob
 
 
+def main():
+    latest_version = get_latest_version()
+    file = 'latest_eo_version.txt'
+    current_version = get_current_version(file)
+
+    if current_version == latest_version:
+        print('We use latest EO version')
+        exit()
+
+    print(f'We use old EO version: "{current_version}"')
+    print('Start updating files')
+
+
+    path_to_files = '/../../**'
+    file_pattern = 'pom.xml'
+    found_files = search_files_by_pattern(path_to_files, file_pattern)
+
+    count_changed_files = update_version_in_files(found_files, latest_version)
+    with open(file, 'w') as f:
+        data = f.write(latest_version)
+    return
+
+
 def get_latest_version():
     print('Check latest EO version')
     url = 'https://search.maven.org/solrsearch/select?q=g:"org.eolang"a:"eo-parent"&rows=1&wt=json'
@@ -24,8 +47,8 @@ def get_current_version(file):
     return current_version
 
 
-def search_files_by_name(dir, file_pattern):
-    print(f'Looking for {file_pattern} files')
+def search_files_by_pattern(dir, file_pattern):
+    print(f'Looking for "{file_pattern}" files')
     path = os.path.join(dir, file_pattern)
     found_files = glob.glob(path, recursive=True)
     print(f'Found {len(found_files)} files')
@@ -55,21 +78,7 @@ def update_version_in_files(files, latest_version):
 
 
 if __name__ == '__main__':
-    latest_version = get_latest_version()
-    file = 'latest_eo_version.txt'
-    current_version = get_current_version(file)
-
-    if current_version == latest_version:
-        print('We use latest EO version')
-        exit()
-
-    print(f'We use old EO version: "{current_version}"')
-    print('Start updating files')
-
-    path = '../../**'
-    file_pattern = 'pom.xml'
-    found_files = search_files_by_name(path, file_pattern)
-
-    count_changed_files = update_version_in_files(found_files, latest_version)
-    with open(file, 'w') as f:
-        data = f.write(latest_version)
+    origin_path = os.getcwd()
+    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
+    main()
+    os.chdir(origin_path)
