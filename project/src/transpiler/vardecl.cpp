@@ -345,8 +345,6 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
     } else {
         str = "";
         Stmt* body = (Stmt * )((clang::InitListExpr * )(VD->getInit()));
-        //::context = &VD->getASTContext();
-        //llvm::outs() << "$$$ = " << csg->statements.size() << "\n";
         getListValue(body, str, &VD->getASTContext());
         llvm::outs() << "    no Initial Value\n";
     }
@@ -431,12 +429,9 @@ void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
         if ((*it)->getStmtClass() == Stmt::InitListExprClass)
             getListValue(*it, str, context);
         else {
-            //(*it)->dump();
             StmtGen* asg = getASTStmtGen((Stmt*)(*it), context);
             std::stringstream ss;
             asg->Generate(ss);
-
-            //llvm::outs() << ss.str() << "\n";
             if (!str.empty()) str += " ";
             str += "(" + ss.str() + ")";
         }

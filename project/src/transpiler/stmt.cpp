@@ -12,8 +12,6 @@ UnaryStmtGen* getEmptyUnaryGen();
 
 StmtGen* getStmtGen(const Stmt* i);
 
-StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context);
-
 UnaryStmtGen* getEmptyUnaryGen(const Expr* pExpr);
 
 UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr);
