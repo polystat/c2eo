@@ -431,12 +431,12 @@ void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
         if ((*it)->getStmtClass() == Stmt::InitListExprClass)
             getListValue(*it, str, context);
         else {
-            (*it)->dump();
+            //(*it)->dump();
             StmtGen* asg = getASTStmtGen((Stmt*)(*it), context);
             std::stringstream ss;
             asg->Generate(ss);
 
-            llvm::outs() << ss.str() << "\n";
+            //llvm::outs() << ss.str() << "\n";
             if (!str.empty()) str += " ";
             str += "(" + ss.str() + ")";
         }

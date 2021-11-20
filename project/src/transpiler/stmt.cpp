@@ -195,6 +195,20 @@ StmtGen* getStmtGen(const Stmt* i) {
         const DoStmt* cs = (DoStmt*) i;
         stmtGen = getDoWhileStmtGenerator(cs);
     }
+    if (stmtClass == Stmt::MemberExprClass) {
+        // TODO: fix MemberExpr
+        UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+        unaryStmtGen->postfix = "";
+        DeclRefExpr* declExpr = (DeclRefExpr * )i;
+        while (declExpr->getStmtClass() == Stmt::MemberExprClass) {
+            std::string field_name = ".f_";
+            field_name += ((MemberExpr*)declExpr)->getMemberDecl()->getNameAsString();
+            unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
+            declExpr = (DeclRefExpr * )(*declExpr->child_begin());
+        }
+        unaryStmtGen->nestedStmt = getDeclName(declExpr);
+        stmtGen = unaryStmtGen;
+    }
     return stmtGen;
 }
 
