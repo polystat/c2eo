@@ -16,21 +16,23 @@ def main():
 
     result_path = '../../result/eo/c2eo/src/'
     start_collecting(assembly_path, result_path)
-    print('Transpilation done')
+    print('Transpilation done\n')
     return
 
 
 def start_transpilation(path_to_assembly, path_to_c_file):
     clear_dir(path_to_assembly, '*')
+    print('\nTranspilation start\n')
     output_name = 'static01'
     os.system(f'./c2eo {path_to_c_file} {output_name}')
+    print('=' * 35)
     return
 
 
 def start_collecting(path_from, path_to):
     clear_dir(path_to, '*')
     os.system('./collector.py')
-    print('\nMove global.eo to src dir')
+    print('Move global.eo to src dir')
     shutil.move(os.path.join(path_from, 'global.eo'), path_to)
     return
 
