@@ -150,9 +150,8 @@ void UnaryStmtGen::Generate(std::ostream &out) {
     out << value;
     if (!empty)
         out << "(";
-    if (nestedStmt != nullptr) {
+    if (nestedStmt != nullptr)
         nestedStmt->Generate(out);
-    }
     out << postfix;
     if (!empty)
         out << ")";
@@ -212,14 +211,14 @@ void RecordGen::Generate(std::ostream &out) {
     }
     if (!fields.empty())
         out << "\n";
-    /*out << "\n" << StmtGen::getIndentSpaces() << "[value] > write\n";
+    out << "\n" << StmtGen::getIndentSpaces() << "[value] > write\n";
     shift++;
     out << StmtGen::getIndentSpaces() << "seq > @";
     shift++;
     for (RecordGen* vg: fields)
         out << "\n" << StmtGen::getIndentSpaces() << "^." << vg->name << ".write (value." << vg->name << ")";
     out << "\n" << StmtGen::getIndentSpaces() << "TRUE\n";
-    shift -= 3;*/
+    shift -= 3;
 }
 
 void WhileStmtGen::Generate(std::ostream &out) {
