@@ -21,6 +21,7 @@ def main():
     print_code("global.eo:", result_code)
     with open(os.path.join(path_to_files, 'global.eo'), 'w') as f:
         f.write(result_code)
+    print('Collecting files done')
     return
 
 
@@ -74,7 +75,5 @@ def print_code(title, code):
 
 
 if __name__ == '__main__':
-    origin_path = os.getcwd()
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
     main()
-    os.chdir(origin_path)

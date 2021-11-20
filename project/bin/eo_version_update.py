@@ -13,11 +13,10 @@ def main():
     current_version = get_current_version(file)
 
     if current_version == latest_version:
-        return 'We use latest EO version'
+        print('We use latest EO version')
+        return
 
-    print(f'We use old EO version: "{current_version}"')
-    print('Start updating files')
-
+    print(f'We use old EO version: "{current_version}"\nStart updating files')
     path_to_files = '../../**'
     file_pattern = 'pom.xml'
     found_files = search_files_by_pattern(path_to_files, file_pattern)
@@ -25,7 +24,8 @@ def main():
     count_changed_files = update_version_in_files(found_files, latest_version)
     with open(file, 'w') as f:
         data = f.write(latest_version)
-    return 'EO version updated'
+    print('EO version updated')
+    return
 
 
 def get_latest_version():
@@ -78,4 +78,4 @@ def update_version_in_files(files, latest_version):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    print(main())
+    main()
