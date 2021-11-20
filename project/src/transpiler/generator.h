@@ -40,7 +40,8 @@ struct AbstractGen {
         GK_LastStmtGen,
         GK_SpaceGen,
         GK_SourceGen,
-        GK_RecordDecl
+        GK_RecordDecl,
+        //GK_FieldGen
     };
 
     const GenKind Kind;
@@ -77,6 +78,16 @@ struct VarGen: AbstractGen {
 
 };
 
+
+/*//-------------------------------------------------------------------------------------------------
+// Генератор кода для полей объектов.
+// Накапливает необходимые значения в соответствующих строках.
+struct FieldGen: VarGen {
+    size_t count = 0;
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_FieldGen;
+    }
+};*/
 
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для структур и объединений.

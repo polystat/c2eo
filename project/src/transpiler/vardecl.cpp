@@ -344,10 +344,10 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
         llvm::outs() << str << "\n";
     } else {
         str = "";
-        Stmt* body = (Stmt*)((clang::InitListExpr * )(VD->getInit()));
-        llvm::outs() << "\x1B[33m";
-        getListValue(body, str);
-        llvm::outs() << "\033[0m";
+        Stmt* body = (Stmt * )((clang::InitListExpr * )(VD->getInit()));
+        //::context = &VD->getASTContext();
+        //llvm::outs() << "$$$ = " << csg->statements.size() << "\n";
+        getListValue(body, str, &VD->getASTContext());
         llvm::outs() << "    no Initial Value\n";
     }
 }
@@ -425,21 +425,20 @@ void getTypeName(const ValueDecl* VD, std::string &str) {
     }
 }
 
-void getListValue(const Stmt* stmt, std::string &str) {
-    for (InitListExpr::iterator it = ((clang::InitListExpr * )stmt)->begin();
-         it != ((clang::InitListExpr * )stmt)->end(); it++) {
-        char* stmtName = (char*)((*it)->getStmtClassName());
-        //llvm::outs() << stmtName <<"\n";
-        if((*it)->getStmtClass() == Stmt::InitListExprClass){
-            //(*it)->dump();
-            llvm::outs() << stmtName <<"Class\n\n";
-            getListValue(*it, str);
-        } else {
+void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
+    for (InitListExpr::iterator it = ((clang::InitListExpr*) stmt)->begin();
+         it != ((clang::InitListExpr*) stmt)->end(); it++) {
+        if ((*it)->getStmtClass() == Stmt::InitListExprClass)
+            getListValue(*it, str, context);
+        else {
             (*it)->dump();
-            llvm::outs() << stmtName <<"Class\n\n";
-            StmtGen* asg = getStmtGen((Stmt*) (*it));
+            StmtGen* asg = getASTStmtGen((Stmt*)(*it), context);
+            std::stringstream ss;
+            asg->Generate(ss);
+
+            llvm::outs() << ss.str() << "\n";
             if (!str.empty()) str += " ";
-            str += "(" + asg->value + ")";
+            str += "(" + ss.str() + ")";
         }
     }
 }

@@ -10,6 +10,10 @@ UnaryStmtGen* getCastGen(const ImplicitCastExpr* pExpr);
 
 UnaryStmtGen* getEmptyUnaryGen();
 
+StmtGen* getStmtGen(const Stmt* i);
+
+StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context);
+
 UnaryStmtGen* getEmptyUnaryGen(const Expr* pExpr);
 
 UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr);
@@ -68,6 +72,11 @@ void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context) {
         //auto isAssigmentOperator = ;
     }
 #endif
+}
+
+StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context){
+    ::context = context;
+    return getStmtGen(i);
 }
 
 CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt* CS, ASTContext* context, bool isDecorator) {
