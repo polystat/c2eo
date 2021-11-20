@@ -150,9 +150,8 @@ void UnaryStmtGen::Generate(std::ostream &out) {
     out << value;
     if (!empty)
         out << "(";
-    if (nestedStmt != nullptr) {
+    if (nestedStmt != nullptr)
         nestedStmt->Generate(out);
-    }
     out << postfix;
     if (!empty)
         out << ")";
@@ -201,21 +200,25 @@ void RecordGen::Generate(std::ostream &out) {
         out << " field_init_" << i;
     out << "] > " << name;
     out << "\n";
-    out << StmtGen::getIndentSpaces();
-    out << "  \"" << type << "\" > type\n";
+    shift++;
+    out << StmtGen::getIndentSpaces() << "\"" << type << "\" > type\n";
     size_t j = 0;
     for (RecordGen* rg: fields) {
-        out << "\n" << StmtGen::getIndentSpaces() << "  " << rg->type << " ";
+        out << "\n" << StmtGen::getIndentSpaces() << rg->type << " ";
         for (size_t i = 0; i < rg->count; i++, j++)
             out << "field_init_" << j << " ";
         out << "> " << rg->name;
     }
     if (!fields.empty())
         out << "\n";
-    /*out << "\n" << StmtGen::getIndentSpaces() << "  [value] > write\n" << StmtGen::getIndentSpaces() << "    seq > @";
+    out << "\n" << StmtGen::getIndentSpaces() << "[value] > write\n";
+    shift++;
+    out << StmtGen::getIndentSpaces() << "seq > @";
+    shift++;
     for (RecordGen* vg: fields)
-        out << "\n" << StmtGen::getIndentSpaces() << "    ^." << vg->name << ".write (value." << vg->name << ")";
-    out << "\n" << StmtGen::getIndentSpaces() << "    TRUE\n";*/
+        out << "\n" << StmtGen::getIndentSpaces() << "^." << vg->name << ".write (value." << vg->name << ")";
+    out << "\n" << StmtGen::getIndentSpaces() << "TRUE\n";
+    shift -= 3;
 }
 
 void WhileStmtGen::Generate(std::ostream &out) {

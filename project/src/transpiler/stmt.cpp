@@ -10,6 +10,8 @@ UnaryStmtGen* getCastGen(const ImplicitCastExpr* pExpr);
 
 UnaryStmtGen* getEmptyUnaryGen();
 
+StmtGen* getStmtGen(const Stmt* i);
+
 UnaryStmtGen* getEmptyUnaryGen(const Expr* pExpr);
 
 UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr);
@@ -68,6 +70,11 @@ void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context) {
         //auto isAssigmentOperator = ;
     }
 #endif
+}
+
+StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context){
+    ::context = context;
+    return getStmtGen(i);
 }
 
 CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt* CS, ASTContext* context, bool isDecorator) {
@@ -185,6 +192,20 @@ StmtGen* getStmtGen(const Stmt* i) {
     if (stmtClass == Stmt::DoStmtClass) {
         const DoStmt* cs = (DoStmt*) i;
         stmtGen = getDoWhileStmtGenerator(cs);
+    }
+    if (stmtClass == Stmt::MemberExprClass) {
+        // TODO: fix MemberExpr
+        UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
+        unaryStmtGen->postfix = "";
+        DeclRefExpr* declExpr = (DeclRefExpr * )i;
+        while (declExpr->getStmtClass() == Stmt::MemberExprClass) {
+            std::string field_name = ".f_";
+            field_name += ((MemberExpr*)declExpr)->getMemberDecl()->getNameAsString();
+            unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
+            declExpr = (DeclRefExpr * )(*declExpr->child_begin());
+        }
+        unaryStmtGen->nestedStmt = getDeclName(declExpr);
+        stmtGen = unaryStmtGen;
     }
     return stmtGen;
 }
