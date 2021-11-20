@@ -13,7 +13,7 @@ def main():
     current_version = get_current_version(file)
 
     if current_version == latest_version:
-        print('We use latest EO version')
+        print('We use latest EO version\n')
         return
 
     print(f'We use old EO version: "{current_version}"\nStart updating files')
@@ -24,7 +24,7 @@ def main():
     count_changed_files = update_version_in_files(found_files, latest_version)
     with open(file, 'w') as f:
         data = f.write(latest_version)
-    print('EO version updated')
+    print('EO version updated\n')
     return
 
 
