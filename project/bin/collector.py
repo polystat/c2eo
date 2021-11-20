@@ -18,7 +18,7 @@ def main():
     print()
     result_code += read_code_from_static_files(path_to_files)
 
-    print_code("global.eo:", result_code)
+    print_code('global.eo:', result_code)
     with open(os.path.join(path_to_files, 'global.eo'), 'w') as f:
         f.write(result_code)
     print('Collecting files done')
