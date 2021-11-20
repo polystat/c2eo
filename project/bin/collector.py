@@ -25,16 +25,16 @@ def main():
     return
 
 
-def read_code_from_global_files(dir):
+def read_code_from_global_files(path):
     code = ''
-    for file in search_files_by_pattern(dir, '*.glob'):
+    for file in search_files_by_pattern(path, '*.glob'):
         code += read_code_from_file(file, indent='  ')
     return code
 
 
-def read_code_from_static_files(dir):
+def read_code_from_static_files(path):
     code = ''
-    for file in search_files_by_pattern(dir, '*.stat'):
+    for file in search_files_by_pattern(path, '*.stat'):
         name = get_only_file_name(file)
         code += f'  [] > {name}\n'
         code += read_code_from_file(file, indent='    ')
@@ -47,10 +47,10 @@ def get_only_file_name(path):
     return name
 
 
-def search_files_by_pattern(dir, file_pattern):
+def search_files_by_pattern(path, file_pattern):
     print(f'Looking for "{file_pattern}" files')
-    path = os.path.join(dir, file_pattern)
-    found_files = glob.glob(path)
+    pattern = os.path.join(path, file_pattern)
+    found_files = glob.glob(pattern)
     # Keep only file basename
     file_names = list(map(lambda x: os.path.basename(x), found_files))
     print(f'Found {len(found_files)} files: {file_names}')

@@ -46,10 +46,10 @@ def get_current_version(file):
     return current_version
 
 
-def search_files_by_pattern(dir, file_pattern):
+def search_files_by_pattern(path, file_pattern):
     print(f'Looking for "{file_pattern}" files')
-    path = os.path.join(dir, file_pattern)
-    found_files = glob.glob(path, recursive=True)
+    pattern = os.path.join(path, file_pattern)
+    found_files = glob.glob(pattern, recursive=True)
     print(f'Found {len(found_files)} files')
     return found_files
 
