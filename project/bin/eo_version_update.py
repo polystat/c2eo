@@ -13,8 +13,7 @@ def main():
     current_version = get_current_version(file)
 
     if current_version == latest_version:
-        print('We use latest EO version')
-        exit()
+        return 'We use latest EO version'
 
     print(f'We use old EO version: "{current_version}"')
     print('Start updating files')
@@ -26,7 +25,7 @@ def main():
     count_changed_files = update_version_in_files(found_files, latest_version)
     with open(file, 'w') as f:
         data = f.write(latest_version)
-    return
+    return 'EO version updated'
 
 
 def get_latest_version():
@@ -78,7 +77,5 @@ def update_version_in_files(files, latest_version):
 
 
 if __name__ == '__main__':
-    origin_path = os.getcwd()
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    main()
-    os.chdir(origin_path)
+    print(main())
