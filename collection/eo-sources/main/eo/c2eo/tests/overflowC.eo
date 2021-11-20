@@ -7,6 +7,7 @@
 +alias c2eo.ctypes.c_int64
 +alias c2eo.ctypes.c_uint16
 +alias c2eo.ctypes.c_uint32
++alias c2eo.coperators.write
 
 [] > overflowC
 
@@ -25,12 +26,12 @@
   seq > non_initialized
 
     printf "write\n"
-    c_1.write 300
-    i16_1.write 65000
-    i32_1.write 9223372036324
-    i64_1.write 9223372036854775807
-    ui16_1.write 9223372036324
-    ui32_1.write 9223372036324
+    write c_1 300
+    write i16_1 65000
+    write i32_1 9223372036324
+    write i64_1 9223372036854775807
+    write ui16_1 9223372036324
+    write ui32_1 9223372036324
 
     printf "char = %d  ->  char = %d\n" 300 c_1
     printf "int16 = %d  ->  int16 = %d\n" 65000 i16_1
@@ -39,12 +40,12 @@
     printf "uint16 = %d  ->  uint16 = %d\n" 9223372036324 ui16_1
     printf "uint32 = %d  ->  uint32 = %d\n\n" 9223372036324 ui32_1
 
-    c_1.write -300
-    i16_1.write -65000
-    i32_1.write -9223372036324
-    i64_1.write -9223372036854775808
-    ui16_1.write -9223372036324
-    ui32_1.write -9223372036324
+    write c_1 -300
+    write i16_1 -65000
+    write i32_1 -9223372036324
+    write i64_1 -9223372036854775808
+    write ui16_1 -9223372036324
+    write ui32_1 -9223372036324
 
     printf "char = %d  ->  char = %d\n" -300 c_1
     printf "int16 = %d  ->  int16 = %d\n" -65000 i16_1

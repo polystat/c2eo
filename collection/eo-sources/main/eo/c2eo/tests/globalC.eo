@@ -11,6 +11,7 @@
 +alias c2eo.ctypes.c_uint16
 +alias c2eo.ctypes.c_uint32
 +alias c2eo.ctypes.c_uint64
++alias c2eo.coperators.write
 
 [] > globalC
 
@@ -32,16 +33,16 @@
 
   seq > non_initialized
 
-    b_1.write 231
-    c_1.write 2
-    f32_1.write 3.1415
-    f64_1.write 3.1415
-    i16_1.write 127
-    i32_1.write 255
-    i64_1.write 511
-    ui16_1.write 352
-    ui32_1.write 231
-    ui64_1.write 2342
+    write b_1 231
+    write c_1 2
+    write f32_1 3.1415
+    write f64_1 3.1415
+    write i16_1 127
+    write i32_1 255
+    write i64_1 511
+    write ui16_1 352
+    write ui32_1 231
+    write ui64_1 2342
 
     printf "b_1 = %d\n" b_1
     printf "c_1 = %d\n" c_1

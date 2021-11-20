@@ -32,5 +32,6 @@
 +alias c2eo.coperators.or
 +alias c2eo.coperators.pow
 +alias c2eo.coperators.sub
++alias c2eo.coperators.write
 
 [arg] > global

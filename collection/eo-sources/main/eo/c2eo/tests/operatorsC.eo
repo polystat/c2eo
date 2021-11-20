@@ -24,6 +24,7 @@
 +alias c2eo.coperators.or
 +alias c2eo.coperators.pow
 +alias c2eo.coperators.sub
++alias c2eo.coperators.write
 
 [] > operatorsC
 
@@ -36,113 +37,113 @@
   memory > c
 
   seq > @
-    c.write (add ai bi)
-    printf "c.write (add %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (add ai bi)
+    printf "write c (add %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (and ai bi)
-    printf "c.write (and %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (and ai bi)
+    printf "write c (and %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (div ai bi)
-    printf "c.write (div %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (div ai bi)
+    printf "write c (div %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (eq ai bi)
-    printf "c.write (eq %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (eq ai bi)
+    printf "write c (eq %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (geq ai bi)
-    printf "c.write (geq %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (geq ai bi)
+    printf "write c (geq %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (greater ai bi)
-    printf "c.write (greater %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (greater ai bi)
+    printf "write c (greater %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (leq ai bi)
-    printf "c.write (leq %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (leq ai bi)
+    printf "write c (leq %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (less ai bi)
-    printf "c.write (less %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (less ai bi)
+    printf "write c (less %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (mod ai bi)
-    printf "c.write (mod %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (mod ai bi)
+    printf "write c (mod %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (mul ai bi)
-    printf "c.write (mul %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (mul ai bi)
+    printf "write c (mul %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (neq ai bi)
-    printf "c.write (neq %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (neq ai bi)
+    printf "write c (neq %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (or ai bi)
-    printf "c.write (or %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (or ai bi)
+    printf "write c (or %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (pow ai bi)
-    printf "c.write (pow %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (pow ai bi)
+    printf "write c (pow %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (sub ai bi)
-    printf "c.write (sub %d %d) -> c = %s\n" ai bi (as-string c)
+    write c (sub ai bi)
+    printf "write c (sub %d %d) -> c = %s\n" ai bi (as-string c)
 
-    c.write (abs ai)
-    printf "c.write (abs %d) -> c = %s\n" ai (as-string c)
+    write c (abs ai)
+    printf "write c (abs %d) -> c = %s\n" ai (as-string c)
 
-    c.write (as-bool ai)
-    printf "c.write (as-bool %d) -> c = %b\n" ai c
+    write c (as-bool ai)
+    printf "write c (as-bool %d) -> c = %b\n" ai c
 
-    c.write (as-float ai)
-    printf "c.write (as-float %d) -> c = %s\n" ai (as-string c)
+    write c (as-float ai)
+    printf "write c (as-float %d) -> c = %s\n" ai (as-string c)
 
-    c.write (neg ai)
-    printf "c.write (neg %d) -> c = %s\n" ai (as-string c)
+    write c (neg ai)
+    printf "write c (neg %d) -> c = %s\n" ai (as-string c)
 
-    c.write (not ai)
-    printf "c.write (not %d) -> c = %s\n" ai (as-string c)
+    write c (not ai)
+    printf "write c (not %d) -> c = %s\n" ai (as-string c)
 
-    c.write (add af bf)
-    printf "c.write (add %f %f) -> c = %s\n" af bf (as-string c)
+    write c (add af bf)
+    printf "write c (add %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (and af bf)
-    printf "c.write (and %f %f) -> c = %s\n" af bf (as-string c)
+    write c (and af bf)
+    printf "write c (and %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (div af bf)
-    printf "c.write (div %f %f) -> c = %s\n" af bf (as-string c)
+    write c (div af bf)
+    printf "write c (div %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (eq af bf)
-    printf "c.write (eq %f %f) -> c = %s\n" af bf (as-string c)
+    write c (eq af bf)
+    printf "write c (eq %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (geq af bf)
-    printf "c.write (geq %f %f) -> c = %s\n" af bf (as-string c)
+    write c (geq af bf)
+    printf "write c (geq %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (greater af bf)
-    printf "c.write (greater %f %f) -> c = %s\n" af bf (as-string c)
+    write c (greater af bf)
+    printf "write c (greater %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (leq af bf)
-    printf "c.write (leq %f %f) -> c = %s\n" af bf (as-string c)
+    write c (leq af bf)
+    printf "write c (leq %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (less af bf)
-    printf "c.write (less %f %f) -> c = %s\n" af bf (as-string c)
+    write c (less af bf)
+    printf "write c (less %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (mul af bf)
-    printf "c.write (mul %f %f) -> c = %s\n" af bf (as-string c)
+    write c (mul af bf)
+    printf "write c (mul %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (neq af bf)
-    printf "c.write (neq %f %f) -> c = %s\n" af bf (as-string c)
+    write c (neq af bf)
+    printf "write c (neq %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (or af bf)
-    printf "c.write (or %f %f) -> c = %s\n" af bf (as-string c)
+    write c (or af bf)
+    printf "write c (or %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (pow af bf)
-    printf "c.write (pow %f %f) -> c = %s\n" af bf (as-string c)
+    write c (pow af bf)
+    printf "write c (pow %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (sub af bf)
-    printf "c.write (sub %f %f) -> c = %s\n" af bf (as-string c)
+    write c (sub af bf)
+    printf "write c (sub %f %f) -> c = %s\n" af bf (as-string c)
 
-    c.write (abs af)
-    printf "c.write (abs %f) -> c = %s\n" af (as-string c)
+    write c (abs af)
+    printf "write c (abs %f) -> c = %s\n" af (as-string c)
 
-    c.write (as-bool af)
-    printf "c.write (as-bool %f) -> c = %b\n" af c
+    write c (as-bool af)
+    printf "write c (as-bool %f) -> c = %b\n" af c
 
-    c.write (as-int af)
-    printf "c.write (as-int %f) -> c = %s\n" af (as-string c)
+    write c (as-int af)
+    printf "write c (as-int %f) -> c = %s\n" af (as-string c)
 
-    c.write (neg af)
-    printf "c.write (neg %f) -> c = %s\n" af (as-string c)
+    write c (neg af)
+    printf "write c (neg %f) -> c = %s\n" af (as-string c)
 
-    c.write (not af)
-    printf "c.write (not %f) -> c = %s\n" af (as-string c)
+    write c (not af)
+    printf "write c (not %f) -> c = %s\n" af (as-string c)
