@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int a = 5;
 int b = 10;
 
@@ -6,6 +8,7 @@ void do_math() {
 }
 
 void do_print() {
+    printf("%d\n", a);
     a;
 }
 

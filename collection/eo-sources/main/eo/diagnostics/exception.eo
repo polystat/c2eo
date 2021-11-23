@@ -1,6 +1,0 @@
-+package diagnostics
-
-+alias org.eolang.txt.sprintf
-
-[message] > exception
-  sprintf "\n[\033[31mERROR\033[0m] %s\n" message > @
