@@ -1,77 +1,79 @@
 #! /usr/bin/python3
-# collector.py - запуск транспилятора и сборщика, очистка промежуточных хранилищ.
+# Collect all generated eo files into one global.
 
-# ------------------------------------------------------------------------------
 import os
 import glob
 import shutil
-
-# ------------------------------------------------------------------------------
-# Каталог для размещения файлов на EO, полученных в ходе транспиляции и сборки
-# Указан относительно текущего каталога
 import sys
+import re
 
-resultDir = '../../result/eo/c2eo/src/'
 
-# ------------------------------------------------------------------------------
-# Каталог в котором формируется файл global.eo для последующей пересылки в
-# каталог проекта на EO
-assemblyDir = '../assembly/'
+def main():
+    print('\nStart collecting files\n')
+    path_to_files = '../assembly'
+    with open('meta.txt', 'r') as f:  # Read part of default code for global result
+        result_code = f.read()
 
-# Фрагмент данных с метаинформацией и началом глобального объекта
-with open('meta.txt', 'r') as f:
-    meta = f.read()
+    result_code += read_code_from_global_files(path_to_files)
+    print()
+    result_code += read_code_from_static_files(path_to_files)
 
-# ------------------------------------------------------------------------------
+    print_code('global.eo:', result_code)
+    with open(os.path.join(path_to_files, 'global.eo'), 'w') as f:
+        f.write(result_code)
+    print('Collecting files done')
+    return
+
+
+def read_code_from_global_files(path):
+    code = ''
+    for file in search_files_by_pattern(path, '*.glob'):
+        code += read_code_from_file(file, indent='  ')
+    return code
+
+
+def read_code_from_static_files(path):
+    code = ''
+    for file in search_files_by_pattern(path, '*.stat'):
+        name = get_only_file_name(file)
+        code += f'  [] > {name}\n'
+        code += read_code_from_file(file, indent='    ')
+    return code
+
+
+def get_only_file_name(path):
+    file = os.path.basename(path)
+    name = os.path.splitext(file)[0]
+    return name
+
+
+def search_files_by_pattern(path, file_pattern):
+    print(f'Looking for "{file_pattern}" files')
+    pattern = os.path.join(path, file_pattern)
+    found_files = glob.glob(pattern)
+    # Keep only file basename
+    file_names = list(map(lambda x: os.path.basename(x), found_files))
+    print(f'Found {len(found_files)} files: {file_names}')
+    return found_files
+
+
+def read_code_from_file(file, indent):
+    code = ''
+    with open(file, 'r') as f:
+        for line in f:
+            if line != '\n':
+                code += indent
+            code += line
+    return code
+
+
+def print_code(title, code):
+    print(f'\n{title}')
+    print('-' * 50)
+    print(code)
+    print('-' * 50)
+
+
 if __name__ == '__main__':
-    print('Hello from collector!!!!')
-
-    argc = len(sys.argv)
-    argv = sys.argv
-    pathToCurrDir = argv[0].replace('collector.py', '')
-
-    # Получение текущего каталога
-    print(f'Current Working Directory is: {os.getcwd()}')
-    # Проверка наличия нужного каталога
-    if os.path.exists(pathToCurrDir + assemblyDir):
-        print(f'Resul Directory is: {pathToCurrDir + assemblyDir}')
-
-    # Получение содержимого каталога
-    # print(f'Directory {pathToCurrDir + assemblyDir} contain: {os.listdir(pathToCurrDir + assemblyDir)}')
-    assemlyStaticFileList = list(
-        glob.glob(os.path.join(pathToCurrDir + assemblyDir, '*.stat')))
-    print(
-        f'Static objects. Directory {pathToCurrDir + assemblyDir} contain files: {assemlyStaticFileList}')
-    assemlyGlobalFileList = list(
-        glob.glob(os.path.join(pathToCurrDir + assemblyDir, '*.glob')))
-    print(
-        f'Global objects. Directory {pathToCurrDir + assemblyDir} contain files: {assemlyGlobalFileList}')
-
-    # Сборка файла global.eo
-    # Формирование всех глобальных объектов
-    collectInfo = meta
-    for globalFile in assemlyGlobalFileList:
-        with open(globalFile, 'r') as f:
-            for line in f:
-                # print(line)
-                if line != '\n':
-                    collectInfo += '  '
-                collectInfo += line
-
-    # Добавление в файл всех статических объектов
-    for staticFile in assemlyStaticFileList:
-        # Получение имени файла для использования в качестве имени статического объекта
-        name = os.path.basename(staticFile)
-        name = os.path.splitext(name)[0]
-        print(f'Static object name = {name}')
-        collectInfo += '  [] > ' + name + '\n'
-        with open(staticFile, 'r') as f:
-            for line in f:
-                print(line)
-                if line != '\n':
-                    collectInfo += '    '
-                collectInfo += line
-
-    print(collectInfo)
-    with open(pathToCurrDir + assemblyDir + 'global.eo', 'w') as f:
-        f.write(collectInfo)
+    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
+    main()
