@@ -11,12 +11,17 @@ def main():
     latest_version = get_latest_version()
     file = 'latest_eo_version.txt'
     current_version = get_current_version(file)
+    compare = version_compare(current_version, latest_version)
 
-    if current_version == latest_version:
+    if compare == 0:
         print('We use latest EO version\n')
         return
+    elif compare == 1:
+        latest_version = current_version
+        print(f'Manual update latest EO version to {latest_version}\n')
+    else:
+        print(f'We use old EO version: "{current_version}"\nStart updating files')
 
-    print(f'We use old EO version: "{current_version}"\nStart updating files')
     path_to_files = '../../**'
     file_pattern = 'pom.xml'
     found_files = search_files_by_pattern(path_to_files, file_pattern)
@@ -26,6 +31,17 @@ def main():
         data = f.write(latest_version)
     print('EO version updated\n')
     return
+
+
+def version_compare(ver1, ver2):
+    tokens1 = ver1.split('.')
+    tokens2 = ver2.split('.')
+    for i in range(len(tokens1)):
+        if int(tokens1[i]) > int(tokens2[i]):
+            return 1
+        elif int(tokens1[i]) < int(tokens2[i]):
+            return -1
+    return 0
 
 
 def get_latest_version():
