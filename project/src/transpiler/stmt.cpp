@@ -117,7 +117,7 @@ StmtGen *getCompoundStmtOutputGenerator(const Stmt *pExpr) {
     // Вывод переменной
     UnaryStmtGen *unaryStmtGen = new UnaryStmtGen;
     unaryStmtGen->value = R"(printf "%s\n" )";
-    unaryStmtGen->postfix += ".as-string";
+    //unaryStmtGen->postfix += ".as-string";
     // TODO: fix MemberExpr
     DeclRefExpr *declExpr = (DeclRefExpr *) (*pExpr->child_begin());
     while (declExpr->getStmtClass() == Stmt::MemberExprClass) {
@@ -126,7 +126,10 @@ StmtGen *getCompoundStmtOutputGenerator(const Stmt *pExpr) {
         unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
         declExpr = (DeclRefExpr *) (*declExpr->child_begin());
     }
-    unaryStmtGen->nestedStmt = getDeclName(declExpr);
+    UnaryStmtGen* asStr = new UnaryStmtGen();
+    asStr->value = "as-string ";
+    asStr->nestedStmt = getDeclName(declExpr);
+    unaryStmtGen->nestedStmt = asStr;
     compoundStmt->Add(unaryStmtGen);
     return compoundStmt;
 }
@@ -298,40 +301,44 @@ StmtGen *getFuncCallGenerator(const CallExpr *pExpr) {
 StmtGen *getDoWhileStmtGenerator(const DoStmt *pStmt) {
     auto *gen = new DoWhileStmtGen;
     auto cond = getStmtGen(pStmt->getCond());
-    UnaryStmtGen* asBoolGen = new UnaryStmtGen;
-    asBoolGen->value = "as-bool ";
-    asBoolGen->nestedStmt = cond;
-    gen->Add(asBoolGen);
-    auto* objStmtGen = new ObjectStmtGen;
-    auto body = getStmtGen(pStmt->getBody());
-    auto *bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
-    if (!bodyCmp) {
-        bodyCmp = new CompoundStmtGen;
-        bodyCmp->Add(body);
-    }
-    bodyCmp->is_decorator = true;
-    objStmtGen->body = bodyCmp;
-    gen->Add(objStmtGen);
-    return gen;
-}
-
-StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
-    WhileStmtGen *gen = new WhileStmtGen;
-    auto cond = getStmtGen(pStmt->getCond());
-    UnaryStmtGen* asBoolGen = new UnaryStmtGen;
-    asBoolGen->value = "as-bool ";
-    asBoolGen->nestedStmt = cond;
-    gen->Add(asBoolGen);
-    ObjectStmtGen* objStmtGen = new ObjectStmtGen;
+    // new while object
+    //UnaryStmtGen* asBoolGen = new UnaryStmtGen;
+    //asBoolGen->value = "as-bool ";
+    //asBoolGen->nestedStmt = cond;
+    //gen->Add(asBoolGen);
+    gen->Add(cond);
+    // new while object
+    //ObjectStmtGen* objStmtGen = new ObjectStmtGen;
     auto body = getStmtGen(pStmt->getBody());
     CompoundStmtGen *bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
     if (!bodyCmp) {
         bodyCmp = new CompoundStmtGen;
         bodyCmp->Add(body);
     }
-    bodyCmp->is_decorator = true;
-    objStmtGen->body = bodyCmp;
-    gen->Add(objStmtGen);
+    //gen->Add(objStmtGen);
+    gen->Add(body);
+    return gen;
+}
+
+StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
+    WhileStmtGen *gen = new WhileStmtGen;
+    auto cond = getStmtGen(pStmt->getCond());
+    // new while object
+    //UnaryStmtGen* asBoolGen = new UnaryStmtGen;
+    //asBoolGen->value = "as-bool ";
+    //asBoolGen->nestedStmt = cond;
+    //gen->Add(asBoolGen);
+    gen->Add(cond);
+    // new while object
+    //ObjectStmtGen* objStmtGen = new ObjectStmtGen;
+    auto body = getStmtGen(pStmt->getBody());
+    CompoundStmtGen *bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
+    if (!bodyCmp) {
+        bodyCmp = new CompoundStmtGen;
+        bodyCmp->Add(body);
+    }
+    //gen->Add(objStmtGen);
+    gen->Add(body);
     return gen;
 }
 

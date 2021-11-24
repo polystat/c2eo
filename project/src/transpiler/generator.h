@@ -111,6 +111,7 @@ struct RecordGen: AbstractGen {
 // Накапливает необходимые значения в соответствующих строках.
 struct StmtGen : AbstractGen {
     std::string value;
+    [[deprecated]]
     std::string postfix;
     static std::string getIndentSpaces();
 
@@ -203,6 +204,7 @@ struct BinaryStmtGen: StmtGen {
 // Накапливает необходимые значения в соответствующих строках.
 struct UnaryStmtGen: StmtGen {
     StmtGen* nestedStmt = nullptr;
+    [[deprecated]]
     std::string op;
 
     virtual void Generate(std::ostream &out);
