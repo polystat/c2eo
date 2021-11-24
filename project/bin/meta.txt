@@ -33,5 +33,7 @@
 +alias c2eo.coperators.pow
 +alias c2eo.coperators.sub
 +alias c2eo.coperators.write
++alias c2eo.coperators.while
++alias c2eo.coperators.if
 
 [arg] > global
