@@ -110,13 +110,16 @@ void FuncGen::Generate(std::ostream &out) {
 
 void BinaryStmtGen::Generate(std::ostream &out) {
     //str << value +"(";
-    bool leftLinear = isLeftLinear(left);
+    out << value << " ";
+    //bool leftLinear = isLeftLinear(left);
+    // lets add left brackets everytime
+    bool leftLinear = false;
     if (!leftLinear)
         out << "(";
     out << left;
     if (!leftLinear)
         out << ")";
-    out << value;
+    out << " ";
     bool rightLiteral = llvm::isa<LiteralStmtGen>(right);
     if (!rightLiteral)
         out << "(";
@@ -152,7 +155,8 @@ void UnaryStmtGen::Generate(std::ostream &out) {
         out << "(";
     if (nestedStmt != nullptr)
         nestedStmt->Generate(out);
-    out << postfix;
+    // Now we dont use dot operator and postfix is deprecated
+    //out << postfix;
     if (!empty)
         out << ")";
 }
@@ -181,7 +185,7 @@ SpaceGen::~SpaceGen() {
 
 void IfStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
-    out << "if.\n";
+    out << "if\n";
     AbstractGen::shift++;
     MultiLineStmtGen::Generate(out);
     AbstractGen::shift--;
@@ -223,7 +227,7 @@ void RecordGen::Generate(std::ostream &out) {
 
 void WhileStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
-    out << "while.\n";
+    out << "while\n";
     AbstractGen::shift++;
     MultiLineStmtGen::Generate(out);
     AbstractGen::shift--;
@@ -254,13 +258,11 @@ ObjectStmtGen::~ObjectStmtGen() {
 
 void DoWhileStmtGen::Generate(std::ostream &out) {
     StmtGen* s = nullptr;
-    ObjectStmtGen* body = llvm::dyn_cast<ObjectStmtGen>(statements[1]);
-    if (body) {
-        body->body->Generate(out);
-        out << "\n";
-    }
+    if (!llvm::isa<CompoundStmtGen>(statements[1]))
+        out << getIndentSpaces();
+    out  << statements[1] << "\n";
     out << getIndentSpaces();
-    out << "while.\n";
+    out << "while\n";
     AbstractGen::shift++;
     MultiLineStmtGen::Generate(out);
     AbstractGen::shift--;

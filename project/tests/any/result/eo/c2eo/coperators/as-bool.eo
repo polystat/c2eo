@@ -1,0 +1,7 @@
++package c2eo.coperators
+
+[a] > as-bool
+  not. > @
+    or.
+      (a.as-string).eq "0"
+      (a.as-string).eq "0.0"

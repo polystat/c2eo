@@ -117,7 +117,7 @@ StmtGen *getCompoundStmtOutputGenerator(const Stmt *pExpr) {
     // Вывод переменной
     UnaryStmtGen *unaryStmtGen = new UnaryStmtGen;
     unaryStmtGen->value = R"(printf "%s\n" )";
-    unaryStmtGen->postfix += ".as-string";
+    //unaryStmtGen->postfix += ".as-string";
     // TODO: fix MemberExpr
     DeclRefExpr *declExpr = (DeclRefExpr *) (*pExpr->child_begin());
     while (declExpr->getStmtClass() == Stmt::MemberExprClass) {
@@ -126,7 +126,10 @@ StmtGen *getCompoundStmtOutputGenerator(const Stmt *pExpr) {
         unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
         declExpr = (DeclRefExpr *) (*declExpr->child_begin());
     }
-    unaryStmtGen->nestedStmt = getDeclName(declExpr);
+    UnaryStmtGen* asStr = new UnaryStmtGen();
+    asStr->value = "as-string ";
+    asStr->nestedStmt = getDeclName(declExpr);
+    unaryStmtGen->nestedStmt = asStr;
     compoundStmt->Add(unaryStmtGen);
     return compoundStmt;
 }
@@ -298,34 +301,44 @@ StmtGen *getFuncCallGenerator(const CallExpr *pExpr) {
 StmtGen *getDoWhileStmtGenerator(const DoStmt *pStmt) {
     auto *gen = new DoWhileStmtGen;
     auto cond = getStmtGen(pStmt->getCond());
+    // new while object
+    //UnaryStmtGen* asBoolGen = new UnaryStmtGen;
+    //asBoolGen->value = "as-bool ";
+    //asBoolGen->nestedStmt = cond;
+    //gen->Add(asBoolGen);
     gen->Add(cond);
-    auto *objStmtGen = new ObjectStmtGen;
-    auto body = getStmtGen(pStmt->getBody());
-    auto *bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
-    if (!bodyCmp) {
-        bodyCmp = new CompoundStmtGen;
-        bodyCmp->Add(body);
-    }
-    bodyCmp->is_decorator = true;
-    objStmtGen->body = bodyCmp;
-    gen->Add(objStmtGen);
-    return gen;
-}
-
-StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
-    WhileStmtGen *gen = new WhileStmtGen;
-    auto cond = getStmtGen(pStmt->getCond());
-    gen->Add(cond);
-    ObjectStmtGen *objStmtGen = new ObjectStmtGen;
+    // new while object
+    //ObjectStmtGen* objStmtGen = new ObjectStmtGen;
     auto body = getStmtGen(pStmt->getBody());
     CompoundStmtGen *bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
     if (!bodyCmp) {
         bodyCmp = new CompoundStmtGen;
         bodyCmp->Add(body);
     }
-    bodyCmp->is_decorator = true;
-    objStmtGen->body = bodyCmp;
-    gen->Add(objStmtGen);
+    //gen->Add(objStmtGen);
+    gen->Add(body);
+    return gen;
+}
+
+StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
+    WhileStmtGen *gen = new WhileStmtGen;
+    auto cond = getStmtGen(pStmt->getCond());
+    // new while object
+    //UnaryStmtGen* asBoolGen = new UnaryStmtGen;
+    //asBoolGen->value = "as-bool ";
+    //asBoolGen->nestedStmt = cond;
+    //gen->Add(asBoolGen);
+    gen->Add(cond);
+    // new while object
+    //ObjectStmtGen* objStmtGen = new ObjectStmtGen;
+    auto body = getStmtGen(pStmt->getBody());
+    CompoundStmtGen *bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
+    if (!bodyCmp) {
+        bodyCmp = new CompoundStmtGen;
+        bodyCmp->Add(body);
+    }
+    //gen->Add(objStmtGen);
+    gen->Add(body);
     return gen;
 }
 
@@ -348,7 +361,9 @@ StmtGen *getIfStmtGenerator(const IfStmt *pStmt) {
 UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral) {
     LiteralStmtGen *literalStmtGen = new LiteralStmtGen;
     auto floatValue = pLiteral->getValue().convertToDouble();
-    literalStmtGen->value = "c_float64 " + std::to_string(floatValue);
+    //literalStmtGen->value = "c_float64 " + std::to_string(floatValue);
+    //Remove type in floating literal
+    literalStmtGen->value = std::to_string(floatValue);
     literalStmtGen->nestedStmt = nullptr;
     return literalStmtGen;
 }
@@ -360,7 +375,9 @@ UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral) {
 
 UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt) {
     LiteralStmtGen *literalStmtGen = new LiteralStmtGen;
-    literalStmtGen->value = "c_int32 " + pNum.toString(10, isSignedInt);
+    //literalStmtGen->value = "c_int32 " + pNum.toString(10, isSignedInt);
+    //Now remove type in literal
+    literalStmtGen->value = pNum.toString(10, isSignedInt);
     literalStmtGen->nestedStmt = nullptr;
     return literalStmtGen;
 }
@@ -401,8 +418,9 @@ UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr) {
 UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator) {
     UnaryStmtGen *unaryStmtGen = new UnaryStmtGen;
     std::string opName = pOperator->getOpcodeStr(pOperator->getOpcode()).str();
-    if (opName == "-") {
-        unaryStmtGen->postfix = ".neg";
+    if (opName == "-")
+    {
+        unaryStmtGen->value = "neg ";
     }
     unaryStmtGen->nestedStmt = getStmtGen(*pOperator->child_begin());
     return unaryStmtGen;
@@ -411,31 +429,56 @@ UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator) {
 BinaryStmtGen *getBinaryStatement(const BinaryOperator *pOperator) {
     BinaryStmtGen *binaryStmtGen = new BinaryStmtGen;
     std::string opName = pOperator->getOpcodeStr().str();
-    if (opName.compare("=") == 0) {
-        binaryStmtGen->value = ".write ";
-    } else if (opName.compare("+") == 0) {
-        binaryStmtGen->value = ".add ";
-    } else if (opName.compare("-") == 0) {
-        binaryStmtGen->value = ".sub ";
-    } else if (opName.compare("*") == 0) {
-        binaryStmtGen->value = ".mul ";
-    } else if (opName.compare("/") == 0) {
-        binaryStmtGen->value = ".div ";
-    } else if (opName.compare("%") == 0) {
-        binaryStmtGen->value = ".mod ";
-    } else if (opName.compare("==") == 0) {
-        binaryStmtGen->value = ".eq ";
-    } else if (opName.compare("!=") == 0) {
-        binaryStmtGen->value = ".neq ";
-    } else if (opName == "<") {
-        binaryStmtGen->value = ".less ";
-    } else if (opName.compare("<=") == 0) {
-        binaryStmtGen->value = ".leq ";
-    } else if (opName.compare(">") == 0) {
-        binaryStmtGen->value = ".greater ";
-    } else if (opName.compare(">=") == 0) {
-        binaryStmtGen->value = ".geq ";
-    } else {
+    if (opName.compare("=") == 0)
+    {
+        binaryStmtGen->value = "write";
+    }
+    else if (opName.compare("+") == 0)
+    {
+        binaryStmtGen->value = "add";
+    }
+    else if (opName.compare("-") == 0)
+    {
+        binaryStmtGen->value = "sub";
+    }
+    else if (opName.compare("*") == 0)
+    {
+        binaryStmtGen->value = "mul";
+    }
+    else if (opName.compare("/") == 0)
+    {
+        binaryStmtGen->value = "div ";
+    }
+    else if (opName.compare("%") == 0)
+    {
+        binaryStmtGen->value = "mod";
+    }
+    else if (opName.compare("==") == 0)
+    {
+        binaryStmtGen->value = "eq";
+    }
+    else if (opName.compare("!=") == 0)
+    {
+        binaryStmtGen->value = "neq";
+    }
+    else if (opName == "<")
+    {
+        binaryStmtGen->value = "less";
+    }
+    else if (opName.compare("<=") == 0)
+    {
+        binaryStmtGen->value = "leq";
+    }
+    else if (opName.compare(">") == 0)
+    {
+        binaryStmtGen->value = "greater";
+    }
+    else if (opName.compare(">=") == 0)
+    {
+        binaryStmtGen->value = "geq";
+    }
+    else
+    {
         binaryStmtGen->value = "";
     }
     binaryStmtGen->left = getStmtGen(*pOperator->child_begin());

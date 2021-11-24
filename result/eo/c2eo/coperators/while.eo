@@ -1,0 +1,9 @@
++package c2eo.coperators
+
++alias c2eo.coperators.as-bool
+
+[a b] > while
+  while. > @
+    as-bool a
+    [i]
+      b > @
