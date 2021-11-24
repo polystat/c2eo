@@ -91,7 +91,7 @@ void FuncGen::Generate(std::ostream &out) {
     } else {
         for (const auto &paramName: paramNames) {
             out << paramName;
-            out << ", ";
+            out << " ";
         }
         out << "ret_param_xxxx] > ";
         out << name;

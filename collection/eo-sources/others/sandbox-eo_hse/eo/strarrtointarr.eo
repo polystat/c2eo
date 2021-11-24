@@ -1,8 +1,0 @@
-+package sandbox
-
-[arr] > strarrtointarr
-  map. > @
-    arr
-    []
-      [current] > map
-        current.toInt > @

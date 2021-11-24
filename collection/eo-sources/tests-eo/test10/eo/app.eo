@@ -1,7 +1,0 @@
-+package test10
-+alias stdout org.eolang.io.stdout
-
-# Попытка выполнить цикл
-[] > app
-  stdout > @
-    "Hello!\n"

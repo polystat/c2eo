@@ -1,7 +1,0 @@
-+package sandbox
-+alias arrtostdout sandbox.arrtostdout
-
-[arr] > intarrtostdout
-  arrtostdout > @
-    arr
-    "%d"
