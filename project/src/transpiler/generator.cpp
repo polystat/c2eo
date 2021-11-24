@@ -110,13 +110,14 @@ void FuncGen::Generate(std::ostream &out) {
 
 void BinaryStmtGen::Generate(std::ostream &out) {
     //str << value +"(";
+    out << value << " ";
     bool leftLinear = isLeftLinear(left);
     if (!leftLinear)
         out << "(";
     out << left;
     if (!leftLinear)
         out << ")";
-    out << value;
+    out << " ";
     bool rightLiteral = llvm::isa<LiteralStmtGen>(right);
     if (!rightLiteral)
         out << "(";
@@ -152,7 +153,7 @@ void UnaryStmtGen::Generate(std::ostream &out) {
         out << "(";
     if (nestedStmt != nullptr)
         nestedStmt->Generate(out);
-    out << postfix;
+    //out << postfix;
     if (!empty)
         out << ")";
 }

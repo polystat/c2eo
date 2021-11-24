@@ -213,7 +213,10 @@ StmtGen* getStmtGen(const Stmt* i) {
 StmtGen* getDoWhileStmtGenerator(const DoStmt* pStmt) {
     auto* gen = new DoWhileStmtGen;
     auto cond = getStmtGen(pStmt->getCond());
-    gen->Add(cond);
+    UnaryStmtGen* asBoolGen = new UnaryStmtGen;
+    asBoolGen->value = "as-bool ";
+    asBoolGen->nestedStmt = cond;
+    gen->Add(asBoolGen);
     auto* objStmtGen = new ObjectStmtGen;
     auto body = getStmtGen(pStmt->getBody());
     auto* bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
@@ -230,7 +233,10 @@ StmtGen* getDoWhileStmtGenerator(const DoStmt* pStmt) {
 StmtGen* getWhileStmtGenerator(const WhileStmt* pStmt) {
     WhileStmtGen* gen = new WhileStmtGen;
     auto cond = getStmtGen(pStmt->getCond());
-    gen->Add(cond);
+    UnaryStmtGen* asBoolGen = new UnaryStmtGen;
+    asBoolGen->value = "as-bool ";
+    asBoolGen->nestedStmt = cond;
+    gen->Add(asBoolGen);
     ObjectStmtGen* objStmtGen = new ObjectStmtGen;
     auto body = getStmtGen(pStmt->getBody());
     CompoundStmtGen* bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
@@ -316,8 +322,9 @@ UnaryStmtGen* getEmptyUnaryGen(const Expr* pExpr) {
 UnaryStmtGen* getUnaryOpertorStatement(const UnaryOperator* pOperator) {
     UnaryStmtGen* unaryStmtGen = new UnaryStmtGen;
     std::string opName = pOperator->getOpcodeStr(pOperator->getOpcode()).str();
-    if (opName == "-") {
-        unaryStmtGen->postfix = ".neg";
+    if (opName == "-")
+    {
+        unaryStmtGen->value = "neg ";
     }
     unaryStmtGen->nestedStmt = getStmtGen(*pOperator->child_begin());
     return unaryStmtGen;
@@ -326,31 +333,56 @@ UnaryStmtGen* getUnaryOpertorStatement(const UnaryOperator* pOperator) {
 BinaryStmtGen* getBinaryStatement(const BinaryOperator* pOperator) {
     BinaryStmtGen* binaryStmtGen = new BinaryStmtGen;
     std::string opName = pOperator->getOpcodeStr().str();
-    if (opName.compare("=") == 0) {
-        binaryStmtGen->value = ".write ";
-    } else if (opName.compare("+") == 0) {
-        binaryStmtGen->value = ".add ";
-    } else if (opName.compare("-") == 0) {
-        binaryStmtGen->value = ".sub ";
-    } else if (opName.compare("*") == 0) {
-        binaryStmtGen->value = ".mul ";
-    } else if (opName.compare("/") == 0) {
-        binaryStmtGen->value = ".div ";
-    } else if (opName.compare("%") == 0) {
-        binaryStmtGen->value = ".mod ";
-    } else if (opName.compare("==") == 0) {
-        binaryStmtGen->value = ".eq ";
-    } else if (opName.compare("!=") == 0) {
-        binaryStmtGen->value = ".neq ";
-    } else if (opName == "<") {
-        binaryStmtGen->value = ".less ";
-    } else if (opName.compare("<=") == 0) {
-        binaryStmtGen->value = ".leq ";
-    } else if (opName.compare(">") == 0) {
-        binaryStmtGen->value = ".greater ";
-    } else if (opName.compare(">=") == 0) {
-        binaryStmtGen->value = ".geq ";
-    } else {
+    if (opName.compare("=") == 0)
+    {
+        binaryStmtGen->value = "write";
+    }
+    else if (opName.compare("+") == 0)
+    {
+        binaryStmtGen->value = "add";
+    }
+    else if (opName.compare("-") == 0)
+    {
+        binaryStmtGen->value = "sub";
+    }
+    else if (opName.compare("*") == 0)
+    {
+        binaryStmtGen->value = "mul";
+    }
+    else if (opName.compare("/") == 0)
+    {
+        binaryStmtGen->value = "div ";
+    }
+    else if (opName.compare("%") == 0)
+    {
+        binaryStmtGen->value = "mod";
+    }
+    else if (opName.compare("==") == 0)
+    {
+        binaryStmtGen->value = "eq";
+    }
+    else if (opName.compare("!=") == 0)
+    {
+        binaryStmtGen->value = "neq";
+    }
+    else if (opName == "<")
+    {
+        binaryStmtGen->value = "less";
+    }
+    else if (opName.compare("<=") == 0)
+    {
+        binaryStmtGen->value = "leq";
+    }
+    else if (opName.compare(">") == 0)
+    {
+        binaryStmtGen->value = "greater";
+    }
+    else if (opName.compare(">=") == 0)
+    {
+        binaryStmtGen->value = "geq";
+    }
+    else
+    {
         binaryStmtGen->value = "";
     }
     binaryStmtGen->left = getStmtGen(*pOperator->child_begin());
