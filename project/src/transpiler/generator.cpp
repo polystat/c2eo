@@ -70,7 +70,7 @@ void CompoundStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
     out << "seq";
     if (is_decorator)
-        out <<" > @";
+        out << " > @";
     out << "\n";
     AbstractGen::shift++;
     if (!statements.empty()) {
@@ -91,7 +91,7 @@ void FuncGen::Generate(std::ostream &out) {
     } else {
         for (const auto &paramName: paramNames) {
             out << paramName;
-            out << ", ";
+            out << " ";
         }
         out << "ret_param_xxxx] > ";
         out << name;
@@ -110,18 +110,19 @@ void FuncGen::Generate(std::ostream &out) {
 
 void BinaryStmtGen::Generate(std::ostream &out) {
     //str << value +"(";
+    out << value << " ";
     bool leftLinear = isLeftLinear(left);
     if (!leftLinear)
         out << "(";
     out << left;
     if (!leftLinear)
         out << ")";
-    out << value;
+    out << " ";
     bool rightLiteral = llvm::isa<LiteralStmtGen>(right);
-    if(!rightLiteral)
+    if (!rightLiteral)
         out << "(";
     out << right;
-    if(!rightLiteral)
+    if (!rightLiteral)
         out << ")";
 
 }
@@ -152,7 +153,7 @@ void UnaryStmtGen::Generate(std::ostream &out) {
         out << "(";
     if (nestedStmt != nullptr)
         nestedStmt->Generate(out);
-    out << postfix;
+    //out << postfix;
     if (!empty)
         out << ")";
 }
@@ -192,23 +193,33 @@ IfStmtGen::~IfStmtGen() {
 
 //--------------------------------------------------------------------------------------------------
 void RecordGen::Generate(std::ostream &out) {
+    out << StmtGen::getIndentSpaces();
     out << "[";
     if (!fields.empty())
-        out << fields[0]->name << "_init";
-    for (size_t i = 1; i < fields.size(); i++)
-        out << " " << fields[i]->name << "_init";
+        out << "field_init_0";
+    for (size_t i = 1; i < count; i++)
+        out << " field_init_" << i;
     out << "] > " << name;
-    out << "\n  ";
-    out << "\"" << type << "\" > type\n";
-    for (VarGen* vg: fields) {
-        out << "\n  " << vg->type << " "<< vg->name << "_init > " << vg->name;
+    out << "\n";
+    shift++;
+    out << StmtGen::getIndentSpaces() << "\"" << type << "\" > type\n";
+    size_t j = 0;
+    for (RecordGen* rg: fields) {
+        out << "\n" << StmtGen::getIndentSpaces() << rg->type << " ";
+        for (size_t i = 0; i < rg->count; i++, j++)
+            out << "field_init_" << j << " ";
+        out << "> " << rg->name;
     }
     if (!fields.empty())
         out << "\n";
-    out << "\n  " << "[value] > write\n" << "    seq > @";
-    for (VarGen* vg: fields)
-        out << "\n      ^." << vg->name << ".write (value." << vg->name << ")";
-    out << "\n      TRUE\n";
+    out << "\n" << StmtGen::getIndentSpaces() << "[value] > write\n";
+    shift++;
+    out << StmtGen::getIndentSpaces() << "seq > @";
+    shift++;
+    for (RecordGen* vg: fields)
+        out << "\n" << StmtGen::getIndentSpaces() << "^." << vg->name << ".write (value." << vg->name << ")";
+    out << "\n" << StmtGen::getIndentSpaces() << "TRUE\n";
+    shift -= 3;
 }
 
 void WhileStmtGen::Generate(std::ostream &out) {
@@ -228,6 +239,7 @@ void LiteralStmtGen::Generate(std::ostream &out) {
     out << value;
     out << ")";
 }
+
 //TODO универсвализировать, добавить параметры возможно наследовать от compgen
 void ObjectStmtGen::Generate(std::ostream &out) {
     //out << getIndentSpaces();
@@ -244,8 +256,7 @@ ObjectStmtGen::~ObjectStmtGen() {
 void DoWhileStmtGen::Generate(std::ostream &out) {
     StmtGen* s = nullptr;
     ObjectStmtGen* body = llvm::dyn_cast<ObjectStmtGen>(statements[1]);
-    if (body)
-    {
+    if (body) {
         body->body->Generate(out);
         out << "\n";
     }

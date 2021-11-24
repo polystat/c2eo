@@ -139,8 +139,8 @@ if __name__ == '__main__':
     # Начальная установка генератора алиасов для файла со всеми резульатами программы на C
     cTestAliasName = '000'
 
+    os.system('./../../bin/eo_version_update.py') # Update EO version in pom.xml
     os.chdir('../../bin')
-    os.system('python3 eo_version_update.py') # Update EO version in pom.xml
     os.system('cmake ..') # Rebuild project
     os.system('make')
     os.chdir('../tests/any')

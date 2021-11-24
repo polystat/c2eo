@@ -1,7 +1,0 @@
-+package sandbox
-+alias arrtostrarr sandbox.arrtostrarr
-
-[arr] > intarrtostrarr
-  arrtostrarr > @
-    arr
-    "%d"

@@ -40,7 +40,8 @@ struct AbstractGen {
         GK_LastStmtGen,
         GK_SpaceGen,
         GK_SourceGen,
-        GK_RecordDecl
+        GK_RecordDecl,
+        //GK_FieldGen
     };
 
     const GenKind Kind;
@@ -79,11 +80,13 @@ struct VarGen: AbstractGen {
 
 
 /*//-------------------------------------------------------------------------------------------------
-// Генератор кода для глобальных переменных.
+// Генератор кода для полей объектов.
 // Накапливает необходимые значения в соответствующих строках.
 struct FieldGen: VarGen {
-    virtual void Generate(std::string &str);
-//    virtual void GenValue(std::string &str);
+    size_t count = 0;
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == GK_FieldGen;
+    }
 };*/
 
 //-------------------------------------------------------------------------------------------------
@@ -92,8 +95,8 @@ struct FieldGen: VarGen {
 struct RecordGen: AbstractGen {
     std::string name;
     std::string type;
-    std::vector<VarGen*> fields;
-    //size_t count = 0;
+    std::vector<RecordGen*> fields; // todo: FieldGen
+    size_t count = 0;
     virtual void Generate(std::ostream &out);
 //    virtual void GenValue(std::string &str);
     RecordGen(): AbstractGen(GenKind::GK_RecordDecl) {}

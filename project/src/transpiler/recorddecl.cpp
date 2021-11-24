@@ -1,10 +1,11 @@
+
 #ifndef RECORD_DECL_INFO
 #define RECORD_DECL_INFO
 #endif
 
 #include "stmt.h"
-#include "generator.h"
 #include "recorddecl.h"
+#include "vardecl.h"
 
 void getRecordDeclSubObjects(const RecordDecl* RD) {
     RecordGen* RG = new RecordGen;
@@ -42,21 +43,31 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
         llvm::outs() << "  is Empty \n";
 #endif
 
+    setSubFields(RG, RD);
+    RG->globalSpaceGenPtr->Add(RG);
+#ifdef RECORD_DECL_INFO
+    llvm::outs() << "\033[0m";
+#endif
+}
+
+void setSubFields(RecordGen* RG, const RecordDecl* RD) {
+    RG->count = 0;
     for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
-        TypeInfo typeInfo = it->getASTContext().getTypeInfo(it->getType());
-        uint64_t typeSize = typeInfo.Width;
-        unsigned fieldAlign = typeInfo.Align;
-        const clang::QualType qt = it->getType();
-        VarGen* VG = new VarGen;
+        std::string strType = "";
+        getTypeName(*it, strType);
+        RecordGen* VG = new RecordGen;
         if (!it->isUnnamedBitfield())
             VG->name = "f_" + it->getNameAsString();
         else
             VG->name = "field" + std::to_string(RG->fields.size());
         //VG->name += "_" + std::to_string(it->getFieldIndex());
-        VG->type = "c_" + qt.getAsString() + std::to_string(typeInfo.Width);
-        VG->value = "0";
-        if (it->isBitField())
-            VG->value = std::to_string(it->getBitWidthValue(it->getASTContext()));
+        VG->type = strType;
+        const clang::Type* typePtr = it->getType().getTypePtr();
+        if (typePtr->isRecordType())
+            setSubFields(VG, typePtr->getAsRecordDecl());
+        else
+            VG->count = 1;
+        RG->count += VG->count;
         RG->fields.push_back(VG);
 
 #ifdef RECORD_DECL_INFO
@@ -67,16 +78,7 @@ void getRecordDeclSubObjects(const RecordDecl* RD) {
         //llvm::outs() << "      isAnonymousStructOrUnion - " << it->isAnonymousStructOrUnion() << "\n";
         llvm::outs() << "      field kind name: " << it->getDeclKindName() << "\n";
         //llvm::outs() << "      field id: " << reinterpret_cast<uint64_t>(it) << "\n";
-        llvm::outs() << "      size - " << typeInfo.Width << "\n";
-        llvm::outs() << "      align - " << typeInfo.Align << "\n";
-        llvm::outs() << "      type - " << qt.getAsString() << "\n";
-        if (it->isBitField()) {
-            llvm::outs() << "      bit field - " << VG->value << "\n";
-        }
+        llvm::outs() << "      type - " << strType << "\n";
 #endif
     }
-    RG->globalSpaceGenPtr->Add(RG);
-#ifdef RECORD_DECL_INFO
-    llvm::outs() << "\033[0m";
-#endif
 }

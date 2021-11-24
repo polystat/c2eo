@@ -26,6 +26,7 @@ using namespace clang::ast_matchers;
 using namespace clang;
 
 //-------------------------------------------------------------------------------------------------
+StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context);
 
 // Определение и тестовый вывод основных параметров составного оператора
 void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context);
