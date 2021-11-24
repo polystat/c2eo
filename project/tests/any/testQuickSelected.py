@@ -143,6 +143,12 @@ if __name__ == '__main__':
         print(f'1) Numer of files =  {argc} Incorrect')
         exit(1)
 
+    os.system('./../../bin/eo_version_update.py') # Update EO version in pom.xml
+    os.chdir('../../bin')
+    os.system('cmake ..') # Rebuild project
+    os.system('make')
+    os.chdir('../tests/any')
+
     # Проверка, что данный конфигурационный файл существует
     configFileName = tmpDir + '/configuration/' + argv[1]
     if os.path.isfile(configFileName):
