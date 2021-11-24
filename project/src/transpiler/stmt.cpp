@@ -354,7 +354,9 @@ StmtGen *getIfStmtGenerator(const IfStmt *pStmt) {
 UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral) {
     LiteralStmtGen *literalStmtGen = new LiteralStmtGen;
     auto floatValue = pLiteral->getValue().convertToDouble();
-    literalStmtGen->value = "c_float64 " + std::to_string(floatValue);
+    //literalStmtGen->value = "c_float64 " + std::to_string(floatValue);
+    //Remove type in floating literal
+    literalStmtGen->value = std::to_string(floatValue);
     literalStmtGen->nestedStmt = nullptr;
     return literalStmtGen;
 }
@@ -366,7 +368,9 @@ UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral) {
 
 UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt) {
     LiteralStmtGen *literalStmtGen = new LiteralStmtGen;
-    literalStmtGen->value = "c_int32 " + pNum.toString(10, isSignedInt);
+    //literalStmtGen->value = "c_int32 " + pNum.toString(10, isSignedInt);
+    //Now remove type in literal
+    literalStmtGen->value = pNum.toString(10, isSignedInt);
     literalStmtGen->nestedStmt = nullptr;
     return literalStmtGen;
 }
