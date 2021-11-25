@@ -52,4 +52,4 @@ jobs:
       - name: Test c2eo
         run: |
           cd ~/c2eo/project/tests/any
-          ./testQuickSelected.py configWithoutStruct
+          ./testQuickAll.py
