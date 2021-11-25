@@ -1,7 +1,7 @@
 +package c2eo.coperators
 
 [a] > as-bool
-  if. > @
-    (a.type.eq "float32").or (a.type.eq "float64")
-    (a.eq 0.0).if FALSE TRUE
-    (a.eq 0).if FALSE TRUE
+  not. > @
+    or.
+      (a.as-string).eq "0"
+      (a.as-string).eq "0.0"
