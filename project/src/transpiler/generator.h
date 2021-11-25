@@ -41,7 +41,7 @@ struct AbstractGen {
         GK_SpaceGen,
         GK_SourceGen,
         GK_RecordDecl,
-        //GK_FieldGen
+        GK_MemberStmtGen
     };
 
     const GenKind Kind;
@@ -242,6 +242,17 @@ struct  LiteralStmtGen: UnaryStmtGen{
 
     static bool classof(const AbstractGen *S) {
         return S->getKind() == AbstractGen::GK_LiteralStmtGen;
+    }
+};
+
+struct  MemberStmtGen: UnaryStmtGen{
+
+    void Generate(std::ostream &out) override ;
+
+    MemberStmtGen() : UnaryStmtGen(AbstractGen::GK_MemberStmtGen){}
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == AbstractGen::GK_MemberStmtGen;
     }
 };
 

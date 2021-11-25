@@ -30,6 +30,8 @@ StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt);
 
 StmtGen *getDoWhileStmtGenerator(const DoStmt *pStmt);
 
+StmtGen *getMemberStmtGenerator(const MemberExpr *pStmt);
+
 StmtGen *getFuncCallGenerator(const CallExpr *pExpr);
 
 StmtGen *getReturnStmtGenerator(const ReturnStmt *pStmt);
@@ -118,17 +120,10 @@ StmtGen *getCompoundStmtOutputGenerator(const Stmt *pExpr) {
     UnaryStmtGen *unaryStmtGen = new UnaryStmtGen;
     unaryStmtGen->value = R"(printf "%s\n" )";
     //unaryStmtGen->postfix += ".as-string";
-    // TODO: fix MemberExpr
     DeclRefExpr *declExpr = (DeclRefExpr *) (*pExpr->child_begin());
-    while (declExpr->getStmtClass() == Stmt::MemberExprClass) {
-        std::string field_name = ".f_";
-        field_name += ((MemberExpr *) declExpr)->getMemberDecl()->getNameAsString();
-        unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
-        declExpr = (DeclRefExpr *) (*declExpr->child_begin());
-    }
     UnaryStmtGen* asStr = new UnaryStmtGen();
     asStr->value = "as-string ";
-    asStr->nestedStmt = getDeclName(declExpr);
+    asStr->nestedStmt = getStmtGen(declExpr);
     unaryStmtGen->nestedStmt = asStr;
     compoundStmt->Add(unaryStmtGen);
     return compoundStmt;
@@ -209,18 +204,8 @@ StmtGen *getStmtGen(const Stmt *i) {
         stmtGen = getDoWhileStmtGenerator(cs);
     }
     if (stmtClass == Stmt::MemberExprClass) {
-        // TODO: fix MemberExpr
-        UnaryStmtGen *unaryStmtGen = new UnaryStmtGen;
-        unaryStmtGen->postfix = "";
-        DeclRefExpr *declExpr = (DeclRefExpr *) i;
-        while (declExpr->getStmtClass() == Stmt::MemberExprClass) {
-            std::string field_name = ".f_";
-            field_name += ((MemberExpr *) declExpr)->getMemberDecl()->getNameAsString();
-            unaryStmtGen->postfix = field_name + unaryStmtGen->postfix;
-            declExpr = (DeclRefExpr *) (*declExpr->child_begin());
-        }
-        unaryStmtGen->nestedStmt = getDeclName(declExpr);
-        stmtGen = unaryStmtGen;
+        const MemberExpr *me = (MemberExpr*) i;
+        stmtGen = getMemberStmtGenerator(me);
     }
     return stmtGen;
 }
@@ -339,6 +324,13 @@ StmtGen *getWhileStmtGenerator(const WhileStmt *pStmt) {
     }
     //gen->Add(objStmtGen);
     gen->Add(body);
+    return gen;
+}
+
+StmtGen *getMemberStmtGenerator(const MemberExpr *pStmt) {
+    MemberStmtGen *gen = new MemberStmtGen;
+    gen->value = "f_" + pStmt->getMemberDecl()->getNameAsString();
+    gen->nestedStmt = getStmtGen(*pStmt->child_begin());
     return gen;
 }
 

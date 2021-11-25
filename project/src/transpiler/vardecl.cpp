@@ -5,7 +5,7 @@
 #include "generator.h"
 #include "stmt.h"
 
-std::string getIntTypeByVar(const VarDecl* VD);
+//std::string getIntTypeByVar(const VarDecl* VD);
 
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl* VD) {
@@ -263,50 +263,50 @@ void getVarDeclParameters(const VarDecl* VD) {
     //VD->dump();
 }
 
-std::string getIntTypeByVar(const VarDecl* VD) {
-    auto qualType = VD->getType();      // квалифицированный тип (QualType)
-    auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
-    bool isSigned = qualType->isSignedIntegerType();
-    auto size = typeInfo.Width;
-    /*
-    std::string result = "";
-    //TODO обработка беззнаковых, когда они появятся.
-    if (isSigned)
-    {
-        switch (size)
-        {
-            case 16:
-                result = "c_int16";
-                break;
-            case 32:
-                result = "c_int32";
-                break;
-            case 64:
-                result = "c_int64";
-                break;
-        }
-    } else
-    {
-        switch (size)
-        {
-            case 16:
-                result = "c_int16";
-                break;
-            case 32:
-                result = "c_int32";
-                break;
-            case 64:
-                result = "c_int64";
-                break;
-        }
-    }*/
-    std::string result = "c_";
-    //TODO обработка беззнаковых, когда они появятся. (нет только c_uint64)
-    if (!isSigned)
-        result += 'u';
-    result += "int" + std::to_string(size);
-    return result;
-}
+//std::string getIntTypeByVar(const VarDecl* VD) {
+//    auto qualType = VD->getType();      // квалифицированный тип (QualType)
+//    auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
+//    bool isSigned = qualType->isSignedIntegerType();
+//    auto size = typeInfo.Width;
+//    /*
+//    std::string result = "";
+//    //TODO обработка беззнаковых, когда они появятся.
+//    if (isSigned)
+//    {
+//        switch (size)
+//        {
+//            case 16:
+//                result = "c_int16";
+//                break;
+//            case 32:
+//                result = "c_int32";
+//                break;
+//            case 64:
+//                result = "c_int64";
+//                break;
+//        }
+//    } else
+//    {
+//        switch (size)
+//        {
+//            case 16:
+//                result = "c_int16";
+//                break;
+//            case 32:
+//                result = "c_int32";
+//                break;
+//            case 64:
+//                result = "c_int64";
+//                break;
+//        }
+//    }*/
+//    std::string result = "c_";
+//    //TODO обработка беззнаковых, когда они появятся. (нет только c_uint64)
+//    if (!isSigned)
+//        result += 'u';
+//    result += "int" + std::to_string(size);
+//    return result;
+//}
 
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
@@ -433,7 +433,7 @@ void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
             std::stringstream ss;
             asg->Generate(ss);
             if (!str.empty()) str += " ";
-            str += "(" + ss.str() + ")";
+            str += ss.str();
         }
     }
 }

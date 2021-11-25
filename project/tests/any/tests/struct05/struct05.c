@@ -6,6 +6,10 @@ struct st {
     } b;
 } a = {1, {2, 3}};
 
+
+
+struct st2 b = {1,2};
+
 int main() {
     a.a;
     printf("%d\n", a.a);

@@ -150,7 +150,7 @@ UnaryStmtGen::~UnaryStmtGen() {
 
 void UnaryStmtGen::Generate(std::ostream &out) {
     bool empty = value.empty() || nestedStmt == nullptr;
-    out << value;
+    out << "(" << value;
     if (!empty)
         out << "(";
     if (nestedStmt != nullptr)
@@ -159,6 +159,7 @@ void UnaryStmtGen::Generate(std::ostream &out) {
     //out << postfix;
     if (!empty)
         out << ")";
+    out << ")";
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -260,7 +261,7 @@ void DoWhileStmtGen::Generate(std::ostream &out) {
     StmtGen* s = nullptr;
     if (!llvm::isa<CompoundStmtGen>(statements[1]))
         out << getIndentSpaces();
-    out  << statements[1] << "\n";
+    out << statements[1] << "\n";
     out << getIndentSpaces();
     out << "while\n";
     AbstractGen::shift++;
@@ -270,4 +271,12 @@ void DoWhileStmtGen::Generate(std::ostream &out) {
 
 DoWhileStmtGen::~DoWhileStmtGen() {
 
+}
+
+void MemberStmtGen::Generate(std::ostream &out) {
+    if (nestedStmt) {
+        nestedStmt->Generate(out);
+        out << ".";
+    }
+    out << value;
 }
