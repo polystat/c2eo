@@ -167,7 +167,7 @@
     printf "write c (bit-xor %d %d) -> c = %s\n" ai bi (as-string c)
 
     write c (shift-left ai 2)
-    printf "write c (shift-left %d) -> c = %s\n" ai (as-string c)
+    printf "write c (shift-left %d %d) -> c = %s\n" ai 2 (as-string c)
 
     write c (shift-right ai 2)
-    printf "write c (shift-left %d) -> c = %s\n" ai (as-string c)
+    printf "write c (shift-left %d %d) -> c = %s\n" ai 2 (as-string c)
