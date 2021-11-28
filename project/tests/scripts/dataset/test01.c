@@ -1,15 +1,8 @@
-struct st {
-    int a;
-    struct st2 {
-        int x, y;
-    } b;
-} a = {1, {2, 3}},
-b= {5, {6, 7}};
-
+int a=9;
+int b=10;
 int main() {
-    a.b.y;
-    b.b.y;
-    a.b = b.b;
-    a.b.y;
+    a+=b;
+    a+=6;
+    a;
     return 0;
 }
