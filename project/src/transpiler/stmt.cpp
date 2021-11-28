@@ -1,5 +1,6 @@
 #include "stmt.h"
 #include "generator.h"
+#include "decl.h"
 
 //#define STM_DEB
 UnaryStmtGen *getUnaryOpertorStatement(const UnaryOperator *pOperator);
@@ -10,8 +11,6 @@ UnaryStmtGen *getCastGen(const ImplicitCastExpr *pExpr);
 
 UnaryStmtGen *getEmptyUnaryGen();
 
-StmtGen *getStmtGen(const Stmt *i);
-
 UnaryStmtGen *getEmptyUnaryGen(const Expr *pExpr);
 
 UnaryStmtGen *getDeclName(const DeclRefExpr *pExpr);
@@ -20,7 +19,7 @@ StmtGen *getCompoundStmtOutputGenerator(const Stmt *pExpr);
 
 UnaryStmtGen *getIntegerLiteralGen(const IntegerLiteral *pLiteral);
 
-UnaryStmtGen *getASPIntIntegerLiteralGen(const APInt pNum, bool isSignedInt);
+UnaryStmtGen *getASPIntIntegerLiteralGen(APInt pNum, bool isSignedInt);
 
 UnaryStmtGen *getFloatingLiteralGen(const FloatingLiteral *pLiteral);
 
@@ -83,10 +82,23 @@ StmtGen *getASTStmtGen(const Stmt *i, ASTContext *context) {
     return getStmtGen(i);
 }
 
-CompoundStmtGen *getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext *context, bool isDecorator) {
+StmtGen *getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext *context, bool isDecorator) {
     ::context = context;
     CompoundStmtGen *compoundStmt = new CompoundStmtGen;
     compoundStmt->is_decorator = isDecorator;
+
+    // New code for founding local statement
+    std::vector<AbstractGen*> declarations;
+    for (Stmt * line: CS->body())
+    {
+        if(line->getStmtClass() == Stmt::DeclStmtClass)
+        {
+            DeclStmt* declStmt = dyn_cast<DeclStmt>(line);
+            for (Decl* declaration : declStmt->decls()) {
+                declarations.push_back(getDeclGen(declaration));
+            }
+        }
+    }
 
     for (CompoundStmt::const_body_iterator i = CS->body_begin(); i != CS->body_end(); i++) {
         // Костыльное решение для тестового выводо
@@ -99,6 +111,10 @@ CompoundStmtGen *getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext *co
             compoundStmt->Add(stmtGen);
             continue;
         }
+        if(stmtClass == Stmt::DeclStmtClass)
+        {
+            continue;
+        }
         StmtGen *stmtGen = getStmtGen(*i);
         if (stmtGen != nullptr)
             compoundStmt->Add(stmtGen);
@@ -107,7 +123,15 @@ CompoundStmtGen *getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext *co
 //     trueStmt->value = "  TRUE";
 //     trueStmt->shift = shift;
 //     compoundStmt->Add(trueStmt);
-    return compoundStmt;
+    if (declarations.empty())
+        return compoundStmt;
+    ObjectStmtGen* gen = new ObjectStmtGen;
+    MultiLineStmtGen* compoundStmtObjectContent = new MultiLineStmtGen;
+    compoundStmtObjectContent->statements.insert(end(compoundStmtObjectContent->statements),
+                                          begin(declarations), end(declarations));
+    compoundStmtObjectContent->Add(compoundStmt);
+    gen->body = compoundStmtObjectContent;
+    return gen;
 }
 
 //Временное решение для вывода
@@ -182,7 +206,7 @@ StmtGen *getStmtGen(const Stmt *i) {
         //else if(strcmp(stmtName , "CompoundStmt") == 0)
     else if (stmtClass == Stmt::CompoundStmtClass) {
         const CompoundStmt *cs = (CompoundStmt *) i;
-        CompoundStmtGen *compoundStmtGen = getCompoundStmtGenerator(cs, context, false);
+        StmtGen *compoundStmtGen = getCompoundStmtGenerator(cs, context, false);
         stmtGen = compoundStmtGen;
     } else if (stmtClass == Stmt::IfStmtClass) {
         const IfStmt *cs = (IfStmt *) i;
@@ -194,6 +218,7 @@ StmtGen *getStmtGen(const Stmt *i) {
         const CallExpr *ep = (CallExpr *) i;
         stmtGen = getFuncCallGenerator(ep);
     }
+    else
 //    else if (stmtClass == Stmt::ReturnStmtClass) {
 //        const ReturnStmt *rs = (ReturnStmt *) i;
 //        stmtGen = getReturnStmtGenerator(rs);

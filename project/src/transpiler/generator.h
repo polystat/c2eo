@@ -61,13 +61,18 @@ struct AbstractGen {
 };
 
 
+class StmtGen;
+
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для объявления переменных.
 // Накапливает необходимые значения в соответствующих строках.
 struct VarGen: AbstractGen {
     std::string name;       // идентификатор переменной
     std::string type;       // тип переменной
+    [[deprecated]]
     std::string value;      // значение переменной
+    //Генератор для значения переменной
+    StmtGen* nestedStmt;
     void Generate(std::ostream &out) override;
 
     VarGen(): AbstractGen(GenKind::GK_VarGen) {}
@@ -126,7 +131,7 @@ protected:
 };
 
 struct MultiLineStmtGen: StmtGen {
-    std::vector<StmtGen*> statements;
+    std::vector<AbstractGen*> statements;
 
     void Add(StmtGen* stmt);
     virtual void Generate(std::ostream &out);
@@ -165,8 +170,8 @@ struct CompoundStmtGen : public MultiLineStmtGen {
 struct FuncGen: MultiLineStmtGen {
     std::string name;       // имя объекта-функции
     std::vector<std::string> paramNames;    // список имен параметров (типы не нужны).
-    // TODO нужен ли body?
-    CompoundStmtGen* body = nullptr;
+    // TODO нужен ли body? Возможно достаточно использования базового statements
+    StmtGen* body = nullptr;
     // Возращаемый параметры передается как дополнительный атрибут с некоторым именем,
     // которое не должно нигде встречаться в другом контексте.
 

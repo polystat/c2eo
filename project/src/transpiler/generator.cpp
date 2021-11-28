@@ -26,7 +26,7 @@ SourceGen::~SourceGen() {
 
 //--------------------------------------------------------------------------------------------------
 void VarGen::Generate(std::ostream &out) {
-    out << type << " " << value << " > " << name;
+    out << type << " " << value << nestedStmt << " > " << name;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -247,7 +247,8 @@ void LiteralStmtGen::Generate(std::ostream &out) {
 //TODO универсвализировать, добавить параметры возможно наследовать от compgen
 void ObjectStmtGen::Generate(std::ostream &out) {
     //out << getIndentSpaces();
-    out << "[i]\n";
+    //TODO убрать эти два пробела
+    out << "  [] > @\n";
     AbstractGen::shift++;
     body->Generate(out);
     AbstractGen::shift--;
