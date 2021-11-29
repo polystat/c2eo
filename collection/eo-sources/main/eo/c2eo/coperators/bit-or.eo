@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a b] > bit-or
+  (a.as-bytes.or (b.as-bytes)).as-int > @

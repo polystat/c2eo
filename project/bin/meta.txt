@@ -35,5 +35,11 @@
 +alias c2eo.coperators.write
 +alias c2eo.coperators.while
 +alias c2eo.coperators.if
++alias c2eo.coperators.bit-not
++alias c2eo.coperators.bit-or
++alias c2eo.coperators.bit-and
++alias c2eo.coperators.bit-xor
++alias c2eo.coperators.shift-left
++alias c2eo.coperators.shift-right
 
 [arg] > global
