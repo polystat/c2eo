@@ -30,7 +30,8 @@ StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context);
 
 // Определение и тестовый вывод основных параметров составного оператора
 void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context);
-CompoundStmtGen* getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext* context, bool isDecorator = false) ;
+StmtGen* getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext* context, bool isDecorator = false) ;
+StmtGen *getStmtGen(const Stmt *i);
 
 // Анализ полученного начального значения с последующим использованием
 //void initValueAnalysis(const VarDecl *VD, std::string &str);
