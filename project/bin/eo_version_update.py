@@ -11,21 +11,13 @@ def main():
     latest_version = get_latest_version()
     file = 'latest_eo_version.txt'
     current_version = get_current_version(file)
-    compare = version_compare(current_version, latest_version)
 
-    if compare == 0:
-        print('We use latest EO version\n')
+    is_latest_version, latest_version = is_update_needed(
+        current_version, latest_version)
+    if is_latest_version:
         return
-    elif compare == 1:
-        latest_version = current_version
-        print(f'Manual update latest EO version to {latest_version}\n')
-    else:
-        print(f'We use old EO version: "{current_version}"\nStart updating files')
 
-    path_to_files = '../../**'
-    file_pattern = 'pom.xml'
-    found_files = search_files_by_pattern(path_to_files, file_pattern)
-
+    found_files = search_files_by_pattern('../../**', 'pom.xml')
     count_changed_files = update_version_in_files(found_files, latest_version)
     with open(file, 'w') as f:
         data = f.write(latest_version)
@@ -33,13 +25,27 @@ def main():
     return
 
 
+def is_update_needed(current_version, latest_version):
+    compare = version_compare(current_version, latest_version)
+    is_latest_version = False
+    if compare == 1:
+        latest_version = current_version
+        print(f'Manual update latest EO version to {latest_version}\n')
+    elif compare == 0:
+        is_latest_version = True
+        print('We use latest EO version\n')
+    else:
+        print(
+            f'We use old EO version: "{current_version}"\nStart updating files')
+
+    return (is_latest_version, latest_version)
+
+
 def version_compare(ver1, ver2):
-    tokens1 = ver1.split('.')
-    tokens2 = ver2.split('.')
-    for i in range(len(tokens1)):
-        if int(tokens1[i]) > int(tokens2[i]):
+    for v1, v2 in zip(ver1.split('.'), ver2.split('.')):
+        if int(v1) > int(v2):
             return 1
-        elif int(tokens1[i]) < int(tokens2[i]):
+        elif int(v1) < int(v2):
             return -1
     return 0
 
