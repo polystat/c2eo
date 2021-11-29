@@ -12,8 +12,7 @@ def main():
     file = 'latest_eo_version.txt'
     current_version = get_current_version(file)
 
-    is_latest_version, latest_version = is_update_needed(
-        current_version, latest_version)
+    is_latest_version, latest_version = is_update_needed(current_version, latest_version)
     if is_latest_version:
         return
 
@@ -35,8 +34,7 @@ def is_update_needed(current_version, latest_version):
         is_latest_version = True
         print('We use latest EO version\n')
     else:
-        print(
-            f'We use old EO version: "{current_version}"\nStart updating files')
+        print(f'We use old EO version: "{current_version}"\nStart updating files')
 
     return (is_latest_version, latest_version)
 
