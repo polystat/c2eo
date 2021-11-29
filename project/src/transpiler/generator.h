@@ -72,7 +72,7 @@ struct VarGen: AbstractGen {
     [[deprecated]]
     std::string value;      // значение переменной
     //Генератор для значения переменной
-    StmtGen* nestedStmt;
+    StmtGen* nestedStmt = nullptr;
     void Generate(std::ostream &out) override;
 
     VarGen(): AbstractGen(GenKind::GK_VarGen) {}

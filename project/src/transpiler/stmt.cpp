@@ -129,6 +129,7 @@ StmtGen *getCompoundStmtGenerator(const CompoundStmt *CS, ASTContext *context, b
     MultiLineStmtGen* compoundStmtObjectContent = new MultiLineStmtGen;
     compoundStmtObjectContent->statements.insert(end(compoundStmtObjectContent->statements),
                                           begin(declarations), end(declarations));
+    compoundStmt->is_decorator = true;
     compoundStmtObjectContent->Add(compoundStmt);
     gen->body = compoundStmtObjectContent;
     return gen;

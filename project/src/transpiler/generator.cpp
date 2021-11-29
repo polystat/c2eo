@@ -49,7 +49,8 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
     int lines = 0;
 
     for (int i = 0; i < statements.size(); ++i) {
-        if (!llvm::isa<MultiLineStmtGen>(statements[i]))
+        //TODO тревожный звоночек, что ObjectStmt это Multiline
+        if (!llvm::isa<MultiLineStmtGen>(statements[i]) && !llvm::isa<ObjectStmtGen>(statements[i]))
             out << getIndentSpaces();
         out << statements[i];
         if (i + 1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i])) {
@@ -246,9 +247,9 @@ void LiteralStmtGen::Generate(std::ostream &out) {
 
 //TODO универсвализировать, добавить параметры возможно наследовать от compgen
 void ObjectStmtGen::Generate(std::ostream &out) {
-    //out << getIndentSpaces();
+    out << getIndentSpaces();
     //TODO убрать эти два пробела
-    out << "  [] > @\n";
+    out << "[] > @\n";
     AbstractGen::shift++;
     body->Generate(out);
     AbstractGen::shift--;
