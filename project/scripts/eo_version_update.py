@@ -5,12 +5,12 @@ import os
 import re
 import glob
 import sys
+import settings # Out settings script
 
 
 def main():
-    latest_version = get_latest_version()
-    file = 'latest_eo_version.txt'
-    current_version = get_current_version(file)
+    current_version = settings.get_setting('current_eo_version')
+    latest_version = settings.get_setting('latest_eo_version')
 
     is_latest_version, latest_version = is_update_needed(current_version, latest_version)
     if is_latest_version:
@@ -18,8 +18,7 @@ def main():
 
     found_files = search_files_by_pattern('../../**', 'pom.xml')
     count_changed_files = update_version_in_files(found_files, latest_version)
-    with open(file, 'w') as f:
-        data = f.write(latest_version)
+    settings.set_setting('current_version', latest_eo_version)
     print('EO version updated\n')
     return
 
@@ -46,24 +45,6 @@ def version_compare(ver1, ver2):
         elif int(v1) < int(v2):
             return -1
     return 0
-
-
-def get_latest_version():
-    print('Check latest EO version')
-    url = 'https://search.maven.org/solrsearch/select?q=g:"org.eolang"a:"eo-parent"&rows=1&wt=json'
-    data = requests.get(url).json()
-    latest_version = data['response']['docs'][0]['latestVersion']
-    print(f'Latest EO version: "{latest_version}"')
-    return latest_version
-
-
-def get_current_version(file):
-    if not os.path.isfile(file):
-        return 'not found'
-
-    with open(file, 'r') as f:
-        current_version = f.read()
-    return current_version
 
 
 def search_files_by_pattern(path, file_pattern):

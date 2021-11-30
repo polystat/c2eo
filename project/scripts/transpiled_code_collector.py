@@ -6,14 +6,13 @@ import glob
 import shutil
 import sys
 import re
+import settings # Out settings script
 
 
 def main():
     print('\nStart collecting files\n')
     path_to_files = '../assembly'
-    with open('meta.txt', 'r') as f:  # Read part of default code for global result
-        result_code = f.read()
-
+    result_code = settings.get_meta_code('global_meta')
     result_code += read_code_from_global_files(path_to_files)
     print()
     result_code += read_code_from_static_files(path_to_files)
