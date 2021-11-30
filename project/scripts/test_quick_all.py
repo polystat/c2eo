@@ -10,10 +10,11 @@ from datetime import timedelta
 # Our scripts
 import settings
 import tools
+import eo_version_update
+import build_c2eo
 
-app = '''[args...] > app
-  global args > @
-'''
+def main()
+    result_code = settings.get_meta_code('app_meta')
 
 
 def is_float(str_num):
@@ -106,14 +107,8 @@ if __name__ == '__main__':
     testedDirNameList.sort()
     print(testedDirNameList)
 
-    # Начальная установка генератора алиасов для файла со всеми резульатами программы на C
-    cTestAliasName = '000'
-
-    os.system('./../../bin/eo_version_update.py') # Update EO version in pom.xml
-    os.chdir('../../bin')
-    os.system('cmake ..') # Rebuild project
-    os.system('make')
-    os.chdir('../tests/any')
+    eo_version_update.main()
+    build_c2eo.main()
 
     # Первоначально происходит компиляция и выполнение всех тестов на C
     # с сохранением результатов в локальных файлах.
