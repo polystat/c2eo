@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - { name: "Ubuntu", os: ubuntu-latest, cc: "gcc", cxx: "g++", archiver: "7z a", generators: "Ninja" }
+          - { name: "Ubuntu", os: ubuntu-latest, cc: "gcc", cxx: "g++", archiver: "7z a" }
 
     steps:
       - name: Checkout
@@ -25,17 +25,6 @@ jobs:
  
       - name: Move c2eo dir
         run: mv c2eo ~
-
-      - name: Check tools version
-        run: |
-          gcc --version
-          g++ --version
-          git --version
-          python3 --version
-          mvn --version
-          cmake --version
-          sudo apt install ninja-build
-          ninja --version
 
       - name: Cache LLVM
         id: cache-llvm
