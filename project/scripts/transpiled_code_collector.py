@@ -6,7 +6,10 @@ import glob
 import shutil
 import sys
 import re
-import settings # Out settings script
+
+# Our scripts
+import tools
+import settings
 
 
 def main():
@@ -26,14 +29,14 @@ def main():
 
 def read_code_from_global_files(path):
     code = ''
-    for file in search_files_by_pattern(path, '*.glob'):
+    for file in tools.search_files_by_pattern(path, '*.glob'):
         code += read_code_from_file(file, indent='  ')
     return code
 
 
 def read_code_from_static_files(path):
     code = ''
-    for file in search_files_by_pattern(path, '*.stat'):
+    for file in tools.search_files_by_pattern(path, '*.stat'):
         name = get_only_file_name(file)
         code += f'  [] > {name}\n'
         code += read_code_from_file(file, indent='    ')
@@ -44,16 +47,6 @@ def get_only_file_name(path):
     file = os.path.basename(path)
     name = os.path.splitext(file)[0]
     return name
-
-
-def search_files_by_pattern(path, file_pattern):
-    print(f'Looking for "{file_pattern}" files')
-    pattern = os.path.join(path, file_pattern)
-    found_files = glob.glob(pattern)
-    # Keep only file basename
-    file_names = list(map(lambda x: os.path.basename(x), found_files))
-    print(f'Found {len(found_files)} files: {file_names}')
-    return found_files
 
 
 def read_code_from_file(file, indent):

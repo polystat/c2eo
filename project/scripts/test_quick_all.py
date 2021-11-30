@@ -6,48 +6,28 @@ import shutil
 import re
 import time
 from datetime import timedelta
-from typing import TextIO
+
+# Our scripts
+import settings
+import tools
 
 app = '''[args...] > app
   global args > @
 '''
 
 
-def isFloat(strNum):
-    # Проверка на соответствие числу через регулярное выражение
-    result = re.fullmatch(r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?', strNum)
-    if result:
-        # re.sub(r',', r'.', strNum)
-        # print(f'strNum = {strNum}. It is float number')
-        return True
-    else:
-        # print(f'strNum = {strNum}. It is not float number')
-        return False
-
-# Функция получает предыдущее имя и порождает следующее.
-# Диапазон имен: aaa-zzz
+def is_float(str_num):
+    float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
+    result = re.fullmatch(float_pattern, str_num)
+    return result != None:
 
 
-def genNextName(lastName):
-    # Проверка на стартовое имя
-    if (lastName >= 'aaa') and (lastName < 'zzz'):
-        tmp_list = list(lastName)
-        # print('tmp_list = ', tmp_list)
-        if tmp_list[2] == 'z':
-            if tmp_list[1] == 'z':
-                tmp_list[0] = chr(ord(tmp_list[0])+1)
-                tmp_list[1] = 'a'
-                tmp_list[2] = 'a'
-            else:
-                tmp_list[1] = chr(ord(tmp_list[1])+1)
-                tmp_list[2] = 'a'
-        else:
-            tmp_list[2] = chr(ord(tmp_list[2]) + 1)
-    else:
-        return 'aaa'
-    new_name: str = ''.join(tmp_list)
-    # print('lastName = ', lastName)
-    return new_name
+if __name__ == '__main__':
+    start_time = time.monotonic()
+    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
+    main()
+
+
 
 # Сравнение результатов полученных при выполнении программ на C и EO
 
@@ -114,17 +94,7 @@ def testDataCompare(testedDir):
 
 
 if __name__ == '__main__':
-    # Фиксация времени начала работы скрипта
-    start_time = time.monotonic()
-    # Фиксация текущего каталога (из которого запускается скрипт)
-    currentDir = os.getcwd()
 
-    # Получение пути до работающего (этого) скрипта
-    myPath = os.path.realpath(__file__)
-    # print(f'testOne Directory is: {myPath}')
-    tmpDir = myPath if os.path.isdir(myPath) else os.path.dirname(myPath)
-    # Изменение рабочего каталога на каталог скрипта
-    os.chdir(tmpDir)
 
     # Получение абсолютного пути до каталога с проектом на EO
     # Пока это внутренняя песочница

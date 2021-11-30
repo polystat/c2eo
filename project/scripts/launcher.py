@@ -1,10 +1,13 @@
 #! /usr/bin/python3
-# launcher.py Main script for transpilation run
+# Main script for transpilation run
 
 import os
 import sys
-import glob
 import shutil
+
+# Our scripts
+import tools
+import collector
 
 
 def main():
@@ -21,7 +24,7 @@ def main():
 
 
 def start_transpilation(path_to_assembly, path_to_c_file):
-    clear_dir(path_to_assembly, '*')
+    tools.clear_dir_by_pattern(path_to_assembly, '*')
     print('\nTranspilation start\n')
     output_name = 'static01'
     os.system(f'./c2eo {path_to_c_file} {output_name}')
@@ -30,30 +33,13 @@ def start_transpilation(path_to_assembly, path_to_c_file):
 
 
 def start_collecting(path_from, path_to):
-    clear_dir(path_to, '*')
-    os.system('./collector.py')
+    tools.clear_dir_by_pattern(path_to, '*')
+    collector.main()
     print('Move global.eo to src dir')
     shutil.move(os.path.join(path_from, 'global.eo'), path_to)
     return
 
 
-def clear_dir(path, file_pattern):
-    found_files = search_files_by_pattern(path, file_pattern)
-    for file in found_files:
-        os.remove(file)
-    print('Files removed')
-    return
-
-
-def search_files_by_pattern(path, file_pattern):
-    print(f'\nLooking for "{file_pattern}" files in "{path}" dir')
-    pattern = os.path.join(path, file_pattern)
-    found_files = glob.glob(pattern)
-    # Keep only file basename
-    file_names = list(map(lambda x: os.path.basename(x), found_files))
-    print(f'Found {len(found_files)} files: {file_names}')
-    return found_files
-
-
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
     main()
