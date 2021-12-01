@@ -29,7 +29,7 @@ def read_code_from_global_files(path, pattern):
     code = ''
     for file in tools.search_files_by_pattern(path, pattern):
         name = tools.get_file_name(file)
-        code += f'[] > {name}\n'
+        code += f'[arg] > {name}\n'
         code += read_code_from_file(file, indent='  ')
     return code
 
