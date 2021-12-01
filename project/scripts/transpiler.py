@@ -41,5 +41,4 @@ def start_collecting(path_from, path_to):
 
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
     main()

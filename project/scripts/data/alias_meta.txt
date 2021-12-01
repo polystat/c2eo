@@ -41,5 +41,3 @@
 +alias c2eo.coperators.bit-xor
 +alias c2eo.coperators.shift-left
 +alias c2eo.coperators.shift-right
-
-[arg] > global

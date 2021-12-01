@@ -12,13 +12,14 @@ import tools
 import settings
 
 
-def main():
+def main(file_name="*"):
     print('\nStart collecting files\n')
     path_to_files = '../assembly'
-    result_code = settings.get_meta_code('global_meta')
-    result_code += read_code_from_global_files(path_to_files)
+
+    result_code = settings.get_meta_code('alias_meta')
+    result_code += read_code_from_global_files(path_to_files, f'{file_name}.glob')
     print()
-    result_code += read_code_from_static_files(path_to_files)
+    result_code += read_code_from_static_files(path_to_files, f'{file_name}.static')
 
     print_code('global.eo:', result_code)
     with open(os.path.join(path_to_files, 'global.eo'), 'w') as f:
@@ -27,16 +28,18 @@ def main():
     return
 
 
-def read_code_from_global_files(path):
+def read_code_from_global_files(path, pattern):
     code = ''
-    for file in tools.search_files_by_pattern(path, '*.glob'):
+    for file in tools.search_files_by_pattern(path, pattern):
+        name = get_only_file_name(file)
+        code += f'[] > {name}_test\n'
         code += read_code_from_file(file, indent='  ')
     return code
 
 
-def read_code_from_static_files(path):
+def read_code_from_static_files(path, pattern):
     code = ''
-    for file in tools.search_files_by_pattern(path, '*.stat'):
+    for file in tools.search_files_by_pattern(path, pattern):
         name = get_only_file_name(file)
         code += f'  [] > {name}\n'
         code += read_code_from_file(file, indent='    ')
@@ -56,7 +59,7 @@ def read_code_from_file(file, indent):
             if line != '\n':
                 code += indent
             code += line
-    return code
+    return code[:-1]  # TODO Temp fix on two spaces in the end of generated files
 
 
 def print_code(title, code):

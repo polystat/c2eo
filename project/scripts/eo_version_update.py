@@ -5,7 +5,10 @@ import os
 import re
 import glob
 import sys
-import settings # Out settings script
+
+# Our scripts
+import tools
+import settings
 
 
 def main():
@@ -16,7 +19,7 @@ def main():
     if is_latest_version:
         return
 
-    found_files = search_files_by_pattern('../../**', 'pom.xml')
+    found_files = tools.search_files_by_pattern('../../**', 'pom.xml', recursive=True)
     count_changed_files = update_version_in_files(found_files, latest_version)
     settings.set_setting('current_version', latest_eo_version)
     print('EO version updated\n')
@@ -45,14 +48,6 @@ def version_compare(ver1, ver2):
         elif int(v1) < int(v2):
             return -1
     return 0
-
-
-def search_files_by_pattern(path, file_pattern):
-    print(f'Looking for "{file_pattern}" files')
-    pattern = os.path.join(path, file_pattern)
-    found_files = glob.glob(pattern, recursive=True)
-    print(f'Found {len(found_files)} files')
-    return found_files
 
 
 def update_version_in_files(files, latest_version):
