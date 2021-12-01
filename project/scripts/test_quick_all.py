@@ -16,31 +16,21 @@ import build_c2eo
 
 def main():
     path_to_tests = settings.get_setting('path_to_tests')
-    path_to_result = '../../result'
+    path_to_result = '../../result/'
     clear_dirs(path_to_tests, path_to_result)
     eo_version_update.main()
     build_c2eo.main()
     tests = tools.search_files_by_pattern(path, '*.c', recursive=True)
     ThreadPool(4).map(prepare_tests, tests)
-    build_eo()
+    build_eo(path_to_result)
     ThreadPool(4).map(prepare_tests, pre)
     ThreadPool(4).map(get_result_for_eo_test, tests)
-    ThreadPool(4).map(compare_tests_result, tests)
+    ThreadPool(4).map(compare_test_results, tests)
 
-def build_eo():
-    os.chdir('../../result')
+def build_eo(path_to_eo):
+    os.chdir(path_to_eo)
     os.system('mvn clean compile')
     os.chdir('../project/scripts')
-
-
-def compare_tests_result():
-    for nameEo in testedDirNameList:
-        eoRunCode = 
-        # print('eoRunCode = ', eoRunCode)
-        if eoRunCode != 0:
-            print(f'Incorrect EO runtime for test {nameEo}')
-            os.chdir(currentDir)
-            exit(-3)
 
 
 def prepare_tests(path_to_test_file):
@@ -96,7 +86,8 @@ def is_float(str_num):
     return result != None:
 
 
-def testDataCompare(path):
+def compare_test_results(path):
+    path = os.path.split(path)[0]
     with open('{path}c_result.txt', 'r') as f:
         c_data = f.readlines()
     with open('{path}eo_result.txt', 'r') as f:
