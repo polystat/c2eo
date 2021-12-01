@@ -1,3 +1,6 @@
-current_eo_version: "0.17.2"
-path_to_llvm_source: "../../../../llvm-clang/"
-path_to_tests: "../tests/any/"
+current_eo_version: 0.17.2
+path_to_tests: ../tests/main/
+path_to_assembly: ../assembly/
+path_to_bin: ../bin/
+path_to_eo_project: ../../result/
+path_to_eo_src: ../../result/eo/c2eo/src/

@@ -1,9 +1,7 @@
 #! /usr/bin/python3
 
-import requests
 import os
 import re
-import glob
 import sys
 
 # Our scripts
@@ -12,6 +10,7 @@ import settings
 
 
 def main():
+    print()
     current_version = settings.get_setting('current_eo_version')
     latest_version = settings.get_setting('latest_eo_version')
 
@@ -19,11 +18,10 @@ def main():
     if is_latest_version:
         return
 
-    found_files = tools.search_files_by_pattern('../../**', 'pom.xml', recursive=True)
-    count_changed_files = update_version_in_files(found_files, latest_version)
-    settings.set_setting('current_version', latest_eo_version)
+    found_files = tools.search_files_by_pattern('../../**/', 'pom.xml', recursive=True)
+    update_version_in_files(found_files, latest_version)
+    settings.set_setting('current_eo_version', latest_version)
     print('EO version updated\n')
-    return
 
 
 def is_update_needed(current_version, latest_version):
@@ -31,14 +29,14 @@ def is_update_needed(current_version, latest_version):
     is_latest_version = False
     if compare == 1:
         latest_version = current_version
-        print(f'Manual update latest EO version to {latest_version}\n')
+        print(f'Manual update latest EO version to {latest_version}')
     elif compare == 0:
         is_latest_version = True
         print('We use latest EO version\n')
     else:
         print(f'We use old EO version: "{current_version}"\nStart updating files')
 
-    return (is_latest_version, latest_version)
+    return is_latest_version, latest_version
 
 
 def version_compare(ver1, ver2):

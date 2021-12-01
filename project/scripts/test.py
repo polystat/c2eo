@@ -1,31 +1,28 @@
 #! /usr/bin/python3
+
 import os
 import sys
-import glob
-import shutil
 import re
 import time
-from multiprocessing.dummy import Pool as ThreadPool
 
 # Our scripts
 import settings
 import tools
-import eo_version_update
+from transpiler import Transpiler
+import update_eo_version
 import build_c2eo
 
 
-def main():
-    path_to_tests = settings.get_setting('path_to_tests')
-    path_to_result = '../../result/'
-    clear_dirs(path_to_tests, path_to_result)
-    eo_version_update.main()
-    build_c2eo.main()
-    tests = tools.search_files_by_pattern(path, '*.c', recursive=True)
-    ThreadPool(4).map(prepare_tests, tests)
-    build_eo(path_to_result)
-    ThreadPool(4).map(prepare_tests, pre)
-    ThreadPool(4).map(get_result_for_eo_test, tests)
-    ThreadPool(4).map(compare_test_results, tests)
+def main(path_to_tests=''):
+    if path_to_tests == '':
+        path_to_tests = settings.get_setting('path_to_tests')
+    path_to_src = settings.get_setting('path_to_eo_src')
+    clear_dirs(path_to_tests, path_to_src)
+    update_eo_version.main()
+    build_c2eo.main(settings.get_setting('path_to_bin'))
+    eo_c_files = Transpiler(path_to_tests).transpile()
+    build_eo(settings.get_setting('path_to_eo_project'))
+
 
 def build_eo(path_to_eo):
     os.chdir(path_to_eo)
@@ -43,19 +40,6 @@ def prepare_eo_file(path, file):
     file_name = os.path.splitext(file)[0]
     eo_c_file = prepare_eo_c_file(path, file)
     os.system(f'./transpiler.py {eo_c_file}')
-
-
-def prepare_eo_c_file(path, file):
-    file_name = os.path.splitext(file)[0]
-    prepared_eo_c_file = f'{path}{file_name}-eo.c'
-    with open(f'{path}{file}', 'r') as f:
-        data = f.readlines()
-    for i, line in enumerate(data):
-        if '#' in line or 'printf' in line:
-            data[i] = f'// {line}'
-    with open(prepared_eo_c_file, 'w') as f:
-        f.write(data)
-    return prepared_eo_c_file
 
 
 def get_result_for_c_test(path, file):
@@ -77,13 +61,13 @@ def get_result_for_eo_test(path, file):
 def clear_dirs(path_to_tests, path_to_result):
     for pattern in ['*.txt', '*-eo.c', '*.eo', '*.out', '*.log']:
         tools.clear_dir_by_pattern(path_to_tests, pattern)
-    tools.clear_dir_by_pattern(path_to_result, '*')
+    tools.clear_dir_by_pattern(path_to_result, '*.*')
 
 
 def is_float(str_num):
     float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
     result = re.fullmatch(float_pattern, str_num)
-    return result != None:
+    return result != None
 
 
 def compare_test_results(path):
@@ -98,10 +82,9 @@ def compare_test_results(path):
         if c_line == eo_line:
             continue
         
-        if is_float(c_line[:-1]) and is_float(eo_line[:-1])
-           and abs(float(c_line) - float(eo_line)) < 0.0001:
+        if is_float(c_line[:-1]) and is_float(eo_line[:-1]) and abs(float(c_line) - float(eo_line)) < 0.0001:
              continue
-        else
+        else:
             log_data.append('Error: {c_line} != {eo_line}')
 
     with open('{path}result.log', 'w') as f:
@@ -111,7 +94,7 @@ def compare_test_results(path):
 if __name__ == '__main__':
     start_time = time.monotonic()
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    main()
+    main(sys.argv[1]) if len(sys.argv) > 1 else main()
     end_time = time.monotonic()
     print(f'Elapsed testing time: {end_time - start_time}')
-    print(f'Tests run: {}, Failures: {}, Errors: {}, Skipped: {}')
+    print(f'Tests run: 0, Failures: 0, Errors: 0, Skipped: 0')

@@ -4,14 +4,16 @@ import os
 import sys
 
 
-def main():
+def main(path_to_c2eo):
     print("\nBuild c2eo")
-    os.chdir('../bin')
+    original_path = os.getcwd()
+    os.chdir(path_to_c2eo)
     os.system('cmake ..')
     os.system('make')
-    print("c2eo builded")
+    os.chdir(original_path)
+    print()
 
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    main()
+    main(os.path.dirname(sys.argv[1]))
