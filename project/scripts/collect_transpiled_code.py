@@ -9,14 +9,14 @@ import tools
 import settings
 
 
-def main(file_name="*"):
+def main():
     print('\nStart collecting files\n')
     path_to_files = settings.get_setting('path_to_assembly')
 
     result_code = settings.get_meta_code('alias_meta')
-    result_code += read_code_from_global_files(path_to_files, f'{file_name}.glob')
+    result_code += read_code_from_global_files(path_to_files, '*.glob')
     print()
-    result_code += read_code_from_static_files(path_to_files, f'{file_name}.static')
+    result_code += read_code_from_static_files(path_to_files, '*.static')
 
     print_code('global.eo:', result_code)
     with open(os.path.join(path_to_files, 'global.eo'), 'w') as f:

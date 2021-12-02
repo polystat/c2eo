@@ -17,6 +17,14 @@ def search_files_by_pattern(path, file_pattern, recursive=False, print_files=Fal
     return found_files
 
 
+def split_path(path_to_file, with_end_sep=False):
+    path, file = os.path.split(path_to_file)
+    if with_end_sep:
+        path += os.sep
+    file_name, extension = os.path.splitext(file)
+    return path, file_name, extension
+
+
 def get_file_name(path):
     file = os.path.basename(path)
     name = os.path.splitext(file)[0]

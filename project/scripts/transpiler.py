@@ -4,6 +4,7 @@
 import os
 import sys
 import shutil
+import subprocess
 from multiprocessing.dummy import Pool as ThreadPool
 
 # Our scripts
@@ -15,31 +16,31 @@ import collect_transpiled_code
 class Transpiler(object):
 
     def __init__(self, path_to_c_files):
-        self.path_to_c_files = path_to_c_files
+        self.path_to_c_files = os.path.join(path_to_c_files, '')
         self.assembly_path = settings.get_setting('path_to_assembly')
         self.result_path = settings.get_setting('path_to_eo_src')
 
     def transpile(self):
+        print('\nTranspilation start\n')
         tools.clear_dir_by_pattern(self.assembly_path, '*')
         tools.clear_dir_by_pattern(self.path_to_c_files, '*-eo.c', recursive=True)
-        files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', recursive=True, print_files=True)
-        eo_c_files = ThreadPool(4).map(self.start_transpilation, files)
+        c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', recursive=True, print_files=True)
+        eo_names = ThreadPool(4).map(self.start_transpilation, c_files)
         self.start_collecting()
         print('Transpilation done\n')
-        return eo_c_files
+        return c_files, eo_names
 
     def start_transpilation(self, path_to_c_file):
-        print('\nTranspilation start\n')
         path_to_eo_c_file = self.prepare_eo_c_file(path_to_c_file)
         output_name = tools.get_file_name(path_to_eo_c_file).replace('-eo', '')
-        os.system(f'../bin/c2eo {path_to_eo_c_file} {output_name} > /dev/null')
-        return path_to_eo_c_file
+        subprocess.run(f'../bin/c2eo {path_to_eo_c_file} {output_name} 1> /dev/null', shell=True)
+        return os.path.abspath(path_to_eo_c_file)
 
     def prepare_eo_c_file(self, path_to_c_file):
-        path, file = os.path.split(path_to_c_file)
-        replaced_path = f'{os.path.split(self.path_to_c_files)[0]}{os.sep}'
-        file_name = path.replace(replaced_path, '').replace(os.sep, '_')
-        prepared_eo_c_file = f'{os.path.join(path, file_name)}-eo.c'
+        path, file_name, _ = tools.split_path(path_to_c_file, with_end_sep=True)
+        replaced_path = f'{os.path.split(self.path_to_c_files[:-1])[0]}{os.sep}'
+        output_name = path.replace(replaced_path, '').replace(os.sep, '_')[:-1]
+        prepared_eo_c_file = f'{path}{output_name}-eo.c'
         with open(f'{path_to_c_file}', 'r') as f:
             data = f.readlines()
         for i, line in enumerate(data):
