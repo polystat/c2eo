@@ -80,7 +80,7 @@ def compare_files(c_data, eo_data):
     if len(eo_data) > 0 and 'exception' in eo_data[0].lower():
         return True, (False, eo_data)
     elif len(c_data) != len(eo_data):
-        log_data = ['\nResults have different length!\n', 'C result:\n']
+        log_data = ['Results have different length!\n', '\nC result:\n']
         log_data.extend(c_data)
         log_data.append('\nEO result:\n')
         log_data.extend(eo_data)
