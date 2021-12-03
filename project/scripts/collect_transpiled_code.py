@@ -3,7 +3,6 @@
 
 import os
 import sys
-from os.path import join
 
 # Our scripts
 import tools
@@ -17,10 +16,9 @@ def main():
     result_code = settings.get_meta_code('alias_meta')
     result_code += read_code_from_global_files(path_to_files, '*.glob')
     print()
-    result_code += read_code_from_static_files(path_to_files, '*.static')
 
     print_code('global.eo:', result_code)
-    with open(join(path_to_files, 'global.eo'), 'w') as f:
+    with open(f'{path_to_files}global.eo', 'w') as f:
         f.write(result_code)
     print('Collecting files done')
     return
@@ -31,6 +29,7 @@ def read_code_from_global_files(path, pattern):
     for file in tools.search_files_by_pattern(path, pattern):
         name = tools.get_file_name(file)
         code += f'[arg] > {name}\n'
+        code += read_code_from_static_files(path, f'{name}.stat')
         code += read_code_from_file(file, indent='  ')
     return code
 
@@ -38,9 +37,7 @@ def read_code_from_global_files(path, pattern):
 def read_code_from_static_files(path, pattern):
     code = ''
     for file in tools.search_files_by_pattern(path, pattern):
-        name = tools.get_file_name(file)
-        code += f'  [] > {name}\n'
-        code += read_code_from_file(file, indent='    ')
+        code += read_code_from_file(file, indent='  ')
     return code
 
 

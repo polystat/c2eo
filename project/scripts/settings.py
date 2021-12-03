@@ -1,5 +1,6 @@
 import yaml
 import requests
+from os import path
 from yaml.loader import SafeLoader
 
 
@@ -9,10 +10,13 @@ settings_file = 'data/settings.yml'
 def get_setting(setting_name):
     if setting_name == 'latest_eo_version':
         return get_latest_eo_version()
-    else:
-        with open(settings_file) as f:
-            data = yaml.load(f, Loader=SafeLoader)
-        return data[setting_name]
+
+    with open(settings_file) as f:
+        data = yaml.load(f, Loader=SafeLoader)
+    setting = data[setting_name]
+    if 'path' in setting_name:
+        setting = path.join(setting, '')
+    return setting
 
 
 def set_setting(setting_name, value):
