@@ -6,6 +6,7 @@ import sys
 import shutil
 import subprocess
 from multiprocessing.dummy import Pool as ThreadPool
+from os.path import join
 
 # Our scripts
 import settings
@@ -16,7 +17,7 @@ import collect_transpiled_code
 class Transpiler(object):
 
     def __init__(self, path_to_c_files):
-        self.path_to_c_files = os.path.join(path_to_c_files, '')
+        self.path_to_c_files = join(path_to_c_files, '')
         self.assembly_path = settings.get_setting('path_to_assembly')
         self.result_path = settings.get_setting('path_to_eo_src')
         self.c2eo_path = settings.get_setting('path_to_c2eo')
@@ -34,7 +35,8 @@ class Transpiler(object):
     def start_transpilation(self, path_to_c_file):
         path_to_eo_c_file = self.prepare_eo_c_file(path_to_c_file)
         output_name = tools.get_file_name(path_to_eo_c_file).replace('-eo', '')
-        subprocess.run(f'{self.c2eo_path}c2eo {path_to_eo_c_file} {output_name} > /dev/null', shell=True)
+        transpile_cmd = f'{self.c2eo_path}c2eo {path_to_eo_c_file} {output_name} > /dev/null'
+        subprocess.run(transpile_cmd, shell=True)
         return os.path.abspath(path_to_eo_c_file)
 
     def prepare_eo_c_file(self, path_to_c_file):
@@ -55,7 +57,7 @@ class Transpiler(object):
         tools.clear_dir_by_pattern(self.result_path, '*')
         collect_transpiled_code.main()
         print('Move global.eo to src dir')
-        shutil.move(os.path.join(self.assembly_path, 'global.eo'), self.result_path)
+        shutil.move(join(self.assembly_path, 'global.eo'), self.result_path)
 
 
 if __name__ == '__main__':

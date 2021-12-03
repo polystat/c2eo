@@ -2,13 +2,14 @@
 
 import os
 import glob
+from os.path import join
 
 
 def search_files_by_pattern(path, file_pattern, recursive=False, print_files=False):
     if recursive:
-        path = os.path.join(path, '**')
+        path = join(path, '**')
     print(f'\nLooking for "{file_pattern}" files in "{path}"')
-    found_files = glob.glob(f'{os.path.join(path, file_pattern)}', recursive=recursive)
+    found_files = glob.glob(f'{join(path, file_pattern)}', recursive=recursive)
     # Keep only file basename
     print(f'Found {len(found_files)} files')
     if print_files:
