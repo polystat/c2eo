@@ -37,7 +37,6 @@ def get_meta_code(meta_name):
         return f.read()
 
 
-# TODO
-# def get_configuration(configuration_name):
-#     with open('data/{meta_name}.txt', 'r') as f:
-#         return f.read()
+def get_configuration(configuration_name):
+    with open('data/{meta_name}.txt', 'r') as f:
+        return f.read()
