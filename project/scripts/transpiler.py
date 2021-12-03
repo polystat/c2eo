@@ -19,6 +19,7 @@ class Transpiler(object):
         self.path_to_c_files = os.path.join(path_to_c_files, '')
         self.assembly_path = settings.get_setting('path_to_assembly')
         self.result_path = settings.get_setting('path_to_eo_src')
+        self.c2eo_path = settings.get_setting('path_to_c2eo')
 
     def transpile(self):
         print('\nTranspilation start\n')
@@ -33,7 +34,7 @@ class Transpiler(object):
     def start_transpilation(self, path_to_c_file):
         path_to_eo_c_file = self.prepare_eo_c_file(path_to_c_file)
         output_name = tools.get_file_name(path_to_eo_c_file).replace('-eo', '')
-        subprocess.run(f'../bin/c2eo {path_to_eo_c_file} {output_name} 1> /dev/null', shell=True)
+        subprocess.run(f'{self.c2eo_path}c2eo {path_to_eo_c_file} {output_name} > /dev/null', shell=True)
         return os.path.abspath(path_to_eo_c_file)
 
     def prepare_eo_c_file(self, path_to_c_file):
