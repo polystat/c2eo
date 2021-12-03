@@ -51,8 +51,14 @@ class Tests(object):
 def get_result_for_c_test(path_to_test):
     path, file_name, _ = tools.split_path(path_to_test, with_end_sep=True)
     compiled_file = f'{path}{file_name}.out'
-    subprocess.run(f'clang {path_to_test} -o {compiled_file} > /dev/null', shell=True)
-    subprocess.run(f'{compiled_file} > {path}c_result.txt', shell=True)
+    result_file = f'{path}c_result.txt'
+    compile_cmd = f'clang {path_to_test} -o {compiled_file} -Wno-everything > /dev/null 2>{result_file}'
+    try:
+        subprocess.run(compile_cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as exc:
+        return exc
+    else:
+        subprocess.run(f'{compiled_file} > {result_file} 2>&1', shell=True)
 
 
 def get_result_for_eo_test(eo_c_file):
@@ -70,23 +76,31 @@ def compare_test_results(path_to_eo_c_file):
     with open(f'{path}eo_result.txt', 'r') as f:
         eo_data = f.readlines()
     file_name = file_name.replace('-eo', '')
-    is_exception, (is_equal, log_data) = compare_files(c_data, eo_data)
+    is_except, (is_equal, log_data) = compare_files(c_data, eo_data)
     with open(f'{path}result.log', 'w') as f:
         f.writelines(log_data)
-    return file_name, is_exception, is_equal, log_data
+    return file_name, is_except, is_equal, log_data
 
 
 def compare_files(c_data, eo_data):
-    if len(eo_data) > 0 and 'exception' in eo_data[0].lower():
+    if is_exception(c_data):
+        return True, (False, c_data)
+
+    if is_exception(eo_data):
         return True, (False, eo_data)
-    elif len(c_data) != len(eo_data):
+
+    if len(c_data) != len(eo_data):
         log_data = ['Results have different length!\n', '\nC result:\n']
         log_data.extend(c_data)
         log_data.append('\nEO result:\n')
         log_data.extend(eo_data)
         return False, (False, log_data)
-    else:
-        return False, compare_lines(c_data, eo_data)
+
+    return False, compare_lines(c_data, eo_data)
+
+
+def is_exception(lines):
+    return len(lines) > 0 and ('exception' in lines[0].lower() or 'error' in lines[0].lower())
 
 
 def compare_lines(c_data, eo_data):
@@ -117,8 +131,8 @@ def group_comparison_results(results):
     exceptions = []
     errors = []
 
-    for test_name, is_exception, is_equal, log_data in results:
-        if is_exception:
+    for test_name, is_except, is_equal, log_data in results:
+        if is_except:
             exceptions.append((test_name, log_data))
         elif is_equal:
             passed.append((test_name, log_data))
@@ -148,7 +162,7 @@ def print_tests_result(passed, errors, exceptions):
           f'Passed: {len(passed)}, Errors: {len(errors)}, Exceptions: {len(exceptions)}')
 
 
-def print_passed_test(test_name,):
+def print_passed_test(test_name, ):
     ok = tools.colorize_text('OK', 'green')
     print(f'[{ok}] {test_name}')
 
