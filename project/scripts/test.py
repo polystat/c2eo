@@ -107,16 +107,18 @@ def compare_lines(c_data, eo_data):
     is_equal = True
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
+        ok_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} == {eo_line[:-1]}', 'green')
         if c_line == eo_line:
-            log_data.append(f'Line {i}: OK!')
+            log_data.append(ok_line)
             continue
 
         is_both_float = is_float(c_line[:-1]) and is_float(eo_line[:-1])
         if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
-            log_data.append(f'Line {i}: OK!')
+            log_data.append(ok_line)
         else:
             is_equal = False
-            log_data.append(f'Error! Line {i}: {c_line} != {eo_line}')
+            error_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} != {eo_line[:-1]}', 'red')
+            log_data.append(error_line)
     return is_equal, log_data
 
 
@@ -174,7 +176,7 @@ def print_error_test(test_name, log_data):
         log_data = log_data[:30]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    print(*log_data)
+    print(*log_data, sep='\n')
 
 
 def print_exception_test(test_name, log_data):
