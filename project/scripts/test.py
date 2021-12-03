@@ -51,7 +51,7 @@ class Tests(object):
 def get_result_for_c_test(path_to_test):
     path, file_name, _ = tools.split_path(path_to_test, with_end_sep=True)
     compiled_file = f'{path}{file_name}.out'
-    subprocess.run(f'clang {path_to_test} -o {compiled_file} 1> /dev/null', shell=True)
+    subprocess.run(f'clang {path_to_test} -o {compiled_file} > /dev/null', shell=True)
     subprocess.run(f'{compiled_file} > {path}c_result.txt', shell=True)
 
 
@@ -128,7 +128,7 @@ def group_comparison_results(results):
 
 
 def print_tests_result(passed, errors, exceptions):
-    info = out_blue('INFO')
+    info = tools.colorize_text('INFO', 'blue')
     print(f'\n[{info}] {"-" * 60}')
     print(f'[{info}]  TEST RESULTS')
     print(f'[{info}] {"-" * 60}')
@@ -149,12 +149,12 @@ def print_tests_result(passed, errors, exceptions):
 
 
 def print_passed_test(test_name,):
-    ok = out_green('OK')
+    ok = tools.colorize_text('OK', 'green')
     print(f'[{ok}] {test_name}')
 
 
 def print_error_test(test_name, log_data):
-    error = out_red('ERROR')
+    error = tools.colorize_text('ERROR', 'red')
     print(f'\n[{error}] {test_name}')
     if len(log_data) > 30:
         log_data = log_data[:30]
@@ -164,25 +164,13 @@ def print_error_test(test_name, log_data):
 
 
 def print_exception_test(test_name, log_data):
-    exception = out_red('EXCEPTION')
+    exception = tools.colorize_text('EXCEPTION', 'red')
     print(f'\n[{exception}] {test_name}:')
     if len(log_data) > 10:
         log_data = log_data[:10]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
     print(*log_data)
-
-
-def out_blue(text):
-    return f'\033[36m{text}\033[37m'
-
-
-def out_green(text):
-    return f'\033[32m{text}\033[37m'
-
-
-def out_red(text):
-    return f'\033[31m{text}\033[37m'
 
 
 if __name__ == '__main__':
@@ -194,7 +182,7 @@ if __name__ == '__main__':
         Tests(sys.argv[1]).test()
     end_time = time.time()
     time_span = int(end_time - start_time)
-    inf = out_blue('INFO')
+    inf = tools.colorize_text('INFO', 'blue')
     print('[{}]  Total time:  {:02}:{:02} min.'.format(inf, time_span // 60, time_span % 60))
     print(f'[{inf}] {"-" * 60}')
     print()

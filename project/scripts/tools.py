@@ -36,3 +36,8 @@ def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False)
     for file in found_files:
         os.remove(file)
     print('Files removed')
+
+
+def colorize_text(text, color):
+    colors = {'blue': '\033[36m', 'white': '\033[37m', 'red': '\033[31m', 'green': '\033[32m'}
+    return f'{colors[color]}{text}{colors["white"]}'
