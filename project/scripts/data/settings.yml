@@ -1,6 +1,6 @@
-current_eo_version: 0.17.2
-path_to_tests: ../tests/main/
+current_eo_version: 0.18.0
 path_to_assembly: ../assembly/
+path_to_c2eo: ../bin/
 path_to_eo_project: ../../result/
 path_to_eo_src: ../../result/eo/c2eo/src/
-path_to_c2eo: ../bin/
+path_to_tests: ../tests/main/

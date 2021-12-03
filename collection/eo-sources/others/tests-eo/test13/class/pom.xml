@@ -28,7 +28,7 @@ SOFTWARE.
   <artifactId>c2eo</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
-    <eolang.version>0.17.2</eolang.version>
+    <eolang.version>0.18.0</eolang.version>
   </properties>
   <build>
     <plugins>

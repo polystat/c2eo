@@ -36,7 +36,7 @@ SOFTWARE.
   <name>Quick Start: C Constants Simulation</name>
   <url>https://github.com/cqfn/eo</url>
   <properties>
-    <eolang.version>0.17.2</eolang.version>
+    <eolang.version>0.18.0</eolang.version>
   </properties>
   <build>
     <plugins>
