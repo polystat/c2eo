@@ -4,17 +4,50 @@ import os
 import glob
 
 
-def search_files_by_pattern(path, file_pattern, recursive=False, print_files=False):
+def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
+    if filters is None:
+        filters = []
     if recursive:
         path = os.path.join(path, '**')
     print(f'\nLooking for "{file_pattern}" files in "{path}"')
     found_files = glob.glob(f'{os.path.join(path, file_pattern)}', recursive=recursive)
-    # Keep only file basename
     print(f'Found {len(found_files)} files')
+    found_files = filter_files(found_files, filters)
+    # Keep only file basename
     if print_files:
-        file_names = sorted(list(map(lambda x: os.path.basename(x), found_files)))
-        print(file_names)
+        print()
+        print_only_file_names(found_files)
+        print()
     return found_files
+
+
+def filter_files(files, filters):
+    if len(filters) == 0:
+        return files
+
+    files = set(files)
+    print(f'Apply filter: {filters} to found files')
+    excluded_files = set()
+    filtered_files = set()
+    for f in filters:
+        if '!' in f:
+            excluded_files |= set(filter(lambda file: f[1:] in file, files))
+        else:
+            filtered_files |= set(filter(lambda x: f in x, files))
+
+    if len(excluded_files) != 0:
+        files -= excluded_files
+
+    if len(filtered_files) != 0:
+        files = filtered_files
+
+    print(f'{len(files)} files left:\n')
+    return list(files)
+
+
+def print_only_file_names(files):
+    names = list(map(lambda x: os.path.splitext(os.path.basename(x))[0], files))
+    print(sorted(names))
 
 
 def split_path(path_to_file, with_end_sep=False):

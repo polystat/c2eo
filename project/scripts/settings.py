@@ -1,3 +1,5 @@
+import os.path
+
 import yaml
 import requests
 from os import path
@@ -5,6 +7,7 @@ from yaml.loader import SafeLoader
 
 
 settings_file = 'data/settings.yml'
+config_path = 'data/config/'
 
 
 def get_setting(setting_name):
@@ -41,6 +44,9 @@ def get_meta_code(meta_name):
         return f.read()
 
 
-def get_configuration(configuration_name):
-    with open('data/{meta_name}.txt', 'r') as f:
-        return f.read()
+def get_config(config_name):
+    config = f'{config_path}{config_name}'
+    if os.path.exists(config):
+        with open(config, 'r') as f:
+            return f.readlines()
+    return []

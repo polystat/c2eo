@@ -16,7 +16,8 @@ import collect_transpiled_code
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files):
+    def __init__(self, path_to_c_files, filters):
+        self.filters = filters
         self.path_to_c_files = os.path.join(path_to_c_files, '')
         self.assembly_path = settings.get_setting('path_to_assembly')
         self.result_path = settings.get_setting('path_to_eo_src')
@@ -26,7 +27,8 @@ class Transpiler(object):
         print('\nTranspilation start\n')
         tools.clear_dir_by_pattern(self.assembly_path, '*')
         tools.clear_dir_by_pattern(self.path_to_c_files, '*-eo.c', recursive=True)
-        c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', recursive=True, print_files=True)
+        c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', filters=self.filters,
+                                                recursive=True, print_files=True)
         eo_names = ThreadPool(4).map(self.start_transpilation, c_files)
         self.start_collecting()
         print('Transpilation done\n')

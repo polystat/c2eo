@@ -20,11 +20,13 @@ import clean_before_transpilation
 
 class Tests(object):
 
-    def __init__(self, path_to_tests=None):
+    def __init__(self, path_to_tests=None, config=None):
         if path_to_tests is None:
-            self.path_to_tests = settings.get_setting('path_to_tests')
-        else:
-            self.path_to_tests = path_to_tests
+            path_to_tests = settings.get_setting('path_to_tests')
+        if config is None:
+            config = settings.get_setting('config')
+        self.filters = settings.get_config(config)
+        self.path_to_tests = path_to_tests
         self.path_to_c2eo = settings.get_setting('path_to_c2eo')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
@@ -33,7 +35,7 @@ class Tests(object):
         clean_before_transpilation.main(self.path_to_tests, self.path_to_eo_src)
         update_eo_version.main()
         build_c2eo.main(self.path_to_c2eo)
-        c_files, eo_c_files = Transpiler(self.path_to_tests).transpile()
+        c_files, eo_c_files = Transpiler(self.path_to_tests, self.filters).transpile()
         self.get_result_for_tests(c_files, eo_c_files)
         results = ThreadPool(4).map(compare_test_results, eo_c_files)
         passed, errors, exceptions = group_comparison_results(results)
@@ -194,8 +196,10 @@ if __name__ == '__main__':
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
     if len(sys.argv) == 1:
         Tests().test()
-    else:
+    elif len(sys.argv) == 2:
         Tests(sys.argv[1]).test()
+    else:
+        Tests(sys.argv[1], sys.argv[2]).test()
     end_time = time.time()
     time_span = int(end_time - start_time)
     inf = tools.colorize_text('INFO', 'blue')
