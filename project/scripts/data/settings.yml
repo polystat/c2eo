@@ -4,4 +4,4 @@ path_to_c2eo: ../bin/
 path_to_eo_project: ../../result/
 path_to_eo_src: ../../result/eo/c2eo/src/
 path_to_tests: ../tests/main/
-config: without_struct
+config: 

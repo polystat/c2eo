@@ -39,7 +39,7 @@ class Tests(object):
         self.get_result_for_tests(c_files, eo_c_files)
         results = ThreadPool(4).map(compare_test_results, eo_c_files)
         passed, errors, exceptions = group_comparison_results(results)
-        print_tests_result(passed, errors, exceptions)
+        print_tests_result(sorted(passed), sorted(errors), sorted(exceptions))
 
     def get_result_for_tests(self, c_files, eo_c_files):
         ThreadPool(4).map(get_result_for_c_test, c_files)
@@ -54,13 +54,13 @@ def get_result_for_c_test(path_to_test):
     path, file_name, _ = tools.split_path(path_to_test, with_end_sep=True)
     compiled_file = f'{path}{file_name}.out'
     result_file = f'{path}c_result.txt'
-    compile_cmd = f'clang {path_to_test} -o {compiled_file} -Wno-everything > /dev/null 2>{result_file}'
+    compile_cmd = f'clang {path_to_test} -o {compiled_file} -Wno-everything > /dev/null 2>>{result_file}'
     try:
         subprocess.run(compile_cmd, shell=True, check=True)
     except subprocess.CalledProcessError as exc:
         return exc
     else:
-        subprocess.run(f'{compiled_file} > {result_file} 2>&1', shell=True)
+        subprocess.run(f'{compiled_file} >> {result_file} 2>&1', shell=True)
 
 
 def get_result_for_eo_test(eo_c_file):
@@ -68,7 +68,7 @@ def get_result_for_eo_test(eo_c_file):
     file_name = file_name.replace('-eo', '')
     command = f'java -cp target/classes:target/eo-runtime.jar org.eolang.Main c2eo.src.{file_name}'
     result_file = f'{path}eo_result.txt'
-    subprocess.run(f'{command} > {result_file} 2>&1', shell=True)
+    subprocess.run(f'{command} >> {result_file} 2>&1', shell=True)
 
 
 def compare_test_results(path_to_eo_c_file):
@@ -119,7 +119,7 @@ def compare_lines(c_data, eo_data):
             log_data.append(ok_line)
         else:
             is_equal = False
-            error_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} != {eo_line[:-1]}', 'red')
+            error_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} != {eo_line}', 'red')
             log_data.append(error_line)
     return is_equal, log_data
 
@@ -147,9 +147,9 @@ def group_comparison_results(results):
 
 def print_tests_result(passed, errors, exceptions):
     info = tools.colorize_text('INFO', 'blue')
-    print(f'\n[{info}] {"-" * 60}')
-    print(f'[{info}]  TEST RESULTS')
-    print(f'[{info}] {"-" * 60}')
+    print_slowly(f'\n[{info}] {"-" * 60}')
+    print_slowly(f'[{info}]  TEST RESULTS')
+    print_slowly(f'[{info}] {"-" * 60}')
     print()
     for test_name, _ in passed:
         print_passed_test(test_name)
@@ -160,35 +160,44 @@ def print_tests_result(passed, errors, exceptions):
     for test_name, log_data in exceptions:
         print_exception_test(test_name, log_data)
 
-    print(f'\n[{info}] {"-" * 60}')
+    print_slowly(f'\n[{info}] {"-" * 60}')
     tests_count = len(passed) + len(errors) + len(exceptions)
-    print(f'[{info}]  Tests run: {tests_count}, '
-          f'Passed: {len(passed)}, Errors: {len(errors)}, Exceptions: {len(exceptions)}')
+    print_slowly(f'[{info}]  Tests run: {tests_count}, '
+                 f'Passed: {len(passed)}, Errors: {len(errors)}, Exceptions: {len(exceptions)}')
+
+
+def print_slowly(*lines):
+    for line in lines:
+        if len(lines) > 1:
+            print(line.rstrip('\n'))
+        else:
+            print(line)
+        time.sleep(0.05)
 
 
 def print_passed_test(test_name, ):
     ok = tools.colorize_text('OK', 'green')
-    print(f'[{ok}] {test_name}')
+    print_slowly(f'[{ok}] {test_name}')
 
 
 def print_error_test(test_name, log_data):
     error = tools.colorize_text('ERROR', 'red')
-    print(f'\n[{error}] {test_name}')
+    print_slowly(f'\n[{error}] {test_name}')
     if len(log_data) > 30:
         log_data = log_data[:30]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    print(*log_data, sep='\n')
+    print_slowly(*log_data)
 
 
 def print_exception_test(test_name, log_data):
     exception = tools.colorize_text('EXCEPTION', 'red')
-    print(f'\n[{exception}] {test_name}:')
+    print_slowly(f'\n[{exception}] {test_name}:')
     if len(log_data) > 10:
         log_data = log_data[:10]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    print(*log_data)
+    print_slowly(*log_data)
 
 
 if __name__ == '__main__':
