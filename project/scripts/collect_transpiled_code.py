@@ -29,15 +29,16 @@ def read_code_from_global_files(path, pattern):
     for file in tools.search_files_by_pattern(path, pattern):
         name = tools.get_file_name(file)
         code += f'[arg] > {name}\n'
-        code += read_code_from_static_files(path, f'{name}.stat')
+        code += read_code_from_static_file(f'{path}{name}.stat', name)
         code += read_code_from_file(file, indent='  ')
     return code
 
 
-def read_code_from_static_files(path, pattern):
+def read_code_from_static_file(file, name):
     code = ''
-    for file in tools.search_files_by_pattern(path, pattern):
-        code += read_code_from_file(file, indent='  ')
+    if os.path.exists(file):
+        code += read_code_from_file(file, indent='    ')
+        code = code.replace(f'{name}.', '')
     return code
 
 
