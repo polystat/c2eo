@@ -2,6 +2,9 @@
 
 import os
 import glob
+import time
+import re
+from multiprocessing.dummy import Pool as ThreadPool
 
 
 def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
@@ -74,3 +77,25 @@ def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False)
 def colorize_text(text, color):
     colors = {'blue': '\033[36m', 'white': '\033[37m', 'red': '\033[31m', 'green': '\033[32m'}
     return f'{colors[color]}{text}{colors["white"]}'
+
+
+def thread_pool():
+    cpu_count = os.cpu_count()
+    if cpu_count is None:
+        cpu_count = 1
+    return ThreadPool(cpu_count)
+
+
+def print_slowly(*lines):
+    for line in lines:
+        if len(lines) > 1:
+            print(line.rstrip('\n'))
+        else:
+            print(line)
+        time.sleep(0.05)
+
+
+def is_float(str_num):
+    float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
+    result = re.fullmatch(float_pattern, str_num)
+    return result is not None

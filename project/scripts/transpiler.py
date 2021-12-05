@@ -6,7 +6,6 @@ import re
 import sys
 import shutil
 import subprocess
-from multiprocessing.dummy import Pool as ThreadPool
 
 # Our scripts
 import settings
@@ -30,7 +29,7 @@ class Transpiler(object):
         tools.clear_dir_by_pattern(self.path_to_c_files, '*-eo.c', recursive=True)
         c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', filters=self.filters,
                                                 recursive=True, print_files=True)
-        eo_names = ThreadPool(4).map(self.start_transpilation, c_files)
+        eo_names = tools.thread_pool().map(self.start_transpilation, c_files)
         self.start_collecting()
         if len(c_files) == 1:
             self.generate_run_sh(c_files[0])

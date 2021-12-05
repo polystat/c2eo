@@ -2,11 +2,9 @@
 
 import os
 import sys
-import re
 import time
 import math
 import subprocess
-from multiprocessing.dummy import Pool as ThreadPool
 
 # Our scripts
 import settings
@@ -37,16 +35,16 @@ class Tests(object):
         build_c2eo.main(self.path_to_c2eo)
         c_files, eo_c_files = Transpiler(self.path_to_tests, self.filters).transpile()
         self.get_result_for_tests(c_files, eo_c_files)
-        results = ThreadPool(4).map(compare_test_results, eo_c_files)
+        results = tools.thread_pool().map(compare_test_results, eo_c_files)
         passed, errors, exceptions = group_comparison_results(results)
         print_tests_result(sorted(passed), sorted(errors), sorted(exceptions))
 
     def get_result_for_tests(self, c_files, eo_c_files):
-        ThreadPool(4).map(get_result_for_c_test, c_files)
+        tools.thread_pool().map(get_result_for_c_test, c_files)
         build_eo.main(self.path_to_eo_project)
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
-        ThreadPool(4).map(get_result_for_eo_test, eo_c_files)
+        tools.thread_pool().map(get_result_for_eo_test, eo_c_files)
         os.chdir(original_path)
 
 
@@ -114,7 +112,7 @@ def compare_lines(c_data, eo_data):
             log_data.append(ok_line)
             continue
 
-        is_both_float = is_float(c_line[:-1]) and is_float(eo_line[:-1])
+        is_both_float = tools.is_float(c_line[:-1]) and tools.is_float(eo_line[:-1])
         if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
             log_data.append(ok_line)
         else:
@@ -122,12 +120,6 @@ def compare_lines(c_data, eo_data):
             error_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} != {eo_line}', 'red')
             log_data.append(error_line)
     return is_equal, log_data
-
-
-def is_float(str_num):
-    float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
-    result = re.fullmatch(float_pattern, str_num)
-    return result is not None
 
 
 def group_comparison_results(results):
@@ -147,9 +139,9 @@ def group_comparison_results(results):
 
 def print_tests_result(passed, errors, exceptions):
     info = tools.colorize_text('INFO', 'blue')
-    print_slowly(f'\n[{info}] {"-" * 60}')
-    print_slowly(f'[{info}]  TEST RESULTS')
-    print_slowly(f'[{info}] {"-" * 60}')
+    tools.print_slowly(f'\n[{info}] {"-" * 60}')
+    tools.print_slowly(f'[{info}]  TEST RESULTS')
+    tools.print_slowly(f'[{info}] {"-" * 60}')
     print()
     for test_name, _ in passed:
         print_passed_test(test_name)
@@ -160,44 +152,35 @@ def print_tests_result(passed, errors, exceptions):
     for test_name, log_data in exceptions:
         print_exception_test(test_name, log_data)
 
-    print_slowly(f'\n[{info}] {"-" * 60}')
+    tools.print_slowly(f'\n[{info}] {"-" * 60}')
     tests_count = len(passed) + len(errors) + len(exceptions)
-    print_slowly(f'[{info}]  Tests run: {tests_count}, '
-                 f'Passed: {len(passed)}, Errors: {len(errors)}, Exceptions: {len(exceptions)}')
-
-
-def print_slowly(*lines):
-    for line in lines:
-        if len(lines) > 1:
-            print(line.rstrip('\n'))
-        else:
-            print(line)
-        time.sleep(0.05)
+    tools.print_slowly(f'[{info}]  Tests run: {tests_count}, Passed: {len(passed)},'
+                       f' Errors: {len(errors)}, Exceptions: {len(exceptions)}')
 
 
 def print_passed_test(test_name, ):
     ok = tools.colorize_text('OK', 'green')
-    print_slowly(f'[{ok}] {test_name}')
+    tools.print_slowly(f'[{ok}] {test_name}')
 
 
 def print_error_test(test_name, log_data):
     error = tools.colorize_text('ERROR', 'red')
-    print_slowly(f'\n[{error}] {test_name}')
+    tools.print_slowly(f'\n[{error}] {test_name}')
     if len(log_data) > 30:
         log_data = log_data[:30]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    print_slowly(*log_data)
+    tools.print_slowly(*log_data)
 
 
 def print_exception_test(test_name, log_data):
     exception = tools.colorize_text('EXCEPTION', 'red')
-    print_slowly(f'\n[{exception}] {test_name}:')
+    tools.print_slowly(f'\n[{exception}] {test_name}:')
     if len(log_data) > 10:
         log_data = log_data[:10]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    print_slowly(*log_data)
+    tools.print_slowly(*log_data)
 
 
 if __name__ == '__main__':
