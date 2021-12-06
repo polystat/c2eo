@@ -156,7 +156,7 @@ void initZeroValueAnalysis_1(const VarDecl* VD, std::string &str) {
 void getTypeName(VarDecl* VD, std::string &str) {
     TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
     uint64_t typeSize = typeInfo.Width;
-    unsigned fieldAlign = typeInfo.Align;
+//    unsigned fieldAlign = typeInfo.Align;
     const QualType qualType = VD->getType();
     const clang::Type* typePtr = qualType.getTypePtr();
     str = "c_";

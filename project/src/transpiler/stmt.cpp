@@ -41,6 +41,8 @@ StmtGen* getReturnStmtGenerator(const ReturnStmt* pStmt);
 
 ASTContext* context;
 
+void getEONameOfType(const QualType qualType, std::string &str);
+
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров составного оператора
 void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context) {
@@ -238,11 +240,58 @@ StmtGen* getStmtGen(const Stmt* i) {
         const CompoundAssignOperator* cao = (CompoundAssignOperator*) i;
         stmtGen = getCompoundAssignOperatorClassGenerator(cao);
     }
-    if (stmtClass == Stmt::Stmt::InitListExprClass) {
+    if (stmtClass == Stmt::InitListExprClass) {
         const InitListExpr* ile = (InitListExpr*) i;
         stmtGen = getInitListExprClassGenerator(ile);
     }
+    if (stmtClass == Stmt::ImplicitValueInitExprClass) {
+        const ImplicitValueInitExpr* ivie = (ImplicitValueInitExpr*) i;
+        const QualType qualType = ivie->getType();
+        stmtGen->value = "";
+        getEONameOfType(qualType, stmtGen->value); //typeInfo.Width??
+    }
     return stmtGen;
+}
+
+
+void getEONameOfType(const QualType qualType, std::string &str) {
+    uint64_t typeSize = 32;
+    const clang::Type* typePtr = qualType.getTypePtr();
+    str = "c_";
+
+    if (typePtr->isBooleanType()) {
+        str += "bool";
+        return;
+    }
+    if (typePtr->isFloatingType()) {
+        str += "float" + std::to_string(typeSize);
+        return;
+    }
+
+    if (!typePtr->isSignedIntegerType())
+        str += "u";
+    if (typePtr->isCharType()) {
+        str += "char";
+        return;
+    }
+    if (typePtr->isIntegerType()) {
+        str += "int" + std::to_string(typeSize);
+        return;
+    }
+
+
+    if (typePtr->isUnionType())
+        str = "un_";
+    if (typePtr->isStructureType())
+        str = "st_";
+    if (typePtr->isUnionType() || typePtr->isStructureType()) {
+        RecordDecl* RD = typePtr->getAsRecordDecl();
+        if (RD->hasNameForLinkage())
+            str += RD->getNameAsString();
+        else
+            str += std::to_string(reinterpret_cast<uint64_t>(RD));
+        return;
+    }
 }
 
 /// Метод, который обрабатывает return,
