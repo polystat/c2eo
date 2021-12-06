@@ -37,9 +37,12 @@ def get_latest_eo_version():
     return latest_version
 
 
-def get_meta_code(meta_name):
+def get_meta_code(meta_name, read_as_lines=False):
     with open(f'data/{meta_name}.txt', 'r') as f:
-        return f.read()
+        if read_as_lines:
+            return f.readlines()
+        else:
+            return f.read()
 
 
 def get_config(config_name):
