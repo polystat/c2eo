@@ -349,9 +349,10 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
         }
         llvm::outs() << str << "\n";
     } else {
-        str = "";
         Stmt* body = (Stmt * )((clang::InitListExpr * )(VD->getInit()));
-        getListValue(body, str, &VD->getASTContext());
+        std::stringstream ss;
+        getASTStmtGen(body, &VD->getASTContext())->Generate(ss);
+        str = ss.str();
         llvm::outs() << "    no Initial Value\n";
     }
 }
@@ -429,17 +430,17 @@ void getTypeName(const ValueDecl* VD, std::string &str) {
     }
 }
 
-void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
-    for (InitListExpr::iterator it = ((clang::InitListExpr*) stmt)->begin();
-         it != ((clang::InitListExpr*) stmt)->end(); it++) {
-        if ((*it)->getStmtClass() == Stmt::InitListExprClass)
-            getListValue(*it, str, context);
-        else {
-            StmtGen* asg = getASTStmtGen((Stmt*)(*it), context);
-            std::stringstream ss;
-            asg->Generate(ss);
-            if (!str.empty()) str += " ";
-            str += ss.str();
-        }
-    }
-}
+//void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
+//    for (InitListExpr::iterator it = ((clang::InitListExpr*) stmt)->begin();
+//         it != ((clang::InitListExpr*) stmt)->end(); it++) {
+//        if ((*it)->getStmtClass() == Stmt::InitListExprClass)
+//            getListValue(*it, str, context);
+//        else {
+//            StmtGen* asg = getASTStmtGen((Stmt*)(*it), context);
+//            std::stringstream ss;
+//            asg->Generate(ss);
+//            if (!str.empty()) str += " ";
+//            str += ss.str();
+//        }
+//    }
+//}

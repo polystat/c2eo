@@ -1,9 +1,15 @@
-#include "stdio.h"
-int a=13;
-int b=0;
 int main() {
-    b+=(a+=1);
-    b;
-    printf("%d\n", b);
+    struct q {
+        int b;
+        struct q2{
+            struct q3{
+                int h;
+            } h;
+        } a;
+        struct q4{
+            int h;
+        }h;
+    };
+    struct q a = {1,2,3};
     return 0;
 }

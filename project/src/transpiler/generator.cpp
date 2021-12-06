@@ -198,22 +198,16 @@ IfStmtGen::~IfStmtGen() {
 
 //--------------------------------------------------------------------------------------------------
 void RecordGen::Generate(std::ostream &out) {
-    out << StmtGen::getIndentSpaces();
     out << "[";
-    if (!fields.empty())
-        out << "field_init_0";
-    for (size_t i = 1; i < count; i++)
-        out << " field_init_" << i;
+    out << "arr";
     out << "] > " << name;
     out << "\n";
     shift++;
     out << StmtGen::getIndentSpaces() << "\"" << type << "\" > type\n";
-    size_t j = 0;
-    for (RecordGen* rg: fields) {
-        out << "\n" << StmtGen::getIndentSpaces() << rg->type << " ";
-        for (size_t i = 0; i < rg->count; i++, j++)
-            out << "field_init_" << j << " ";
-        out << "> " << rg->name;
+    for (size_t i = 0; i < fields.size(); i++) {
+        out << "\n" << StmtGen::getIndentSpaces() << fields[i]->type << " ";
+        out << "(arr.get " << i << ") ";
+        out << "> " << fields[i]->name;
     }
     if (!fields.empty())
         out << "\n";
@@ -281,4 +275,14 @@ void MemberStmtGen::Generate(std::ostream &out) {
         out << ".";
     }
     out << value;
+}
+
+void ListStmtGen::Generate(std::ostream &out) {
+    out << "(* ";
+    for (size_t i = 0; i < elements.size(); i++) {
+        if (i)
+            out << " ";
+        elements[i]->Generate(out);
+    }
+    out << ")";
 }
