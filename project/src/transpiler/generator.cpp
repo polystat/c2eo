@@ -1,8 +1,8 @@
 #include <string>
 #include <numeric>
-#include "llvm/Support/Casting.h"
-
 #include "generator.h"
+
+#include "llvm/Support/Casting.h"
 
 
 // void VarGen::GenValue(std::string &str) {
@@ -23,7 +23,6 @@ SourceGen::~SourceGen() {
     delete stat;
 }
 
-
 //--------------------------------------------------------------------------------------------------
 void VarGen::Generate(std::ostream &out) {
     out << type << " " << value << " > " << name;
@@ -32,16 +31,17 @@ void VarGen::Generate(std::ostream &out) {
 //--------------------------------------------------------------------------------------------------
 /// shift is indentation level. shift 2 is equal to 4 spaces
 std::string StmtGen::getIndentSpaces() {
-
     return std::string(shift * 2, ' ');
 }
 
 //--------------------------------------------------------------------------------------------------
 void MultiLineStmtGen::Add(StmtGen* stmt) {
     UnaryStmtGen* st = llvm::dyn_cast<UnaryStmtGen>(stmt);
-    //TODO Вынести Empty как отдельный тип или метод
-    if (st && st->op == "" && st->value == "" && st->nestedStmt == nullptr)
+
+    // TODO: Вынести Empty как отдельный тип или метод
+    if (st && st->op == "" && st->value == "" && st->nestedStmt == nullptr) {
         return;
+    }
     statements.push_back(stmt);
 }
 
@@ -49,34 +49,35 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
     int lines = 0;
 
     for (int i = 0; i < statements.size(); ++i) {
-        if (!llvm::isa<MultiLineStmtGen>(statements[i]))
+        if (!llvm::isa<MultiLineStmtGen>(statements[i])) {
             out << getIndentSpaces();
+        }
         out << statements[i];
         if (i + 1 != statements.size() || llvm::isa<EmptyStmtGen>(statements[i])) {
             out << "\n";
-            lines++;
+            ++lines;
         }
     }
-
-
 }
 
 MultiLineStmtGen::~MultiLineStmtGen() {
     statements.clear();
 }
 
-
 void CompoundStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
     out << "seq";
-    if (is_decorator)
+    if (is_decorator) {
         out << " > @";
+    }
+
     out << "\n";
     AbstractGen::shift++;
     if (!statements.empty()) {
         MultiLineStmtGen::Generate(out);
         out << "\n";
     }
+
     out << getIndentSpaces();
     out << "TRUE";
     AbstractGen::shift--;
@@ -97,8 +98,8 @@ void FuncGen::Generate(std::ostream &out) {
         out << name;
         out << "\n";
     }
-    // Далее идет формирование тела функции
 
+    // Далее идет формирование тела функции
     AbstractGen::shift++;
     out << body;
     AbstractGen::shift--;
@@ -109,24 +110,28 @@ void FuncGen::Generate(std::ostream &out) {
 }
 
 void BinaryStmtGen::Generate(std::ostream &out) {
-    //str << value +"(";
+    // str << value +"(";
     out << value << " ";
-    //bool leftLinear = isLeftLinear(left);
+    // bool leftLinear = isLeftLinear(left);
     // lets add left brackets everytime
     bool leftLinear = false;
-    if (!leftLinear)
+    if (!leftLinear) {
         out << "(";
+    }
     out << left;
-    if (!leftLinear)
+    if (!leftLinear) {
         out << ")";
+    }
     out << " ";
-    bool rightLiteral = llvm::isa<LiteralStmtGen>(right);
-    if (!rightLiteral)
-        out << "(";
-    out << right;
-    if (!rightLiteral)
-        out << ")";
 
+    bool rightLiteral = llvm::isa<LiteralStmtGen>(right);
+    if (!rightLiteral) {
+        out << "(";
+    }
+    out << right;
+    if (!rightLiteral) {
+        out << ")";
+    }
 }
 
 BinaryStmtGen::~BinaryStmtGen() {
@@ -135,11 +140,16 @@ BinaryStmtGen::~BinaryStmtGen() {
 }
 
 bool BinaryStmtGen::isLeftLinear(StmtGen* pGen) {
-    if (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen))
+    if (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen)) {
         return false;
+    }
+
     auto* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
-    if (unaryStmtGen->nestedStmt != nullptr)
+
+    if (unaryStmtGen->nestedStmt != nullptr) {
         return isLeftLinear(unaryStmtGen->nestedStmt);
+    }
+
     return true;
 }
 
@@ -151,21 +161,24 @@ UnaryStmtGen::~UnaryStmtGen() {
 void UnaryStmtGen::Generate(std::ostream &out) {
     bool empty = value.empty() || nestedStmt == nullptr;
     out << "(" << value;
-    if (!empty)
+
+    if (!empty) {
         out << "(";
-    if (nestedStmt != nullptr)
+    }
+    if (nestedStmt != nullptr) {
         nestedStmt->Generate(out);
+    }
     // Now we dont use dot operator and postfix is deprecated
-    //out << postfix;
-    if (!empty)
+    // out << postfix;
+    if (!empty) {
         out << ")";
+    }
     out << ")";
 }
 
 //--------------------------------------------------------------------------------------------------
 void SpaceGen::Generate(std::ostream &out) {
     // Формирование списка глобальных объектов
-    //
     for (auto globalObject: objects) {
         out << globalObject;
         out << "\n";
@@ -187,48 +200,66 @@ SpaceGen::~SpaceGen() {
 void IfStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
     out << "if\n";
+
     AbstractGen::shift++;
     MultiLineStmtGen::Generate(out);
     AbstractGen::shift--;
 }
 
 IfStmtGen::~IfStmtGen() {
+
 }
 
 //--------------------------------------------------------------------------------------------------
 void RecordGen::Generate(std::ostream &out) {
     out << StmtGen::getIndentSpaces();
     out << "[";
-    if (!fields.empty())
+
+    if (!fields.empty()) {
         out << "field_init_0";
-    for (size_t i = 1; i < count; i++)
+    }
+    for (size_t i = 1; i < count; i++) {
         out << " field_init_" << i;
+    }
+
     out << "] > " << name;
     out << "\n";
+
     shift++;
     out << StmtGen::getIndentSpaces() << "\"" << type << "\" > type\n";
+
     size_t j = 0;
     for (RecordGen* rg: fields) {
         out << "\n" << StmtGen::getIndentSpaces() << rg->type << " ";
-        for (size_t i = 0; i < rg->count; i++, j++)
+
+        for (size_t i = 0; i < rg->count; i++, j++) {
             out << "field_init_" << j << " ";
+        }
+
         out << "> " << rg->name;
     }
-    if (!fields.empty())
+
+    if (!fields.empty()) {
         out << "\n";
+    }
     out << "\n" << StmtGen::getIndentSpaces() << "[value] > write\n";
     shift++;
     out << StmtGen::getIndentSpaces() << "seq > @";
     shift++;
-    for (RecordGen* vg: fields)
+
+    for (RecordGen* vg: fields) {
         out << "\n" << StmtGen::getIndentSpaces() << "^." << vg->name << ".write (value." << vg->name << ")";
+    }
+
     out << "\n" << StmtGen::getIndentSpaces() << "TRUE\n";
     shift -= 3;
 }
 
 void WhileStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
-    out << "while\n";
+    out << "while";
+    out << "\n";
+
     AbstractGen::shift++;
     MultiLineStmtGen::Generate(out);
     AbstractGen::shift--;
@@ -248,6 +279,7 @@ void LiteralStmtGen::Generate(std::ostream &out) {
 void ObjectStmtGen::Generate(std::ostream &out) {
     //out << getIndentSpaces();
     out << "[i]\n";
+
     AbstractGen::shift++;
     body->Generate(out);
     AbstractGen::shift--;
@@ -259,11 +291,14 @@ ObjectStmtGen::~ObjectStmtGen() {
 
 void DoWhileStmtGen::Generate(std::ostream &out) {
     StmtGen* s = nullptr;
-    if (!llvm::isa<CompoundStmtGen>(statements[1]))
+
+    if (!llvm::isa<CompoundStmtGen>(statements[1])) {
         out << getIndentSpaces();
+    }
     out << statements[1] << "\n";
     out << getIndentSpaces();
     out << "while\n";
+
     AbstractGen::shift++;
     MultiLineStmtGen::Generate(out);
     AbstractGen::shift--;

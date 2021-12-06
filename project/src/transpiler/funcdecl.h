@@ -23,9 +23,6 @@ using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
-
-using namespace clang;
-
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод параметров описания функции
 void getFuncDeclParameters(const FunctionDecl *FD);
