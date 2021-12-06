@@ -70,7 +70,7 @@ class Transpiler(object):
 
     def generate_run_sh(self, c_file):
         file_name = tools.get_file_name(c_file)
-        code = settings.get_meta_code('run_sh')
+        code = settings.get_meta_code('run.sh')
         code = regex.sub('<object_name>', file_name, code)
         with open(f'{self.path_to_eo_project}run.sh', 'w') as f:
             f.write(code)

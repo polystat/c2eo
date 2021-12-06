@@ -5,6 +5,7 @@ import sys
 import time
 import math
 import subprocess
+import re as regex
 
 # Our scripts
 import tools
@@ -28,6 +29,7 @@ class Tests(object):
         self.path_to_c2eo = settings.get_setting('path_to_c2eo')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
+        self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
 
     def test(self):
         clean_before_transpilation.main(self.path_to_tests, self.path_to_eo_src)
@@ -44,8 +46,15 @@ class Tests(object):
         build_eo.main(self.path_to_eo_project)
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
-        tools.thread_pool().map(get_result_for_eo_test, eo_c_files)
+        tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)
         os.chdir(original_path)
+
+    def get_result_for_eo_test(self, eo_c_file):
+        path, file_name, _ = tools.split_path(eo_c_file, with_end_sep=True)
+        file_name = file_name.replace('-eo', '')
+        command = regex.sub('<object_name>', file_name, self.run_sh_cmd)
+        result_file = f'{path}eo_result.txt'
+        subprocess.run(f'{command} >> {result_file} 2>&1', shell=True)
 
 
 def get_result_for_c_test(path_to_test):
@@ -59,14 +68,6 @@ def get_result_for_c_test(path_to_test):
         return exc
     else:
         subprocess.run(f'{compiled_file} >> {result_file} 2>&1', shell=True)
-
-
-def get_result_for_eo_test(eo_c_file):
-    path, file_name, _ = tools.split_path(eo_c_file, with_end_sep=True)
-    file_name = file_name.replace('-eo', '')
-    command = f'java -cp target/classes:target/eo-runtime.jar org.eolang.Main c2eo.src.{file_name}'
-    result_file = f'{path}eo_result.txt'
-    subprocess.run(f'{command} >> {result_file} 2>&1', shell=True)
 
 
 def compare_test_results(path_to_eo_c_file):
@@ -107,17 +108,19 @@ def compare_lines(c_data, eo_data):
     is_equal = True
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
-        ok_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} == {eo_line[:-1]}', 'green')
+        c_line = c_line.rstrip()
+        eo_line = eo_line.rstrip()
+        ok_line = tools.colorize_text(f'\tLine {i}: {c_line} == {eo_line}', 'green')
         if c_line == eo_line:
             log_data.append(ok_line)
             continue
 
-        is_both_float = tools.is_float(c_line[:-1]) and tools.is_float(eo_line[:-1])
+        is_both_float = tools.is_float(c_line) and tools.is_float(eo_line)
         if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
             log_data.append(ok_line)
         else:
             is_equal = False
-            error_line = tools.colorize_text(f'\tLine {i}: {c_line[:-1]} != {eo_line}', 'red')
+            error_line = tools.colorize_text(f'\tLine {i}: {c_line} != {eo_line}\n', 'red')
             log_data.append(error_line)
     return is_equal, log_data
 
