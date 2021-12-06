@@ -40,7 +40,7 @@ set(SOURCE_FILES
         generator.cpp
 
 
-        util.cpp)
+        util.cpp decl.h decl.cpp)
 
 #add_executable(recvistor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})

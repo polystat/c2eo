@@ -1,15 +1,9 @@
-struct st {
-    int a;
-    struct st2 {
-        int x, y;
-    } b;
-} a = {1, {2, 3}},
-b= {5, {6, 7}};
-
+#include "stdio.h"
+int a=13;
+int b=0;
 int main() {
-    a.b.y;
-    b.b.y;
-    a.b = b.b;
-    a.b.y;
+    b+=(a+=1);
+    b;
+    printf("%d\n", b);
     return 0;
 }

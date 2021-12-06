@@ -29,12 +29,7 @@ using namespace clang;
 void getVarDeclParameters(const VarDecl *VD);
 //-------------------------------------------------------------------------------------------------
 
-// Анализ полученного начального значения с последующим использованием
-void initValueAnalysis(const VarDecl *VD, std::string &str);
 
-
-// Анализ типа для неициализированных переменны с установко нулевого значения
-void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 
 void getTypeName(const ValueDecl* VD, std::string &str);
 void getListValue(const Stmt* stmt, std::string &str, ASTContext* context);

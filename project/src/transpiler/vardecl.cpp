@@ -5,6 +5,12 @@
 #include "generator.h"
 #include "stmt.h"
 
+// Анализ полученного начального значения с последующим использованием
+void initValueAnalysis(const VarDecl *VD, std::string &str);
+
+
+// Анализ типа для неициализированных переменны с установко нулевого значения
+void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
 // Определение и тестовый вывод основных параметров описания переменных

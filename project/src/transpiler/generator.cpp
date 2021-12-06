@@ -25,7 +25,7 @@ SourceGen::~SourceGen() {
 
 //--------------------------------------------------------------------------------------------------
 void VarGen::Generate(std::ostream &out) {
-    out << type << " " << value << " > " << name;
+    out << type << " " << value << nestedStmt << " > " << name;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -50,8 +50,7 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
 
     for (int i = 0; i < statements.size(); ++i) {
         //TODO тревожный звоночек, что ObjectStmt это Multiline
-        if (!llvm::isa<MultiLineStmtGen>(statements[i]) &&
-            !llvm::isa<ObjectStmtGen>(statements[i])) {
+        if (!llvm::isa<MultiLineStmtGen>(statements[i]) && !llvm::isa<ObjectStmtGen>(statements[i]))
             out << getIndentSpaces();
         }
         out << statements[i];
@@ -282,7 +281,6 @@ void ObjectStmtGen::Generate(std::ostream &out) {
     out << getIndentSpaces();
     // TODO убрать эти два пробела
     out << "[] > @\n";
-
     AbstractGen::shift++;
     body->Generate(out);
     AbstractGen::shift--;
