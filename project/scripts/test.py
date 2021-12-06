@@ -7,13 +7,13 @@ import math
 import subprocess
 
 # Our scripts
-import settings
 import tools
-from transpiler import Transpiler
-import update_eo_version
-import build_c2eo
+import settings
 import build_eo
+import build_c2eo
+import update_eo_version
 import clean_before_transpilation
+from transpile_с2eo import Transpiler
 
 
 class Tests(object):

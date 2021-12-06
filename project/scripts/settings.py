@@ -1,8 +1,6 @@
-import os.path
-
 import yaml
+import os.path
 import requests
-from os import path
 from yaml.loader import SafeLoader
 
 
@@ -18,7 +16,7 @@ def get_setting(setting_name):
         data = yaml.load(f, Loader=SafeLoader)
     setting = data[setting_name]
     if 'path' in setting_name:
-        setting = path.join(setting, '')
+        setting = os.path.join(setting, '')
     return setting
 
 

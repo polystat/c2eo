@@ -3,7 +3,7 @@
 import os
 import glob
 import time
-import re
+import re as regex
 from multiprocessing.dummy import Pool as ThreadPool
 
 
@@ -97,5 +97,5 @@ def print_slowly(*lines):
 
 def is_float(str_num):
     float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
-    result = re.fullmatch(float_pattern, str_num)
+    result = regex.fullmatch(float_pattern, str_num)
     return result is not None

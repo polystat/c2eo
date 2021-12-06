@@ -1,8 +1,8 @@
 #! /usr/bin/python3
 
 import os
-import re
 import sys
+import re as regex
 
 # Our scripts
 import tools
@@ -57,11 +57,11 @@ def update_version_in_files(files, latest_version):
         with open(file, 'r') as f:
             data = f.read()
 
-        result = re.search(pattern, data)
+        result = regex.search(pattern, data)
         if (not result) or (latest_version_declaration in result.group()):
             continue
 
-        new_data = re.sub(pattern, latest_version_declaration, data)
+        new_data = regex.sub(pattern, latest_version_declaration, data)
         with open(file, 'w') as f:
             f.write(new_data)
         count_changed_files += 1
