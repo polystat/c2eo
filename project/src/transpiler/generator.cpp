@@ -12,10 +12,10 @@
 // }
 
 
-SpaceGen* AbstractGen::globalSpaceGenPtr = nullptr;
-SpaceGen* AbstractGen::staticSpaceGenPtr = nullptr;
+SpaceGen *AbstractGen::globalSpaceGenPtr = nullptr;
+SpaceGen *AbstractGen::staticSpaceGenPtr = nullptr;
 std::string AbstractGen::filename;
-std::map <uint64_t, std::string> AbstractGen::identifiers = std::map<uint64_t, std::string>();
+std::map<uint64_t, std::string> AbstractGen::identifiers = std::map<uint64_t, std::string>();
 int AbstractGen::shift = 0;
 
 SourceGen::~SourceGen() {
@@ -35,8 +35,8 @@ std::string StmtGen::getIndentSpaces() {
 }
 
 //--------------------------------------------------------------------------------------------------
-void MultiLineStmtGen::Add(StmtGen* stmt) {
-    UnaryStmtGen* st = llvm::dyn_cast<UnaryStmtGen>(stmt);
+void MultiLineStmtGen::Add(StmtGen *stmt) {
+    UnaryStmtGen *st = llvm::dyn_cast<UnaryStmtGen>(stmt);
 
     // TODO: Вынести Empty как отдельный тип или метод
     if (st && st->op == "" && st->value == "" && st->nestedStmt == nullptr) {
@@ -49,7 +49,9 @@ void MultiLineStmtGen::Generate(std::ostream &out) {
     int lines = 0;
 
     for (int i = 0; i < statements.size(); ++i) {
-        if (!llvm::isa<MultiLineStmtGen>(statements[i])) {
+        //TODO тревожный звоночек, что ObjectStmt это Multiline
+        if (!llvm::isa<MultiLineStmtGen>(statements[i]) &&
+            !llvm::isa<ObjectStmtGen>(statements[i])) {
             out << getIndentSpaces();
         }
         out << statements[i];
@@ -139,12 +141,12 @@ BinaryStmtGen::~BinaryStmtGen() {
     delete BinaryStmtGen::right;
 }
 
-bool BinaryStmtGen::isLeftLinear(StmtGen* pGen) {
+bool BinaryStmtGen::isLeftLinear(StmtGen *pGen) {
     if (pGen == nullptr || !llvm::isa<UnaryStmtGen>(pGen)) {
         return false;
     }
 
-    auto* unaryStmtGen = static_cast<UnaryStmtGen*> (pGen);
+    auto *unaryStmtGen = static_cast<UnaryStmtGen *> (pGen);
 
     if (unaryStmtGen->nestedStmt != nullptr) {
         return isLeftLinear(unaryStmtGen->nestedStmt);
@@ -188,7 +190,7 @@ void SpaceGen::Generate(std::ostream &out) {
 
 //........................................................................
 // Добавление очередного объекта к глобальному пространству
-void SpaceGen::Add(AbstractGen* obj) {
+void SpaceGen::Add(AbstractGen *obj) {
     objects.push_back(obj);
 }
 
@@ -229,7 +231,7 @@ void RecordGen::Generate(std::ostream &out) {
     out << StmtGen::getIndentSpaces() << "\"" << type << "\" > type\n";
 
     size_t j = 0;
-    for (RecordGen* rg: fields) {
+    for (RecordGen *rg: fields) {
         out << "\n" << StmtGen::getIndentSpaces() << rg->type << " ";
 
         for (size_t i = 0; i < rg->count; i++, j++) {
@@ -247,7 +249,7 @@ void RecordGen::Generate(std::ostream &out) {
     out << StmtGen::getIndentSpaces() << "seq > @";
     shift++;
 
-    for (RecordGen* vg: fields) {
+    for (RecordGen *vg: fields) {
         out << "\n" << StmtGen::getIndentSpaces() << "^." << vg->name << ".write (value." << vg->name << ")";
     }
 
@@ -277,8 +279,9 @@ void LiteralStmtGen::Generate(std::ostream &out) {
 
 //TODO универсвализировать, добавить параметры возможно наследовать от compgen
 void ObjectStmtGen::Generate(std::ostream &out) {
-    //out << getIndentSpaces();
-    out << "[i]\n";
+    out << getIndentSpaces();
+    // TODO убрать эти два пробела
+    out << "[] > @\n";
 
     AbstractGen::shift++;
     body->Generate(out);
@@ -290,7 +293,7 @@ ObjectStmtGen::~ObjectStmtGen() {
 }
 
 void DoWhileStmtGen::Generate(std::ostream &out) {
-    StmtGen* s = nullptr;
+    StmtGen *s = nullptr;
 
     if (!llvm::isa<CompoundStmtGen>(statements[1])) {
         out << getIndentSpaces();
