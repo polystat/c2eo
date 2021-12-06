@@ -144,8 +144,7 @@ def print_tests_result(passed, errors, exceptions):
     info = tools.colorize_text('INFO', 'blue')
     tools.print_slowly(f'\n[{info}] {"-" * 60}')
     tools.print_slowly(f'[{info}]  TEST RESULTS')
-    tools.print_slowly(f'[{info}] {"-" * 60}')
-    print()
+    tools.print_slowly(f'[{info}] {"-" * 60}\n')
     for test_name, _ in passed:
         print_passed_test(test_name)
 
@@ -198,6 +197,5 @@ if __name__ == '__main__':
     end_time = time.time()
     time_span = int(end_time - start_time)
     inf = tools.colorize_text('INFO', 'blue')
-    print('[{}]  Total time:  {:02}:{:02} min.'.format(inf, time_span // 60, time_span % 60))
-    print(f'[{inf}] {"-" * 60}')
-    print()
+    tools.print_slowly('[{}]  Total time:  {:02}:{:02} min.'.format(inf, time_span // 60, time_span % 60))
+    tools.print_slowly(f'[{inf}] {"-" * 60}\n')
