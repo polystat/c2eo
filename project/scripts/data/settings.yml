@@ -1,11 +1,11 @@
-current_eo_version: 0.18.0
+config: null
+current_eo_version: 0.19.0
 file_chunk_size: 65536
-config:
+path_to_assembly: ../assembly/
 path_to_c2eo: ../bin/
+path_to_config: data/config/
+path_to_eo_project: ../../result/
+path_to_eo_src: ../../result/eo/c2eo/src/
 path_to_hash: data/hash/
 path_to_meta: data/meta/
 path_to_tests: ../tests/main/
-path_to_config: data/config/
-path_to_eo_src: ../../result/eo/c2eo/src/
-path_to_assembly: ../assembly/
-path_to_eo_project: ../../result/
