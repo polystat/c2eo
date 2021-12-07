@@ -3,8 +3,7 @@ int x = 3;
 int y = 2;
 int r;
 int main() {
-    if (x > y)
-
+    if (x > y);
         else {
         r = y;
     }
