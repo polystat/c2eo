@@ -213,7 +213,6 @@ IfStmtGen::~IfStmtGen() {
 
 //--------------------------------------------------------------------------------------------------
 void RecordGen::Generate(std::ostream &out) {
-    out << StmtGen::getIndentSpaces();
     out << "[";
 
     if (!fields.empty()) {
@@ -315,4 +314,14 @@ void MemberStmtGen::Generate(std::ostream &out) {
         out << ".";
     }
     out << value;
+}
+
+void ListStmtGen::Generate(std::ostream &out) {
+    out << "(* ";
+    for (size_t i = 0; i < elements.size(); i++) {
+        if (i)
+            out << " ";
+        elements[i]->Generate(out);
+    }
+    out << ")";
 }

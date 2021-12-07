@@ -1,30 +1,32 @@
 #include "decl.h"
+#include "recorddecl.h"
 
 
-void getTypeName(VarDecl *VD, std::string &str);
+void getTypeName(VarDecl* VD, std::string &str);
 
-void initValueAnalysis_1(const VarDecl *VD, std::string &str);
+void initValueAnalysis_1(const VarDecl* VD, std::string &str);
 
-void initZeroValueAnalysis_1(const VarDecl *VD, std::string &str);
+void initZeroValueAnalysis_1(const VarDecl* VD, std::string &str);
 
-std::string GetNameStoragePrefix(VarDecl *VD);
+std::string GetNameStoragePrefix(VarDecl* VD);
 
-std::string getNestedPrefix(VarDecl *VD);
+std::string getNestedPrefix(VarDecl* VD);
 
-AbstractGen *getDeclGen(Decl *decloration) {
+AbstractGen* getDeclGen(Decl* decloration) {
     AbstractGen* result = nullptr;
     auto declKind = decloration->getKind();
-    if (declKind == Decl::Var)
-    {
+    if (declKind == Decl::Var) {
         VarDecl* VD = dyn_cast<VarDecl>(decloration);
         VarGen* VG = getVarDeclGen(VD);
         result = VG;
-
+    } else if (declKind == Decl::Record) {
+        RecordDecl* RD = dyn_cast<RecordDecl>(decloration);
+        result = getRecordDeclSubObjects(RD);
     }
     return result;
 }
 
-VarGen *getVarDeclGen(VarDecl *VD) {
+VarGen* getVarDeclGen(VarDecl* VD) {
     VarGen* var = new VarGen;
     auto varName = VD->getNameAsString();
     auto varID = reinterpret_cast<uint64_t>(VD);
@@ -48,17 +50,17 @@ VarGen *getVarDeclGen(VarDecl *VD) {
     return var;
 }
 
-std::string getNestedPrefix(VarDecl *VD) {
+std::string getNestedPrefix(VarDecl* VD) {
     auto globalStorage = VD->hasGlobalStorage();
     auto extStorage = VD->hasExternalStorage();
     auto storageClass = VD->getStorageClass();
     auto staticLocal = VD->isStaticLocal();
-    if (globalStorage && !extStorage && (storageClass == SC_Static||staticLocal))
+    if (globalStorage && !extStorage && (storageClass == SC_Static || staticLocal))
         return AbstractGen::filename + ".";
     return "";
 }
 
-std::string GetNameStoragePrefix(VarDecl *VD) {
+std::string GetNameStoragePrefix(VarDecl* VD) {
     auto globalStorage = VD->hasGlobalStorage();
     auto extStorage = VD->hasExternalStorage();
     auto localVarDecl = VD->isLocalVarDecl();
@@ -74,10 +76,9 @@ std::string GetNameStoragePrefix(VarDecl *VD) {
 }
 
 
-
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
-void initValueAnalysis_1(const VarDecl *VD, std::string &str) {
+void initValueAnalysis_1(const VarDecl* VD, std::string &str) {
     //Init Value is only stmt, then lets use getStmt
 
 
@@ -123,7 +124,7 @@ void initValueAnalysis_1(const VarDecl *VD, std::string &str) {
 
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
-void initZeroValueAnalysis_1(const VarDecl *VD, std::string &str) {
+void initZeroValueAnalysis_1(const VarDecl* VD, std::string &str) {
     // Анализ типа переменной для корректного преобразования в тип Eolang
     auto qualType = VD->getType();      // квалифицированный тип (QualType)
     auto typePtr = qualType.getTypePtr();   // указатель на тип (Type)
@@ -143,7 +144,7 @@ void initZeroValueAnalysis_1(const VarDecl *VD, std::string &str) {
         for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
             if (!str.empty()) str += " ";
             std::string fieldVal = "";
-            initZeroValueAnalysis_1((const VarDecl *) (*it), fieldVal);
+            initZeroValueAnalysis_1((const VarDecl*) (*it), fieldVal);
             str += fieldVal;
         }
     } else {
@@ -152,10 +153,10 @@ void initZeroValueAnalysis_1(const VarDecl *VD, std::string &str) {
 }
 
 
-void getTypeName(VarDecl *VD, std::string &str) {
+void getTypeName(VarDecl* VD, std::string &str) {
     TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
     uint64_t typeSize = typeInfo.Width;
-    unsigned fieldAlign = typeInfo.Align;
+//    unsigned fieldAlign = typeInfo.Align;
     const QualType qualType = VD->getType();
     const clang::Type* typePtr = qualType.getTypePtr();
     str = "c_";

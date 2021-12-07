@@ -17,6 +17,8 @@ UnaryStmtGen* getDeclName(const DeclRefExpr* pExpr);
 
 StmtGen* getCompoundStmtOutputGenerator(const Stmt* pExpr);
 
+ListStmtGen* getInitListExprClassGenerator(const InitListExpr* ile);
+
 BinaryStmtGen* getCompoundAssignOperatorClassGenerator(const CompoundAssignOperator* cao);
 
 UnaryStmtGen* getIntegerLiteralGen(const IntegerLiteral* pLiteral);
@@ -38,6 +40,8 @@ StmtGen* getFuncCallGenerator(const CallExpr* pExpr);
 StmtGen* getReturnStmtGenerator(const ReturnStmt* pStmt);
 
 ASTContext* context;
+
+void getEONameOfType(const QualType qualType, std::string &str);
 
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод основных параметров составного оператора
@@ -233,6 +237,16 @@ StmtGen* getStmtGen(const Stmt* i) {
         const CompoundAssignOperator* cao = (CompoundAssignOperator*) i;
         stmtGen = getCompoundAssignOperatorClassGenerator(cao);
     }
+    if (stmtClass == Stmt::InitListExprClass) {
+        const InitListExpr* ile = (InitListExpr*) i;
+        stmtGen = getInitListExprClassGenerator(ile);
+    }
+    if (stmtClass == Stmt::ImplicitValueInitExprClass) {
+        const ImplicitValueInitExpr* ivie = (ImplicitValueInitExpr*) i;
+        const QualType qualType = ivie->getType();
+        stmtGen->value = "";
+        getEONameOfType(qualType, stmtGen->value); //typeInfo.Width??
+    }
     return stmtGen;
 }
 
@@ -351,7 +365,7 @@ BinaryStmtGen* getCompoundAssignOperatorClassGenerator(const CompoundAssignOpera
         binaryRightStmtGen->value = "div ";
     } else if (opName.compare("%=") == 0) {
         binaryRightStmtGen->value = "mod";
-    }else if (opName.compare("&=") == 0) {
+    } else if (opName.compare("&=") == 0) {
         binaryRightStmtGen->value = "bit-and";
     } else if (opName.compare("|=") == 0) {
         binaryRightStmtGen->value = "bit-or";
@@ -464,6 +478,17 @@ UnaryStmtGen* getUnaryOpertorStatement(const UnaryOperator* pOperator) {
     return unaryStmtGen;
 }
 
+ListStmtGen* getInitListExprClassGenerator(const InitListExpr* ile) {
+    ListStmtGen* lsg = new ListStmtGen;
+    lsg->value = "";
+    lsg->nestedStmt = nullptr;
+    for (InitListExpr::iterator it = ((clang::InitListExpr*) ile)->begin();
+         it != ((clang::InitListExpr*) ile)->end(); it++) {
+        lsg->elements.push_back(getStmtGen(*it));
+    }
+    return lsg;
+}
+
 BinaryStmtGen* getBinaryStatement(const BinaryOperator* pOperator) {
     BinaryStmtGen* binaryStmtGen = new BinaryStmtGen;
     std::string opName = pOperator->getOpcodeStr().str();
@@ -479,9 +504,7 @@ BinaryStmtGen* getBinaryStatement(const BinaryOperator* pOperator) {
         binaryStmtGen->value = "div ";
     } else if (opName.compare("%") == 0) {
         binaryStmtGen->value = "mod";
-    }
-
-    else if (opName.compare("&") == 0) {
+    } else if (opName.compare("&") == 0) {
         binaryStmtGen->value = "bit-and";
     } else if (opName.compare("|") == 0) {
         binaryStmtGen->value = "bit-or";
@@ -491,10 +514,7 @@ BinaryStmtGen* getBinaryStatement(const BinaryOperator* pOperator) {
         binaryStmtGen->value = "shift-left";
     } else if (opName.compare(">>") == 0) {
         binaryStmtGen->value = "shift-right";
-    }
-
-
-    else if (opName.compare("==") == 0) {
+    } else if (opName.compare("==") == 0) {
         binaryStmtGen->value = "eq";
     } else if (opName.compare("!=") == 0) {
         binaryStmtGen->value = "neq";

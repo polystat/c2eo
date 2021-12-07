@@ -41,7 +41,8 @@ struct AbstractGen {
         GK_SpaceGen,
         GK_SourceGen,
         GK_RecordDecl,
-        GK_MemberStmtGen
+        GK_MemberStmtGen,
+        GK_ListStmtGen
     };
 
     const GenKind Kind;
@@ -101,6 +102,7 @@ struct RecordGen: AbstractGen {
     std::string name;
     std::string type;
     std::vector<RecordGen*> fields; // todo: FieldGen
+//    std::vector<RecordGen*> records;
     size_t count = 0;
     virtual void Generate(std::ostream &out);
 //    virtual void GenValue(std::string &str);
@@ -262,6 +264,18 @@ struct  MemberStmtGen: UnaryStmtGen{
 };
 
 
+
+
+struct ListStmtGen:UnaryStmtGen{
+    std::vector<StmtGen*> elements;
+    void Generate(std::ostream &out) override ;
+
+    ListStmtGen() : UnaryStmtGen(AbstractGen::GK_ListStmtGen){}
+
+    static bool classof(const AbstractGen *S) {
+        return S->getKind() == AbstractGen::GK_ListStmtGen;
+    }
+};
 
 
 struct SourceGen:AbstractGen{
