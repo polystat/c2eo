@@ -10,10 +10,11 @@ import re as regex
 # Our scripts
 import tools
 import settings
-import build_eo
+
 import build_c2eo
 import update_eo_version
 import clean_before_transpilation
+from build_eo import EOBuilder
 from transpile_с2eo import Transpiler
 
 
@@ -43,7 +44,8 @@ class Tests(object):
 
     def get_result_for_tests(self, c_files, eo_c_files):
         tools.thread_pool().map(get_result_for_c_test, c_files)
-        build_eo.main(self.path_to_eo_project)
+        project_name = tools.make_name_from_path(self.path_to_eo_project)
+        EOBuilder(project_name).build()
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)

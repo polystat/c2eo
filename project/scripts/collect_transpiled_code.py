@@ -13,7 +13,7 @@ def main():
     print('\nStart collecting files\n')
     path_to_files = settings.get_setting('path_to_assembly')
 
-    result_code = settings.get_meta_code('alias_meta')
+    result_code = settings.get_meta_code('aliases')
     result_code += read_code_from_global_files(path_to_files, '*.glob')
     print()
 

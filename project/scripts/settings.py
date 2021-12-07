@@ -40,8 +40,8 @@ def get_latest_eo_version():
 
 
 def get_meta_code(name, read_as_lines=False):
-    path = get_setting('meta_path')
-    file = os.path.join(path, f'{name}.txt)')
+    path = get_setting('path_to_meta')
+    file = os.path.join(path, f'{name}.txt')
     with open(file, 'r') as f:
         if read_as_lines:
             return f.readlines()
@@ -50,7 +50,7 @@ def get_meta_code(name, read_as_lines=False):
 
 
 def get_config(name):
-    path = get_setting('config_path')
+    path = get_setting('path_to_config')
     file = os.path.join(path, f'{name}.txt)')
     if os.path.exists(file):
         with open(file, 'r') as f:
@@ -59,7 +59,7 @@ def get_config(name):
 
 
 def get_cache_hash(name):
-    path = get_setting('hash_path')
+    path = get_setting('path_to_hash')
     files = tools.search_files_by_pattern(path, '*.yml')
     for file in files:
         if tools.get_file_name(file) != name:
@@ -72,7 +72,7 @@ def get_cache_hash(name):
 
 
 def set_cache_hash(name, hashes):
-    path = get_setting('hash_path')
+    path = get_setting('path_to_hash')
     file = os.path.join(path, f'{name}.yml)')
     with open(file, 'w') as f:
         f.write(yaml.dump(hashes))
