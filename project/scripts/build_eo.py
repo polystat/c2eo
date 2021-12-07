@@ -17,21 +17,39 @@ class EOBuilder(object):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.hash_name = hash_name
         self.hashes = settings.get_cache_hash(self.hash_name)
+        self.current_version = settings.get_setting('current_eo_version')
 
     def build(self):
+        original_path = os.getcwd()
+        os.chdir(self.path_to_eo_project)
         eo_files = tools.search_files_by_pattern('eo', '*.eo', recursive=True)
-        path_to_objects = 'target/eo-foreign.csv'
-        is_was_built = os.path.exists(path_to_objects)
-        if is_was_built and self.hashes and is_actual_object_version(path_to_objects):
-            print('Recompilation eo project start')
+        if self.is_good_for_recompilation():
+            print('Recompilation eo project start\n')
             result = tools.thread_pool().map(self.check_file_hash, eo_files)
             data_for_recompile, self.hashes = parse_result(result)
             self.prepare_for_recompile(data_for_recompile)
             settings.set_cache_hash(self.hash_name, self.hashes)
             subprocess.run('mvn compile', shell=True)
         else:
-            print('Full eo project compilation start')
+            print('Full eo project compilation start\n')
             subprocess.run('mvn clean compile', shell=True)
+        os.chdir(original_path)
+
+    def is_good_for_recompilation(self):
+        path_to_objects = 'target/eo-foreign.csv'
+        if os.path.exists(path_to_objects):
+            print('First eo project building')
+            return False
+
+        if is_actual_object_version(path_to_objects, self.current_version):
+            print('Compilation on last version detect')
+            return False
+
+        if self.hashes is None:
+            print('Hash not found')
+            return False
+
+        return True
 
     def check_file_hash(self, file):
         with open(file, 'r') as f:
@@ -68,9 +86,8 @@ def parse_result(result):
     return files_for_recompile, hashes
 
 
-def is_actual_object_version(path_to_objects):
+def is_actual_object_version(path_to_objects, current_version):
     print('Check version of compiled eo objects')
-    current_version = settings.get_setting('current_eo_version')
     with open(path_to_objects, 'r') as f:
         for line in f:
             result = regex.search(r'(?<=version:)\d+\.\d+.\d+$', line)
