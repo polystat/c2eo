@@ -1,58 +1,42 @@
-
-#ifndef RECORD_DECL_INFO
-#define RECORD_DECL_INFO
-#endif
-
 #include "stmt.h"
 #include "recorddecl.h"
 #include "vardecl.h"
 
-void getRecordDeclSubObjects(const RecordDecl* RD) {
+RecordGen* getRecordDeclSubObjects(const RecordDecl* RD) {
     RecordGen* RG = new RecordGen;
-#ifdef RECORD_DECL_INFO
-    llvm::outs() << "\x1B[33m";
-#endif
-
     if (RD->isUnion()) {
-#ifdef RECORD_DECL_INFO
-        llvm::outs() << "Union \n";
-#endif
         RG->type = "union";
         RG->name = "un_";
     }
     if (RD->isStruct()) {
-#ifdef RECORD_DECL_INFO
-        llvm::outs() << "Struct \n";
-#endif
         RG->type = "struct";
         RG->name = "st_";
     }
-
-    //RG->name = "anonymous";
-
     if (RD->hasNameForLinkage())
         RG->name += RD->getNameAsString();
     else
         RG->name += std::to_string(reinterpret_cast<uint64_t>(RD));
-#ifdef RECORD_DECL_INFO
-    llvm::outs() << "  name - " << RG->name << "\n";
-#endif
-
-    if (RD->field_empty())
-#ifdef RECORD_DECL_INFO
-        llvm::outs() << "  is Empty \n";
-#endif
-
     setSubFields(RG, RD);
+
     RG->globalSpaceGenPtr->Add(RG);
-#ifdef RECORD_DECL_INFO
-    llvm::outs() << "\033[0m";
-#endif
+    return RG;
 }
 
 void setSubFields(RecordGen* RG, const RecordDecl* RD) {
+//    for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
+//        if ((*it)->getKind() == Decl::Record){
+//            (*it)->dump();
+//            llvm::outs() << "😄\n\n\n";
+//        }
+//    }
+
+
     RG->count = 0;
     for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
+//        (*it)->dump();
+//        llvm::outs() << (*it)->getKind() << '\n';
+//        if ((*it)->getKind() == Decl::Record)
+//            llvm::outs() << "hm...))\n";
         std::string strType = "";
         getTypeName(*it, strType);
         RecordGen* VG = new RecordGen;
@@ -69,16 +53,5 @@ void setSubFields(RecordGen* RG, const RecordDecl* RD) {
             VG->count = 1;
         RG->count += VG->count;
         RG->fields.push_back(VG);
-
-#ifdef RECORD_DECL_INFO
-        llvm::outs() << "    field\n";
-        llvm::outs() << "      name - " << it->getNameAsString() << "\n";
-        llvm::outs() << "      index - " << it->getFieldIndex() << "\n";
-        llvm::outs() << "      is unnamed bit field - " << it->isUnnamedBitfield() << "\n";
-        //llvm::outs() << "      isAnonymousStructOrUnion - " << it->isAnonymousStructOrUnion() << "\n";
-        llvm::outs() << "      field kind name: " << it->getDeclKindName() << "\n";
-        //llvm::outs() << "      field id: " << reinterpret_cast<uint64_t>(it) << "\n";
-        llvm::outs() << "      type - " << strType << "\n";
-#endif
     }
 }
