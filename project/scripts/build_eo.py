@@ -18,30 +18,34 @@ class EOBuilder(object):
         self.hash_name = hash_name
         self.hashes = settings.get_cache_hash(self.hash_name)
         self.current_version = settings.get_setting('current_eo_version')
+        self.path_to_foreign_objects = 'target/eo-foreign.csv'
 
     def build(self):
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         eo_files = tools.search_files_by_pattern('eo', '*.eo', recursive=True)
+
         if self.is_good_for_recompilation():
             print('Recompilation eo project start\n')
             result = tools.thread_pool().map(self.check_file_hash, eo_files)
             data_for_recompile, self.hashes = parse_result(result)
             self.prepare_for_recompile(data_for_recompile)
-            settings.set_cache_hash(self.hash_name, self.hashes)
             subprocess.run('mvn compile', shell=True)
         else:
+            result = tools.thread_pool().map(self.check_file_hash, eo_files)
+            _, self.hashes = parse_result(result)
             print('Full eo project compilation start\n')
             subprocess.run('mvn clean compile', shell=True)
+
         os.chdir(original_path)
+        settings.set_cache_hash(self.hash_name, self.hashes)
 
     def is_good_for_recompilation(self):
-        path_to_objects = 'target/eo-foreign.csv'
-        if os.path.exists(path_to_objects):
+        if os.path.exists(self.path_to_foreign_objects):
             print('First eo project building')
             return False
 
-        if is_actual_object_version(path_to_objects, self.current_version):
+        if is_actual_object_version(self.path_to_foreign_objects, self.current_version):
             print('Compilation on last version detect')
             return False
 
@@ -65,7 +69,7 @@ class EOBuilder(object):
             for _, file in data:
                 file = file.replace(self.path_to_eo_project, '')
                 os.remove(os.path.join(f'target/{step}', file))
-        with open('target/eo-foreign.csv', 'r') as f:
+        with open(self.path_to_foreign_objects, 'r') as f:
             data = f.readlines()
         for i, line in enumerate(data):
             result = regex.search(r'(?<=id:).*(?=\tversion:0.0.0$)', line)
@@ -74,6 +78,8 @@ class EOBuilder(object):
                     if object_name == result.group():
                         data[i] = ''
                         break
+        with open(self.path_to_foreign_objects, 'w') as f:
+            f.writelines(data)
 
 
 def parse_result(result):
