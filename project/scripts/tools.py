@@ -67,6 +67,12 @@ def get_file_name(path):
     return name
 
 
+def make_name_from_path(path):
+    path = path.replace(os.sep, ' ').replace('.', '')
+    names = filter(lambda x: x != '', path.split(' '))
+    return '_'.join(names)
+
+
 def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False):
     found_files = search_files_by_pattern(path, file_pattern, recursive=recursive, print_files=print_files)
     for file in found_files:

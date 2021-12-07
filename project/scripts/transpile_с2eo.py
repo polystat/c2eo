@@ -51,7 +51,7 @@ class Transpiler(object):
     def prepare_eo_c_file(self, path_to_c_file):
         path, file_name, _ = tools.split_path(path_to_c_file, with_end_sep=True)
         replaced_path = f'{os.path.split(self.path_to_c_files[:-1])[0]}{os.sep}'
-        output_name = path.replace(replaced_path, '').replace(os.sep, '_')[:-1]
+        output_name = tools.make_name_from_path(path.replace(replaced_path, ''))
         prepared_eo_c_file = f'{path}{output_name}-eo.c'
         with open(f'{path_to_c_file}', 'r') as f:
             data = f.readlines()
