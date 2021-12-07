@@ -3,9 +3,11 @@ import os.path
 import requests
 from yaml.loader import SafeLoader
 
+# Our scripts
+import tools
+
 
 settings_file = 'data/settings.yml'
-config_path = 'data/config/'
 
 
 def get_setting(setting_name):
@@ -37,17 +39,40 @@ def get_latest_eo_version():
     return latest_version
 
 
-def get_meta_code(meta_name, read_as_lines=False):
-    with open(f'data/{meta_name}.txt', 'r') as f:
+def get_meta_code(name, read_as_lines=False):
+    path = get_setting('meta_path')
+    file = os.path.join(path, f'{name}.txt)')
+    with open(file, 'r') as f:
         if read_as_lines:
             return f.readlines()
         else:
             return f.read()
 
 
-def get_config(config_name):
-    config = f'{config_path}{config_name}'
-    if os.path.exists(config):
-        with open(config, 'r') as f:
+def get_config(name):
+    path = get_setting('config_path')
+    file = os.path.join(path, f'{name}.txt)')
+    if os.path.exists(file):
+        with open(file, 'r') as f:
             return f.readlines()
     return []
+
+
+def get_cache_hash(name):
+    path = get_setting('hash_path')
+    files = tools.search_files_by_pattern(path, '*.yml')
+    for file in files:
+        if tools.get_file_name(file) != name:
+            os.remove(file)
+    file = os.path.join(path, f'{name}.yml)')
+    if os.path.exists(file):
+        with open(file) as f:
+            return yaml.load(f, Loader=SafeLoader)
+    return None
+
+
+def set_cache_hash(name, hashes):
+    path = get_setting('hash_path')
+    file = os.path.join(path, f'{name}.yml)')
+    with open(file, 'w') as f:
+        f.write(yaml.dump(hashes))

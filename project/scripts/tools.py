@@ -99,3 +99,12 @@ def is_float(str_num):
     float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
     result = regex.fullmatch(float_pattern, str_num)
     return result is not None
+
+
+def version_compare(ver1, ver2):
+    for v1, v2 in zip(ver1.split('.'), ver2.split('.')):
+        if int(v1) > int(v2):
+            return 1
+        elif int(v1) < int(v2):
+            return -1
+    return 0

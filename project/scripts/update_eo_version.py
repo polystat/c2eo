@@ -25,7 +25,7 @@ def main():
 
 
 def is_update_needed(current_version, latest_version):
-    compare = version_compare(current_version, latest_version)
+    compare = tools.version_compare(current_version, latest_version)
     is_latest_version = False
     if compare == 1:
         latest_version = current_version
@@ -37,15 +37,6 @@ def is_update_needed(current_version, latest_version):
         print(f'We use old EO version: "{current_version}"\nStart updating files')
 
     return is_latest_version, latest_version
-
-
-def version_compare(ver1, ver2):
-    for v1, v2 in zip(ver1.split('.'), ver2.split('.')):
-        if int(v1) > int(v2):
-            return 1
-        elif int(v1) < int(v2):
-            return -1
-    return 0
 
 
 def update_version_in_files(files, latest_version):
