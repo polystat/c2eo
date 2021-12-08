@@ -1,5 +1,5 @@
 config: null
-current_eo_version: 0.19.0
+current_eo_version: 0.19.1
 file_chunk_size: 65536
 path_to_assembly: ../assembly/
 path_to_c2eo: ../bin/
