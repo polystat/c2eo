@@ -44,8 +44,9 @@ class Tests(object):
 
     def get_result_for_tests(self, c_files, eo_c_files):
         tools.thread_pool().map(get_result_for_c_test, c_files)
-        project_name = tools.make_name_from_path(self.path_to_eo_project)
+        project_name = tools.make_name_from_path(self.path_to_tests)
         EOBuilder(project_name).build()
+        print('\nRunning tests')
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)
