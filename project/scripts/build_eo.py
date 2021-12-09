@@ -42,6 +42,16 @@ class EOBuilder(object):
         else:
             print('Compilation on latest version detected')
 
+        eo_src_files = tools.search_files_by_pattern('eo/c2eo/src', '*.eo')
+        eo_src_files = set(map(tools.get_file_name, eo_src_files))
+        project_eo_files = tools.search_files_by_pattern('target/01-parse/c2eo/src', '*.xmir')
+        project_eo_files = set(map(tools.get_file_name, project_eo_files))
+        if project_eo_files - eo_src_files:
+            print('\nEO project files are incompatible')
+            return False
+        else:
+            print('\nEO project files are compatible')
+
         return True
 
     def is_actual_object_version(self):

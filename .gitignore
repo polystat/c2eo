@@ -90,13 +90,14 @@ fabric.properties
 
 # EO project files
 project/**/global.eo
-result/**/global.eo
+result/**/*.eo
 *.glob
 *.stat
 
 # Test temp files and dirs
 project/tests/scripts/env/*.c
 project/tests/scripts/env/*.txt
+project/tests/**/*.eo
 
 
 # Python cache

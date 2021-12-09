@@ -3,6 +3,7 @@
 import os
 import glob
 import time
+import filecmp
 import re as regex
 from multiprocessing.dummy import Pool as ThreadPool
 
@@ -98,7 +99,7 @@ def print_slowly(*lines):
             print(line.rstrip('\n'))
         else:
             print(line)
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 
 def is_float(str_num):
@@ -114,3 +115,13 @@ def version_compare(ver1, ver2):
         elif int(v1) < int(v2):
             return -1
     return 0
+
+
+def compare_files(file1, file2):
+    if not os.path.exists(file1) or not os.path.exists(file2):
+        return False
+    with open(file1, 'r') as f1:
+        data1 = f1.read()
+    with open(file2, 'r') as f2:
+        data2 = f2.read()
+    return data1 == data2

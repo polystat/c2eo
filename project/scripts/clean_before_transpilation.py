@@ -8,14 +8,11 @@ import tools
 import settings
 
 
-def main(path_to_tests=None, path_to_eo_project=None):
-    if path_to_eo_project is None:
-        path_to_eo_project = settings.get_setting('path_to_eo_project')
+def main(path_to_tests=None):
     if path_to_tests is None:
         path_to_tests = settings.get_setting('path_to_tests')
-    for pattern in ['*.txt', '*-eo.c', '*.eo', '*.out', '*.log']:
+    for pattern in ['*-eo.c', '*.eo', '*.out', '*.log', '*.glob', '*.stat', '*.txt']:
         tools.clear_dir_by_pattern(path_to_tests, pattern, recursive=True)
-    tools.clear_dir_by_pattern(path_to_eo_project, '*.*')
 
 
 if __name__ == '__main__':
@@ -24,5 +21,3 @@ if __name__ == '__main__':
         main()
     elif len(sys.argv) == 2:
         main(sys.argv[1])
-    else:
-        main(sys.argv[1], sys.argv[2])

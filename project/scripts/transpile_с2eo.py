@@ -29,21 +29,20 @@ class Transpiler(object):
         tools.clear_dir_by_pattern(self.path_to_c_files, '*-eo.c', recursive=True)
         c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', filters=self.filters,
                                                 recursive=True, print_files=True)
-        eo_names = tools.thread_pool().map(self.start_transpilation, c_files)
-        tools.clear_dir_by_pattern(self.path_to_eo_src, '*.*')
-        tools.thread_pool().map(self.start_collecting, c_files)
+        eo_c_files = tools.thread_pool().map(self.start_transpilation, c_files)
+        self.start_collecting(eo_c_files)
         print('Move eo files to src dir')
         if len(c_files) == 1:
-            self.generate_run_sh(c_files[0])
+            self.generate_run_sh(eo_c_files[0])
         print('Transpilation done\n')
-        return c_files, eo_names
+        return c_files, eo_c_files
 
     def start_transpilation(self, path_to_c_file):
-        path_to_eo_c_file = self.prepare_eo_c_file(path_to_c_file)
-        output_name = tools.get_file_name(path_to_eo_c_file).replace('-eo', '')
-        transpile_cmd = f'{self.path_to_c2eo}c2eo {path_to_eo_c_file} {output_name} > /dev/null'
+        eo_c_file = self.prepare_eo_c_file(path_to_c_file)
+        output_name = tools.get_file_name(eo_c_file).replace('-eo', '')
+        transpile_cmd = f'{self.path_to_c2eo}c2eo {eo_c_file} {output_name} > /dev/null'
         subprocess.run(transpile_cmd, shell=True)
-        return os.path.abspath(path_to_eo_c_file)
+        return os.path.abspath(eo_c_file)
 
     def prepare_eo_c_file(self, path_to_c_file):
         path, file_name, _ = tools.split_path(path_to_c_file, with_end_sep=True)
@@ -59,15 +58,28 @@ class Transpiler(object):
             f.writelines(data)
         return prepared_eo_c_file
 
-    def start_collecting(self, c_file):
-        name = tools.get_file_name(c_file)
-        collect_transpiled_code.main(tools.get_file_name(c_file))
-        file = f'{self.path_to_assembly}{name}.eo'
-        shutil.copy(file, os.path.dirname(c_file))
-        shutil.move(file, self.path_to_eo_src)
+    def start_collecting(self, eo_c_files):
+        for file in eo_c_files:
+            name = tools.get_file_name(file).replace('-eo', '')
+            collect_transpiled_code.main(name)
 
-    def generate_run_sh(self, c_file):
-        file_name = tools.get_file_name(c_file)
+        eo_assembly_names = tools.search_files_by_pattern(self.path_to_assembly, '*.eo')
+        eo_assembly_names = set(map(tools.get_file_name, eo_assembly_names))
+        src_eo_names = tools.search_files_by_pattern(self.path_to_eo_src, '*.eo')
+        src_eo_names = set(map(tools.get_file_name, src_eo_names))
+        for name in src_eo_names - eo_assembly_names:
+            os.remove(f'{self.path_to_eo_src}{name}.eo')
+        for file in eo_c_files:
+            name = tools.get_file_name(file).replace('-eo', '')
+            assembly_file = f'{self.path_to_assembly}{name}.eo'
+            src_file = f'{self.path_to_eo_src}{name}.eo'
+            shutil.copy(assembly_file, os.path.dirname(file))
+            if not tools.compare_files(assembly_file, src_file):
+                shutil.move(assembly_file, src_file)
+            os.remove(assembly_file)
+
+    def generate_run_sh(self, eo_c_file):
+        file_name = tools.get_file_name(eo_c_file).replace('-eo', '')
         code = settings.get_meta_code('run.sh')
         code = regex.sub('<object_name>', file_name, code)
         with open(f'{self.path_to_eo_project}run.sh', 'w') as f:

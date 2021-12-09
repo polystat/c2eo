@@ -33,7 +33,7 @@ class Tests(object):
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
 
     def test(self):
-        clean_before_transpilation.main(self.path_to_tests, self.path_to_eo_src)
+        clean_before_transpilation.main(self.path_to_tests)
         update_eo_version.main()
         build_c2eo.main(self.path_to_c2eo)
         c_files, eo_c_files = Transpiler(self.path_to_tests, self.filters).transpile()

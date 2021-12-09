@@ -5,24 +5,19 @@ import os
 import sys
 
 # Our scripts
-import tools
 import settings
 
 
-def main(global_file):
-    make_final_eo_file(global_file)
-    return
-
-
-def make_final_eo_file(file):
+def main(name):
+    path_to_assembly = settings.get_setting('path_to_assembly')
     code = ''
-    file_name = tools.get_file_name(file)
-    code += settings.get_meta_code('aliases')
-    code.replace('c2eo.src', f'c2eo.src.{file_name}', 1)
-    code += read_code_from_file(file, file_name)
-    code += read_code_from_static_file(file.replace('.glob', '.stat'), file_name)
+    code += settings.get_meta_code('aliases').replace('c2eo.src', f'c2eo.src.{name}', 1)
+    file = f'{path_to_assembly}{name}.glob'
+    code += read_code_from_static_file(file.replace('.glob', '.stat'), name)
+    code += read_code_from_file(file, indent='  ')
     with open(file.replace('.glob', '.eo'), 'w') as f:
         f.write(code)
+    return
 
 
 def read_code_from_static_file(file, name):
@@ -33,7 +28,7 @@ def read_code_from_static_file(file, name):
     return code
 
 
-def read_code_from_file(file, indent):
+def read_code_from_file(file, indent=''):
     code = ''
     with open(file, 'r') as f:
         for line in f:
@@ -45,4 +40,4 @@ def read_code_from_file(file, indent):
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    main()
+    main(sys.argv[1])
