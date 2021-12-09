@@ -223,10 +223,10 @@ StmtGen* getStmtGen(const Stmt* i) {
         stmtGen = getFuncCallGenerator(ep);
     }
     //else
-//    else if (stmtClass == Stmt::ReturnStmtClass) {
-//        const ReturnStmt *rs = (ReturnStmt *) i;
-//        stmtGen = getReturnStmtGenerator(rs);
-//    }
+    else if (stmtClass == Stmt::ReturnStmtClass) {
+        const ReturnStmt *rs = (ReturnStmt *) i;
+        stmtGen = getReturnStmtGenerator(rs);
+    }
 
     if (stmtClass == Stmt::DoStmtClass) {
         const DoStmt* cs = (DoStmt*) i;
@@ -294,74 +294,58 @@ void getEONameOfType(const QualType qualType, std::string &str) {
     }
 }
 
-/// Метод, который обрабатывает return,
-/// но пака что не понятно как будем работать с return
-//StmtGen *getReturnStmtGenerator(const ReturnStmt *pStmt) {
-//    UnaryStmtGen *returnStmt = new UnaryStmtGen;
-//    returnStmt->value = "ret_param_xxxx.write ";
-//    returnStmt->postfix = "0"; // дефолтовое значение
-//
-//    auto ret_value = pStmt->getRetValue();
-//    Stmt::StmtClass retStmtClass = ret_value->getStmtClass();
-//    UnaryStmtGen *gen = (UnaryStmtGen *) getStmtGen(ret_value);
-//
-//    if (retStmtClass == Stmt::ImplicitCastExprClass) {
-//        returnStmt->postfix = gen->nestedStmt->value;
-//    } else if (retStmtClass == Stmt::IntegerLiteralClass ||
-//               retStmtClass == Stmt::FloatingLiteralClass ||
-//               retStmtClass == Stmt::CharacterLiteralClass) {
-//        returnStmt->postfix = gen->value;
-//    }
-//
-//    return returnStmt;
-//}
+StmtGen *getReturnStmtGenerator(const ReturnStmt *pStmt) {
+    UnaryStmtGen *returnStmt = new UnaryStmtGen;
+    returnStmt->value = "ret_param_xxxx.write ";
 
-StmtGen* getFuncCallGenerator(const CallExpr* pExpr) {
+    auto ret_value = pStmt->getRetValue();
+    if(ret_value == nullptr) {
+        returnStmt->value = "";
+        return returnStmt;
+    }
+
+    Stmt::StmtClass retStmtClass = ret_value->getStmtClass();
+    UnaryStmtGen *gen = (UnaryStmtGen *) getStmtGen(ret_value);
+
+    if (retStmtClass == Stmt::ImplicitCastExprClass) {
+        returnStmt->value += gen->nestedStmt->value;
+    } else if (retStmtClass == Stmt::IntegerLiteralClass ||
+               retStmtClass == Stmt::FloatingLiteralClass ||
+               retStmtClass == Stmt::CharacterLiteralClass) {
+        returnStmt->value += gen->value;
+    }
+
+    return returnStmt;
+}
+
+StmtGen *getFuncCallGenerator(const CallExpr *pExpr) {
     auto funcDecl = pExpr->getDirectCallee();
-    UnaryStmtGen* unaryExprStmt = new UnaryStmtGen;
-    unaryExprStmt->value = "^.g_" + funcDecl->getNameAsString();
-    unaryExprStmt->postfix = " (";
+    UnaryStmtGen *unaryExprStmt = new UnaryStmtGen;
+
+    unaryExprStmt->value = "g_" + funcDecl->getNameAsString();
+    if (!funcDecl->param_empty()) {
+        unaryExprStmt->value += " (";
+    }
+    //unaryExprStmt->postfix = " (";
 
     for (auto argument: pExpr->arguments()) {
         Stmt::StmtClass paramStmtClass = argument->getStmtClass();
-        UnaryStmtGen* gen = (UnaryStmtGen*) getStmtGen(argument);
+        UnaryStmtGen *gen = (UnaryStmtGen *) getStmtGen(argument);
 
         if (paramStmtClass == Stmt::ImplicitCastExprClass) {
-            unaryExprStmt->postfix += gen->nestedStmt->value;
-            unaryExprStmt->postfix += " ";
+            unaryExprStmt->value += gen->nestedStmt->value;
+            unaryExprStmt->value += " ";
         } else if (paramStmtClass == Stmt::IntegerLiteralClass ||
                    paramStmtClass == Stmt::FloatingLiteralClass ||
                    paramStmtClass == Stmt::CharacterLiteralClass) {
-            unaryExprStmt->postfix += gen->value;
-            unaryExprStmt->postfix += " ";
+            unaryExprStmt->value += gen->value;
+            unaryExprStmt->value += " ";
         }
     }
-    unaryExprStmt->postfix.erase(unaryExprStmt->postfix.end() - 1); // убираем лишний пробел
 
-    if (funcDecl->param_empty()) {
-        unaryExprStmt->postfix = "";
-    } else {
-        unaryExprStmt->postfix += ")";
-    }
-
-    //TODO : если значение будет возвращаться не как параметр, а создаваться в теле:
-    if (funcDecl->isNoReturn()) {
-        return unaryExprStmt;
-    } else {
-        auto returnType = funcDecl->getReturnType().getTypePtr();
-
-        if (returnType->isIntegerType()) {
-            llvm::outs() << "    returns int\n";
-        }
-        if (returnType->isCharType()) {
-            llvm::outs() << "    returns char\n";
-        }
-        if (returnType->isBooleanType()) {
-            llvm::outs() << "    returns bool\n";
-        }
-        if (returnType->isRealFloatingType()) {
-            llvm::outs() << "    returns real\n";
-        }
+    if (!funcDecl->param_empty()) {
+        unaryExprStmt->value.erase(unaryExprStmt->value.end() - 1);
+        unaryExprStmt->value += ")";
     }
 
     return unaryExprStmt;
