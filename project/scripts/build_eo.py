@@ -5,6 +5,7 @@ import sys
 import json
 import hashlib
 import subprocess
+import re as regex
 
 # Our scripts
 import settings
@@ -31,6 +32,8 @@ class EOBuilder(object):
             objects, files, self.hashes = parse_result(result)
             self.prepare_for_recompile(objects, files)
             subprocess.run('mvn compile', shell=True)
+            self.fix_objects_file()
+
         else:
             result = tools.thread_pool().map(self.check_file_hash, eo_files)
             _, _, self.hashes = parse_result(result)
@@ -47,7 +50,7 @@ class EOBuilder(object):
         else:
             print('\nCompile files detected')
 
-        if not is_actual_object_version(self.path_to_foreign_objects, self.current_version):
+        if not self.is_actual_object_version():
             print('\nCompilation on old version detected')
             return False
         else:
@@ -80,9 +83,26 @@ class EOBuilder(object):
         for token in data:
             if token['id'] in objects:
                 data.remove(token)
-        print(data)
         with open(self.path_to_foreign_objects, 'w') as f:
             json.dump(data, f)
+
+    def fix_objects_file(self):
+        with open(self.path_to_foreign_objects, 'r') as f:
+            data = f.read()
+        data = regex.sub(r'(?<=}]).*}]$', '', data)
+        with open(self.path_to_foreign_objects, 'w') as f:
+            f.write(data)
+
+    def is_actual_object_version(self):
+        print('\nCheck version of compiled eo objects')
+        with open(self.path_to_foreign_objects) as f:
+            data = json.load(f)
+        for token in data:
+            if token['version'] not in ['*.*.*', '0.0.0']:
+                compare = tools.version_compare(self.current_version, token['version'])
+                if compare <= 0:
+                    return True
+        return False
 
 
 def parse_result(result):
@@ -96,18 +116,6 @@ def parse_result(result):
             files_for_recompile.append(file)
     print(f'Objects for recompilation: {objects_for_recompile}\n')
     return objects_for_recompile, files_for_recompile, hashes
-
-
-def is_actual_object_version(path_to_objects, current_version):
-    print('\nCheck version of compiled eo objects')
-    with open(path_to_objects) as f:
-        data = json.load(f)
-    for token in data:
-        if token['version'] not in ['*.*.*', '0.0.0']:
-            compare = tools.version_compare(current_version, token['version'])
-            if compare <= 0:
-                return True
-    return False
 
 
 def get_file_hash(file, chunk_size):
