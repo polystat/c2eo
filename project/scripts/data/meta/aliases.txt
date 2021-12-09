@@ -42,3 +42,4 @@
 +alias c2eo.coperators.shift-left
 +alias c2eo.coperators.shift-right
 
+[arg] > global

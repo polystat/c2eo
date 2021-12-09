@@ -9,35 +9,27 @@ import tools
 import settings
 
 
-def main():
-    print('\nStart collecting files\n')
-    path_to_files = settings.get_setting('path_to_assembly')
-
-    result_code = settings.get_meta_code('aliases')
-    result_code += read_code_from_global_files(path_to_files, '*.glob')
-    print()
-
-    print_code('global.eo:', result_code)
-    with open(f'{path_to_files}global.eo', 'w') as f:
-        f.write(result_code)
-    print('Collecting files done')
+def main(global_file):
+    make_final_eo_file(global_file)
     return
 
 
-def read_code_from_global_files(path, pattern):
+def make_final_eo_file(file):
     code = ''
-    for file in tools.search_files_by_pattern(path, pattern):
-        name = tools.get_file_name(file)
-        code += f'[arg] > {name}\n'
-        code += read_code_from_static_file(f'{path}{name}.stat')
-        code += read_code_from_file(file, indent='  ').replace(f'{name}.', '')
-    return code
+    file_name = tools.get_file_name(file)
+    code += settings.get_meta_code('aliases')
+    code.replace('c2eo.src', f'c2eo.src.{file_name}', 1)
+    code += read_code_from_file(file, file_name)
+    code += read_code_from_static_file(file.replace('.glob', '.stat'), file_name)
+    with open(file.replace('.glob', '.eo'), 'w') as f:
+        f.write(code)
 
 
-def read_code_from_static_file(file):
+def read_code_from_static_file(file, name):
     code = ''
     if os.path.exists(file):
-        code += read_code_from_file(file, indent='  ')
+        code += f'  [] > {name}\n'
+        code += read_code_from_file(file, indent='    ')
     return code
 
 
@@ -49,13 +41,6 @@ def read_code_from_file(file, indent):
                 code += indent
             code += line
     return code
-
-
-def print_code(title, code):
-    print(f'\n{title}')
-    print('-' * 50)
-    print(code)
-    print('-' * 50)
 
 
 if __name__ == '__main__':
