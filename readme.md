@@ -70,8 +70,9 @@ $ make # or $ cmake --build
 > Use `--` at the end of command below to skip all errors:
 
 ```bash
-$ cd ../bin
-$ python3 launcher.py <file-of-c-program> # or $ ./launcher.py <file-of-c-program>
+$ cd ../scripts
+$ ./transpile_с2eo.py <path-to-dir-with-c-program>
+# or $ python3 transpile_с2eo.py <path-to-dir-with-c-program>
 ```
 
 <details>
@@ -118,8 +119,7 @@ Now the generated project in this [dir](result/) . For running the project you n
 Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
 
 &nbsp;
-## Additional step. Tests examples
-### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
+## Additional step. [Tests examples](./project/tests/main)
 
 &nbsp;
 # Project structure
