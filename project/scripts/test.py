@@ -112,7 +112,7 @@ def compare_lines(c_data, eo_data):
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
         c_line = c_line.rstrip()
         eo_line = eo_line.rstrip()
-        ok_line = tools.colorize_text(f'\tLine {i}: {c_line} == {eo_line}', 'green')
+        ok_line = tools.colorize_text(f'\tLine {i}: {c_line} == {eo_line}\n', 'green')
         if c_line == eo_line:
             log_data.append(ok_line)
             continue

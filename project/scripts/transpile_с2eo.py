@@ -76,7 +76,8 @@ class Transpiler(object):
             shutil.copy(assembly_file, os.path.dirname(file))
             if not tools.compare_files(assembly_file, src_file):
                 shutil.move(assembly_file, src_file)
-            os.remove(assembly_file)
+            if os.path.isfile(assembly_file):
+                os.remove(assembly_file)
 
     def generate_run_sh(self, eo_c_file):
         file_name = tools.get_file_name(eo_c_file).replace('-eo', '')

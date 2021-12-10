@@ -118,7 +118,7 @@ def version_compare(ver1, ver2):
 
 
 def compare_files(file1, file2):
-    if not os.path.exists(file1) or not os.path.exists(file2):
+    if not os.path.isfile(file1) or not os.path.isfile(file2):
         return False
     with open(file1, 'r') as f1:
         data1 = f1.read()
