@@ -16,7 +16,6 @@ class EOBuilder(object):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.current_version = settings.get_setting('current_eo_version')
         self.path_to_foreign_objects = 'target/eo-foreign.json'
-        self.chunk_size = settings.get_setting('file_chunk_size')
 
     def build(self):
         original_path = os.getcwd()
