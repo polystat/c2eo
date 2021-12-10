@@ -137,23 +137,21 @@ Based on intermediate files located in the `project / assembly` directory, it al
     ├── project 
     │   ├── assembly
     │   ├── bin
+    │   │   └── c2eo
     │   ├── build
+    │   ├── scripts
     │   ├── lib
     │   ├── src
-    │   │   ├── transpiler
-    │   │   ├── collector
-    │   │   └── launcher
+    │   │   └── transpiler
     │   ├── tests
     │   └── CMakeLists.txt
-    ├── result
-    │   ├── pom.xml
-    │   ├── README.md
-    │   ├── run.sh
-    │   └── eo
-    │       └── c2eo
-    │           ├── run.sh
-    │           └── eo  
-    └── tmp 
+    └── result
+        ├── pom.xml
+        ├── README.md
+        ├── run.sh
+        └── eo
+            └── c2eo
+                └── src
 
 * ### collection
   Каталог `collection` содержит исходные тексты программ на языках программирования C и EO, которые предполагается использовать как для интеграционного тестирования транспилятора, так и для проверки возможных вариантов трансформации в EO. Программы на C размещаются в подкаталоге `c-sources`. Они формируют наборы данных, позволяющие оценить работоспособность разрабатываемого транспилятора. В подкаталоге `eo-sources` размещаются программы на EO, которые используются для анализа различных вариантов кодогенерации, а также для анализа возможности трансформации программ с C в EO.

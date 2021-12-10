@@ -136,23 +136,21 @@ Github page of [EO project](https://github.com/cqfn/eo) where you can learn abou
     ├── project 
     │   ├── assembly
     │   ├── bin
+    │   │   └── c2eo
     │   ├── build
+    │   ├── scripts
     │   ├── lib
     │   ├── src
-    │   │   ├── transpiler
-    │   │   ├── collector
-    │   │   └── launcher
+    │   │   └── transpiler
     │   ├── tests
     │   └── CMakeLists.txt
-    ├── result
-    │   ├── pom.xml
-    │   ├── README.md
-    │   ├── run.sh
-    │   └── eo
-    │       └── c2eo
-    │           ├── run.sh
-    │           └── eo  
-    └── tmp 
+    └── result
+        ├── pom.xml
+        ├── README.md
+        ├── run.sh
+        └── eo
+            └── c2eo
+                └── src
 
 * ### collection
   The `collection` directory contains source codes for programs in the C and EO programming languages, which are supposed to be used both for integration testing of the transpiler and for testing possible options for transforming into EO. C programs are located in the `c-sources` subdirectory. They form data sets that allow assessing the performance of the transpiler being developed. The subdirectory `eo-sources` contains programs on EO, which are used to analyze various variants of code generation, as well as to analyze the possibility of transforming programs from C to EO.
