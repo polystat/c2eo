@@ -10,7 +10,6 @@ import re as regex
 # Our scripts
 import tools
 import settings
-
 import build_c2eo
 import update_eo_version
 import clean_before_transpilation
