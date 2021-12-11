@@ -3,7 +3,6 @@
 import os
 import glob
 import time
-import filecmp
 import re as regex
 from multiprocessing.dummy import Pool as ThreadPool
 

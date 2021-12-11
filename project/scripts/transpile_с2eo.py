@@ -11,6 +11,7 @@ import re as regex
 import tools
 import settings
 import collect_transpiled_code
+import clean_before_transpilation
 
 
 class Transpiler(object):
@@ -25,8 +26,7 @@ class Transpiler(object):
 
     def transpile(self):
         print('\nTranspilation start\n')
-        tools.clear_dir_by_pattern(self.path_to_assembly, '*')
-        tools.clear_dir_by_pattern(self.path_to_c_files, '*-eo.c', recursive=True)
+        clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', filters=self.filters,
                                                 recursive=True, print_files=True)
         eo_c_files = tools.thread_pool().map(self.start_transpilation, c_files)
