@@ -15,38 +15,44 @@ class EOBuilder(object):
     def __init__(self):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.current_version = settings.get_setting('current_eo_version')
-        self.path_to_foreign_objects = 'target/eo-foreign.json'
+        self.path_to_foreign_objects = settings.get_setting('path_to_foreign_objects')
+        self.path_to_eo = settings.get_setting('path_to_eo')
+        self.path_to_eo_parse = settings.get_setting('path_to_eo_parse')
 
     def build(self):
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         if self.is_good_for_recompilation():
             print('\nRecompilation eo project start\n')
-            subprocess.run('mvn compile', shell=True)
+            #subprocess.run('mvn compile', shell=True)
         else:
             print('Full eo project compilation start\n')
-            subprocess.run('mvn clean compile', shell=True)
+            #subprocess.run('mvn clean compile', shell=True)
         os.chdir(original_path)
 
     def is_good_for_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):
-            print('\nCompile files not found')
+            print('\nCompile dir not found')
             return False
         else:
-            print('\nCompile files detected')
+            print('\nCompile dir found')
 
         if not self.is_actual_object_version():
-            print('\nCompilation on old version detected')
+            print('\nOld version detected')
             return False
         else:
-            print('Compilation on latest version detected')
+            print('Latest version detected')
 
-        eo_src_files = tools.search_files_by_pattern('eo/c2eo/src', '*.eo')
-        eo_src_files = set(map(tools.get_file_name, eo_src_files))
-        project_eo_files = tools.search_files_by_pattern('target/01-parse/c2eo/src', '*.xmir')
-        project_eo_files = set(map(tools.get_file_name, project_eo_files))
-        if project_eo_files - eo_src_files:
+        eo_src_files = tools.search_files_by_pattern(self.path_to_eo, '*.eo', recursive=True)
+        eo_src_files = set(map(lambda x: x.replace(self.path_to_eo, '', 1).replace('.eo', '', 1), eo_src_files))
+        project_eo_files = tools.search_files_by_pattern(self.path_to_eo_parse, '*.xmir',
+                                                         recursive=True, filters=['!org/eolang'])
+        project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
+                                   project_eo_files))
+        difference = project_eo_files - eo_src_files
+        if difference:
             print('\nEO project files are incompatible')
+            print(f'The following files may have been deleted: {difference}')
             return False
         else:
             print('\nEO project files are compatible')
