@@ -58,7 +58,7 @@ def filter_files(files, filters):
 def get_status(s):
     status = {'INFO': '\033[36mINFO\033[37m', 'WARNING': '\033[35mWARNING\033[37m',
               'ERROR': '\033[31mERROR\033[37m', 'EXCEPTION': '\033[31mEXCEPTION\033[37m',
-              'OK': '\033[32mOK\033[37m'}
+              'OK': '\033[32m OK \033[37m'}
     return status.get(s)
 
 
@@ -84,8 +84,8 @@ def pprint(*lines, slowly=False, status='INFO'):
     if not lines:
         lines = ['']
     for line in lines:
-        for token in line.split('\n'):
-            print(f'{get_status(status)} {token}')
+        for token in str(line).split('\n'):
+            print(f'[{get_status(status)}] {token}')
             if slowly:
                 time.sleep(0.01)
 
@@ -104,7 +104,6 @@ def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, p
     found_files = glob.glob(f'{os.path.join(path, file_pattern)}', recursive=recursive)
     pprint(f'Found {len(found_files)} files')
     found_files = filter_files(found_files, filters)
-    # Keep only file basename
     if print_files:
         pprint()
         print_only_file_names(found_files)

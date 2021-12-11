@@ -154,7 +154,7 @@ def print_tests_result(passed, errors, exceptions):
 
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tests_count = len(passed) + len(errors) + len(exceptions)
-    tools.pprint(f'Tests run: {tests_count}, Ok: {len(passed)},'
+    tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
                  f' Errors: {len(errors)}, Exceptions: {len(exceptions)}', slowly=True)
 
 
