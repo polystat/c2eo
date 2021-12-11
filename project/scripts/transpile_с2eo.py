@@ -31,7 +31,6 @@ class Transpiler(object):
                                                 recursive=True, print_files=True)
         eo_c_files = tools.thread_pool().map(self.start_transpilation, c_files)
         self.start_collecting(eo_c_files)
-        print('\nMove eo files to src dir')
         if len(c_files) == 1:
             self.generate_run_sh(eo_c_files[0])
         print('Transpilation done\n')
@@ -62,22 +61,39 @@ class Transpiler(object):
         for file in eo_c_files:
             name = tools.get_file_name(file).replace('-eo', '')
             collect_transpiled_code.main(name)
+        self.remove_unused_eo_files()
+        difference = tools.thread_pool().map(self.move_transpilation_files, eo_c_files)
+        difference = [x for x in difference if x is not None]
+        if difference:
+            print(f'\nDetect changes in src files: {difference}')
+            print('Move these files to src dir\n')
+        else:
+            print('\nNot found any changes src in files')
 
+    def remove_unused_eo_files(self):
         eo_assembly_names = tools.search_files_by_pattern(self.path_to_assembly, '*.eo')
         eo_assembly_names = set(map(tools.get_file_name, eo_assembly_names))
         src_eo_names = tools.search_files_by_pattern(self.path_to_eo_src, '*.eo')
         src_eo_names = set(map(tools.get_file_name, src_eo_names))
         for name in src_eo_names - eo_assembly_names:
             os.remove(f'{self.path_to_eo_src}{name}.eo')
-        for file in eo_c_files:
-            name = tools.get_file_name(file).replace('-eo', '')
-            assembly_file = f'{self.path_to_assembly}{name}.eo'
-            src_file = f'{self.path_to_eo_src}{name}.eo'
-            shutil.copy(assembly_file, os.path.dirname(file))
-            if not tools.compare_files(assembly_file, src_file):
-                shutil.move(assembly_file, src_file)
-            if os.path.isfile(assembly_file):
-                os.remove(assembly_file)
+
+    def move_transpilation_files(self, eo_c_file):
+        name = tools.get_file_name(eo_c_file).replace('-eo', '')
+        assembly_file = f'{self.path_to_assembly}{name}.eo'
+        eo_c_dir = os.path.dirname(eo_c_file)
+        shutil.copy(assembly_file, eo_c_dir)
+        shutil.move(assembly_file.replace('.eo', '.glob'), eo_c_dir)
+        stat_file = assembly_file.replace('.eo', '.stat')
+        if os.path.isfile(stat_file):
+            shutil.move(stat_file, eo_c_dir)
+        shutil.copy(assembly_file, os.path.dirname(eo_c_file))
+        src_file = f'{self.path_to_eo_src}{name}.eo'
+        if not tools.compare_files(assembly_file, src_file):
+            shutil.move(assembly_file, src_file)
+            return assembly_file
+        if os.path.isfile(assembly_file):
+            os.remove(assembly_file)
 
     def generate_run_sh(self, eo_c_file):
         file_name = tools.get_file_name(eo_c_file).replace('-eo', '')
