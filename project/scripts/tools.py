@@ -57,7 +57,7 @@ def filter_files(files, filters):
 
 def get_status(s):
     status = {'INFO': '\033[36mINFO\033[37m', 'WARNING': '\033[35mWARNING\033[37m',
-              'ERROR': '\033[31mINFO\033[37m', 'EXCEPTION': '\033[31mWARNING\033[37m',
+              'ERROR': '\033[31mERROR\033[37m', 'EXCEPTION': '\033[31mEXCEPTION\033[37m',
               'OK': '\033[32mOK\033[37m'}
     return status.get(s)
 
@@ -85,7 +85,7 @@ def pprint(*lines, slowly=False, status='INFO'):
         lines = ['']
     for line in lines:
         for token in line.split('\n'):
-            pprint(f'{get_status(status)} {token}')
+            print(f'{get_status(status)} {token}')
             if slowly:
                 time.sleep(0.01)
 
