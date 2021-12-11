@@ -3,9 +3,6 @@ import os.path
 import requests
 from yaml.loader import SafeLoader
 
-# Our scripts
-import tools
-
 
 settings_file = 'data/settings.yml'
 
@@ -56,25 +53,3 @@ def get_config(name):
         with open(file, 'r') as f:
             return f.readlines()
     return []
-
-
-def get_cache_hash(name):
-    path = get_setting('path_to_hash')
-    print(f'\nFinding {name} hash')
-    files = tools.search_files_by_pattern(path, '*.yml')
-    for file in files:
-        if tools.get_file_name(file) != name:
-            os.remove(file)
-            print('Other hashes have been removed\n')
-    file = os.path.join(path, f'{name}.yml')
-    if os.path.exists(file):
-        with open(file) as f:
-            return yaml.load(f, Loader=SafeLoader)
-    return {}
-
-
-def set_cache_hash(name, hashes):
-    path = get_setting('path_to_hash')
-    file = os.path.join(path, f'{name}.yml')
-    with open(file, 'w') as f:
-        f.write(yaml.dump(hashes))
