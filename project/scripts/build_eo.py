@@ -24,10 +24,10 @@ class EOBuilder(object):
         os.chdir(self.path_to_eo_project)
         if self.is_good_for_recompilation():
             tools.pprint('\nRecompilation eo project start\n')
-            #subprocess.run('mvn compile', shell=True)
+            subprocess.run('mvn compile', shell=True)
         else:
             tools.pprint('Full eo project compilation start\n')
-            #subprocess.run('mvn clean compile', shell=True)
+            subprocess.run('mvn clean compile', shell=True)
         os.chdir(original_path)
 
     def is_good_for_recompilation(self):
