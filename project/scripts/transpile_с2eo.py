@@ -31,7 +31,7 @@ class Transpiler(object):
                                                 recursive=True, print_files=True)
         eo_c_files = tools.thread_pool().map(self.start_transpilation, c_files)
         self.start_collecting(eo_c_files)
-        print('Move eo files to src dir')
+        print('\nMove eo files to src dir')
         if len(c_files) == 1:
             self.generate_run_sh(eo_c_files[0])
         print('Transpilation done\n')
