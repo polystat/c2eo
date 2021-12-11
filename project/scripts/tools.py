@@ -11,7 +11,7 @@ def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False)
     found_files = search_files_by_pattern(path, file_pattern, recursive=recursive, print_files=print_files)
     for file in found_files:
         os.remove(file)
-    print('Files removed')
+    pprint('Files removed')
 
 
 def colorize_text(text, color):
@@ -36,7 +36,7 @@ def filter_files(files, filters):
         return files
 
     files = set(files)
-    print(f'Apply filter: {filters} to found files')
+    pprint(f'Apply filter: {filters} to found files')
     excluded_files = set()
     filtered_files = set()
     for f in filters:
@@ -51,13 +51,14 @@ def filter_files(files, filters):
     if len(filtered_files) != 0:
         files = filtered_files
 
-    print(f'{len(files)} files left\n')
+    pprint(f'{len(files)} files left\n')
     return list(files)
 
 
 def get_status(s):
     status = {'INFO': '\033[36mINFO\033[37m', 'WARNING': '\033[35mWARNING\033[37m',
-              'ERROR': '\033[31mINFO\033[37m', 'EXCEPTION': '\033[31mWARNING\033[37m'}
+              'ERROR': '\033[31mINFO\033[37m', 'EXCEPTION': '\033[31mWARNING\033[37m',
+              'OK': '\033[32mOK\033[37m'}
     return status.get(s)
 
 
@@ -80,9 +81,11 @@ def make_name_from_path(path):
 
 
 def pprint(*lines, slowly=False, status='INFO'):
+    if not lines:
+        lines = ['']
     for line in lines:
         for token in line.split('\n'):
-            print(f'{get_status(status)} {token}')
+            pprint(f'{get_status(status)} {token}')
             if slowly:
                 time.sleep(0.01)
 
@@ -97,15 +100,15 @@ def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, p
         filters = []
     if recursive:
         path = os.path.join(path, '**')
-    print(f'\nLooking for "{file_pattern}" files in "{path}"')
+    pprint(f'\nLooking for "{file_pattern}" files in "{path}"')
     found_files = glob.glob(f'{os.path.join(path, file_pattern)}', recursive=recursive)
-    print(f'Found {len(found_files)} files')
+    pprint(f'Found {len(found_files)} files')
     found_files = filter_files(found_files, filters)
     # Keep only file basename
     if print_files:
-        print()
+        pprint()
         print_only_file_names(found_files)
-        print()
+        pprint()
     return found_files
 
 

@@ -10,7 +10,7 @@ import settings
 
 
 def main():
-    print()
+    tools.pprint()
     current_version = settings.get_setting('current_eo_version')
     latest_version = settings.get_setting('latest_eo_version')
 
@@ -21,7 +21,7 @@ def main():
     found_files = tools.search_files_by_pattern('../../', 'pom.xml', recursive=True)
     update_version_in_files(found_files, latest_version)
     settings.set_setting('current_eo_version', latest_version)
-    print('EO version updated\n')
+    tools.pprint('EO version updated\n')
 
 
 def is_update_needed(current_version, latest_version):
@@ -29,18 +29,18 @@ def is_update_needed(current_version, latest_version):
     is_latest_version = False
     if compare == 1:
         latest_version = current_version
-        print(f'Manual update latest EO version to {latest_version}')
+        tools.pprint(f'Manual update latest EO version to {latest_version}')
     elif compare == 0:
         is_latest_version = True
-        print('We use latest EO version\n')
+        tools.pprint('We use latest EO version\n')
     else:
-        print(f'We use old EO version: "{current_version}"\nStart updating files')
+        tools.pprint(f'We use old EO version: "{current_version}"\nStart updating files')
 
     return is_latest_version, latest_version
 
 
 def update_version_in_files(files, latest_version):
-    print('Updating version')
+    tools.pprint('Updating version')
     count_changed_files = 0
     pattern = r'<eolang\.version>.*<\/eolang\.version>'
     latest_version_declaration = f'<eolang.version>{latest_version}</eolang.version>'
@@ -57,7 +57,7 @@ def update_version_in_files(files, latest_version):
             f.write(new_data)
         count_changed_files += 1
 
-    print(f'{count_changed_files} files updated')
+    tools.pprint(f'{count_changed_files} files updated')
     return count_changed_files
 
 

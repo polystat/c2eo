@@ -42,7 +42,7 @@ class Tests(object):
     def get_result_for_tests(self, c_files, eo_c_files):
         tools.thread_pool().map(get_result_for_c_test, c_files)
         EOBuilder().build()
-        print('\nRunning tests')
+        tools.pprint('\nRunning tests')
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)
@@ -140,12 +140,11 @@ def group_comparison_results(results):
 
 
 def print_tests_result(passed, errors, exceptions):
-    info = tools.colorize_text('INFO', 'blue')
-    tools.print_slowly(f'\n[{info}] {"-" * 60}')
-    tools.print_slowly(f'[{info}]  TEST RESULTS')
-    tools.print_slowly(f'[{info}] {"-" * 60}\n')
+    tools.pprint(f'\n{"-" * 60}', slowly=True)
+    tools.pprint('TEST RESULTS', slowly=True)
+    tools.pprint(f'{"-" * 60}\n', slowly=True)
     for test_name, _ in passed:
-        print_passed_test(test_name)
+        tools.pprint(test_name, slowly=True, status='OK')
 
     for test_name, log_data in errors:
         print_error_test(test_name, log_data)
@@ -153,35 +152,30 @@ def print_tests_result(passed, errors, exceptions):
     for test_name, log_data in exceptions:
         print_exception_test(test_name, log_data)
 
-    tools.print_slowly(f'\n[{info}] {"-" * 60}')
+    tools.pprint(f'\n{"-" * 60}', slowly=True)
     tests_count = len(passed) + len(errors) + len(exceptions)
-    tools.print_slowly(f'[{info}]  Tests run: {tests_count}, Passed: {len(passed)},'
-                       f' Errors: {len(errors)}, Exceptions: {len(exceptions)}')
-
-
-def print_passed_test(test_name, ):
-    ok = tools.colorize_text('OK', 'green')
-    tools.print_slowly(f'[{ok}] {test_name}')
+    tools.pprint(f'Tests run: {tests_count}, Ok: {len(passed)},'
+                 f' Errors: {len(errors)}, Exceptions: {len(exceptions)}', slowly=True)
 
 
 def print_error_test(test_name, log_data):
-    error = tools.colorize_text('ERROR', 'red')
-    tools.print_slowly(f'\n[{error}] {test_name}')
+    tools.pprint()
+    tools.pprint(f'{test_name}:', slowly=True, status='ERROR')
     if len(log_data) > 30:
         log_data = log_data[:30]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    tools.print_slowly(*log_data)
+    tools.pprint(*log_data, slowly=True)
 
 
 def print_exception_test(test_name, log_data):
-    exception = tools.colorize_text('EXCEPTION', 'red')
-    tools.print_slowly(f'\n[{exception}] {test_name}:')
+    tools.pprint()
+    tools.pprint(f'{test_name}:', slowly=True, status='EXCEPTION')
     if len(log_data) > 10:
         log_data = log_data[:10]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    tools.print_slowly(*log_data)
+    tools.pprint(*log_data, slowly=True)
 
 
 if __name__ == '__main__':
@@ -195,6 +189,5 @@ if __name__ == '__main__':
         Tests(sys.argv[1], sys.argv[2]).test()
     end_time = time.time()
     time_span = int(end_time - start_time)
-    inf = tools.colorize_text('INFO', 'blue')
-    tools.print_slowly('[{}]  Total time:  {:02}:{:02} min.'.format(inf, time_span // 60, time_span % 60))
-    tools.print_slowly(f'[{inf}] {"-" * 60}\n')
+    tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
+    tools.pprint(f'{"-" * 60}\n', slowly=True)

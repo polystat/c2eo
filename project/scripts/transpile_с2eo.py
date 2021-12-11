@@ -25,7 +25,7 @@ class Transpiler(object):
         self.path_to_c2eo = settings.get_setting('path_to_c2eo')
 
     def transpile(self):
-        print('\nTranspilation start\n')
+        tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', filters=self.filters,
                                                 recursive=True, print_files=True)
@@ -33,7 +33,7 @@ class Transpiler(object):
         self.start_collecting(eo_c_files)
         if len(c_files) == 1:
             self.generate_run_sh(eo_c_files[0])
-        print('Transpilation done\n')
+        tools.pprint('Transpilation done\n')
         return c_files, eo_c_files
 
     def start_transpilation(self, path_to_c_file):
@@ -65,10 +65,10 @@ class Transpiler(object):
         difference = tools.thread_pool().map(self.move_transpilation_files, eo_c_files)
         difference = [x for x in difference if x is not None]
         if difference:
-            print(f'\nDetect changes in src files: {difference}')
-            print('Move these files to src dir\n')
+            tools.pprint(f'\nDetect changes in src files: {difference}')
+            tools.pprint('Move these files to src dir\n')
         else:
-            print('\nNot found any changes src in files')
+            tools.pprint('\nNot found any changes src in files')
 
     def remove_unused_eo_files(self):
         eo_assembly_names = tools.search_files_by_pattern(self.path_to_assembly, '*.eo')

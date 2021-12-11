@@ -3,6 +3,9 @@ import os.path
 import requests
 from yaml.loader import SafeLoader
 
+# Our scripts
+import tools
+
 
 settings_file = 'data/settings.yml'
 
@@ -28,11 +31,11 @@ def set_setting(setting_name, value):
 
 
 def get_latest_eo_version():
-    print('Check latest EO version')
+    tools.pprint('Check latest EO version')
     url = 'https://search.maven.org/solrsearch/select?q=g:"org.eolang"a:"eo-parent"&rows=1&wt=json'
     data = requests.get(url).json()
     latest_version = data['response']['docs'][0]['latestVersion']
-    print(f'Latest EO version: "{latest_version}"')
+    tools.pprint(f'Latest EO version: "{latest_version}"')
     return latest_version
 
 

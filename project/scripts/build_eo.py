@@ -6,8 +6,8 @@ import json
 import subprocess
 
 # Our scripts
-import settings
 import tools
+import settings
 
 
 class EOBuilder(object):
@@ -23,25 +23,25 @@ class EOBuilder(object):
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         if self.is_good_for_recompilation():
-            print('\nRecompilation eo project start\n')
+            tools.pprint('\nRecompilation eo project start\n')
             #subprocess.run('mvn compile', shell=True)
         else:
-            print('Full eo project compilation start\n')
+            tools.pprint('Full eo project compilation start\n')
             #subprocess.run('mvn clean compile', shell=True)
         os.chdir(original_path)
 
     def is_good_for_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):
-            print('\nCompile dir not found')
+            tools.pprint('\nCompile dir not found')
             return False
         else:
-            print('\nCompile dir found')
+            tools.pprint('\nCompile dir found')
 
         if not self.is_actual_object_version():
-            print('\nOld version detected')
+            tools.pprint('\nOld version detected')
             return False
         else:
-            print('Latest version detected')
+            tools.pprint('Latest version detected')
 
         eo_src_files = tools.search_files_by_pattern(self.path_to_eo, '*.eo', recursive=True)
         eo_src_files = set(map(lambda x: x.replace(self.path_to_eo, '', 1).replace('.eo', '', 1), eo_src_files))
@@ -51,16 +51,16 @@ class EOBuilder(object):
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
         if difference:
-            print('\nEO project files are incompatible')
-            print(f'The following files may have been deleted: {difference}')
+            tools.pprint('\nEO project files are incompatible')
+            tools.pprint(f'The following files may have been deleted: {difference}')
             return False
         else:
-            print('\nEO project files are compatible')
+            tools.pprint('\nEO project files are compatible')
 
         return True
 
     def is_actual_object_version(self):
-        print('\nCheck version of compiled eo objects')
+        tools.pprint('\nCheck version of compiled eo objects')
         with open(self.path_to_foreign_objects) as f:
             data = json.load(f)
         for token in data:
