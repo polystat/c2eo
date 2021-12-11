@@ -14,7 +14,7 @@ def get_setting(setting_name):
     with open(settings_file) as f:
         data = yaml.load(f, Loader=SafeLoader)
     setting = data[setting_name]
-    if 'path' in setting_name:
+    if 'path' in setting_name and '.' not in setting:
         setting = os.path.join(setting, '')
     return setting
 
