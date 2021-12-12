@@ -88,6 +88,6 @@ All scripts are run from the `c2eo/project/scripts` folder
     $ ./update_eo_version.py
     ```
 
-1.` settings.py` - script with access to project settings
+1. `settings.py` - script with access to project settings
 
-1.` tools.py` - script with useful functions
+1. `tools.py` - script with useful functions
