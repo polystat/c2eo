@@ -91,7 +91,7 @@ def pprint(*lines, slowly=False, status='INFO'):
 
 
 def print_only_file_names(files):
-    names = list(map(lambda x: os.path.splitext(os.path.basename(x))[0], files))
+    names = list(map(lambda x: get_file_name(x), files))
     pprint(sorted(names))
 
 
