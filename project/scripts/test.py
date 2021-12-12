@@ -41,12 +41,14 @@ class Tests(object):
 
     def get_result_for_tests(self, c_files, eo_c_files):
         tools.thread_pool().map(get_result_for_c_test, c_files)
-        EOBuilder().build()
-        tools.pprint('\nRunning tests')
-        original_path = os.getcwd()
-        os.chdir(self.path_to_eo_project)
-        tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)
-        os.chdir(original_path)
+        if EOBuilder().build():
+            tools.pprint('\nRunning tests')
+            original_path = os.getcwd()
+            os.chdir(self.path_to_eo_project)
+            tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)
+            os.chdir(original_path)
+        else:
+            exit(-1)
 
     def get_result_for_eo_test(self, eo_c_file):
         path, file_name, _ = tools.split_path(eo_c_file, with_end_sep=True)
