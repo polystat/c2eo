@@ -169,7 +169,6 @@ def print_truncated_data(data, max_lines):
     lines_count = min(max_lines, len(data))
     log_data = ''.join(data[:lines_count])
     indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
-    log_data += f'{indent}...'
     tools.pprint(log_data, slowly=True, status=None)
 
 
