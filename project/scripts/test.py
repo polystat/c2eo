@@ -157,20 +157,20 @@ def print_tests_result(passed, errors, exceptions):
 
 def print_error_test(test_name, log_data):
     tools.pprint(test_name, slowly=True, status='ERROR')
-    if len(log_data) > 30:
-        log_data = log_data[:30]
-        indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
-        log_data.append(f'{indent}...')
-    tools.pprint(*log_data, slowly=True, status=None)
+    print_truncated_data(log_data, 30)
 
 
 def print_exception_test(test_name, log_data):
     tools.pprint(test_name, slowly=True, status='EXCEPTION')
-    if len(log_data) > 10:
-        log_data = log_data[:10]
-        indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
-        log_data.append(f'{indent}...')
-    tools.pprint(*log_data, slowly=True, status=None)
+    print_truncated_data(log_data, 10)
+
+
+def print_truncated_data(data, max_lines):
+    lines_count = min(max_lines, len(data))
+    log_data = ''.join(data[:lines_count])
+    indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
+    log_data += f'{indent}...'
+    tools.pprint(log_data, slowly=True, status=None)
 
 
 if __name__ == '__main__':

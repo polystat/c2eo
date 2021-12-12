@@ -69,7 +69,7 @@ class Transpiler(object):
             tools.print_only_file_names(difference)
             tools.pprint('Move these files to src dir\n')
         else:
-            tools.pprint('\nNot found any changes src in files')
+            tools.pprint('\nNot found any changes in src files')
 
     def remove_unused_eo_files(self):
         eo_assembly_names = tools.search_files_by_pattern(self.path_to_assembly, '*.eo')
