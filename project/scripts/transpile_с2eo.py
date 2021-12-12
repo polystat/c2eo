@@ -82,12 +82,11 @@ class Transpiler(object):
         name = tools.get_file_name(eo_c_file).replace('-eo', '')
         assembly_file = f'{self.path_to_assembly}{name}.eo'
         eo_c_dir = os.path.dirname(eo_c_file)
+        for extension in ['.glob', '.stat']:
+            file = assembly_file.replace('.eo', extension)
+            if os.path.isfile(file):
+                shutil.move(file, eo_c_dir)
         shutil.copy(assembly_file, eo_c_dir)
-        shutil.move(assembly_file.replace('.eo', '.glob'), eo_c_dir)
-        stat_file = assembly_file.replace('.eo', '.stat')
-        if os.path.isfile(stat_file):
-            shutil.move(stat_file, eo_c_dir)
-        shutil.copy(assembly_file, os.path.dirname(eo_c_file))
         src_file = f'{self.path_to_eo_src}{name}.eo'
         if not tools.compare_files(assembly_file, src_file):
             shutil.move(assembly_file, src_file)
