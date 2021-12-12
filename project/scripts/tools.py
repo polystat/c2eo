@@ -55,11 +55,11 @@ def filter_files(files, filters):
     return list(files)
 
 
-def get_status(s):
-    status = {'INFO': '\033[36mINFO\033[37m', 'WARN': '\033[35mWARN\033[37m',
-              'ERROR': '\033[31mERROR\033[37m', 'EXCEPTION': '\033[31mEXCEPTION\033[37m',
-              'PASS': '\033[32mPASS\033[37m'}
-    return status.get(s)
+def get_status(status):
+    statuses = {'INFO': '\033[36mINFO\033[37m', 'WARN': '\033[35mWARN\033[37m',
+                'ERROR': '\033[31mERROR\033[37m', 'EXCEPTION': '\033[31mEXCEPTION\033[37m',
+                'PASS': '\033[32mPASS\033[37m'}
+    return statuses.get(status)
 
 
 def get_file_name(path):
