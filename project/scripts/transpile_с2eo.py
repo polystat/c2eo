@@ -63,6 +63,7 @@ class Transpiler(object):
             collect_transpiled_code.main(name)
         self.remove_unused_eo_files()
         difference = tools.thread_pool().map(self.move_transpilation_files, eo_c_files)
+        difference = filter(lambda x: x, difference)  # Filter None values
         if difference:
             tools.pprint(f'\nDetect changes in src files:')
             tools.print_only_file_names(difference)
