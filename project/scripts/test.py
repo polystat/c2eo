@@ -142,16 +142,13 @@ def group_comparison_results(results):
 def print_tests_result(passed, errors, exceptions):
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tools.pprint('TEST RESULTS', slowly=True)
-    tools.pprint(f'{"-" * 60}\n', slowly=True)
+    tools.pprint(f'{"-" * 60}', slowly=True)
     for test_name, _ in passed:
         tools.pprint(test_name, slowly=True, status='PASS')
-
     for test_name, log_data in errors:
         print_error_test(test_name, log_data)
-
     for test_name, log_data in exceptions:
         print_exception_test(test_name, log_data)
-
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tests_count = len(passed) + len(errors) + len(exceptions)
     tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
@@ -159,23 +156,21 @@ def print_tests_result(passed, errors, exceptions):
 
 
 def print_error_test(test_name, log_data):
-    tools.pprint()
-    tools.pprint(f'{test_name}:', slowly=True, status='ERROR')
+    tools.pprint(test_name, slowly=True, status='ERROR')
     if len(log_data) > 30:
         log_data = log_data[:30]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    tools.pprint(*log_data, slowly=True)
+    tools.pprint(*log_data, slowly=True, status=None)
 
 
 def print_exception_test(test_name, log_data):
-    tools.pprint()
-    tools.pprint(f'{test_name}:', slowly=True, status='EXCEPTION')
+    tools.pprint(test_name, slowly=True, status='EXCEPTION')
     if len(log_data) > 10:
         log_data = log_data[:10]
         indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
         log_data.append(f'{indent}...')
-    tools.pprint(*log_data, slowly=True)
+    tools.pprint(*log_data, slowly=True, status=None)
 
 
 if __name__ == '__main__':

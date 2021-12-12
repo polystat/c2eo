@@ -84,10 +84,13 @@ def pprint(*lines, slowly=False, status='INFO'):
     if not lines:
         lines = ['']
     for line in lines:
-        for token in str(line).split('\n'):
-            print(f'[{get_status(status)}] {token}')
-            if slowly:
-                time.sleep(0.01)
+        if status:
+            for token in str(line).split('\n'):
+                print(f'[{get_status(status)}] {token}')
+        else:
+            print(line)
+        if slowly:
+            time.sleep(0.01)
 
 
 def print_only_file_names(files):
