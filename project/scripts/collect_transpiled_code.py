@@ -14,7 +14,7 @@ def main(name):
     code += settings.get_meta_code('aliases').replace('c2eo.src', f'c2eo.src.{name}', 1)
     file = f'{path_to_assembly}{name}.glob'
     code += read_code_from_static_file(file.replace('.glob', '.stat'), name)
-    code += read_code_from_file(file, indent='  ')
+    code += read_code_from_global_file(file)
     with open(file.replace('.glob', '.eo'), 'w') as f:
         f.write(code)
     return
@@ -25,6 +25,13 @@ def read_code_from_static_file(file, name):
     if os.path.exists(file):
         code += f'  [] > {name}\n'
         code += read_code_from_file(file, indent='    ')
+    return code
+
+
+def read_code_from_global_file(file):
+    code = ''
+    if os.path.exists(file):
+        code += read_code_from_file(file, indent='  ')
     return code
 
 
