@@ -144,7 +144,7 @@ def print_tests_result(passed, errors, exceptions):
     tools.pprint('TEST RESULTS', slowly=True)
     tools.pprint(f'{"-" * 60}\n', slowly=True)
     for test_name, _ in passed:
-        tools.pprint(test_name, slowly=True, status='OK')
+        tools.pprint(test_name, slowly=True, status='PASS')
 
     for test_name, log_data in errors:
         print_error_test(test_name, log_data)

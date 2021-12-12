@@ -56,9 +56,9 @@ def filter_files(files, filters):
 
 
 def get_status(s):
-    status = {'INFO': '\033[36mINFO\033[37m', 'WARNING': '\033[35mWARNING\033[37m',
+    status = {'INFO': '\033[36mINFO\033[37m', 'WARN': '\033[35mWARN\033[37m',
               'ERROR': '\033[31mERROR\033[37m', 'EXCEPTION': '\033[31mEXCEPTION\033[37m',
-              'OK': '\033[32m OK \033[37m'}
+              'PASS': '\033[32mPASS\033[37m'}
     return status.get(s)
 
 
