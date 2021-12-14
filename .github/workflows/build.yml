@@ -40,5 +40,5 @@ jobs:
           
       - name: Test c2eo
         run: |
-          cd ~/c2eo/project/tests/any
-          ./testQuickAll.py
+          cd ~/c2eo/project/scripts
+          ./test.py
