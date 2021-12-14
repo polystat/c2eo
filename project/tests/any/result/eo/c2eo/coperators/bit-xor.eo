@@ -1,4 +1,0 @@
-+package c2eo.coperators
-
-[a b] > bit-xor
-  (a.as-bytes.xor (b.as-bytes)).as-int > @
