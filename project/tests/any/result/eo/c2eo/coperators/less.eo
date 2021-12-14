@@ -1,4 +1,0 @@
-+package c2eo.coperators
-
-[a b] > less
-  (a.less b).if 1 0 > @

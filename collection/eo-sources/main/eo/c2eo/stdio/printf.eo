@@ -1,0 +1,39 @@
++package c2eo.stdio
+
++alias org.eolang.txt.sprintf
++alias org.eolang.io.stdout
+
++alias c2eo.collections.array
++alias diagnostics.exception
+
+# stdout (sprintf format args) > @
+[format args...] > printf
+  stdout > @
+    if.
+      args.length.eq 0
+      sprintf format
+      if.
+        args.length.eq 1
+        sprintf format (args.get 0)
+        if.
+          args.length.eq 2
+          sprintf format (args.get 0) (args.get 1)
+          if.
+            args.length.eq 3
+            sprintf format (args.get 0) (args.get 1) (args.get 2)
+            if.
+              args.length.eq 4
+              sprintf format (args.get 0) (args.get 1) (args.get 2) (args.get 3)
+              if.
+                args.length.eq 5
+                sprintf format (args.get 0) (args.get 1) (args.get 2) (args.get 3) (args.get 4)
+                if.
+                  args.length.eq 6
+                  sprintf format (args.get 0) (args.get 1) (args.get 2) (args.get 3) (args.get 4) (args.get 5)
+                  if.
+                    args.length.eq 7
+                    sprintf format (args.get 0) (args.get 1) (args.get 2) (args.get 3) (args.get 4) (args.get 5) (args.get 6)
+                    if.
+                      args.length.eq 8
+                      sprintf format (args.get 0) (args.get 1) (args.get 2) (args.get 3) (args.get 4) (args.get 5) (args.get 6) (args.get 7)
+                      exception "8 is max count of arguments in printf!"

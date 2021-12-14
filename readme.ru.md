@@ -71,8 +71,9 @@ $ make # или $ cmake --build
 > Используйте `--` в конце команды, расположенной ниже, чтобы пропустить все ошибки:
 
 ```bash
-$ cd ../bin
-$ python3 launcher.py <file-of-c-program> # или $ ./launcher.py <file-of-c-program>
+$ cd ../scripts
+$ ./transpile_с2eo.py <path-to-dir-with-c-program>
+# или $ python3 transpile_с2eo.py <path-to-dir-with-c-program>
 ```
 
 <details>
@@ -119,8 +120,7 @@ Based on intermediate files located in the `project / assembly` directory, it al
 Гитхаб страница [EO project](https://github.com/cqfn/eo) где вы можете узнать о языке EO.
 
 &nbsp;
-## Дополнительный шаг. Примеры тестов
-### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
+## Дополнительный шаг. [Примеры тестов](./project/tests/main)
 
 &nbsp;
 # Структура проекта
@@ -137,23 +137,21 @@ Based on intermediate files located in the `project / assembly` directory, it al
     ├── project 
     │   ├── assembly
     │   ├── bin
+    │   │   └── c2eo
     │   ├── build
+    │   ├── scripts
     │   ├── lib
     │   ├── src
-    │   │   ├── transpiler
-    │   │   ├── collector
-    │   │   └── launcher
+    │   │   └── transpiler
     │   ├── tests
     │   └── CMakeLists.txt
-    ├── result
-    │   ├── pom.xml
-    │   ├── README.md
-    │   ├── run.sh
-    │   └── eo
-    │       └── c2eo
-    │           ├── run.sh
-    │           └── eo  
-    └── tmp 
+    └── result
+        ├── pom.xml
+        ├── README.md
+        ├── run.sh
+        └── eo
+            └── c2eo
+                └── src
 
 * ### collection
   Каталог `collection` содержит исходные тексты программ на языках программирования C и EO, которые предполагается использовать как для интеграционного тестирования транспилятора, так и для проверки возможных вариантов трансформации в EO. Программы на C размещаются в подкаталоге `c-sources`. Они формируют наборы данных, позволяющие оценить работоспособность разрабатываемого транспилятора. В подкаталоге `eo-sources` размещаются программы на EO, которые используются для анализа различных вариантов кодогенерации, а также для анализа возможности трансформации программ с C в EO.
