@@ -1,4 +1,4 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-missing-red.svg)](https://github.com/polystat/c2eo/blob/master/LICENSE.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-missing-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
 If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
@@ -72,7 +72,6 @@ $ make # or $ cmake --build
 ```bash
 $ cd ../scripts
 $ ./transpile_с2eo.py <path-to-dir-with-c-program>
-# or $ python3 transpile_с2eo.py <path-to-dir-with-c-program>
 ```
 
 <details>
