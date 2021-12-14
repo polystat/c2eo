@@ -41,4 +41,4 @@ jobs:
       - name: Test c2eo
         run: |
           cd ~/c2eo/project/scripts
-          sudo ./test.py
+          python3 ./test.py ../tests/main
