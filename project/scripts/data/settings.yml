@@ -1,5 +1,5 @@
 config: null
-current_eo_version: 0.20.0
+current_eo_version: 0.21.0
 path_to_assembly: ../assembly/
 path_to_c2eo: ../bin/
 path_to_config: data/config/
