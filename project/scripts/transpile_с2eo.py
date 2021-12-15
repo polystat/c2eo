@@ -18,6 +18,8 @@ class Transpiler(object):
 
     def __init__(self, path_to_c_files, filters):
         self.filters = filters
+        if os.path.isfile(path_to_c_files):
+            path_to_c_files = os.path.dirname(path_to_c_files)
         self.path_to_c_files = os.path.join(path_to_c_files, '')
         self.path_to_assembly = settings.get_setting('path_to_assembly')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
@@ -104,6 +106,6 @@ class Transpiler(object):
 
 
 if __name__ == '__main__':
-    transpiler = Transpiler(os.path.abspath(sys.argv[1]), [])
-    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    transpiler.transpile()
+    path_to_files = os.path.abspath(sys.argv[1])
+    tools.move_to_script_dir(sys.argv[0])
+    Transpiler(path_to_files, []).transpile()
