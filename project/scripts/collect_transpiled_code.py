@@ -5,6 +5,7 @@ import os
 import sys
 
 # Our scripts
+import tools
 import settings
 
 
@@ -46,5 +47,5 @@ def read_code_from_file(file, indent=''):
 
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
+    tools.move_to_script_dir(sys.argv[0])
     main(sys.argv[1])

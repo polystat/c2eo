@@ -106,6 +106,6 @@ class Transpiler(object):
 
 
 if __name__ == '__main__':
-    transpiler = Transpiler(os.path.abspath(sys.argv[1]), [])
-    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
-    transpiler.transpile()
+    path_to_files = os.path.abspath(sys.argv[1])
+    tools.move_to_script_dir(sys.argv[0])
+    Transpiler(path_to_files, []).transpile()

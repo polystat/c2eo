@@ -1,6 +1,5 @@
 #! /usr/bin/python3
 
-import os
 import sys
 
 # Our scripts
@@ -17,7 +16,7 @@ def main(path_to_tests=None):
 
 
 if __name__ == '__main__':
-    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
+    tools.move_to_script_dir(sys.argv[0])
     if len(sys.argv) == 1:
         main()
     elif len(sys.argv) == 2:

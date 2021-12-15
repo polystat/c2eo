@@ -80,6 +80,12 @@ def make_name_from_path(path):
     return '_'.join(names)
 
 
+def move_to_script_dir(path_to_script):
+    path_to_script = os.path.dirname(path_to_script)
+    if os.path.exists(path_to_script):
+        os.chdir(path_to_script)
+
+
 def pprint(*lines, slowly=False, status='INFO'):
     if not lines:
         lines = ['']

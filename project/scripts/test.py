@@ -170,13 +170,12 @@ def print_exception_test(test_name, log_data):
 def print_truncated_data(data, max_lines):
     lines_count = min(max_lines, len(data))
     log_data = ''.join(data[:lines_count])
-    indent = '  ' * (len(log_data[-1]) - len(log_data[-1].lstrip()))
     tools.pprint(log_data, slowly=True, status=None)
 
 
 if __name__ == '__main__':
     start_time = time.time()
-    os.chdir(os.path.dirname(sys.argv[0]))  # Go to current script dir
+    tools.move_to_script_dir(sys.argv[0])
     if len(sys.argv) == 1:
         Tests().test()
     elif len(sys.argv) == 2:
