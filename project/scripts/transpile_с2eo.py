@@ -18,6 +18,8 @@ class Transpiler(object):
 
     def __init__(self, path_to_c_files, filters):
         self.filters = filters
+        if os.path.isfile(path_to_c_files):
+            path_to_c_files = os.path.dirname(path_to_c_files)
         self.path_to_c_files = os.path.join(path_to_c_files, '')
         self.path_to_assembly = settings.get_setting('path_to_assembly')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
