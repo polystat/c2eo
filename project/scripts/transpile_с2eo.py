@@ -108,4 +108,4 @@ class Transpiler(object):
 if __name__ == '__main__':
     path_to_files = os.path.abspath(sys.argv[1])
     tools.move_to_script_dir(sys.argv[0])
-    Transpiler(path_to_files, []).transpile()
+    Transpiler(path_to_files, None).transpile()

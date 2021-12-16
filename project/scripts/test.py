@@ -176,12 +176,7 @@ def print_truncated_data(data, max_lines):
 if __name__ == '__main__':
     start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
-    if len(sys.argv) == 1:
-        Tests().test()
-    elif len(sys.argv) == 2:
-        Tests(sys.argv[1]).test()
-    else:
-        Tests(sys.argv[1], sys.argv[2]).test()
+    Tests(tools.get_or_none(sys.argv, 1), tools.get_or_none(sys.argv, 2)).test()
     end_time = time.time()
     time_span = int(end_time - start_time)
     tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)

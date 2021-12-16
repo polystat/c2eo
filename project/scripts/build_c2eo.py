@@ -23,7 +23,4 @@ def main(path_to_c2eo=None):
 
 if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
-    if len(sys.argv) == 1:
-        main()
-    else:
-        main(sys.argv[1])
+    main(tools.get_or_none(sys.argv, 1))
