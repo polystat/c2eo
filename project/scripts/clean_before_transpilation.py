@@ -17,7 +17,4 @@ def main(path_to_tests=None):
 
 if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
-    if len(sys.argv) == 1:
-        main()
-    elif len(sys.argv) == 2:
-        main(sys.argv[1])
+    main(tools.get_or_none(sys.argv, 1))

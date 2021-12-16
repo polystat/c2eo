@@ -7,6 +7,19 @@ import re as regex
 from multiprocessing.dummy import Pool as ThreadPool
 
 
+def apply_filters_to_files(files, filters: set):
+    pprint(f'Apply filters: {filters} to found files')
+    inclusion_filters = set(filter(lambda f: f[0] != '!', filters))
+    result = set() if inclusion_filters else set(files)
+    for inclusion_filter in inclusion_filters:
+        result |= set(filter(lambda file: inclusion_filter in file, files))
+    exclusion_filters = set(filter(lambda f: f[0] == '!', filters))
+    for exclusion_filter in exclusion_filters:
+        result = set(filter(lambda file: exclusion_filter[1:] not in file, result))
+    pprint(f'{len(result)} files left\n')
+    return list(result)
+
+
 def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False):
     found_files = search_files_by_pattern(path, file_pattern, recursive=recursive, print_files=print_files)
     for file in found_files:
@@ -31,28 +44,8 @@ def compare_files(file1, file2):
     return data1 == data2
 
 
-def filter_files(files, filters):
-    if len(filters) == 0:
-        return files
-
-    files = set(files)
-    pprint(f'Apply filter: {filters} to found files')
-    excluded_files = set()
-    filtered_files = set()
-    for f in filters:
-        if '!' in f:
-            excluded_files |= set(filter(lambda file: f[1:] in file, files))
-        else:
-            filtered_files |= set(filter(lambda x: f in x, files))
-
-    if len(excluded_files) != 0:
-        files -= excluded_files
-
-    if len(filtered_files) != 0:
-        files = filtered_files
-
-    pprint(f'{len(files)} files left\n')
-    return list(files)
+def get_or_none(array, index):
+    return array[index] if index < len(array) else None
 
 
 def get_status(status):
@@ -95,6 +88,7 @@ def pprint(*lines, slowly=False, status='INFO'):
                 print(f'[{get_status(status)}] {token}')
             else:
                 print(token)
+
             if slowly:
                 time.sleep(0.01)
 
@@ -112,11 +106,9 @@ def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, p
     pprint(f'\nLooking for "{file_pattern}" files in "{path}"')
     found_files = glob.glob(f'{os.path.join(path, file_pattern)}', recursive=recursive)
     pprint(f'Found {len(found_files)} files')
-    found_files = filter_files(found_files, filters)
+    found_files = apply_filters_to_files(found_files, filters)
     if print_files:
-        pprint()
         print_only_file_names(found_files)
-        pprint()
     return found_files
 
 
