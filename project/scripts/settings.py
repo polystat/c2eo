@@ -51,8 +51,9 @@ def get_meta_code(name, read_as_lines=False):
 
 def get_config(name):
     path = get_setting('path_to_config')
-    file = os.path.join(path, f'{name}.txt)')
-    if os.path.exists(file):
+    file = os.path.join(path, f'{name}.txt')
+    if os.path.isfile(file):
         with open(file, 'r') as f:
-            return f.readlines()
-    return []
+            return set(map(lambda line: line.strip(), f.readlines()))
+    else:
+        return None

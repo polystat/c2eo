@@ -7,7 +7,9 @@ import re as regex
 from multiprocessing.dummy import Pool as ThreadPool
 
 
-def apply_filters_to_files(files, filters: set):
+def apply_filters_to_files(files, filters=None):
+    if filters is None:
+        return files
     pprint(f'Apply filters: {filters} to found files')
     inclusion_filters = set(filter(lambda f: f[0] != '!', filters))
     result = set() if inclusion_filters else set(files)
@@ -96,11 +98,10 @@ def pprint(*lines, slowly=False, status='INFO'):
 def print_only_file_names(files):
     names = list(map(lambda x: get_file_name(x), files))
     pprint(sorted(names))
+    pprint()
 
 
 def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
-    if filters is None:
-        filters = []
     if recursive:
         path = os.path.join(path, '**')
     pprint(f'\nLooking for "{file_pattern}" files in "{path}"')
