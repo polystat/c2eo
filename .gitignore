@@ -89,8 +89,8 @@ fabric.properties
 **/target**
 
 # EO project files
+result/eo/c2eo/src/
 project/**/global.eo
-result/**/*.eo
 *.glob
 *.stat
 
@@ -108,3 +108,4 @@ project/tests/**/*.eo
 
 # Compiled c2eo
 project/bin/c2eo
+
