@@ -33,7 +33,7 @@ def get_aliases_code(name, main_code):
     length = len(aliases_code)
     useful_lines = [0, length - 2, length - 1]
     for i, alias in aliases:
-        result = regex.search(rf'(?<=[ (]){alias}(?=[ )\n])', main_code)
+        result = regex.search(rf'(?<=[^>][ (]){alias}(?=[ )\n])', main_code)
         if result:
             useful_lines.append(i)
     code = ''
