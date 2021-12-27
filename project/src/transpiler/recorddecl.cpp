@@ -2,7 +2,8 @@
 #include "recorddecl.h"
 #include "vardecl.h"
 
-RecordGen* getRecordDeclSubObjects(const RecordDecl* RD) {
+void getRecordDeclSubObjects(const RecordDecl* RD) {
+    if (!RD->hasLinkage())return; //todo: test it!
     RecordGen* RG = new RecordGen;
     if (RD->isUnion()) {
         RG->type = "union";
@@ -19,7 +20,37 @@ RecordGen* getRecordDeclSubObjects(const RecordDecl* RD) {
     setSubFields(RG, RD);
 
     RG->globalSpaceGenPtr->Add(RG);
-    return RG;
+}
+
+std::vector<RecordGen*> getAllRecordDeclSubObjects(const RecordDecl* RD) {
+    RecordGen* RG = new RecordGen;
+    if (RD->isUnion()) {
+        RG->type = "union";
+        RG->name = "un_";
+    }
+    if (RD->isStruct()) {
+        RG->type = "struct";
+        RG->name = "st_";
+    }
+    if (RD->hasNameForLinkage())
+        RG->name += RD->getNameAsString();
+    else
+        RG->name += std::to_string(reinterpret_cast<uint64_t>(RD));
+    setSubFields(RG, RD);
+
+    std::vector < RecordGen * > RGs;
+    RGs.push_back(RG);
+
+    for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
+        if ((*it)->getKind() == Decl::Record) {
+            std::vector < RecordGen * > subRGs = getAllRecordDeclSubObjects((const RecordDecl*) *it);
+            for (auto subRG: subRGs)
+                RGs.push_back(subRG);
+        }
+    }
+    //todo:??
+
+    return RGs;
 }
 
 void setSubFields(RecordGen* RG, const RecordDecl* RD) {
