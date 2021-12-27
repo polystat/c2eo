@@ -99,7 +99,9 @@ StmtGen* getCompoundStmtGenerator(const CompoundStmt* CS, ASTContext* context, b
         if (line->getStmtClass() == Stmt::DeclStmtClass) {
             DeclStmt* declStmt = dyn_cast<DeclStmt>(line);
             for (Decl* declaration: declStmt->decls()) {
-                declarations.push_back(getDeclGen(declaration));
+                std::vector < AbstractGen * > declGens = getDeclGen(declaration);
+                for (auto declGen: declGens)
+                    declarations.push_back(declGen);
             }
         }
     }
@@ -160,7 +162,7 @@ StmtGen* getCompoundStmtOutputGenerator(const Stmt* pExpr) {
 StmtGen* getStmtGen(const Stmt* i) {
     //TODO подумать над утечкой памяти
     StmtGen* stmtGen = getEmptyUnaryGen();
-    //!!char* stmtName = (char*)(i->getStmtClassName());
+    char* stmtName = (char*) (i->getStmtClassName());
     //if (strcmp(stmtName ,"BinaryOperator") == 0)
     Stmt::StmtClass stmtClass = i->getStmtClass();
     if (stmtClass == Stmt::BinaryOperatorClass) {
