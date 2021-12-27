@@ -1,7 +1,0 @@
-+package c2eo.stdio
-
-+alias org.eolang.txt.sprintf
-+alias org.eolang.io.stdout
-
-[format args...] > printf
-  stdout (sprintf format ...args) > @
