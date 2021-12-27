@@ -43,31 +43,17 @@ std::vector<RecordGen*> getAllRecordDeclSubObjects(const RecordDecl* RD) {
 
     for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
         if ((*it)->getKind() == Decl::Record) {
-            std::vector < RecordGen * > subRGs = getAllRecordDeclSubObjects((const RecordDecl*) *it);
+            std::vector<RecordGen*> subRGs = getAllRecordDeclSubObjects((const RecordDecl*) *it);
             for (auto subRG: subRGs)
                 RGs.push_back(subRG);
         }
     }
-    //todo:??
-
     return RGs;
 }
 
 void setSubFields(RecordGen* RG, const RecordDecl* RD) {
-//    for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
-//        if ((*it)->getKind() == Decl::Record){
-//            (*it)->dump();
-//            llvm::outs() << "😄\n\n\n";
-//        }
-//    }
-
-
     RG->count = 0;
     for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
-//        (*it)->dump();
-//        llvm::outs() << (*it)->getKind() << '\n';
-//        if ((*it)->getKind() == Decl::Record)
-//            llvm::outs() << "hm...))\n";
         std::string strType = "";
         getTypeName(*it, strType);
         RecordGen* VG = new RecordGen;
