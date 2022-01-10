@@ -1,4 +1,4 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-missing-red.svg)](https://github.com/polystat/c2eo/blob/master/LICENSE.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
 Транспилятор C/C++ в [EOLANG](https://www.eolang.org).
 Если что-то пошло не так, [создайте issue](https://github.com/polystat/c2eo/issues),
@@ -71,8 +71,8 @@ $ make # или $ cmake --build
 > Используйте `--` в конце команды, расположенной ниже, чтобы пропустить все ошибки:
 
 ```bash
-$ cd ../bin
-$ python3 launcher.py <file-of-c-program> # или $ ./launcher.py <file-of-c-program>
+$ cd ../scripts
+$ ./transpile_с2eo.py <path-to-dir-with-c-program>
 ```
 
 <details>
@@ -119,8 +119,7 @@ Based on intermediate files located in the `project / assembly` directory, it al
 Гитхаб страница [EO project](https://github.com/cqfn/eo) где вы можете узнать о языке EO.
 
 &nbsp;
-## Дополнительный шаг. Примеры тестов
-### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
+## Дополнительный шаг. [Примеры тестов](./project/tests/main)
 
 &nbsp;
 # Структура проекта
@@ -137,23 +136,21 @@ Based on intermediate files located in the `project / assembly` directory, it al
     ├── project 
     │   ├── assembly
     │   ├── bin
+    │   │   └── c2eo
     │   ├── build
+    │   ├── scripts
     │   ├── lib
     │   ├── src
-    │   │   ├── transpiler
-    │   │   ├── collector
-    │   │   └── launcher
+    │   │   └── transpiler
     │   ├── tests
     │   └── CMakeLists.txt
-    ├── result
-    │   ├── pom.xml
-    │   ├── README.md
-    │   ├── run.sh
-    │   └── eo
-    │       └── c2eo
-    │           ├── run.sh
-    │           └── eo  
-    └── tmp 
+    └── result
+        ├── pom.xml
+        ├── README.md
+        ├── run.sh
+        └── eo
+            └── c2eo
+                └── src
 
 * ### collection
   Каталог `collection` содержит исходные тексты программ на языках программирования C и EO, которые предполагается использовать как для интеграционного тестирования транспилятора, так и для проверки возможных вариантов трансформации в EO. Программы на C размещаются в подкаталоге `c-sources`. Они формируют наборы данных, позволяющие оценить работоспособность разрабатываемого транспилятора. В подкаталоге `eo-sources` размещаются программы на EO, которые используются для анализа различных вариантов кодогенерации, а также для анализа возможности трансформации программ с C в EO.

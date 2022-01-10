@@ -12,16 +12,18 @@ std::string GetNameStoragePrefix(VarDecl* VD);
 
 std::string getNestedPrefix(VarDecl* VD);
 
-AbstractGen* getDeclGen(Decl* decloration) {
-    AbstractGen* result = nullptr;
+std::vector<AbstractGen*> getDeclGen(Decl* decloration) {
+    std::vector < AbstractGen * > result;
     auto declKind = decloration->getKind();
     if (declKind == Decl::Var) {
         VarDecl* VD = dyn_cast<VarDecl>(decloration);
         VarGen* VG = getVarDeclGen(VD);
-        result = VG;
+        result.push_back(VG);
     } else if (declKind == Decl::Record) {
         RecordDecl* RD = dyn_cast<RecordDecl>(decloration);
-        result = getRecordDeclSubObjects(RD);
+        std::vector < RecordGen * > RGs = getAllRecordDeclSubObjects(RD);
+        for (auto rg: RGs)
+            result.push_back(rg);
     }
     return result;
 }

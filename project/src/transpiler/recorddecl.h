@@ -31,7 +31,8 @@ using namespace clang;
 
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый объектов структуры или объединения
-RecordGen* getRecordDeclSubObjects(const RecordDecl *RD);
+void getRecordDeclSubObjects(const RecordDecl *RD);
+std::vector<RecordGen*> getAllRecordDeclSubObjects(const RecordDecl* RD);
 
 void setSubFields(RecordGen* RG, const RecordDecl* RD);
 

@@ -1,21 +1,16 @@
-struct q {
-    int b;
-    struct q2{
-        struct q3{
-            int h;
-        } h;
-    } a;
-    struct q4{
-        int h;
-    }h;
-    unsigned long long q;
-    struct q4 y;
+//clang -Xclang -ast-dump -fsyntax-only test01.c
+//#include "stdio.h"
+struct a{
+    struct b{
+        int a;
+    } q;
 };
-
 int main() {
-
-    struct q a = {1,2, 3};
-    a.y.h = 7;
-    a.y.h;
+    struct a1{
+        struct b1{
+            int a;
+        } q;
+    };
+//    printf("%d\n", r);
     return 0;
 }

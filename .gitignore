@@ -24,8 +24,8 @@
 
 #test result scripts
 **/*-eo.c
-**/cResult.txt
-**/eoResult.txt
+**/c_result.txt
+**/eo_result.txt
 
 # Executables
 *.exe
@@ -89,18 +89,23 @@ fabric.properties
 **/target**
 
 # EO project files
+result/eo/c2eo/src/
 project/**/global.eo
-result/**/global.eo
 *.glob
 *.stat
 
 # Test temp files and dirs
 project/tests/scripts/env/*.c
 project/tests/scripts/env/*.txt
-project/tests/scripts/__pycache__/
-# project/tests/any/tests/
-# !project/tests/any/tests/**/*[!-][!e][!o].c
+project/tests/**/*.eo
+
+
+# Python cache
+**/__pycache__
+
+# Log files
 *.log
 
 # Compiled c2eo
 project/bin/c2eo
+

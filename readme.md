@@ -1,4 +1,4 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-missing-red.svg)](https://github.com/polystat/c2eo/blob/master/LICENSE.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
 This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
 If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
@@ -70,8 +70,8 @@ $ make # or $ cmake --build
 > Use `--` at the end of command below to skip all errors:
 
 ```bash
-$ cd ../bin
-$ python3 launcher.py <file-of-c-program> # or $ ./launcher.py <file-of-c-program>
+$ cd ../scripts
+$ ./transpile_с2eo.py <path-to-dir-with-c-program>
 ```
 
 <details>
@@ -118,8 +118,7 @@ Now the generated project in this [dir](result/) . For running the project you n
 Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
 
 &nbsp;
-## Additional step. Tests examples
-### [Tests_1](./project/tests/scripts), [Tests_2](./project/tests/datasets/launcher-set/), [Tests_3](./project/tests/any)
+## Additional step. [Tests examples](./project/tests/main)
 
 &nbsp;
 # Project structure
@@ -136,23 +135,21 @@ Github page of [EO project](https://github.com/cqfn/eo) where you can learn abou
     ├── project 
     │   ├── assembly
     │   ├── bin
+    │   │   └── c2eo
     │   ├── build
+    │   ├── scripts
     │   ├── lib
     │   ├── src
-    │   │   ├── transpiler
-    │   │   ├── collector
-    │   │   └── launcher
+    │   │   └── transpiler
     │   ├── tests
     │   └── CMakeLists.txt
-    ├── result
-    │   ├── pom.xml
-    │   ├── README.md
-    │   ├── run.sh
-    │   └── eo
-    │       └── c2eo
-    │           ├── run.sh
-    │           └── eo  
-    └── tmp 
+    └── result
+        ├── pom.xml
+        ├── README.md
+        ├── run.sh
+        └── eo
+            └── c2eo
+                └── src
 
 * ### collection
   The `collection` directory contains source codes for programs in the C and EO programming languages, which are supposed to be used both for integration testing of the transpiler and for testing possible options for transforming into EO. C programs are located in the `c-sources` subdirectory. They form data sets that allow assessing the performance of the transpiler being developed. The subdirectory `eo-sources` contains programs on EO, which are used to analyze various variants of code generation, as well as to analyze the possibility of transforming programs from C to EO.

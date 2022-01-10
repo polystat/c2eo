@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[arr index] > get
+  arr.get index > @

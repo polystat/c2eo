@@ -23,7 +23,7 @@ using namespace llvm;
 using namespace clang;
 using namespace clang::ast_matchers;
 
-AbstractGen* getDeclGen(Decl* decloration);
+std::vector<AbstractGen*> getDeclGen(Decl* decloration);
 VarGen *getVarDeclGen(VarDecl *VD);
 
 
