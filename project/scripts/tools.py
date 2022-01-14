@@ -1,6 +1,8 @@
 # Useful functions for our project
 
 import os
+import csv
+import json
 import glob
 import time
 import re as regex
@@ -99,6 +101,22 @@ def print_only_file_names(files):
     names = list(map(lambda x: get_file_name(x), files))
     pprint(sorted(names))
     pprint()
+
+
+def read_file_as_dictionary(path):
+    _, _, extension = split_path(path)
+    data = []
+    if '.csv' == extension:
+        with open('names.csv', newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+        for row in reader:
+            data.append(row)
+    elif '.json' == extension:
+        with open(path) as f:
+            data = json.load(f)
+    else:
+        pprint('Unsupported file extension', status='EXCEPTION')
+    return data
 
 
 def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
