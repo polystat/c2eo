@@ -107,10 +107,10 @@ def read_file_as_dictionary(path):
     _, _, extension = split_path(path)
     data = []
     if '.csv' == extension:
-        with open('names.csv', newline='') as csvfile:
+        with open(path, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
-        for row in reader:
-            data.append(row)
+            for row in reader:
+                data.append(row)
     elif '.json' == extension:
         with open(path) as f:
             data = json.load(f)
