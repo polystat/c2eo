@@ -37,9 +37,8 @@ def get_aliases_code(name, main_code):
         if result:
             useful_lines.append(i)
     code = ''
-    for i, line in enumerate(aliases_code):
-        if i in useful_lines:
-            code += aliases_code[i]
+    for i in useful_lines:
+        code += aliases_code[i]
     return code
 
 
