@@ -20,6 +20,7 @@ struct AbstractGen {
     static std::string filename;
     static std::map<uint64_t ,std::string> identifiers;
     static int shift;
+    static int offset;
 
     enum GenKind{
         GK_VarGen,
