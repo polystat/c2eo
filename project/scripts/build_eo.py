@@ -2,7 +2,6 @@
 
 import os
 import sys
-import json
 import subprocess
 
 # Our scripts
@@ -62,11 +61,10 @@ class EOBuilder(object):
 
     def is_actual_object_version(self):
         tools.pprint('\nCheck version of compiled eo objects')
-        with open(self.path_to_foreign_objects) as f:
-            data = json.load(f)
-        for token in data:
-            if token['version'] not in ['*.*.*', '0.0.0']:
-                compare = tools.version_compare(self.current_version, token['version'])
+        data = tools.read_file_as_dictionary(self.path_to_foreign_objects)
+        for package in data:
+            if package['version'] not in ['*.*.*', '0.0.0']:
+                compare = tools.version_compare(self.current_version, package['version'])
                 if compare <= 0:
                     return True
         return False
