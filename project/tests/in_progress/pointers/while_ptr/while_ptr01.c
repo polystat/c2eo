@@ -31,6 +31,7 @@ int main() {
     x = x1;
     while (x.next != NULL) {
         printf("%d\n", x.val);
+        x.val;
         x = *x.next;
     }
 

@@ -15,7 +15,10 @@ int main() {
     x3 = x1;
 
     printf("%d\n", x1.val);
+    x1.val;
     printf("%d\n", x2.next->val);
+    x2.next->val;
     printf("%d\n", x3.val);
+    x3.val;
     return 0;
 }
