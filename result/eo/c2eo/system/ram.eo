@@ -1,0 +1,9 @@
++package c2eo.system
+
++alias eoram org.eolang.gray.ram
+
+[size] > ram
+
+  eoram size > @
+
+  memory > index

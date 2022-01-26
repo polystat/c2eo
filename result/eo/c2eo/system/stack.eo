@@ -1,0 +1,34 @@
++package c2eo.system
+
++alias org.eolang.gray.cage
+
+[] > stack
+
+  cage > elements
+
+  memory > index
+
+  memory > length
+
+  [ram] > push
+    seq > @
+      if.
+        index.is-empty
+        index.write 0
+        index.write (index.add 1)
+      if.
+        length.is-empty
+        seq
+          length.write 1
+          elements.write (* cage)
+        if.
+          length.leq index
+          elements.write (elements.append cage)
+          TRUE
+      (elements.get index).write ram
+      ram
+
+  index.write (index.sub 1) > pop
+
+  [i] > get
+    elements.get i > @

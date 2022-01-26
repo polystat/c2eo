@@ -1,0 +1,9 @@
++package c2eo.system
+
+[ram address] > ptr
+
+  [length] > read
+    ram.read address length > @
+
+  [bytes] > write
+    ram.write address bytes > @
