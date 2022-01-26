@@ -1,0 +1,35 @@
++package c2eo.examples.example1
+
++alias c2eo.stdio.printf
++alias c2eo.coperators.write
++alias c2eo.coperators.add
++alias c2eo.ctypes.c_int64
++alias c2eo.system.ptr
++alias c2eo.system.ram
++alias c2eo.system.stack
+
+[arg...] > global
+
+  stack > allocator
+
+  allocator.push (ram 1024) > g-ram
+
+  c_int64 (ptr g-ram 0) > a
+
+  c_int64 (ptr g-ram 8) > b
+
+  c_int64 (ptr g-ram 8) > c
+
+  [arg...] > main
+    seq > @
+      write a 8
+      write b 5
+      printf "a = %d\n" a
+      printf "b = %d\n" b
+      printf "a + b = %d\n" (add a b)
+      write b a
+      printf "b = %d\n" b
+      printf "c = %d\n" c
+      TRUE
+
+  main arg > @
