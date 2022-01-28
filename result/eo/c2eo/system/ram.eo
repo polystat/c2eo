@@ -4,6 +4,11 @@
 
 [size] > ram
 
-  eoram size > @
+  eoram size > mem!
 
   memory > index
+
+  mem > @
+
+  [address bytes] > wrt
+    mem.write address bytes > @

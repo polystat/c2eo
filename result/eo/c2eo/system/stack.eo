@@ -23,10 +23,10 @@
           elements.write (* cage)
         if.
           length.leq index
-          elements.write (elements.append cage)
-          TRUE
-      (elements.get index).write ram
-      ram
+          elements.write (elements'.append cage)
+          length.write (length.add 1)
+      (get index).write ram
+      ram.index.write index
 
   index.write (index.sub 1) > pop
 
