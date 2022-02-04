@@ -1,35 +1,32 @@
 +package c2eo.examples.example1
 
-+alias c2eo.stdio.printf
-+alias c2eo.coperators.write
-+alias c2eo.coperators.add
-+alias c2eo.ctypes.c_int64
-+alias c2eo.system.ptr
++alias org.eolang.gray.cage
 +alias c2eo.system.ram
-+alias c2eo.system.stack
++alias c2eo.system.address
++alias c2eo.stdio.printf
 
-[arg...] > global
+[args...] > global
 
-  stack > allocator
+  * (* cage cage) > allocator
+  memory > allocator-index
 
-  allocator.push (ram 1024) > g-ram
+  ram 8 > g-ram
+  ram 0 > s-ram
 
-  c_int64 (ptr g-ram 0) > a
+  address g-ram 0 > g-x
 
-  c_int64 (ptr g-ram 8) > b
-
-  c_int64 (ptr g-ram 8) > c
-
-  [arg...] > main
+  [args] > main
     seq > @
-      write a 8
-      write b 5
-      printf "a = %d\n" a
-      printf "b = %d\n" b
-      printf "a + b = %d\n" (add a b)
-      write b a
-      printf "b = %d\n" b
-      printf "c = %d\n" c
+      ((allocator.get 0).get 0).write g-ram
+      g-ram.index.write 0
+      ((allocator.get 0).get 1).write s-ram
+      s-ram.index.write 1
+      allocator-index.write 2
+      g-x.set 1
+      g-x.set (1.add ((g-x.get 8).as-int))
+      printf "%d\n" ((g-x.get 8).as-int)
+      g-x.set (((g-x.get 8).as-int).add 1)
+      printf "%d\n" ((g-x.get 8).as-int)
       TRUE
 
-  main arg > @
+  main args > @

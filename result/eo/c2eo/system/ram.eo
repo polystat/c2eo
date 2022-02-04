@@ -10,5 +10,5 @@
 
   mem > @
 
-  [address bytes] > wrt
+  [address bytes] > set
     mem.write address bytes > @
