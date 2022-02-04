@@ -1,0 +1,9 @@
++package c2eo.system
+
+[mem addr] > address
+
+  [size-bytes] > get
+    mem.read addr size-bytes > @
+
+  [value] > set
+    mem.write addr (value.as-bytes) > @
