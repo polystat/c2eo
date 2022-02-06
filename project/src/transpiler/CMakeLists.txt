@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.18)
 
+project(c2eo)
+
 # set(CMAKE_C_COMPILER путь/до/компилятора)
 #set(CMAKE_CXX_COMPILER "${PATH_TO_LLVM_SOURCE}/build/bin/clang")
 
 #  llvm_config
-set(PATH_TO_LLVM_SOURCE "../../../../llvm-clang/" CACHE PATH [FORCE])
+set(PATH_TO_LLVM_SOURCE "../../../llvm-clang/")
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
 
 include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
@@ -40,7 +42,7 @@ set(SOURCE_FILES
         generator.cpp
 
 
-        util.cpp decl.h decl.cpp)
+        util.cpp decl.h decl.cpp cmake-build-debug/memory_manager.cpp cmake-build-debug/memory_manager.h)
 
 #add_executable(recvistor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})

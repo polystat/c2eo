@@ -13,6 +13,77 @@ void initValueAnalysis(const VarDecl *VD, std::string &str);
 void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
+void ProcessVariable(const VarDecl *VD){
+  // Имя переменной
+  auto varName = VD->getNameAsString();
+  auto varID = reinterpret_cast<uint64_t>(VD);
+  TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
+  auto typeSize = typeInfo.Width;
+  auto fieldAlign = typeInfo.Align;
+  // Получение типа переменной
+  ///std::string typeName{"any value"};
+  ///StringRef varTypeName(typeName);
+  ////auto qualType = VD->getType();
+  QualType qualType = VD->getType();
+  const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
+  ////varTypeName = typeId->getName();
+  ////llvm::outs() << "  Type is " << varTypeName << "\n";
+
+  auto typePtr = qualType.getTypePtr();
+  //auto kind = typePtr->getKind();
+
+  std::string strType = "";
+  getTypeName(VD, strType);
+  // StorageClass getStorageClass() const
+  // Показывает на явное описани того или иного класса памяти в тексте программы
+  // Наверное не во всех случаях полезно
+  auto storageClass = VD->getStorageClass();
+  // Проверка на размещение переменной в локальной памяти
+  auto inLocalStorage = VD->hasLocalStorage();
+  // Проверка на статическую локальную переменную
+  auto staticLocal = VD->isStaticLocal();
+  // Внешняя переменная (описатель external)
+  auto extStorage = VD->hasExternalStorage();
+  // Размещение переменной в глобальной памяти
+  // Касается глобальных и статических переменных
+  auto globalStorage = VD->hasGlobalStorage();
+  // Переменная с локальной видимостью
+  auto localVarDecl = VD->isLocalVarDecl();
+  // Переменная или параметр с локальной видимостью
+  auto localVarDeclOrParm = VD->isLocalVarDeclOrParm();
+  // Наличие начальной инициализации
+  auto isInit = VD->hasInit();
+  std::string strValue = "";
+  if (isInit) {
+    initValueAnalysis(VD, strValue);
+  } else {
+    initZeroValueAnalysis(VD, strValue);
+  }
+
+
+
+
+  // Проверка, что переменная является глобальной
+  if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
+    // Формируется глобальная переменная со всеми атрибутами
+    VarGen* var = new VarGen;
+
+    var->name = "g_" + varName;
+    var->type = strType;
+    var->value = strValue;
+    var->identifiers[varID] = var->name;
+    var->globalSpaceGenPtr->Add(var);
+  } else if (globalStorage && !extStorage) {
+    VarGen* var = new VarGen;
+    var->name = "s_" + varName;
+    var->type = strType;
+    var->value = strValue;
+    var->identifiers[varID] = AbstractGen::filename + "." + var->name;
+    var->staticSpaceGenPtr->Add(var);
+  }
+}
+
+
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl* VD) {
     // Имя переменной
