@@ -25,8 +25,11 @@ using namespace clang::ast_matchers;
 
 using namespace clang;
 
+// Обработка переменной встреченной при проходе по дереву.
+void ProcessVariable(const VarDecl *VD);
+
 // Определение и тестовый вывод основных параметров описания переменных
-void getVarDeclParameters(const VarDecl *VD);
+// void getVarDeclParameters(const VarDecl *VD);
 //-------------------------------------------------------------------------------------------------
 
 
