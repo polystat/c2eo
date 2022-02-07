@@ -5,6 +5,7 @@
 #include "matchers.h"
 #include "generator.h"
 #include "util.h"
+#include "unit_transpiler.h"
 
 
 // Apply a custom category to all command-line options so that they are the
@@ -26,9 +27,11 @@ void generateSpace(SpaceGen &globGen, std::string objFilename);
 
 const char **transform_argv(const char *const *argv);
 
+UnitTranspiler transpiler;
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
+
     if (argc < 3) {
         llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> item-name\n";
         return -1;
@@ -38,16 +41,6 @@ int main(int argc, const char **argv) {
     const char **parser_argv = transform_argv(argv);
     const char* inputFileName = argv[1];
     std::string filename = argv[2];
-
-    SpaceGen globGen, staticGen;
-    VarGen::globalSpaceGenPtr = &globGen;
-    VarGen::staticSpaceGenPtr = &staticGen;
-    AbstractGen::filename = filename;
-
-    std::string staticObj;
-    std::string staticInit;
-
-
 
     auto ExpectedParser
             = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
@@ -70,29 +63,14 @@ int main(int argc, const char **argv) {
     addMatchers(finder);
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
 // 
-    auto result = Tool.run(newFrontendActionFactory(&finder).get());
+   auto result = Tool.run(newFrontendActionFactory(&finder).get());
+   if (!result)
+     return result;
 
-//         CodeGenerator::getCodeToConsole();
-
-//         CodeGenerator::getCodeToFile("test.eo");
-//         llvm::outs() << "code printed to file " << "test.eo" << "\n";
-
-
-//     generateSpace(globGen, filename + ".glob", filename + ".glob.seq");
-//     generateSpace(staticGen, filename + ".stat", filename + ".stat.seq");
-    if (!globGen.objects.empty()) {
-        generateSpace(globGen, "../assembly/" + filename + ".glob");
-    }
-    if (!staticGen.objects.empty()) {
-        generateSpace(staticGen, "../assembly/" + filename + ".stat");
-    }
-
-    llvm::outs()<< std::is_base_of<StmtGen,UnaryStmtGen>::value << "\n";
-    llvm::outs()<< std::is_base_of<UnaryStmtGen,StmtGen>::value << "\n";
-    llvm::outs()<< std::is_base_of<UnaryStmtGen,BinaryStmtGen>::value << "\n";
-
-
-   return result;
+   // тестовый вывод
+   //std::cout << transpiler;
+   std::ofstream out(filename);
+   out << transpiler;
 }
 
 const char **transform_argv(const char *const *argv) {

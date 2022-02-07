@@ -29,7 +29,7 @@ using namespace clang;
 void ProcessVariable(const VarDecl *VD);
 
 // Определение и тестовый вывод основных параметров описания переменных
-void getVarDeclParameters(const VarDecl *VD);
+// void getVarDeclParameters(const VarDecl *VD);
 //-------------------------------------------------------------------------------------------------
 
 

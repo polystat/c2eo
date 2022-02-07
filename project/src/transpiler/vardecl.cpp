@@ -4,6 +4,7 @@
 #include "vardecl.h"
 #include "generator.h"
 #include "stmt.h"
+#include "unit_transpiler.h"
 
 // Анализ полученного начального значения с последующим использованием
 void initValueAnalysis(const VarDecl *VD, std::string &str);
@@ -16,18 +17,12 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 void ProcessVariable(const VarDecl *VD){
   // Имя переменной
   auto varName = VD->getNameAsString();
-  auto varID = reinterpret_cast<uint64_t>(VD);
   TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
-  auto typeSize = typeInfo.Width;
-  auto fieldAlign = typeInfo.Align;
-  // Получение типа переменной
-  ///std::string typeName{"any value"};
-  ///StringRef varTypeName(typeName);
-  ////auto qualType = VD->getType();
+  // размер в байтах
+  auto typeSize = typeInfo.Width / 8;
+
   QualType qualType = VD->getType();
   const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
-  ////varTypeName = typeId->getName();
-  ////llvm::outs() << "  Type is " << varTypeName << "\n";
 
   auto typePtr = qualType.getTypePtr();
   //auto kind = typePtr->getKind();
@@ -60,30 +55,18 @@ void ProcessVariable(const VarDecl *VD){
     initZeroValueAnalysis(VD, strValue);
   }
 
-
+  extern UnitTranspiler transpiler;
 
 
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    // Формируется глобальная переменная со всеми атрибутами
-    VarGen* var = new VarGen;
-
-    var->name = "g_" + varName;
-    var->type = strType;
-    var->value = strValue;
-    var->identifiers[varID] = var->name;
-    var->globalSpaceGenPtr->Add(var);
+    transpiler.glob.Add(typeSize,"int","g-" + varName,strValue);
   } else if (globalStorage && !extStorage) {
-    VarGen* var = new VarGen;
-    var->name = "s_" + varName;
-    var->type = strType;
-    var->value = strValue;
-    var->identifiers[varID] = AbstractGen::filename + "." + var->name;
-    var->staticSpaceGenPtr->Add(var);
+    transpiler.stat.Add(typeSize,"int","s-" + varName,strValue);
   }
 }
 
-
+/*
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl* VD) {
     // Имя переменной
@@ -183,7 +166,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         llvm::outs() << "  " << strType << "\n";
 #endif
     }
-*/
+
 #ifdef VAR_DECL_INFO
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
 #endif
@@ -312,7 +295,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         var->staticSpaceGenPtr->Add(var);
     }
 
-    /*
+
        // Проверка, что переменная является статической.
        if (globalStorage && !extStorage && !staticLocal)
        {
@@ -335,7 +318,7 @@ void getVarDeclParameters(const VarDecl* VD) {
            var->type = strType;
            var->value  = strValue;
            var->globalSpaceGenPtr->Add(var);
-       } */
+       }
 
     //VD->dump();
 }
@@ -347,7 +330,6 @@ void getVarDeclParameters(const VarDecl* VD) {
 //    auto size = typeInfo.Width;
 //    /*
 //    std::string result = "";
-//    //TODO обработка беззнаковых, когда они появятся.
 //    if (isSigned)
 //    {
 //        switch (size)
@@ -378,7 +360,7 @@ void getVarDeclParameters(const VarDecl* VD) {
 //        }
 //    }*/
 //    std::string result = "c_";
-//    //TODO обработка беззнаковых, когда они появятся. (нет только c_uint64)
+//    //TOD обработка беззнаковых, когда они появятся. (нет только c_uint64)
 //    if (!isSigned)
 //        result += 'u';
 //    result += "int" + std::to_string(size);
@@ -398,7 +380,6 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
     //auto align = typeInfo.Align;  // не нужен
     APValue* initVal = VD->evaluateValue();
     if (initVal != nullptr) {
-        llvm::outs() << "    Initial Value = ";
         if (initVal->isInt()) {
             auto intValue = initVal->getInt().getExtValue();
             //llvm::outs() << intValue;

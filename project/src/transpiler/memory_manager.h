@@ -7,7 +7,7 @@
 // Representation of a simple variable stored in RAM
 struct Variable{
   int position;
-  int size;
+  size_t size;
   std::string type;
   std::string alias;
   std::string value;
@@ -17,12 +17,20 @@ class MemoryManager{
  public:
   explicit MemoryManager(std::string name):pointer(0),name(std::move(name)) {}
 
-  void Add(int size, std::string type, std::string alias);
+  void Add(size_t size, std::string type, std::string alias, std::string value);
 
+  bool Empty();
+
+  size_t MemorySize();
+
+  std::vector<Variable>::const_iterator begin() const;
+
+  std::vector<Variable>::const_iterator  end() const;
+
+  std::string name;
  private:
   // index of first free byte in memory
   int pointer;
-  std::string name;
   std::vector<Variable> variables;
 
 };

@@ -71,7 +71,7 @@ void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
         return;
     llvm::outs() << "Integer variable.\n";
     // Определение и тестовый вывод основных параметров описания переменных
-    getVarDeclParameters(VD);
+    ProcessVariable(VD);
 
     //VD->dump();
 }

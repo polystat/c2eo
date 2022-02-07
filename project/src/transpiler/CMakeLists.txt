@@ -43,7 +43,7 @@ set(SOURCE_FILES
 
 
 
-        util.cpp decl.h decl.cpp memory_manager.cpp memory_manager.h)
+        util.cpp decl.h decl.cpp memory_manager.cpp memory_manager.h unit_transpiler.cpp unit_transpiler.h)
 
 
 #add_executable(recvistor main.cpp)
