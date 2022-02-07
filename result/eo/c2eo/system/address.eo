@@ -2,8 +2,8 @@
 
 [mem addr] > address
 
-  [size-bytes] > get
+  [size-bytes] > read
     mem.read addr size-bytes > @
 
-  [value] > set
+  [value] > write
     mem.write addr (value.as-bytes) > @

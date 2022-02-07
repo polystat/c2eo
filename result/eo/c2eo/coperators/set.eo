@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
-[a b] > get
-  a.get b > @
+[a b] > set
+  a.set b > @
