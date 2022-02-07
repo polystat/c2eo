@@ -3,6 +3,10 @@
 +alias org.eolang.gray.cage
 +alias c2eo.system.ram
 +alias c2eo.system.address
++alias c2eo.coperators.get
++alias c2eo.coperators.add
++alias c2eo.coperators.write
++alias c2eo.coperators.as-int64
 +alias c2eo.stdio.printf
 
 [args...] > global
@@ -17,16 +21,16 @@
 
   [args] > main
     seq > @
-      ((allocator.get 0).get 0).write g-ram
-      g-ram.index.write 0
-      ((allocator.get 0).get 1).write s-ram
-      s-ram.index.write 1
-      allocator-index.write 2
-      g-x.set 1
-      g-x.set (1.add ((g-x.get 8).as-int))
-      printf "%d\n" ((g-x.get 8).as-int)
-      g-x.set (((g-x.get 8).as-int).add 1)
-      printf "%d\n" ((g-x.get 8).as-int)
+      write (get (get allocator 0) 0) g-ram
+      write (g-ram.index) 0
+      write (get (get allocator 0) 1) s-ram
+      write (s-ram.index) 1
+      write allocator-index 2
+      write g-x 1
+      write g-x (add 1 (as-int64 g-x))
+      printf "%d\n" (as-int64 g-x)
+      write g-x (add (as-int64 g-x) 1)
+      printf "%d\n" (as-int64 g-x)
       TRUE
 
   main args > @
