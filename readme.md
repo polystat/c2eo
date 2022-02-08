@@ -4,9 +4,45 @@ This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
 If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
 we will fix. *Other languages: [Russian](readme.ru.md)*
 
-# Getting started guide
+## User guide
 
-## Step 1. OS and tools
+1. OS and tools  
+You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
+Tools:
+[wget](https://www.tecmint.com/install-wget-in-linux/), 
+[tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
+[cmake](https://cmake.org/download/), 
+[gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
+[g++](https://pkgs.org/download/g++),
+
+    ```bash
+    $ sudo apt install wget tar cmake gcc g++ # Installation for Ubuntu
+    ```
+
+2. Download  
+Download directly from [github](https://github.com/polystat/c2eo/releases/) or use this command:
+
+    ```bash
+    $ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
+    ```
+
+3. Install package  
+    ```bash
+    $ sudo dpkg -i path/to/c2eo-1.0.1.deb
+    # or
+    $ sudo apt-get install path/to/c2eo-1.0.1.deb
+    ```
+
+
+4. Run transpilation  
+It will generate `.glob` and `.stat` files in `/tmp/`
+    ```bash
+    $ c2eo <path-to-C-file-name> item-name
+    ```
+
+## Developer guide
+
+1. OS and tools.  
 You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
 Tools:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
@@ -14,117 +50,148 @@ Tools:
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
 [cmake](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++), [ninja-build](https://ninja-build.org/), [python3.+](https://www.python.org/downloads/)
+[g++](https://pkgs.org/download/g++),
+[ninja-build](https://ninja-build.org/),
+[python3.+](https://www.python.org/downloads/)
 
-```bash
-$ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
-```
+    ```bash
+    $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
+    ```
 
-## Step 2. Install LLVM + CLANG
+2. Install LLVM CLANG.  
+Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command:
 
-Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command
+    ```bash
+    $ tar -xvf llvm-clang.tar.gz
+    ```
 
-```bash
-$ tar -xvf llvm-clang.tar.gz
-```
+    <details>
+    <summary> Old variant </summary>
+    <p></p>
+    <t>2. Install LLVM CLANG</t>
+    <pre><code>
+    $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
+    $ tar -xvf llvmorg-12.0.1.tar.gz
+    </code></pre>
+
+    <t>2.1 Build LLVM CLANG</t>
+    <pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
+    $ cd llvm-clang
+    $ mkdir build && cd $_
+    </code></pre>
+    <pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
+    </code></pre>
+    <pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
+    $ cd ../..
+    </code></pre>
+    </details>
+    </p>
+
+3. Install C2EO
+    ```bash
+    $ git clone https://github.com/polystat/c2eo.git
+    ```
+
+4. Build C2EO
+    > IMPORTANT. Every time the transpiler code changes, you need to repeat this step
+
+    It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
+
+    ```bash
+    $ cd ./c2eo/project/build
+    $ cmake ..
+    $ make # or $ cmake --build
+    ``` 
+
+5. Run transpilation
+
+    ```bash
+    $ cd ../scripts
+    $ ./transpile_с2eo.py <path-to-dir-with-C-program>
+    ```
+
+6. Run generated project  
+Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start).Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
+
+
+---
+## Additional information 
+
+<t>1. [Project tests](./project/tests/main)</t>
 
 <details>
-<summary> Old variant </summary>
+  <summary><bold>2. Transpilation principles</bold></summary>
+</p>
 
-<h2>Step 2. Install LLVM + CLANG</h2>
-<pre><code>
-$ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
-$ tar -xvf llvmorg-12.0.1.tar.gz
-</code></pre>
+1. Scalar variables  
+For each type of variable (local, global or static, we create a separate memory of the required size). Then we prescribe the starting address (our analogue of the pointer), from which we will read or write the required number of bytes, depending on the type of variable.
 
-<h2>Step 2.1 Build LLVM + CLANG</h2>
-<pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
-$ cd llvm-clang
-$ mkdir build && cd $_
-</code></pre>
-<pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
-</code></pre>
-<pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
-$ cd ../..
-</code></pre>
+- EO template
+
+    ```java
+    ram <length> > <ram name>
+    address <ram name> <start> > p
+    write p <value>
+    printf "%<type literal>" (<as type> a)
+    ```
+
+- C
+    ```c
+    char a = 'c';
+    long long b = 12;
+    double c = 8.4;
+    printf("%c", a);
+    printf("%d", b);
+    printf("%f", c);
+    ```
+
+- EO
+    ```java
+    ram <length> > g-ram
+    address g-ram 0 > b // 1 byte offset from the beginning
+    address g-ram 1 > b // 8 byte offset from the beginning
+    address g-ram 9 > b // 8 byte offset from the beginning
+    write a 'c'
+    write b 12
+    write c 8.4
+    printf "%c" (as-char a) // as-char -> read 1 byte from start (0) and convert to char
+    printf "%d" (as-double b) // as-double -> read 8 byte from start (1) and convert to double
+    printf "%f" (as-int64 c) // as-int64 -> read 8 byte from start (9) and convert to int64
+    ```
+
+2. External references  
+When forming external links, from header files or directly described in the current compilation unit, it is impossible to bind them to memory. In this regard, the question arises: how to take them into account so that the corresponding file on EO can be compiled. As a possible option, you can try to form the corresponding aliases, and form stubs in the files corresponding to these aliases. At the moment we are considering the following solution:
+
+- In the file where the external call is used, we generate the following alias
+
+    ```java
+    +alias c2eo.extern.<name>
+    ```
+
+- Сreating a file of the same name by the specified alias with an empty implementation
+
+    ```java
+    +package c2eo.extern
+
+    [] > <name>
+    ```
+
+3. Function declaration (function prototypes)
+
+4. Declaring arrays
+
+5. Structures and associations
+
+6. Structural variables
+
+7. Pointers
+
 </details>
 
-## Step 3. Install C2EO
-```bash
-$ git clone https://github.com/polystat/c2eo.git
-```
-
-## Step 4. Build C2EO
-
-> IMPORTANT. Every time the transpiler code changes, you need to repeat this step
-
-It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then
-
-```bash
-$ cd ./c2eo/project/build
-$ cmake ..
-$ make # or $ cmake --build
-``` 
-
-## Step 5. Run transpilation
-> Use `--` at the end of command below to skip all errors:
-
-```bash
-$ cd ../scripts
-$ ./transpile_с2eo.py <path-to-dir-with-c-program>
-```
+</p>
 
 <details>
-    <summary>More information here...</summary>
-
-&nbsp;
-## Executable transpiler file and scripts for building the program on EO
-
----
-## Directory Hierarchy
-
-These files are located in the `project/bin` directory
-
-&nbsp;
-## Run scripts
-
-### Launching the program builder on EO
-
-`python3 launcher.py <file-of-c-program>`
-
-The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result/eo/c2eo/src/` of the project on EO.
-
-&nbsp;
-## Support scripts and programs
----
-### Transpilation and formation of intermediate files
-
-`c2eo <file-of-c-program> <name>`
-
-Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project/assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
-
-### Generating the global.eo file
-
-`collector`
-
-Based on intermediate files located in the `project/assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
-
----
-</details>
-
-## Step 6. Run generated project
-
-Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start) . 
-Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
-
-&nbsp;
-## Additional step. [Tests examples](./project/tests/main)
-
-&nbsp;
-# Project structure
-
-<details>
-  <summary><bold>Additional information...</bold></summary>
+  <summary><bold>3. Project structure</bold></summary>
 
     .
     ├── collection
@@ -236,20 +303,44 @@ The presented scheme provides complete autonomy for the formation of the program
 
 </details>
 
-# Releases
-## Download 
-Use `wget` or dowload directly from [github](https://github.com/polystat/c2eo/releases/).
-```bash
-$ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
-```
-## Install C2EO
-```bash
-$ sudo dpkg -i path/to/c2eo-1.0.1.deb
-or
-$ sudo apt-get install path/to/c2eo-1.0.1.deb
-```
-## Using of transpiler
-```bash
-$ c2eo path/to/<C-file-name> item-name
-```
-It will generate `.glob` and `.stat` files in `/tmp/`.
+</p>
+
+<details>
+    <summary>4. About working with the project</summary>
+
+&nbsp;
+## Executable transpiler file and scripts for building the program on EO
+
+---
+## Directory Hierarchy
+
+These files are located in the `project/bin` directory
+
+&nbsp;
+## Run scripts
+
+### Launching the program builder on EO
+
+`python3 launcher.py <file-of-c-program>`
+
+The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result/eo/c2eo/src/` of the project on EO.
+
+&nbsp;
+## Support scripts and programs
+---
+### Transpilation and formation of intermediate files
+
+`c2eo <file-of-c-program> <name>`
+
+Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project/assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
+
+### Generating the global.eo file
+
+`collector`
+
+Based on intermediate files located in the `project/assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
+
+---
+</details>
+
+</p>
