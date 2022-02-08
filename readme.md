@@ -367,6 +367,7 @@ $ sudo apt-get install path/to/c2eo-1.0.1.deb
 ```bash
 $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
 $ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
+$ sudo apt install c2eo
 ```
   
 ## Using of transpiler
