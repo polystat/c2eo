@@ -71,7 +71,8 @@ class StmtGen;
 struct VarGen: AbstractGen {
     std::string name;       // идентификатор переменной
     std::string type;       // тип переменной
-    [[deprecated]]
+    //[[deprecated]]
+    // TODO remove this field
     std::string value;      // значение переменной
     //Генератор для значения переменной
     StmtGen* nestedStmt = nullptr;
@@ -119,7 +120,8 @@ struct RecordGen: AbstractGen {
 // Накапливает необходимые значения в соответствующих строках.
 struct StmtGen : AbstractGen {
     std::string value;
-    [[deprecated]]
+    //[[deprecated]]
+    // remove this field
     std::string postfix;
     static std::string getIndentSpaces();
 
@@ -212,7 +214,8 @@ struct BinaryStmtGen: StmtGen {
 // Накапливает необходимые значения в соответствующих строках.
 struct UnaryStmtGen: StmtGen {
     StmtGen* nestedStmt = nullptr;
-    [[deprecated]]
+    //[[deprecated]]
+    //TODO remove this code
     std::string op;
 
     virtual void Generate(std::ostream &out);

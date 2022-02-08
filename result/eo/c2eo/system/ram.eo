@@ -1,0 +1,14 @@
++package c2eo.system
+
++alias eoram org.eolang.gray.ram
+
+[size] > ram
+
+  eoram size > mem!
+
+  memory > index
+
+  mem > @
+
+  [address bytes] > set
+    mem.write address bytes > @

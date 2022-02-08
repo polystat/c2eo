@@ -1,0 +1,36 @@
++package c2eo.examples.example1
+
++alias org.eolang.gray.cage
++alias c2eo.system.ram
++alias c2eo.system.address
++alias c2eo.coperators.get
++alias c2eo.coperators.add
++alias c2eo.coperators.write
++alias c2eo.coperators.as-int64
++alias c2eo.stdio.printf
+
+[args...] > global
+
+  * (* cage cage) > allocator
+  memory > allocator-index
+
+  ram 8 > g-ram
+  ram 0 > s-ram
+
+  address g-ram 0 > g-x
+
+  [args] > main
+    seq > @
+      write (get (get allocator 0) 0) g-ram
+      write (g-ram.index) 0
+      write (get (get allocator 0) 1) s-ram
+      write (s-ram.index) 1
+      write allocator-index 2
+      write g-x 1
+      write g-x (add 1 (as-int64 g-x))
+      printf "%d\n" (as-int64 g-x)
+      write g-x (add (as-int64 g-x) 1)
+      printf "%d\n" (as-int64 g-x)
+      TRUE
+
+  main args > @

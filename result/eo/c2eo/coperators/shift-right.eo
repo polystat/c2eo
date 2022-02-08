@@ -1,4 +1,0 @@
-+package c2eo.coperators
-
-[a b] > shift-right
-  (a.as-bytes.right b).as-int > @

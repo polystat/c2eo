@@ -4,6 +4,7 @@
 #include "vardecl.h"
 #include "generator.h"
 #include "stmt.h"
+#include "unit_transpiler.h"
 
 // Анализ полученного начального значения с последующим использованием
 void initValueAnalysis(const VarDecl *VD, std::string &str);
@@ -13,6 +14,59 @@ void initValueAnalysis(const VarDecl *VD, std::string &str);
 void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
+void ProcessVariable(const VarDecl *VD){
+  // Имя переменной
+  auto varName = VD->getNameAsString();
+  TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
+  // размер в байтах
+  auto typeSize = typeInfo.Width / 8;
+
+  QualType qualType = VD->getType();
+  const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
+
+  auto typePtr = qualType.getTypePtr();
+  //auto kind = typePtr->getKind();
+
+  std::string strType = "";
+  getTypeName(VD, strType);
+  // StorageClass getStorageClass() const
+  // Показывает на явное описани того или иного класса памяти в тексте программы
+  // Наверное не во всех случаях полезно
+  auto storageClass = VD->getStorageClass();
+  // Проверка на размещение переменной в локальной памяти
+  auto inLocalStorage = VD->hasLocalStorage();
+  // Проверка на статическую локальную переменную
+  auto staticLocal = VD->isStaticLocal();
+  // Внешняя переменная (описатель external)
+  auto extStorage = VD->hasExternalStorage();
+  // Размещение переменной в глобальной памяти
+  // Касается глобальных и статических переменных
+  auto globalStorage = VD->hasGlobalStorage();
+  // Переменная с локальной видимостью
+  auto localVarDecl = VD->isLocalVarDecl();
+  // Переменная или параметр с локальной видимостью
+  auto localVarDeclOrParm = VD->isLocalVarDeclOrParm();
+  // Наличие начальной инициализации
+  auto isInit = VD->hasInit();
+  std::string strValue = "";
+  if (isInit) {
+    initValueAnalysis(VD, strValue);
+  } else {
+    initZeroValueAnalysis(VD, strValue);
+  }
+
+  extern UnitTranspiler transpiler;
+
+
+  // Проверка, что переменная является глобальной
+  if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
+    transpiler.glob.Add(typeSize,"int","g-" + varName,strValue);
+  } else if (globalStorage && !extStorage) {
+    transpiler.stat.Add(typeSize,"int","s-" + varName,strValue);
+  }
+}
+
+/*
 // Определение и тестовый вывод основных параметров описания переменных
 void getVarDeclParameters(const VarDecl* VD) {
     // Имя переменной
@@ -112,7 +166,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         llvm::outs() << "  " << strType << "\n";
 #endif
     }
-*/
+
 #ifdef VAR_DECL_INFO
     llvm::outs() << "  !!! class name = " << typePtr->getTypeClassName() << "\n";
 #endif
@@ -241,7 +295,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         var->staticSpaceGenPtr->Add(var);
     }
 
-    /*
+
        // Проверка, что переменная является статической.
        if (globalStorage && !extStorage && !staticLocal)
        {
@@ -264,7 +318,7 @@ void getVarDeclParameters(const VarDecl* VD) {
            var->type = strType;
            var->value  = strValue;
            var->globalSpaceGenPtr->Add(var);
-       } */
+       }
 
     //VD->dump();
 }
@@ -276,7 +330,6 @@ void getVarDeclParameters(const VarDecl* VD) {
 //    auto size = typeInfo.Width;
 //    /*
 //    std::string result = "";
-//    //TODO обработка беззнаковых, когда они появятся.
 //    if (isSigned)
 //    {
 //        switch (size)
@@ -307,7 +360,7 @@ void getVarDeclParameters(const VarDecl* VD) {
 //        }
 //    }*/
 //    std::string result = "c_";
-//    //TODO обработка беззнаковых, когда они появятся. (нет только c_uint64)
+//    //TOD обработка беззнаковых, когда они появятся. (нет только c_uint64)
 //    if (!isSigned)
 //        result += 'u';
 //    result += "int" + std::to_string(size);
@@ -327,7 +380,6 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
     //auto align = typeInfo.Align;  // не нужен
     APValue* initVal = VD->evaluateValue();
     if (initVal != nullptr) {
-        llvm::outs() << "    Initial Value = ";
         if (initVal->isInt()) {
             auto intValue = initVal->getInt().getExtValue();
             //llvm::outs() << intValue;

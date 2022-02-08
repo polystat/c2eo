@@ -33,16 +33,14 @@ void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
 //------------------------------------------------------------------------------
 // Анализ на глобальную переменную
 void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
-    ASTContext *context = Result.Context;
-    const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
-    // We do not want to convert header files!
-    ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
-    if (!VD)
-        return;
+  ASTContext *context = Result.Context;
+  const auto *VD = Result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
+  // We do not want to convert header files!
+  if (!VD || !context->getSourceManager().isWrittenInMainFile(VD->getLocation()))
+      return;
 
-    getVarDeclParameters(VD);
-
-    //VD->dump();
+  //getVarDeclParameters(VD);
+  ProcessVariable(VD);
 }
 
 //------------------------------------------------------------------------------
@@ -66,14 +64,14 @@ void LoopAnalyzer::run(const MatchFinder::MatchResult &Result) {
 // Анализ на целочисленную переменную
 void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     ASTContext *Context = Result.Context;
-    const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
+    const auto VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
     // We do not want to convert header files!
     ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
     if (!VD)
         return;
     llvm::outs() << "Integer variable.\n";
     // Определение и тестовый вывод основных параметров описания переменных
-    getVarDeclParameters(VD);
+    ProcessVariable(VD);
 
     //VD->dump();
 }
@@ -82,7 +80,7 @@ void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
 // Анализ на глобальную целочисленную переменную
 void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
   ASTContext *Context = Result.Context;
-  const VarDecl *VD = Result.Nodes.getNodeAs<VarDecl>("intVarGlobalMemoryDecl");
+  const auto *VD = Result.Nodes.getNodeAs<VarDecl>("intVarGlobalMemoryDecl");
   // We do not want to convert header files!
   ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
   if (!VD)

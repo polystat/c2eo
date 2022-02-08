@@ -236,3 +236,20 @@ The presented scheme provides complete autonomy for the formation of the program
 
 </details>
 
+# Releases
+## Download 
+Use `wget` or dowload directly from [github](https://github.com/polystat/c2eo/releases/).
+```bash
+$ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
+```
+## Install C2EO
+```bash
+$ sudo dpkg -i path/to/c2eo-1.0.1.deb
+or
+$ sudo apt-get install path/to/c2eo-1.0.1.deb
+```
+## Using of transpiler
+```bash
+$ c2eo path/to/<C-file-name> item-name
+```
+It will generate `.glob` and `.stat` files in `/tmp/`.
