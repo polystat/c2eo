@@ -1,0 +1,10 @@
+Origin: Debian
+Suite: testing
+AlsoAcceptFor: unstable experimental
+Codename: c2eo-rep
+Version: 1.0
+Architectures: i386 amd64 source
+Components: main contrib non-free
+UDebComponents: main contrib non-free
+Description: repository for c2eo releases
+SignWith: 4B50AF6031782AA9D35898248F6E3F51D5C56594

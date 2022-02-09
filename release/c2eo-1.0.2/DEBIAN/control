@@ -1,0 +1,14 @@
+Package: c2eo
+Version: 1.0-2
+Provides: c2eo
+Maintainer: Yaroslav Ryabtsev <yairyabtsev@edu.hse.ru>
+Architecture: all
+Section: misc
+Description: The translator of C to EOLANG.
+ This is a translator of C/C++ to EOLANG for Debian and Ubuntu. 
+Depends: dpkg, wget, python3
+Build-Depends: debhelper (>=9)
+Pre-Depends: wget (>= 1.0)
+Origin: https://github.com/polystat/c2eo
+Multi-Arch: foreign
+
