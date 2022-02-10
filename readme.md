@@ -6,45 +6,57 @@ we will fix. *Other languages: [Russian](readme.ru.md)*
 
 ## User guide
 
-1. OS and tools  
-You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Tools:
+1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
+Packages:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [cmake](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++),
+[g++](https://pkgs.org/download/g++)
 
     ```bash
     $ sudo apt install wget tar cmake gcc g++ # Installation for Ubuntu
     ```
+2. Installation
+    <details>
+      <summary>Variant 1 (Manual)</summary>
 
-2. Download  
-Download directly from [github](https://github.com/polystat/c2eo/releases/) or use this command:
+    Download directly from [github](https://github.com/polystat/c2eo/releases/) or use this command:
 
     ```bash
     $ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
     ```
 
-3. Install package  
+    Install package  
     ```bash
-    $ sudo dpkg -i path/to/c2eo-1.0.1.deb
-    # or
-    $ sudo apt-get install path/to/c2eo-1.0.1.deb
+    $ sudo apt-get install path/to/c2eo-1.0.1.deb # or $ sudo dpkg -i path/to/c2eo-1.0.1.deb
     ```
+    </details>
 
+    </p>
 
-4. Run transpilation  
-It will generate `.glob` and `.stat` files in `/tmp/`
+    <details>
+      <summary> Variant 2 (Automatic)</summary>
+
+    ```bash
+    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
+    $ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
+    $ sudo apt install c2eo
+    ```
+    </details>
+
+</p>
+
+3. Run transpilation. It will generate `.glob` and `.stat` files in `/tmp/`
+
     ```bash
     $ c2eo <path-to-C-file-name> item-name
     ```
 
 ## Developer guide
 
-1. OS and tools.  
-You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Tools:
+1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
+Packages:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
@@ -58,8 +70,7 @@ Tools:
     $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
     ```
 
-2. Install LLVM CLANG.  
-Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command:
+2. Install LLVM/Clang. Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command:
 
     ```bash
     $ tar -xvf llvm-clang.tar.gz
@@ -68,13 +79,13 @@ Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH
     <details>
     <summary> Old variant </summary>
     <p></p>
-    <t>2. Install LLVM CLANG</t>
+    <t>2. Install LLVM/Clang</t>
     <pre><code>
     $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
     $ tar -xvf llvmorg-12.0.1.tar.gz
     </code></pre>
 
-    <t>2.1 Build LLVM CLANG</t>
+    <t>2.1 Build LLVM/Clang</t>
     <pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
     $ cd llvm-clang
     $ mkdir build && cd $_
@@ -120,7 +131,7 @@ Now the generated project in this [dir](result/) . For running the project you n
 <t>1. [Project tests](./project/tests/main)</t>
 
 <details>
-  <summary><bold>2. Transpilation principles</bold></summary>
+  <summary>2. Transpilation principles</summary>
 </p>
 
 1. Scalar variables  
@@ -191,7 +202,7 @@ When forming external links, from header files or directly described in the curr
 </p>
 
 <details>
-  <summary><bold>3. Project structure</bold></summary>
+  <summary>3. Project structure</summary>
 
     .
     ├── collection
@@ -344,36 +355,3 @@ Based on intermediate files located in the `project/assembly` directory, it also
 </details>
 
 </p>
-
-# Releases
-  
-## Download 
-  
-Use `wget` or dowload directly from [github](https://github.com/polystat/c2eo/releases/).
-```bash
-$ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
-```
-  
-## Install C2EO
-  
-```bash
-$ sudo dpkg -i path/to/c2eo-1.0.1.deb
-or
-$ sudo apt-get install path/to/c2eo-1.0.1.deb
-```
-  
-## Install using apt
-  
-```bash
-$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
-$ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
-$ sudo apt install c2eo
-```
-  
-## Using of transpiler
-  
-```bash
-$ c2eo path/to/<C-file-name> item-name
-```
-  
-It will generate `.glob` and `.stat` files in `/tmp/`.
