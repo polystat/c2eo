@@ -1,8 +1,8 @@
 #include "memory_manager.h"
 
 
-void MemoryManager::Add(size_t size, std::string type, std::string alias, std::string value) {
-  Variable var = {pointer,size,std::move(type),std::move(alias), std::move(value)};
+void MemoryManager::Add(uint64_t id,size_t size, std::string type, std::string alias, std::string value) {
+  Variable var = {id, pointer,size,std::move(type),std::move(alias), std::move(value)};
   variables.push_back(var);
   pointer += size;
 }

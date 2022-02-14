@@ -6,6 +6,7 @@
 
 // Representation of a simple variable stored in RAM
 struct Variable{
+  uint64_t id;
   int position;
   size_t size;
   std::string type;
@@ -17,7 +18,7 @@ class MemoryManager{
  public:
   explicit MemoryManager(std::string name):pointer(0),name(std::move(name)) {}
 
-  void Add(size_t size, std::string type, std::string alias, std::string value);
+  void Add(uint64_t id, size_t size, std::string type, std::string alias, std::string value);
 
   bool Empty();
 

@@ -15,6 +15,8 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
 void ProcessVariable(const VarDecl *VD){
+  // ID переменной
+  uint64_t varId = reinterpret_cast<uint64_t>(VD);
   // Имя переменной
   auto varName = VD->getNameAsString();
   TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
@@ -57,12 +59,11 @@ void ProcessVariable(const VarDecl *VD){
 
   extern UnitTranspiler transpiler;
 
-
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    transpiler.glob.Add(typeSize,"int","g-" + varName,strValue);
+    transpiler.glob.Add(varId, typeSize, "int", "g-" + varName, strValue);
   } else if (globalStorage && !extStorage) {
-    transpiler.stat.Add(typeSize,"int","s-" + varName,strValue);
+    transpiler.stat.Add(varId, typeSize, "int", "s-" + varName, strValue);
   }
 }
 
