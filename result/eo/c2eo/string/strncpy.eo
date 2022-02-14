@@ -1,4 +1,0 @@
-+package c2eo.stdio
-
-[destptr srcptr size] > strncpy
-  destptr.write (srcptr.read size) > @

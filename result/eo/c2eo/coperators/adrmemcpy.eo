@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[adr mem size] > adrmemcpy
+  adr.write (mem.read 0 size) > @

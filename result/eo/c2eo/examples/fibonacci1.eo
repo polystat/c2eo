@@ -10,59 +10,170 @@
 +alias c2eo.coperators.add
 +alias c2eo.coperators.less
 +alias c2eo.coperators.add-int64
-+alias c2eo.coperators.as-int64
++alias c2eo.coperators.read-as-int64
 
 [args...] > global
 
-  * (* cage cage cage) > allocator
+  * > allocator
+    *
+      cage
+      cage
+      cage
+
   memory > allocator-index
 
-  ram 40 > g-ram
-  ram 0 > s-ram
+  ram > global-ram
+    40
 
-  address g-ram 0 > p1
-  address g-ram 8 > p2
-  address g-ram 16 > arg
-  address g-ram 24 > result
-  address g-ram 32 > i
+  ram > static-ram
+    0
+
+  address > p1
+    global-ram
+    0
+
+  address > p2
+    global-ram
+    8
+
+  address > arg
+    global-ram
+    16
+
+  address > result
+    global-ram
+    24
+
+  address > i
+    global-ram
+    32
 
   [] > eo-init
     seq > @
-      write (get (get allocator 0) 0) g-ram
-      write (g-ram.index) 0
-      write (get (get allocator 0) 1) s-ram
-      write (s-ram.index) 1
-      write allocator-index 2
-      write p1 0
-      write p2 1
-      write arg 0
-      write result 0
-      write i 0
+      write
+        get
+          get
+            allocator
+            0
+          0
+        global-ram
+
+      write
+        global-ram.index
+        0
+
+      write
+        get
+          get
+            allocator
+            0
+          1
+        static-ram
+
+      write
+        static-ram.index
+        1
+
+      write
+        allocator-index
+        2
+
+      write
+        p1
+        0
+
+      write
+        p2
+        1
+
+      write
+        arg
+        0
+
+      write
+        result
+        0
+
+      write
+        i
+        0
+
       TRUE
 
   [] > fibo
-    ram 0 > l-ram
+    ram > l-ram
+      0
+
     seq > @
-      write (get (get allocator 0) allocator-index) l-ram
-      write allocator-index (add allocator-index 1)
-      write i 1
+      write
+        get
+          get
+            allocator
+            0
+          allocator-index
+        l-ram
+
+      write
+        allocator-index
+        add
+          allocator-index
+          1
+
+      write
+        i
+        1
+
       while
-        less (as-int64 i) (as-int64 arg)
+        less
+          read-as-int64
+            i
+          read-as-int64
+            arg
         seq
-          write result (add-int64 p1 p2)
-          write p1 (as-int64 p2)
-          write p2 (as-int64 result)
-          write i (add 1 (as-int64 i))
+          write
+            result
+            add-int64
+              p1
+              p2
+
+          write
+            p1
+            read-as-int64
+              p2
+
+          write
+            p2
+            read-as-int64
+              result
+
+          write
+            i
+            add
+              1
+              read-as-int64
+                i
+
           TRUE
 
   [args] > main
     seq > @
-      write arg 10
+      write
+        arg
+        10
+
       fibo
-      printf "fibo(%d) = %d\n" (as-int64 arg) (as-int64 result)
+
+      printf
+        "fibo(%d) = %d\n"
+        read-as-int64
+          arg
+        read-as-int64
+          result
+
       TRUE
 
   seq > @
     eo-init
-    main args
+    main
+      args
     TRUE
