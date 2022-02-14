@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
-[a] > as-float
+[a] > as-double
   a.as-float > @
