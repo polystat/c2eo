@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -cp target/classes:target/eo-runtime.jar org.eolang.Main c2eo.examples.fibonacci5.global "$@"
+java -cp target/classes:target/eo-runtime.jar org.eolang.Main c2eo.examples.increment1.global "$@"
