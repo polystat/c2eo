@@ -23,6 +23,7 @@ def inc(version: str) -> str:
 
 
 def get_version() -> str:
+    #todo get it from file
     for file in os.listdir("."):
         if file[:5] == 'c2eo-' and file[-3:] != 'deb':
             return file[5:]
@@ -93,6 +94,8 @@ def copy_libs():
                         libs_set.add(path)
     if not flag:
         print('run todo.sh as root and re-try')
+        print('make sure that in CMakeLists.txt the correct path to the libraries is spelled out: '
+              'link_directories("/usr/lib")')
         exit()
 
 
@@ -106,37 +109,39 @@ if __name__ == '__main__':
     parser.add_argument(
         '--branch',
         type=str,
-        default='yar',
-        help=''
+        default='heap',
+        help='name of the branch to check out (default is heap)'
     )
     parser.add_argument(
         '--version',
         type=str,
         default=inc(get_version()),
-        help=''
+        help='specify the new version (by default, the last number increases)'
     )
     parser.add_argument(
         '--date',
         type=str,
         default=datetime.datetime.now().astimezone().strftime('%a, %d %b %Y %H:%M:%S %z'),
-        help=''
+        help='use the date and time in the format %%a,  %%d%%b %%Y %%H:%%M:%%S%%z, example: Sun, 13 Feb 2022 23:35:51'
+        ' +0300 (the current time is used by default)'
     )
     parser.add_argument(
         '--user',
         type=str,
         default=get_user(),
-        help=''
+        help='use the parameter to specify the full name and email address, example: Yaroslav Ryabtsev <yairyabtsev'
+        '@edu.hse.ru> (data from git_config is used by default)'
     )
-    parser.add_argument(
-        '--key',
-        type=str,
-        default='yes',
-        help=''
-    )
+    # parser.add_argument(
+    #     '--key',
+    #     type=str,
+    #     default='yes',
+    #     help=''
+    # )
     args = parser.parse_args()
     try_shell(f'git checkout {args.branch}')
 
-    try_shell(f'mv c2eo-{get_version()} c2eo-{args.version}')
+    # try_shell(f'mv c2eo-{get_version()} c2eo-{args.version}')
 
     os.chdir('../project')
     if not os.path.exists('build'):
@@ -152,7 +157,7 @@ if __name__ == '__main__':
         os.mkdir('usr')
         os.mkdir('usr/bin')
         os.mkdir('usr/lib')
-    # make_deb(args.version)
+    make_deb(args.version)
     os.chdir('..')
     try_shell(f'fakeroot dpkg-deb --build c2eo-{args.version}')
     # try_shell(f'lintian c2eo-{version}.deb') ---> checker
@@ -160,9 +165,9 @@ if __name__ == '__main__':
     os.chdir('repository/debian')
     make_repo(args.version)
 
-    os.chdir('..')
-    if not os.path.exists('auto_index'):
-        os.mkdir('auto_index')
-    try_shell(f'cp -rf debian/pool auto_index')
-    try_shell(f'cp -rf debian/dists auto_index')
-    host_it()
+    # os.chdir('..')
+    # if not os.path.exists('auto_index'):
+    #     os.mkdir('auto_index')
+    # try_shell(f'cp -rf debian/pool auto_index')
+    # try_shell(f'cp -rf debian/dists auto_index')
+    # host_it()
