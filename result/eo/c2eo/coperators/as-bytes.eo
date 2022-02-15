@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > as-bytes
+  a.as-bytes > @
