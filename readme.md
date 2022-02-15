@@ -134,68 +134,217 @@ Now the generated project in this [dir](result/) . For running the project you n
   <summary>2. Transpilation principles</summary>
 </p>
 
-1. Scalar variables  
-For each type of variable (local, global or static, we create a separate memory of the required size). Then we prescribe the starting address (our analogue of the pointer), from which we will read or write the required number of bytes, depending on the type of variable.
+1. RAM
 
-- EO template
+    To work with memory, we use the ram object. For each type of variable (local, global, static) we use a separate object of ram.
 
     ```java
-    ram <length> > <ram name>
-    address <ram name> <start> > p
-    write p <value>
-    printf "%<type literal>" (<as type> a)
+    ram > global-ram
+      1024
+    ram > static-ram
+      1024
     ```
 
-- C
-    ```c
-    char a = 'c';
-    long long b = 12;
-    double c = 8.4;
-    printf("%c", a);
-    printf("%d", b);
-    printf("%f", c);
-    ```
+2. RAM indexing
 
-- EO
+    With this approach, to work with pointers, we need to place and know the indexes of ram objects. We use a special array in which we place the allocated ram objects. We need to allocate local memory and add new ram objects. To do this, we use a special index of a free cage cell.
+
     ```java
-    ram <length> > g-ram
-    address g-ram 0 > b // 1 byte offset from the beginning
-    address g-ram 1 > b // 8 byte offset from the beginning
-    address g-ram 9 > b // 8 byte offset from the beginning
-    write a 'c'
-    write b 12
-    write c 8.4
-    printf "%c" (as-char a) // as-char -> read 1 byte from start (0) and convert to char
-    printf "%d" (as-double b) // as-double -> read 8 byte from start (1) and convert to double
-    printf "%f" (as-int64 c) // as-int64 -> read 8 byte from start (9) and convert to int64
+    * > allocator
+      *
+        cage
+        cage
+        ...
+    memory > allocator-index
+    write
+      get
+        get
+          allocator
+          0
+        0
+      global-ram
+    write
+      global-ram.index
+      0
+    write
+      allocator-index
+      1
     ```
 
-2. External references  
-When forming external links, from header files or directly described in the current compilation unit, it is impossible to bind them to memory. In this regard, the question arises: how to take them into account so that the corresponding file on EO can be compiled. As a possible option, you can try to form the corresponding aliases, and form stubs in the files corresponding to these aliases. At the moment we are considering the following solution:
+3. Scalar variables
 
+    Then we prescribe the starting address (our analogue of the pointer), from which we will read or write the required number of bytes, depending on the type of variable.
+
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    long long a = 5;
+    printf("%d", a)
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    address > a
+      global-ram
+      0
+    write
+      a
+      5
+    printf
+      "%d"
+      read-as-int64 // read-as-int64 -> read 8 byte from start (0) and convert to int64
+        a
+    <code></pre></td>
+    </tr>
+    </table>
+
+4. External links
+
+    To compile files with any external links, we use the following solution:
 - In the file where the external call is used, we generate the following alias
-
-    ```java
-    +alias c2eo.extern.<name>
-    ```
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    #include < string >
+    strncpy(str2, str1, 8);
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    +alias c2eo.external.strcpy
+    strcpy
+      str2
+      st1
+      8
+    <code></pre></td>
+    </tr>
+    </table>
 
 - Сreating a file of the same name by the specified alias with an empty implementation
 
     ```java
     +package c2eo.extern
 
-    [] > <name>
+    [] > strcpy
     ```
 
-3. Function declaration (function prototypes)
+5. Functions
 
-4. Declaring arrays
+    To pass arguments to the function and get the result, we use separate ram objects. In the function itself, we use the local version of the argument ram and local ram. 
 
-5. Structures and associations
+    ```java
+    ram > arguments-ram
+      1024
+    ram > result-ram
+      1024
 
-6. Structural variables
+    [] > fun
+      ram > local-arguments-ram
+        8
+      address > x
+        local-arguments-ram
+        0
+      ram > local-ram
+        1024
+      address > y
+        local-arguments-ram
+        0
+      seq > @
+        memcpy // Сopy the specified number of bytes to this ram from another
+            local-arguments-ram
+            arguments-ram
+            8 
+        memadrcpy // Сopy the specified number of bytes to this ram from address
+            result-ram
+            y
+            8
+        TRUE
+    ```
 
-7. Pointers
+6. Arrays
+
+    The transformation of arrays is similar to variables. if we know their size in advance.
+
+7. Structures
+
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    struct Rectangle {int x; int y;} rect;
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    address > g-rect
+      global-ram
+      0
+    address > g-rect-x
+      global-ram
+      0
+    address > g-rect-y
+      global-ram
+      4
+    <code></pre></td>
+    </tr>
+    </table>
+
+8. Unions
+
+    The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
+
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    struct Rectangle {int x; int y;};
+    struct Triangle {int a, b,c;};
+    struct Figure {
+        int key;
+        union {
+            Rectangle r;
+            Triangle  t;
+    } fig;
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    address > g-fig
+      global-ram
+      0
+    address > g-fig-key
+      global-ram
+      0
+    address > g-fig-r-x
+      global-ram
+      4
+    address > g-fig-r-y
+      global-ram
+      8
+    address > g-fig-t-a
+      global-ram
+      4
+    address > g-fig-t-b
+      global-ram
+      8
+    address > g-fig-t-c
+      global-ram
+      12
+    <code></pre></td>
+    </tr>
+    </table>
+
+9. Enums
+
+    We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+
+10. Pointers
 
 </details>
 
