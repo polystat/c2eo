@@ -64,6 +64,7 @@ def make_deb(version, user, date):
         #     if not changes:
         #         break
         #     print('  *', changes, file=changelog)
+
         # with datetime try_shell('git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format="  * %h
         # %s by %an <%aE>   %cd" >> DEBIAN/changelog')
     try_shell('git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format="  * %h %s by %an <%aE>"'
@@ -85,7 +86,7 @@ def make_repo():
         for key in distributions.keys():
             print(f'{key}: {distributions[key]}', file=distributions_file)
     try_shell('reprepro export')
-    try_shell('reprepro -P -V -b . -C main includedeb c2eo-rep ../../c2eo*.deb')
+    try_shell('reprepro -P -V -b . -C main includedeb c2eo-rep ../c2eo*.deb')
 
 
 def copy_libs():
@@ -165,5 +166,5 @@ if __name__ == '__main__':
     try_shell(f'fakeroot dpkg-deb --build c2eo-{args.version}')
     # try_shell(f'lintian c2eo-{version}.deb') ---> checker
 
-    os.chdir('repository/DEBIAN')
+    os.chdir('repository')
     make_repo()

@@ -3,7 +3,12 @@ To use the script, make sure that you have installed the following packages:
 $ pip3 install git_config
 $ sudo apt install md5deep reprepro
 ```
+Also check that in `CMakeLists.txt` the correct path to the libraries is specified: 
+```cmake
+link_directories("/usr/lib")
+```
 
+### How to use:
 ```bash
 $ python3 ./release/update-release.py -h
 usage: update-release.py [-h] [--branch BRANCH] [--version VERSION]
@@ -15,4 +20,23 @@ optional arguments:
   --branch BRANCH    name of the branch to check out (default is heap)
   --version VERSION  specify the new version
 ```
+Example
+```bash
+$ python3 update-release.py --version=0.1.1 --branch="yar"
+```
+Notes: 
+* Use `.` as the separator for the version.
+* This script uses the current date, time, and time zone. Make sure they are configured correctly.
+* This script extracts your name and email from `git config`. Make sure you have them.
 
+This script will write automatically generated merges to the changelog file.
+You can view an approximate list of changes by running the following command in the terminal:
+
+```bash
+git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format="  * %h %s by %an <%aE>"
+```
+
+### Algorithm:
+* Build the executable file. 
+* Creating a deb file (basic: https://habr.com/ru/post/78094/)
+* Creating a repository (basic: https://unixforum.org/viewtopic.php?t=79513 )
