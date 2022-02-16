@@ -41,7 +41,7 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
 * Creating a deb file (basic: https://habr.com/ru/post/78094/)
 * Creating a repository (basic: https://unixforum.org/viewtopic.php?t=79513 )
 
-### You will get these files generated:
+And you will get these files generated:
 ```bash 
 $ tree
 .
