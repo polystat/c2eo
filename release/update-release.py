@@ -16,9 +16,8 @@ control = {
     'Architecture': 'all',
     'Section': 'misc',
     'Description': 'The translator of C to EOLANG.\n This is a translator of C/C++ to EOLANG for Debian and Ubuntu.',
-    'Depends': 'dpkg, wget, python3',
+    'Depends': 'dpkg, gcc',
     'Build-Depends': 'debhelper (>=9)',
-    'Pre-Depends': 'wget (>= 1.0)',
     'Origin': 'https://github.com/polystat/c2eo',
     'Multi-Arch': 'foreign'
 }
@@ -168,3 +167,6 @@ if __name__ == '__main__':
 
     os.chdir('repository')
     make_repo()
+
+
+
