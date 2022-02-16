@@ -32,7 +32,7 @@ distributions = {
     'Components': 'main contrib non-free',
     'UDebComponents': 'main contrib non-free',
     'Description': 'repository for c2eo releases',
-    'SignWith': 'A0398E7D2B2846BF006D31C9F7C91591CC543ECA'
+    'SignWith': 'yes'  # 'A0398E7D2B2846BF006D31C9F7C91591CC543ECA'
 }
 
 
