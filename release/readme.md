@@ -10,7 +10,7 @@ link_directories("/usr/lib")
 
 ### How to use:
 ```bash
-(venv) $ python3 ./release/update-release.py -h
+(venv) $ python3 update-release.py -h
 usage: update-release.py [-h] [--branch BRANCH] [--version VERSION]
 
 Release maker
