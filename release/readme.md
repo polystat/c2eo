@@ -138,11 +138,10 @@ $ tree
 │           └── c
 │               └── c2eo
 │                   └── c2eo_X.X.X_all.deb
-├── test.py
 ├── todo.sh
 └── update-release.py
 
-35 directories, 121 files
+35 directories, 120 files
 ```
 
 Then, you have to upload `./repository/dists` and `./repository/pool` to ... `TODO: Amazon S3`
