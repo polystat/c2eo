@@ -1,9 +1,9 @@
-To use the script, make sure that you have installed the following packages:
+To use this script, make sure you have the following packages installed:
 ```bash
 (venv) $ pip3 install git_config
 $ sudo apt install md5deep reprepro
 ```
-Also check that in `CMakeLists.txt` the correct path to the libraries is specified: 
+Also, check that in `CMakeLists.txt` the correct path to the libraries is specified: 
 ```cmake
 link_directories("/usr/lib")
 ```
@@ -25,7 +25,7 @@ Example
 (venv) $ python3 update-release.py --version=0.1.1 --branch="yar"
 ```
 Notes: 
-* Use `.` as the separator for the version.
+* Use `.` as a version delimiter.
 * This script uses the current date, time, and time zone. Make sure they are configured correctly.
 * This script extracts your name and email from `git config`. Make sure you have them.
 
@@ -38,10 +38,10 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
 
 ### Algorithm:
 * Build the executable file. 
-* Creating a deb file (basic: https://habr.com/ru/post/78094/)
-* Creating a repository (basic: https://unixforum.org/viewtopic.php?t=79513 )
+* Create a deb file (basic: https://habr.com/ru/post/78094/)
+* Create a repository (basic: https://unixforum.org/viewtopic.php?t=79513 )
 
-And you will get these files generated:
+The following files will be generated:
 ```bash 
 $ tree
 .
@@ -144,4 +144,4 @@ $ tree
 35 directories, 120 files
 ```
 
-Then, you have to upload `./repository/dists` and `./repository/pool` to ... `TODO: Amazon S3`
+Then you have to upload `./repository/dists` and `./repository/pool` to ... `TODO: Amazon S3`
