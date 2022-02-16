@@ -145,4 +145,4 @@ $ tree
 35 directories, 121 files
 ```
 
-Then, you have to upload them to ... `todo: Amazon S3`
+Then, you have to upload `./repository/dists` and `./repository/pool` to ... `TODO: Amazon S3`
