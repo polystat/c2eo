@@ -237,19 +237,46 @@ The presented scheme provides complete autonomy for the formation of the program
 </details>
 
 # Releases
-## Download 
-Use `wget` or dowload directly from [github](https://github.com/polystat/c2eo/releases/).
+At the first time you need to add a repository:
 ```bash
-$ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A0398E7D2B2846BF006D31C9F7C91591CC543ECA
+$ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
 ```
-## Install C2EO
+After that, the `c2eo` file will be available in `apt`:
 ```bash
-$ sudo dpkg -i path/to/c2eo-1.0.1.deb
-or
-$ sudo apt-get install path/to/c2eo-1.0.1.deb
+$ sudo apt install c2eo
+$ sudo apt remove c2eo
 ```
-## Using of transpiler
-```bash
-$ c2eo path/to/<C-file-name> item-name
-```
-It will generate `.glob` and `.stat` files in `/tmp/`.
+
+
+[//]: # (## Download )
+
+[//]: # (Use `wget` or dowload directly from [github]&#40;https://github.com/polystat/c2eo/releases/&#41;.)
+
+[//]: # (```bash)
+
+[//]: # ($ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb)
+
+[//]: # (```)
+
+[//]: # (## Install C2EO)
+
+[//]: # (```bash)
+
+[//]: # ($ sudo dpkg -i path/to/c2eo-1.0.1.deb)
+
+[//]: # (or)
+
+[//]: # ($ sudo apt-get install path/to/c2eo-1.0.1.deb)
+
+[//]: # (```)
+
+[//]: # (## Using of transpiler)
+
+[//]: # (```bash)
+
+[//]: # ($ c2eo path/to/<C-file-name> item-name)
+
+[//]: # (```)
+
+[//]: # (It will generate `.glob` and `.stat` files in `/tmp/`.)
