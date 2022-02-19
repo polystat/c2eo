@@ -33,14 +33,14 @@ Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
 [cmake](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++),
-[ninja-build](https://ninja-build.org/),
+[g++](https://pkgs.org/download/g++), 
+[ninja-build](https://ninja-build.org/) 
 and
 [python3.+](https://www.python.org/downloads/).
 
 Then, you need LLVM/Clang:
 
-```
+```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
 $ tar -xvf llvmorg-12.0.1.tar.gz
 $ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
@@ -85,15 +85,14 @@ Let's take the following C code as an example:
 
 ```c
 double z = 3.14;
-char* t = "hello, world";
 void foo(int a) {
   double x = z + a;
 }
 ```
 
-In EO, we represent the entire global memory space as a copy of `ram` object, which we call `global`. Thus, the variable `z` would be accessed as a block of eight bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write eight bytes to the 0th position of `global`:
+In EO, we represent the entire global memory space as a copy of [ram](https://github.com/polystat/c2eo/blob/heap/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of eight bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
 
-```
+```java
 ram > global
 global.write 
   0
@@ -102,7 +101,7 @@ global.write
 
 In a similar way we deal with stack, creating a new copy of `ram` for each function call. The variable `a` will be "pushed" to `stack-ram-foo` and accessible by the code inside the function `foo` by the 0th position. The local variable `x` will also be pushed to the stack and will be accessible by the 4th position, because the length of `int` is four. Here, we are trying to simulate the bevaviour of a typical C compiler. The declaration of `foo` and its execution may look like this:
 
-```
+```java
 [stack] > foo
   stack.read 0 > a
   stack.write > @
@@ -122,7 +121,7 @@ seq
 
 C code may get an address of a variable, which is either in stack or in global memory:
 
-```
+```c
 int f = 7;
 void bar() {
   int t = 42;
@@ -134,19 +133,19 @@ void bar() {
 
 The object `stack`, which is provided as an argument to EO object `bar` is not really a standalone piece of memory, but a "window" to the memory represented by `global`. Each `stack` has its own starting position inside the global memory. Thus, `&t` would return `stack.position + 0`, while `&f` would be just `0`:
 
-```
+```java
 stack > bar-stack
   global
-  5000                    # temporary position of this particular stack in global space
+  5000                    // temporary position of this particular stack in global space
 
 [bar-stack] > bar
   stack.write
-    4                     # int* p
-    stack.address 0       # &t   -> 5000
+    4                     // int* p
+    stack.address 0       // &t   -> 5000
   stack.write
     4
     0
-  global.read             # read from global or stack
+  global.read             // read from global or stack
     stack.read 4          
 ```
 
@@ -155,180 +154,128 @@ stack > bar-stack
 
 **To be edited later:**
 
-3. Scalar variables
+### External links
 
-    Then we prescribe the starting address (our analogue of the pointer), from which we will read or write the required number of bytes, depending on the type of variable.
+To compile files with any external links, we use the following solution:
 
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    long long a = 5;
-    printf("%d", a)
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    address > a
-      global-ram
-      0
-    write
-      a
-      5
-    printf
-      "%d"
-      read-as-int64 // read-as-int64 -> read 8 byte from start (0) and convert to int64
-        a
-    <code></pre></td>
-    </tr>
-    </table>
-
-4. External links
-
-    To compile files with any external links, we use the following solution:
 - In the file where the external call is used, we generate the following alias
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    #include < string >
-    strncpy(str2, str1, 8);
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    +alias c2eo.external.strcpy
-    strcpy
-      str2
-      st1
-      8
-    <code></pre></td>
-    </tr>
-    </table>
+
+  ```c
+  #include <string>
+  strncpy(str2, str1, 8);
+  ```
+
+  ```java
+  +alias c2eo.external.strcpy
+  strcpy str2 st1 8
+  ```
 
 - Сreating a file of the same name by the specified alias with an empty implementation
 
-    ```java
-    +package c2eo.extern
+  ```java
+  +package c2eo.external
 
-    [] > strcpy
-    ```
+  [] > strcpy
+  ```
 
-5. Functions
+### Functions
 
-    To pass arguments to the function and get the result, we use separate ram objects. In the function itself, we use the local version of the argument ram and local ram. 
+To pass arguments to the function and get the result, we use separate ram objects. In the function itself, we use the local version of the argument ram and local ram. 
 
-    ```java
-    ram > arguments-ram
-      1024
-    ram > result-ram
-      1024
+```java
+ram > arguments-ram
+  1024
+ram > result-ram
+  1024
 
-    [] > fun
-      ram > local-arguments-ram
+[] > fun
+  ram > local-arguments-ram
+    8
+  address > x
+    local-arguments-ram
+    0
+  ram > local-ram
+    1024
+  address > y
+    local-arguments-ram
+    0
+  seq > @
+    memcpy // Сopy the specified number of bytes to this ram from another
+        local-arguments-ram
+        arguments-ram
+        8 
+    memadrcpy // Сopy the specified number of bytes to this ram from address
+        result-ram
+        y
         8
-      address > x
-        local-arguments-ram
-        0
-      ram > local-ram
-        1024
-      address > y
-        local-arguments-ram
-        0
-      seq > @
-        memcpy // Сopy the specified number of bytes to this ram from another
-            local-arguments-ram
-            arguments-ram
-            8 
-        memadrcpy // Сopy the specified number of bytes to this ram from address
-            result-ram
-            y
-            8
-        TRUE
-    ```
+    TRUE
+```
 
-6. Arrays
+### Arrays
 
-    The transformation of arrays is similar to variables. if we know their size in advance.
+The transformation of arrays is similar to variables. if we know their size in advance.
 
-7. Structures
+### Structures
 
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    struct Rectangle {int x; int y;} rect;
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    address > g-rect
-      global-ram
-      0
-    address > g-rect-x
-      global-ram
-      0
-    address > g-rect-y
-      global-ram
-      4
-    <code></pre></td>
-    </tr>
-    </table>
+```c
+struct Rectangle {int x; int y;} rect;
+```
 
-8. Unions
+```java
+address > g-rect
+  global-ram
+  0
+address > g-rect-x
+  global-ram
+  0
+address > g-rect-y
+  global-ram
+  4
+```
 
-    The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
+### Unions
 
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    struct Rectangle {int x; int y;};
-    struct Triangle {int a, b,c;};
-    struct Figure {
-        int key;
-        union {
-            Rectangle r;
-            Triangle  t;
-    } fig;
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    address > g-fig
-      global-ram
-      0
-    address > g-fig-key
-      global-ram
-      0
-    address > g-fig-r-x
-      global-ram
-      4
-    address > g-fig-r-y
-      global-ram
-      8
-    address > g-fig-t-a
-      global-ram
-      4
-    address > g-fig-t-b
-      global-ram
-      8
-    address > g-fig-t-c
-      global-ram
-      12
-    <code></pre></td>
-    </tr>
-    </table>
+The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
 
-9. Enums
+```c
+struct Rectangle {int x; int y;};
+struct Triangle {int a, b,c;};
+struct Figure {
+    int key;
+    union {
+        Rectangle r;
+        Triangle  t;
+} fig;
+```
 
-    We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+```java
+address > g-fig
+  global-ram
+  0
+address > g-fig-key
+  global-ram
+  0
+address > g-fig-r-x
+  global-ram
+  4
+address > g-fig-r-y
+  global-ram
+  8
+address > g-fig-t-a
+  global-ram
+  4
+address > g-fig-t-b
+  global-ram
+  8
+address > g-fig-t-c
+  global-ram
+  12
+```
 
-10. Pointers
+### Enums
+
+We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+
 
 </details>
 
