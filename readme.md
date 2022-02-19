@@ -1,8 +1,8 @@
-<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> 
+<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-[![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  
-[![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) 
-[![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) 
+[![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt)
+[![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo)
 [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
 This is a experimental translator of C programs to [EO](https://www.eolang.org) programs.
