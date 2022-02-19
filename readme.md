@@ -12,7 +12,7 @@ This is a experimental translator of C programs to [EO](https://www.eolang.org) 
 Assuming, you are on [Ubuntu 20+](https://ubuntu.com/download):
 
 ```bash
-$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A0398E7D2B2846BF006D31C9F7C91591CC543ECA
 $ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
 $ sudo apt install c2eo
 ```
