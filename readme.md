@@ -91,9 +91,6 @@ void foo(int a) {
 }
 ```
 
-double z = 15;
-
-
 In EO, we represent the entire global memory space as a copy of `ram` object, which we call `global`. Thus, the variable `z` would be accessed as a block of eight bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write eight bytes to the 0th position of `global`:
 
 ```
