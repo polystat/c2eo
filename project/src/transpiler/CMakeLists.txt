@@ -6,7 +6,7 @@ project(c2eo)
 #set(CMAKE_CXX_COMPILER "${PATH_TO_LLVM_SOURCE}/build/bin/clang")
 
 #  llvm_config
-#set(PATH_TO_LLVM_SOURCE "../../../llvm-clang/")
+set(PATH_TO_LLVM_SOURCE "../../../llvm-clang/")
 
 
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")

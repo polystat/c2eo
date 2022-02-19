@@ -64,8 +64,8 @@ int main(int argc, const char **argv) {
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
 // 
    auto result = Tool.run(newFrontendActionFactory(&finder).get());
-   if (!result)
-     return result;
+   //if (!result)
+   //  return result;
 
    // тестовый вывод
    //std::cout << transpiler;
