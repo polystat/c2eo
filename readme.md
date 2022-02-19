@@ -1,62 +1,33 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> 
 
-This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
-If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
-we will fix. *Other languages: [Russian](readme.ru.md)*
+[![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  
+[![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) 
+[![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) 
+[![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
-## User guide
+This is a experimental translator of C programs to [EO](https://www.eolang.org) programs.
 
-1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Packages:
-[wget](https://www.tecmint.com/install-wget-in-linux/), 
-[tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
-[cmake](https://cmake.org/download/), 
-[gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++)
+## How to Use
 
-    ```bash
-    $ sudo apt install wget tar cmake gcc g++ # Installation for Ubuntu
-    ```
-2. Installation
-    <details>
-      <summary>Variant 1 (Manual)</summary>
+Assuming, you are on [Ubuntu 20+](https://ubuntu.com/download):
 
-    Download directly from [github](https://github.com/polystat/c2eo/releases/) or use this command:
+```bash
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
+$ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
+$ sudo apt install c2eo
+```
 
-    ```bash
-    $ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
-    ```
+Then, just run:
 
-    Install package  
-    ```bash
-    $ sudo apt-get install path/to/c2eo-1.0.1.deb # or $ sudo dpkg -i path/to/c2eo-1.0.1.deb
-    ```
-    </details>
+```bash
+$ c2eo <c-file-name> <eo-file-name>
+```
 
-    </p>
+If doesn't work, submit a ticket, we'll fix.
 
-    <details>
-      <summary> Variant 2 (Automatic)</summary>
+## How to Contribute
 
-    ```bash
-    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
-    $ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
-    $ sudo apt install c2eo
-    ```
-    </details>
-
-</p>
-
-3. Run transpilation. It will generate `.glob` and `.stat` files in `/tmp/`
-
-    ```bash
-    $ c2eo <path-to-C-file-name> item-name
-    ```
-
-## Developer guide
-
-1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Packages:
+Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
@@ -64,112 +35,128 @@ Packages:
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
 [g++](https://pkgs.org/download/g++),
 [ninja-build](https://ninja-build.org/),
-[python3.+](https://www.python.org/downloads/)
+and
+[python3.+](https://www.python.org/downloads/).
 
-    ```bash
-    $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
-    ```
+Then, you need LLVM/Clang:
 
-2. Install LLVM/Clang. Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command:
+```
+$ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
+$ tar -xvf llvmorg-12.0.1.tar.gz
+$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
+$ cd llvm-clang
+$ mkdir build && cd $_
+$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
+$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
+$ cd ../..
+```
 
-    ```bash
-    $ tar -xvf llvm-clang.tar.gz
-    ```
+You may also try our own pre-packaged archive:
 
-    <details>
-    <summary> Old variant </summary>
-    <p></p>
-    <t>2. Install LLVM/Clang</t>
-    <pre><code>
-    $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
-    $ tar -xvf llvmorg-12.0.1.tar.gz
-    </code></pre>
+```bash
+$ wget https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA
+$ tar -xvf llvm-clang.tar.gz
+```
 
-    <t>2.1 Build LLVM/Clang</t>
-    <pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
-    $ cd llvm-clang
-    $ mkdir build && cd $_
-    </code></pre>
-    <pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
-    </code></pre>
-    <pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
-    $ cd ../..
-    </code></pre>
-    </details>
-    </p>
+It is assumed that the `llvm-clang` is located in the same dir as the `c2eo`. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
 
-3. Install C2EO
-    ```bash
-    $ git clone https://github.com/polystat/c2eo.git
-    ```
+```bash
+$ cd ./c2eo/project/build
+$ cmake ..
+$ make
+``` 
 
-4. Build C2EO
-    > IMPORTANT. Every time the transpiler code changes, you need to repeat this step
+Then, run tests:
 
-    It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
+```bash
+$ cd ../scripts
+$ ./transpile_с2eo.py <path-to-dir-with-C-program>
+```
 
-    ```bash
-    $ cd ./c2eo/project/build
-    $ cmake ..
-    $ make # or $ cmake --build
-    ``` 
+Now the generated project is in `result/`.
 
-5. Run transpilation
+## Principles of Transpilation from C to EO
 
-    ```bash
-    $ cd ../scripts
-    $ ./transpile_с2eo.py <path-to-dir-with-C-program>
-    ```
+C is a _system-level procedural_ programming language with direct access to the underlying hardware architecture elements, such as memory and registers. EO, on the other hand is a _high-level object-oriented_ language. There are a number of non-trivial mechanisms of translating constructs from the former to the latter, which are explained below:
 
-6. Run generated project  
-Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start).Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
+### Direct Memory Access
+
+Let's take the following C code as an example:
+
+```c
+double z = 3.14;
+char* t = "hello, world";
+void foo(int a) {
+  double x = z + a;
+}
+```
+
+double z = 15;
 
 
----
-## Additional information 
+In EO, we represent the entire global memory space as a copy of `ram` object, which we call `global`. Thus, the variable `z` would be accessed as a block of eight bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write eight bytes to the 0th position of `global`:
 
-<t>1. [Project tests](./project/tests/main)</t>
+```
+ram > global
+global.write 
+  0
+  3.14.as-bytes
+```
 
-<details>
-  <summary>2. Transpilation principles</summary>
-</p>
+In a similar way we deal with stack, creating a new copy of `ram` for each function call. The variable `a` will be "pushed" to `stack-ram-foo` and accessible by the code inside the function `foo` by the 0th position. The local variable `x` will also be pushed to the stack and will be accessible by the 4th position, because the length of `int` is four. Here, we are trying to simulate the bevaviour of a typical C compiler. The declaration of `foo` and its execution may look like this:
 
-1. RAM
+```
+[stack] > foo
+  stack.read 0 > a
+  stack.write > @
+    4
+    add.
+      global.read 0
+      a
 
-    To work with memory, we use the ram object. For each type of variable (local, global, static) we use a separate object of ram.
+seq 
+  ram > stack
+  stack.write 0 55
+  stack.write 4 78322
+  foo stack
+```
 
-    ```java
-    ram > global-ram
-      1024
-    ram > static-ram
-      1024
-    ```
+### Pointers
 
-2. RAM indexing
+C code may get an address of a variable, which is either in stack or in global memory:
 
-    With this approach, to work with pointers, we need to place and know the indexes of ram objects. We use a special array in which we place the allocated ram objects. We need to allocate local memory and add new ram objects. To do this, we use a special index of a free cage cell.
+```
+int f = 7;
+void bar() {
+  int t = 42;
+  int* p = &t; // 0th in stack
+  p = &f; // 0th in global
+  *p = 500; // where will it write, to stack or to global?
+}
+```
 
-    ```java
-    * > allocator
-      *
-        cage
-        cage
-        ...
-    memory > allocator-index
-    write
-      get
-        get
-          allocator
-          0
-        0
-      global-ram
-    write
-      global-ram.index
-      0
-    write
-      allocator-index
-      1
-    ```
+The object `stack`, which is provided as an argument to EO object `bar` is not really a standalone piece of memory, but a "window" to the memory represented by `global`. Each `stack` has its own starting position inside the global memory. Thus, `&t` would return `stack.position + 0`, while `&f` would be just `0`:
+
+```
+stack > bar-stack
+  global
+  5000                    # temporary position of this particular stack in global space
+
+[bar-stack] > bar
+  stack.write
+    4                     # int* p
+    stack.address 0       # &t   -> 5000
+  stack.write
+    4
+    0
+  global.read             # read from global or stack
+    stack.read 4          
+```
+
+
+<hr/>
+
+**To be edited later:**
 
 3. Scalar variables
 
