@@ -86,36 +86,44 @@ Let's take the following C code as an example:
 
 ```c
 double z = 3.14;
-void foo(int a) {
-  double x = z + a;
-}
 ```
 
-In EO, we represent the entire global memory space as a copy of [ram](https://github.com/polystat/c2eo/blob/heap/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of eight bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
+In EO, we represent the entire global memory space as a copy of [ram](https://github.com/polystat/c2eo/blob/heap/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of 8 bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
 
 ```java
 ram > global
-global.write 
+global.write
   0
   3.14.as-bytes
 ```
 
-In a similar way we deal with stack, creating a new copy of `ram` for each function call. The variable `a` will be "pushed" to `stack-ram-foo` and accessible by the code inside the function `foo` by the 0th position. The local variable `x` will also be pushed to the stack and will be accessible by the 4th position, because the length of `int` is four. Here, we are trying to simulate the bevaviour of a typical C compiler. The declaration of `foo` and its execution may look like this:
+### Functions
+
+```c
+void foo(int a) {
+  double x = z + a;
+  return x;
+}
+```
+
+In a similar way we deal with function call, we calculate the necessary space for arguments (`param-start` and `param-size`) and local variables in `global` for each function call. The variable `a` will be "pushed" to `global` and accessible by the code inside the function `foo` by the 0th position with local offset. The local variable `x` will also be pushed to the `global` and will be accessible by the 4th with local offset, because the length of `int` is four. 
+Also we use separate copy of `ram` named `return` for storing function return result. Here, we are trying to simulate the bevaviour of a typical C compiler. The declaration of `foo` and its execution may look like this:
 
 ```java
-[stack] > foo
-  stack.read 0 > a
-  stack.write > @
-    4
-    add.
-      global.read 0
-      a
+[param-start param-size] > foo
+  global.read param-start > a
+  global.read (add param-start 4) > x
+  seq > @
+    x.write
+      add
+        global.read 0
+        a
+    return.write x
 
-seq 
-  ram > stack
-  stack.write 0 55
-  stack.write 4 78322
-  foo stack
+seq
+  global.write 0 55
+  global.write 8 78322
+  foo 8 4
 ```
 
 ### Pointers
@@ -126,24 +134,31 @@ C code may get an address of a variable, which is either in stack or in global m
 int f = 7;
 void bar() {
   int t = 42;
-  int* p = &t; // 0th in stack
-  p = &f; // 0th in global
-  *p = 500; // where will it write, to stack or to global?
+  int* p = &t;  // local scope
+  *p = 500;     // write from local scope to local
+  p = &f;       // global scope
+  *p = 500;     // write from local scope to global
 }
 ```
+```c
+╭───────┬───────┬────────╮
+| int f │ int t │ int* p │ // variables in ram
+├───────┼───────┼────────┤
+|  0th  │  4th  │   8th  │ // start position in ram
+╰───────┴───────┴────────╯
+```
 
-The object `stack`, which is provided as an argument to EO object `bar` is not really a standalone piece of memory, but a "window" to the memory represented by `global`. Each `stack` has its own starting position inside the global memory. Thus, `&t` would return `stack.position + 0`, while `&f` would be just `0`:
+However, as in C, our variables are located in `global` and have absolute address.
+The object `param-start` provided as an argument to EO object `bar` is a calculated offset in `global` addressing the beginning of the frame for function call. Thus, `&t` would return `param-start + 0`, while `&f` would be just `0`:
+
+# TОDО
 
 ```java
-stack > bar-stack
-  global
-  5000                    // temporary position of this particular stack in global space
-
-[bar-stack] > bar
-  stack.write
-    4                     // int* p
-    stack.address 0       // &t   -> 5000
-  stack.write
+[param-start] > bar
+  global.write
+    8                     // int* p
+    param-start           // &t -> function offset position in global space
+  global.write
     4
     0
   global.read             // read from global or stack
@@ -178,39 +193,6 @@ To compile files with any external links, we use the following solution:
 
   [] > strcpy
   ```
-
-### Functions
-
-To pass arguments to the function and get the result, we use separate ram objects. In the function itself, we use the local version of the argument ram and local ram. 
-
-```java
-ram > arguments-ram
-  1024
-ram > result-ram
-  1024
-
-[] > fun
-  ram > local-arguments-ram
-    8
-  address > x
-    local-arguments-ram
-    0
-  ram > local-ram
-    1024
-  address > y
-    local-arguments-ram
-    0
-  seq > @
-    memcpy // Сopy the specified number of bytes to this ram from another
-        local-arguments-ram
-        arguments-ram
-        8 
-    memadrcpy // Сopy the specified number of bytes to this ram from address
-        result-ram
-        y
-        8
-    TRUE
-```
 
 ### Arrays
 
