@@ -6,12 +6,12 @@
 
 typedef long long i64;
 
-i64 fibo(i64 arg) {
+i64 fibo(i64 n) {
   i64 p1 = 0;
   i64 p2 = 1;
   i64 result = 1;
   i64 i = 1;
-  while (i < arg) {
+  while (i < n) {
     result = p1 + p2;
     p1 = p2;
     p2 = result;
@@ -21,98 +21,67 @@ i64 fibo(i64 arg) {
 }
 
 int main() {
-  i64 arg = 10;
-  i64 result = fibo(arg);
-  printf("fibo(%lld) = %lld\n", arg, result);
+  i64 n = 10;
+  i64 result = fibo(n);
+  printf("fibo(%lld) = %lld\n", n, result);
   return 0;
 }
 /*
-+package c2eo.examples.fibonacci4
-
-+alias org.eolang.gray.cage
-+alias c2eo.system.ram
-+alias c2eo.system.address
-+alias c2eo.stdio.printf
-+alias c2eo.string.memcpy
-+alias c2eo.coperators.while
-+alias c2eo.coperators.write
-+alias c2eo.coperators.get
-+alias c2eo.coperators.add
-+alias c2eo.coperators.less
-+alias c2eo.coperators.add-int64
-+alias c2eo.coperators.as-int64
-+alias c2eo.coperators.memadrcpy
-+alias c2eo.coperators.adrmemcpy
-
 [args...] > global
 
-  * (* cage cage cage) > allocator
-  memory > allocator-index
+  ram 2048 > global-ram
+  memory > empty-global-position
+  ram 1024 > return-ram
+  memory > return-size
+  address return-ram 0 > return
 
-  ram 0 > global-ram
-  ram 0 > static-ram
-  ram 8 > arguments-ram
-  ram 8 > result-ram
+  [param-start param-size] > fibo
+    add param-start param-size > local-start
+    address global-ram (add param-start 0) > n
+    address global-ram (add local-start 0) > p1
+    address global-ram (add local-start 8) > p2
+    address global-ram (add local-start 16) > result
+    address global-ram (add local-start 24) > i
 
-  [] > eo-init
     seq > @
-      write (get (get allocator 0) 0) global-ram
-      write (global-ram.index) 0
-      write (get (get allocator 0) 1) static-ram
-      write (static-ram.index) 1
-      write (get (get allocator 0) 2) arguments-ram
-      write (arguments-ram.index) 2
-      write (get (get allocator 0) 3) result-ram
-      write (result-ram.index) 3
-      write allocator-index 4
-      TRUE
-
-  [] > fibo
-    ram 8 > local-arguments-ram
-    address local-arguments-ram 0 > p1 > arg
-    ram 32 > local-ram
-    address local-ram 0 > p1
-    address local-ram 8 > p2
-    address local-ram 16 > result
-    address local-ram 24 > i
-    seq > @
-      memcpy local-arguments-ram arguments-ram 8
-      write (get (get allocator 0) allocator-index) local-arguments-ram
-      write allocator-index (add allocator-index 1)
-      write (get (get allocator 0) allocator-index) local-ram
-      write allocator-index (add allocator-index 1)
       write p1 0
       write p2 1
       write result 1
       write i 1
       while
-        less (as-int64 i) (as-int64 arg)
+        less (read-as-int64 i) (read-as-int64 n)
         seq
           write result (add-int64 p1 p2)
-          write p1 (as-int64 p2)
-          write p2 (as-int64 result)
-          write i (add 1 (as-int64 i))
-          TRUE
-      memadrcpy result-ram result
-      write allocator-index (sub allocator-index 2)
+          write p1 (read-as-int64 p2)
+          write p2 (read-as-int64 result)
+          write i (add (read-as-int64 i) 1)
+      write return (read-as-int64 result)
+      write return-size 8
       TRUE
 
-  [args] > main
-    ram 16 > local-ram
-    address local-ram 0 > arg
-    address local-ram 8 > result
+  [param-start param-size] > main
+    add param-start param-size > local-start
+    address global-ram (add local-start 0) > n
+    address global-ram (add local-start 8) > result
     seq > @
-      write (get (get allocator 0) allocator-index) local-ram
-      write allocator-index (add allocator-index 1)
-      write arg 10
-      write arguments-ram 0 (as-bytes arg)
-      fibo
-      adrmemcpy result (result-ram) 8
-      printf "fibo(%d) = %d\n" (as-int64 arg) (as-int64 result)
+      write n 10
+      write (address global-ram (add empty-global-position 0)) (read-as-int64 n)
+      write empty-global-position (add empty-global-position 40)
+      fibo (sub empty-global-position 40) 8
+      write empty-global-position (add empty-global-position 40)
+      write result (read-as-int64 return)
+      printf "fibo(%d) = %d\n" (read-as-int64 n) (read-as-int64 result)
+      TRUE
+
+  [arg] > eo-application
+    seq > @
+      write empty-global-position (add empty-global-position 16)
+      main (sub empty-global-position 16) 0
+      write empty-global-position (sub empty-global-position 16)
       TRUE
 
   seq > @
-    eo-init
-    main args
+    write empty-global-position 0
+    eo-application args
     TRUE
 */
