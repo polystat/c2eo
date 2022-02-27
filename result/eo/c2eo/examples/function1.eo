@@ -1,4 +1,4 @@
-+package c2eo.examples.example3
++package c2eo.examples.function1
 
 +alias c2eo.stdio.printf
 +alias c2eo.system.ram
@@ -18,9 +18,10 @@
   address return-ram 0 > return
 
   [param-start param-size] > fun1
+    add param-start param-size > local-start
     address global-ram (add param-start 0) > a
     address global-ram (add param-start 8) > b
-    address global-ram (add (add param-start param-size) 0) > result
+    address global-ram (add local-start 0) > result
     seq > @
       write result (add-int64 a b)
       write (address global-ram (add empty-global-position 0)) (read-as-int64 result)
@@ -34,18 +35,19 @@
       TRUE
 
   [param-start param-size] > fun2
+    add param-start param-size > local-start
     address global-ram (add param-start 0) > a
     address global-ram (add param-start 8) > b
-    address global-ram (add (add param-start param-size) 0) > result
+    address global-ram (add local-start 0) > result
     seq > @
       write result (add-int64 a b)
       write return-size 8
       write return (read-as-int64 result)
       TRUE
 
-  [arg] > main
+  [param-start param-size] > main
+    add param-start param-size > local-start
     seq > @
-      write empty-global-position 0
       write (address global-ram (add empty-global-position 0)) 7
       write (address global-ram (add empty-global-position 8)) 9
       write empty-global-position (add empty-global-position 24)
@@ -54,4 +56,14 @@
       printf "result = %d" (read-as-int64 return)
       TRUE
 
-  main args > @
+  [arg] > eo-application
+    seq > @
+      write empty-global-position (add empty-global-position 0)
+      main (sub empty-global-position 0) 0
+      write empty-global-position (sub empty-global-position 0)
+      TRUE
+
+  seq > @
+    write empty-global-position 0
+    eo-application args
+    TRUE

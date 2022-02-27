@@ -1,45 +1,45 @@
 #include <stdio.h>
-int x = 1;
 
-int main() {
+typedef long long i64;
+
+i64 x = 0;
+
+i64 main() {
     x = 1 + x;
-    printf("%d\n", x);
+    printf("%ld\n", x);
     x;
     x = x + 1;
-    printf("%d\n", x);
+    printf("%ld\n", x);
     x;
     return 0;
 }
 
 /*
-+alias org.eolang.gray.cage
-+alias c2eo.system.ram
-+alias c2eo.system.address
-+alias c2eo.stdio.printf
-
 [args...] > global
 
-  * (* cage cage) > allocator
-  memory > allocator-index
+  ram 2048 > global-ram
+  memory > empty-global-position
+  ram 1024 > return-ram
+  memory > return-size
+  address return-ram 0 > return
+  address global-ram 0 > x
 
-  ram 8 > g-ram
-  ram 0 > s-ram
-
-  address g-ram 0 > g-x
-
-  [args] > main
+  [] > main
     seq > @
-      ((allocator.get 0).get 0).write g-ram
-      g-ram.index.write 0
-      ((allocator.get 0).get 1).write s-ram
-      s-ram.index.write 1
-      allocator-index.write 2
-      g-x.set 1
-      g-x.set (1.add ((g-x.get 8).as-int))
-      printf "%d\n" ((g-x.get 8).as-int)
-      g-x.set (((g-x.get 8).as-int).add 1)
-      printf "%d\n" ((g-x.get 8).as-int)
+      write x (add (read-as-int64 x) 1)
+      printf "%d\n" (read-as-int64 x)
+      write x (add 1 (read-as-int64 x))
+      printf "%d\n" (read-as-int64 x)
       TRUE
 
-  main args > @
+  [arg] > eo-application
+    seq > @
+      main
+      TRUE
+
+  seq > @
+    write x 1
+    write empty-global-position 8
+    eo-application args
+    TRUE
 */

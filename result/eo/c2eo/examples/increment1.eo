@@ -1,77 +1,36 @@
 +package c2eo.examples.increment1
 
++alias c2eo.stdio.printf
 +alias c2eo.system.ram
 +alias c2eo.system.address
-+alias c2eo.stdio.printf
-+alias c2eo.coperators.write
 +alias c2eo.coperators.add
-+alias c2eo.coperators.sub
-+alias c2eo.coperators.less
-+alias c2eo.coperators.if
++alias c2eo.coperators.write
 +alias c2eo.coperators.read-as-int64
 
 [args...] > global
 
-  ram > global-ram
-    16
+  ram 2048 > global-ram
+  memory > empty-global-position
+  ram 1024 > return-ram
+  memory > return-size
+  address return-ram 0 > return
+  address global-ram 0 > x
 
-  address > n
-    global-ram
-    0
-
-  address > s
-    global-ram
-    8
-
-  [] > eo-init
+  [] > main
     seq > @
-      write
-        s
-        0
+      write x (add (read-as-int64 x) 1)
+      printf "%d\n" (read-as-int64 x)
+      write x (add 1 (read-as-int64 x))
+      printf "%d\n" (read-as-int64 x)
       TRUE
 
-  [] > increment
-    memory > mem
+  [arg] > eo-application
     seq > @
-      if
-        less
-          0
-          read-as-int64
-            n
-        seq
-          write
-            s
-            add
-              read-as-int64
-                s
-              1
-          write
-            n
-            sub
-              read-as-int64
-                n
-              1
-          ^.increment
-        TRUE
-
-  [args] > main
-    seq > @
-      write
-        n
-        10
-      printf
-        "increment(%d) = "
-        read-as-int64
-          n
-      ^.increment
-      printf
-        "%d\n"
-        read-as-int64
-          s
+      main
       TRUE
 
   seq > @
-    eo-init
-    main
-      args
+    write x 1
+    write empty-global-position 8
+    eo-application args
     TRUE
