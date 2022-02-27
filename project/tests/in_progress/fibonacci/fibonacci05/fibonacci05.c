@@ -1,16 +1,25 @@
-+package c2eo.examples.fibonacci5
+#include <stdio.h>
 
-+alias c2eo.stdio.printf
-+alias c2eo.system.ram
-+alias c2eo.system.address
-+alias c2eo.coperators.add
-+alias c2eo.coperators.sub
-+alias c2eo.coperators.write
-+alias c2eo.coperators.less
-+alias c2eo.coperators.if
-+alias c2eo.coperators.add-int64
-+alias c2eo.coperators.read-as-int64
+typedef long long i64;
 
+i64 fibo(i64 p1, i64 p2, i64 n) {
+  i64 tmp;
+  if (0 < n) {
+    tmp = p1;
+    p1 = p1 + p2;
+    p2 = tmp;
+    n--;
+    fibo(p1, p2, n);    
+  } else {
+    return p1;
+  }
+}
+
+int main() {
+  printf("fibo(%lld) = %lld\n", 10ll, fibo(0, 1, 10));
+  return 0;
+}
+/*
 [args...] > global
 
   ram 2048 > global-ram
@@ -70,3 +79,4 @@
     write empty-global-position 0
     eo-application args
     TRUE
+*/

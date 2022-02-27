@@ -1,278 +1,70 @@
 +package c2eo.examples.fibonacci4
 
-+alias org.eolang.gray.cage
++alias c2eo.stdio.printf
 +alias c2eo.system.ram
 +alias c2eo.system.address
-+alias c2eo.stdio.printf
-+alias c2eo.string.memcpy
-+alias c2eo.coperators.while
-+alias c2eo.coperators.write
-+alias c2eo.coperators.get
 +alias c2eo.coperators.add
 +alias c2eo.coperators.sub
 +alias c2eo.coperators.less
++alias c2eo.coperators.while
++alias c2eo.coperators.write
 +alias c2eo.coperators.add-int64
 +alias c2eo.coperators.read-as-int64
-+alias c2eo.coperators.memadrcpy
-+alias c2eo.coperators.adrmemcpy
 
 [args...] > global
 
-  * > allocator
-    *
-      cage
-      cage
-      cage
-      cage
-      cage
-      cage
-      cage
+  ram 2048 > global-ram
+  memory > empty-global-position
+  ram 1024 > return-ram
+  memory > return-size
+  address return-ram 0 > return
 
-  memory > allocator-index
-
-  ram > global-ram
-    0
-
-  ram > static-ram
-    0
-
-  ram > arguments-ram
-    8
-
-  ram > result-ram
-    8
-
-  [] > eo-init
-    seq > @
-      write
-        get
-          get
-            allocator
-            0
-          0
-        global-ram
-
-      write
-        global-ram.index
-        0
-
-      write
-        get
-          get
-            allocator
-            0
-          1
-        static-ram
-
-      write
-        static-ram.index
-        1
-
-      write
-        get
-          get
-            allocator
-            0
-          2
-        arguments-ram
-
-      write
-        arguments-ram.index
-        2
-
-      write
-        get
-          get
-            allocator
-            0
-          3
-        result-ram
-
-      write
-        result-ram.index
-        3
-
-      write
-        allocator-index
-        4
-
-      TRUE
-
-  [] > fibo
-    ram > local-arguments-ram
-      8
-
-    address > arg
-      local-arguments-ram
-      0
-
-    ram > local-ram
-      32
-
-    address > p1
-      local-ram
-      0
-
-    address > p2
-      local-ram
-      8
-
-    address > result
-      local-ram
-      16
-
-    address > i
-      local-ram
-      24
+  [param-start param-size] > fibo
+    add param-start param-size > local-start
+    address global-ram (add param-start 0) > n
+    address global-ram (add local-start 0) > p1
+    address global-ram (add local-start 8) > p2
+    address global-ram (add local-start 16) > result
+    address global-ram (add local-start 24) > i
 
     seq > @
-      memcpy
-        local-arguments-ram
-        arguments-ram
-        8
-
-      write
-        get
-          get
-            allocator
-            0
-          allocator-index
-        local-arguments-ram
-
-      write
-        allocator-index
-        add
-          allocator-index
-          1
-
-      write
-        get
-          get
-            allocator
-            0
-          allocator-index
-        local-ram
-
-      write
-        allocator-index
-        add
-          allocator-index
-          1
-
-      write
-        p1
-        0
-
-      write
-        p2
-        1
-
-      write
-        result
-        1
-
-      write
-        i
-        1
-
+      write p1 0
+      write p2 1
+      write result 1
+      write i 1
       while
-        less
-          read-as-int64
-            i
-          read-as-int64
-            arg
+        less (read-as-int64 i) (read-as-int64 n)
         seq
-          write
-            result
-            add-int64
-              p1
-              p2
-
-          write
-            p1
-            read-as-int64
-              p2
-
-          write
-            p2
-            read-as-int64
-              result
-
-          write
-            i
-            add
-              1
-              read-as-int64
-                i
-          TRUE
-
-      memadrcpy
-        result-ram
-        result
-        8
-
-      write
-        allocator-index
-        sub
-          allocator-index
-          2
-
+          write result (add-int64 p1 p2)
+          write p1 (read-as-int64 p2)
+          write p2 (read-as-int64 result)
+          write i (add (read-as-int64 i) 1)
+      write return (read-as-int64 result)
+      write return-size 8
       TRUE
 
-  [args] > main
-    ram > local-ram
-      16
-
-    address > arg
-      local-ram
-      0
-
-    address > result
-      local-ram
-      8
-
+  [param-start param-size] > main
+    add param-start param-size > local-start
+    address global-ram (add local-start 0) > n
+    address global-ram (add local-start 8) > result
     seq > @
-      write
-        get
-          get
-            allocator
-            0
-          allocator-index
-        local-ram
+      write n 10
+      write (address global-ram (add empty-global-position 0)) (read-as-int64 n)
+      write empty-global-position (add empty-global-position 40)
+      fibo (sub empty-global-position 40) 8
+      write empty-global-position (add empty-global-position 40)
+      write result (read-as-int64 return)
+      printf "fibo(%d) = %d\n" (read-as-int64 n) (read-as-int64 result)
+      TRUE
 
-      write
-        allocator-index
-        add
-          allocator-index
-          1
-
-      write
-        arg
-        10
-
-      memadrcpy
-        arguments-ram
-        arg
-        8
-
-      ^.fibo
-
-      adrmemcpy
-        result
-        result-ram
-        8
-
-      printf
-        "fibo(%d) = %d\n"
-        read-as-int64
-          arg
-        read-as-int64
-          result
-
+  [arg] > eo-application
+    seq > @
+      write empty-global-position (add empty-global-position 16)
+      main (sub empty-global-position 16) 0
+      write empty-global-position (sub empty-global-position 16)
       TRUE
 
   seq > @
-    eo-init
-    main
-      args
+    write empty-global-position 0
+    eo-application args
     TRUE

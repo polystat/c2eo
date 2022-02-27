@@ -17,6 +17,7 @@ SpaceGen* AbstractGen::staticSpaceGenPtr = nullptr;
 std::string AbstractGen::filename;
 std::map <uint64_t, std::string> AbstractGen::identifiers = std::map<uint64_t, std::string>();
 int AbstractGen::shift = 0;
+int AbstractGen::offset = -1;
 
 SourceGen::~SourceGen() {
     delete glob;
@@ -26,7 +27,12 @@ SourceGen::~SourceGen() {
 
 //--------------------------------------------------------------------------------------------------
 void VarGen::Generate(std::ostream &out) {
-    out << type << " " << value << nestedStmt << " > " << name;
+    if (offset == -1) {
+        out << "heap 1024 > g-mem\n";
+        offset = 0;
+    }
+    out << type << " " << "(ptr g-mem " << offset << " " << 8 << ")" << " " << value << nestedStmt << " > " << name;
+    offset += 8;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -199,13 +205,17 @@ IfStmtGen::~IfStmtGen() {
 //--------------------------------------------------------------------------------------------------
 void RecordGen::Generate(std::ostream &out) {
     out << "[";
+    out << "ptr" << ' ';
     out << "arr";
     out << "] > " << name;
     out << "\n";
     shift++;
     out << StmtGen::getIndentSpaces() << "\"" << type << "\" > type\n";
+    int local_offset = 0;
     for (size_t i = 0; i < fields.size(); i++) {
         out << "\n" << StmtGen::getIndentSpaces() << fields[i]->type << " ";
+        out << "(ptr ptr.heap.pointer " << "(add (ptr.address) (" << local_offset << "))" << " 8)" << " ";
+        local_offset += 8;
         out << "(arr.get " << i << ") ";
         out << "> " << fields[i]->name;
     }

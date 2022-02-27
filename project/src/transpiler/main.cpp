@@ -33,7 +33,7 @@ UnitTranspiler transpiler;
 int main(int argc, const char **argv) {
 
     if (argc < 3) {
-        llvm::errs() << "Incorrect command line format. Necessary: ./c2eo <C-file-name> item-name\n";
+        llvm::errs() << "Incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
         return -1;
     }
 
@@ -64,8 +64,8 @@ int main(int argc, const char **argv) {
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
 // 
    auto result = Tool.run(newFrontendActionFactory(&finder).get());
-   if (!result)
-     return result;
+   //if (!result)
+   //  return result;
 
    // тестовый вывод
    //std::cout << transpiler;

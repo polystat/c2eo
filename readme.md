@@ -4,127 +4,354 @@ This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
 If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
 we will fix. *Other languages: [Russian](readme.ru.md)*
 
-# Getting started guide
+## User guide
 
-## Step 1. OS and tools
-You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Tools:
+1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
+Packages:
+[wget](https://www.tecmint.com/install-wget-in-linux/), 
+[tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
+[cmake](https://cmake.org/download/), 
+[gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
+[g++](https://pkgs.org/download/g++)
+
+    ```bash
+    $ sudo apt install wget tar cmake gcc g++ # Installation for Ubuntu
+    ```
+2. Installation
+    <details>
+      <summary>Variant 1 (Manual)</summary>
+
+    Download directly from [github](https://github.com/polystat/c2eo/releases/) or use this command:
+
+    ```bash
+    $ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
+    ```
+
+    Install package  
+    ```bash
+    $ sudo apt-get install path/to/c2eo-1.0.1.deb # or $ sudo dpkg -i path/to/c2eo-1.0.1.deb
+    ```
+    </details>
+
+    </p>
+
+    <details>
+      <summary> Variant 2 (Automatic)</summary>
+
+    ```bash
+    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
+    $ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
+    $ sudo apt install c2eo
+    ```
+    </details>
+
+</p>
+
+3. Run transpilation. It will generate `.glob` and `.stat` files in `/tmp/`
+
+    ```bash
+    $ c2eo <path-to-C-file-name> item-name
+    ```
+
+## Developer guide
+
+1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
+Packages:
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
 [cmake](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++), [ninja-build](https://ninja-build.org/), [python3.+](https://www.python.org/downloads/)
+[g++](https://pkgs.org/download/g++),
+[ninja-build](https://ninja-build.org/),
+[python3.+](https://www.python.org/downloads/)
 
-```bash
-$ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
-```
+    ```bash
+    $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
+    ```
 
-## Step 2. Install LLVM + CLANG
+2. Install LLVM/Clang. Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command:
 
-Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command
+    ```bash
+    $ tar -xvf llvm-clang.tar.gz
+    ```
 
-```bash
-$ tar -xvf llvm-clang.tar.gz
-```
+    <details>
+    <summary> Old variant </summary>
+    <p></p>
+    <t>2. Install LLVM/Clang</t>
+    <pre><code>
+    $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
+    $ tar -xvf llvmorg-12.0.1.tar.gz
+    </code></pre>
+
+    <t>2.1 Build LLVM/Clang</t>
+    <pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
+    $ cd llvm-clang
+    $ mkdir build && cd $_
+    </code></pre>
+    <pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
+    </code></pre>
+    <pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
+    $ cd ../..
+    </code></pre>
+    </details>
+    </p>
+
+3. Install C2EO
+    ```bash
+    $ git clone https://github.com/polystat/c2eo.git
+    ```
+
+4. Build C2EO
+    > IMPORTANT. Every time the transpiler code changes, you need to repeat this step
+
+    It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
+
+    ```bash
+    $ cd ./c2eo/project/build
+    $ cmake ..
+    $ make # or $ cmake --build
+    ``` 
+
+5. Run transpilation
+
+    ```bash
+    $ cd ../scripts
+    $ ./transpile_с2eo.py <path-to-dir-with-C-program>
+    ```
+
+6. Run generated project  
+Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start).Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
+
+
+---
+## Additional information 
+
+<t>1. [Project tests](./project/tests/main)</t>
 
 <details>
-<summary> Old variant </summary>
+  <summary>2. Transpilation principles</summary>
+</p>
 
-<h2>Step 2. Install LLVM + CLANG</h2>
-<pre><code>
-$ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
-$ tar -xvf llvmorg-12.0.1.tar.gz
-</code></pre>
+1. RAM
 
-<h2>Step 2.1 Build LLVM + CLANG</h2>
-<pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
-$ cd llvm-clang
-$ mkdir build && cd $_
-</code></pre>
-<pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
-</code></pre>
-<pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
-$ cd ../..
-</code></pre>
+    To work with memory, we use the ram object. For each type of variable (local, global, static) we use a separate object of ram.
+
+    ```java
+    ram > global-ram
+      1024
+    ram > static-ram
+      1024
+    ```
+
+2. RAM indexing
+
+    With this approach, to work with pointers, we need to place and know the indexes of ram objects. We use a special array in which we place the allocated ram objects. We need to allocate local memory and add new ram objects. To do this, we use a special index of a free cage cell.
+
+    ```java
+    * > allocator
+      *
+        cage
+        cage
+        ...
+    memory > allocator-index
+    write
+      get
+        get
+          allocator
+          0
+        0
+      global-ram
+    write
+      global-ram.index
+      0
+    write
+      allocator-index
+      1
+    ```
+
+3. Scalar variables
+
+    Then we prescribe the starting address (our analogue of the pointer), from which we will read or write the required number of bytes, depending on the type of variable.
+
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    long long a = 5;
+    printf("%d", a)
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    address > a
+      global-ram
+      0
+    write
+      a
+      5
+    printf
+      "%d"
+      read-as-int64 // read-as-int64 -> read 8 byte from start (0) and convert to int64
+        a
+    <code></pre></td>
+    </tr>
+    </table>
+
+4. External links
+
+    To compile files with any external links, we use the following solution:
+- In the file where the external call is used, we generate the following alias
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    #include < string >
+    strncpy(str2, str1, 8);
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    +alias c2eo.external.strcpy
+    strcpy
+      str2
+      st1
+      8
+    <code></pre></td>
+    </tr>
+    </table>
+
+- Сreating a file of the same name by the specified alias with an empty implementation
+
+    ```java
+    +package c2eo.extern
+
+    [] > strcpy
+    ```
+
+5. Functions
+
+    To pass arguments to the function and get the result, we use separate ram objects. In the function itself, we use the local version of the argument ram and local ram. 
+
+    ```java
+    ram > arguments-ram
+      1024
+    ram > result-ram
+      1024
+
+    [] > fun
+      ram > local-arguments-ram
+        8
+      address > x
+        local-arguments-ram
+        0
+      ram > local-ram
+        1024
+      address > y
+        local-arguments-ram
+        0
+      seq > @
+        memcpy // Сopy the specified number of bytes to this ram from another
+            local-arguments-ram
+            arguments-ram
+            8 
+        memadrcpy // Сopy the specified number of bytes to this ram from address
+            result-ram
+            y
+            8
+        TRUE
+    ```
+
+6. Arrays
+
+    The transformation of arrays is similar to variables. if we know their size in advance.
+
+7. Structures
+
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    struct Rectangle {int x; int y;} rect;
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    address > g-rect
+      global-ram
+      0
+    address > g-rect-x
+      global-ram
+      0
+    address > g-rect-y
+      global-ram
+      4
+    <code></pre></td>
+    </tr>
+    </table>
+
+8. Unions
+
+    The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
+
+    <table>
+    <tr>
+    <th>C</th>
+    <th>EO</th>
+    </tr>
+    <tr>
+    <td><pre lang="c"><code>
+    struct Rectangle {int x; int y;};
+    struct Triangle {int a, b,c;};
+    struct Figure {
+        int key;
+        union {
+            Rectangle r;
+            Triangle  t;
+    } fig;
+    <code></pre></td>
+    <td><pre lang="java"><code>
+    address > g-fig
+      global-ram
+      0
+    address > g-fig-key
+      global-ram
+      0
+    address > g-fig-r-x
+      global-ram
+      4
+    address > g-fig-r-y
+      global-ram
+      8
+    address > g-fig-t-a
+      global-ram
+      4
+    address > g-fig-t-b
+      global-ram
+      8
+    address > g-fig-t-c
+      global-ram
+      12
+    <code></pre></td>
+    </tr>
+    </table>
+
+9. Enums
+
+    We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+
+10. Pointers
+
 </details>
 
-## Step 3. Install C2EO
-```bash
-$ git clone https://github.com/polystat/c2eo.git
-```
-
-## Step 4. Build C2EO
-
-> IMPORTANT. Every time the transpiler code changes, you need to repeat this step
-
-It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then
-
-```bash
-$ cd ./c2eo/project/build
-$ cmake ..
-$ make # or $ cmake --build
-``` 
-
-## Step 5. Run transpilation
-> Use `--` at the end of command below to skip all errors:
-
-```bash
-$ cd ../scripts
-$ ./transpile_с2eo.py <path-to-dir-with-c-program>
-```
+</p>
 
 <details>
-    <summary>More information here...</summary>
-
-&nbsp;
-## Executable transpiler file and scripts for building the program on EO
-
----
-## Directory Hierarchy
-
-These files are located in the `project/bin` directory
-
-&nbsp;
-## Run scripts
-
-### Launching the program builder on EO
-
-`python3 launcher.py <file-of-c-program>`
-
-The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result/eo/c2eo/src/` of the project on EO.
-
-&nbsp;
-## Support scripts and programs
----
-### Transpilation and formation of intermediate files
-
-`c2eo <file-of-c-program> <name>`
-
-Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project/assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
-
-### Generating the global.eo file
-
-`collector`
-
-Based on intermediate files located in the `project/assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
-
----
-</details>
-
-## Step 6. Run generated project
-
-Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start) . 
-Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
-
-&nbsp;
-## Additional step. [Tests examples](./project/tests/main)
-
-&nbsp;
-# Project structure
-
-<details>
-  <summary><bold>Additional information...</bold></summary>
+  <summary>3. Project structure</summary>
 
     .
     ├── collection
@@ -236,20 +463,44 @@ The presented scheme provides complete autonomy for the formation of the program
 
 </details>
 
-# Releases
-## Download 
-Use `wget` or dowload directly from [github](https://github.com/polystat/c2eo/releases/).
-```bash
-$ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
-```
-## Install C2EO
-```bash
-$ sudo dpkg -i path/to/c2eo-1.0.1.deb
-or
-$ sudo apt-get install path/to/c2eo-1.0.1.deb
-```
-## Using of transpiler
-```bash
-$ c2eo path/to/<C-file-name> item-name
-```
-It will generate `.glob` and `.stat` files in `/tmp/`.
+</p>
+
+<details>
+    <summary>4. About working with the project</summary>
+
+&nbsp;
+## Executable transpiler file and scripts for building the program on EO
+
+---
+## Directory Hierarchy
+
+These files are located in the `project/bin` directory
+
+&nbsp;
+## Run scripts
+
+### Launching the program builder on EO
+
+`python3 launcher.py <file-of-c-program>`
+
+The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result/eo/c2eo/src/` of the project on EO.
+
+&nbsp;
+## Support scripts and programs
+---
+### Transpilation and formation of intermediate files
+
+`c2eo <file-of-c-program> <name>`
+
+Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project/assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
+
+### Generating the global.eo file
+
+`collector`
+
+Based on intermediate files located in the `project/assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
+
+---
+</details>
+
+</p>

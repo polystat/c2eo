@@ -1,179 +1,62 @@
 +package c2eo.examples.fibonacci1
 
-+alias org.eolang.gray.cage
++alias c2eo.stdio.printf
 +alias c2eo.system.ram
 +alias c2eo.system.address
-+alias c2eo.stdio.printf
-+alias c2eo.coperators.while
-+alias c2eo.coperators.write
-+alias c2eo.coperators.get
 +alias c2eo.coperators.add
++alias c2eo.coperators.sub
++alias c2eo.coperators.write
 +alias c2eo.coperators.less
++alias c2eo.coperators.while
 +alias c2eo.coperators.add-int64
 +alias c2eo.coperators.read-as-int64
 
 [args...] > global
 
-  * > allocator
-    *
-      cage
-      cage
-      cage
+  ram 2048 > global-ram
+  memory > empty-global-position
+  ram 1024 > return-ram
+  memory > return-size
+  address return-ram 0 > return
+  address global-ram 0 > p1
+  address global-ram 8 > p2
+  address global-ram 16 > n
+  address global-ram 24 > result
+  address global-ram 32 > i
 
-  memory > allocator-index
-
-  ram > global-ram
-    40
-
-  ram > static-ram
-    0
-
-  address > p1
-    global-ram
-    0
-
-  address > p2
-    global-ram
-    8
-
-  address > arg
-    global-ram
-    16
-
-  address > result
-    global-ram
-    24
-
-  address > i
-    global-ram
-    32
-
-  [] > eo-init
+  [param-start param-size] > fibo
+    add param-start param-size > local-start
     seq > @
-      write
-        get
-          get
-            allocator
-            0
-          0
-        global-ram
-
-      write
-        global-ram.index
-        0
-
-      write
-        get
-          get
-            allocator
-            0
-          1
-        static-ram
-
-      write
-        static-ram.index
-        1
-
-      write
-        allocator-index
-        2
-
-      write
-        p1
-        0
-
-      write
-        p2
-        1
-
-      write
-        arg
-        0
-
-      write
-        result
-        0
-
-      write
-        i
-        0
-
+      write i 1
+      while
+        less (read-as-int64 i) (read-as-int64 n)
+        seq
+          write result (add-int64 p1 p2)
+          write p1 (read-as-int64 p2)
+          write p2 (read-as-int64 result)
+          write i (add (read-as-int64 i) 1)
       TRUE
 
-  [] > fibo
-    ram > l-ram
-      0
-
+  [param-start param-size] > main
+    add param-start param-size > local-start
     seq > @
-      write
-        get
-          get
-            allocator
-            0
-          allocator-index
-        l-ram
+      write n 10
+      write empty-global-position (add empty-global-position 0)
+      fibo (sub empty-global-position 0) 0
+      write empty-global-position (sub empty-global-position 0)
+      printf "fibo(%d) = %d\n" (read-as-int64 n) (read-as-int64 result)
+      TRUE
 
-      write
-        allocator-index
-        add
-          allocator-index
-          1
-
-      write
-        i
-        1
-
-      while
-        less
-          read-as-int64
-            i
-          read-as-int64
-            arg
-        seq
-          write
-            result
-            add-int64
-              p1
-              p2
-
-          write
-            p1
-            read-as-int64
-              p2
-
-          write
-            p2
-            read-as-int64
-              result
-
-          write
-            i
-            add
-              1
-              read-as-int64
-                i
-
-          TRUE
-
-  [args] > main
+  [arg] > eo-application
     seq > @
-      write
-        arg
-        10
-
-      fibo
-
-      printf
-        "fibo(%d) = %d\n"
-        read-as-int64
-          arg
-        read-as-int64
-          result
-
+      write empty-global-position (add empty-global-position 0)
+      main (sub empty-global-position 0) 0
+      write empty-global-position (sub empty-global-position 0)
       TRUE
 
   seq > @
-    eo-init
-    main
-      args
+    write p1 0
+    write p2 1
+    write empty-global-position 40
+    eo-application args
     TRUE
