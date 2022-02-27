@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+std::string str_join(std::vector<std::string> vec);
+
 // Запись строки символов в указанный файл
 void str2file(std::string str, std::string fileName);
 

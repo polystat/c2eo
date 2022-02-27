@@ -9,7 +9,8 @@
 
 [args...] > global
 
-  ram 2048 > global-ram
+  ram > global-ram
+    2048
   memory > empty-global-position
   ram 1024 > return-ram
   memory > return-size

@@ -5,38 +5,48 @@
 #include <vector>
 #include <string>
 
-
-struct EOBase{
-  virtual void Generate(std::ostream &out) = 0;
+enum class EOObjectType{
+  EO_COMPLETE = 0,
+  EO_LITERAL = 1,
+  EO_ABSTRACT = 2,
 };
 
-struct EOVarRef : public EOBase {
-  uint64_t id;
+
+struct EOObject{
+ public:
+  explicit EOObject(EOObjectType type) :type(type) { }
+
+  // Create simple complete Object
+  explicit EOObject(std::string name) :
+    name(std::move(name)),
+    type(EOObjectType::EO_COMPLETE) {}
+  // Create simple object, may be used for literal
+  EOObject (std::string name, EOObjectType type) : name(std::move(name)), type(type) {}
+
+  //create complete name with body
+  EOObject (std::string name, std::string postfix) :
+    name(std::move(name)),
+    postfix(std::move(postfix)),
+    type(EOObjectType::EO_COMPLETE) {}
+
+  // Add nested object to vector of nested
+  void AddNested(const EOObject& obj);
+
+  std::vector<std::string> arguments;
+  std::string name;
+  std::string postfix;
+  EOObjectType type;
+  std::vector<EOObject> nested;
+  friend std::ostream& operator<< (std::ostream& os, const EOObject& obj);
+ private:
+  static auto GetSpaceIndent();
+  static int indent;
 };
 
-struct EOUnit : public EOBase {
-  std::string value;
-};
-
-struct EOData : public EOUnit { };
-
-struct EOName : public EOUnit { };
-
-
-
-struct EOObject : public EOBase{
-  std::vector<EOBase*> nested;
-  std::string suffix;
-};
-
-struct EOAbstractObject : public EOObject{
-  std::vector<std::string> attributes;
-};
-
-struct EOCompleteObject : public EOObject{
-  std::string head;
-};
 
 
 
 #endif //__EO_OBJECT__
+
+
+EOObject createSeq();
