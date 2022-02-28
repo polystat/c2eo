@@ -15,6 +15,8 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
 void ProcessVariable(const VarDecl *VD){
+  // ID переменной
+  uint64_t varId = reinterpret_cast<uint64_t>(VD);
   // Имя переменной
   auto varName = VD->getNameAsString();
   TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
@@ -57,12 +59,11 @@ void ProcessVariable(const VarDecl *VD){
 
   extern UnitTranspiler transpiler;
 
-
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    transpiler.glob.Add(typeSize,"int","g-" + varName,strValue);
+    transpiler.glob.Add(varId, typeSize, "int", "g-" + varName, strValue);
   } else if (globalStorage && !extStorage) {
-    transpiler.stat.Add(typeSize,"int","s-" + varName,strValue);
+    transpiler.glob.Add(varId, typeSize, "int", "s-" + varName, strValue);
   }
 }
 
@@ -327,12 +328,12 @@ void getVarDeclParameters(const VarDecl* VD) {
 //    auto qualType = VD->getType();      // квалифицированный тип (QualType)
 //    auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
 //    bool isSigned = qualType->isSignedIntegerType();
-//    auto size = typeInfo.Width;
+//    auto mem_size = typeInfo.Width;
 //    /*
 //    std::string result = "";
 //    if (isSigned)
 //    {
-//        switch (size)
+//        switch (mem_size)
 //        {
 //            case 16:
 //                result = "c_int16";
@@ -346,7 +347,7 @@ void getVarDeclParameters(const VarDecl* VD) {
 //        }
 //    } else
 //    {
-//        switch (size)
+//        switch (mem_size)
 //        {
 //            case 16:
 //                result = "c_int16";
@@ -363,7 +364,7 @@ void getVarDeclParameters(const VarDecl* VD) {
 //    //TOD обработка беззнаковых, когда они появятся. (нет только c_uint64)
 //    if (!isSigned)
 //        result += 'u';
-//    result += "int" + std::to_string(size);
+//    result += "int" + std::to_string(mem_size);
 //    return result;
 //}
 
@@ -399,13 +400,11 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
             //llvm::outs() << floatValue;
             str = std::to_string(floatValue);
         }
-        llvm::outs() << str << "\n";
     } else {
         Stmt* body = (Stmt * )((clang::InitListExpr * )(VD->getInit()));
         std::stringstream ss;
         getASTStmtGen(body, &VD->getASTContext())->Generate(ss);
         str = ss.str();
-        llvm::outs() << "    no Initial Value\n";
     }
 }
 

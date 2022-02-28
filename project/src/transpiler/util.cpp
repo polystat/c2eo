@@ -2,6 +2,8 @@
 
 #include "util.h"
 
+using namespace std;
+
 // Запись строки символов в указанный файл
 void str2file(std::string str, std::string fileName) {
     std::ofstream out;          // поток для записи
@@ -86,5 +88,16 @@ void createStatic(std::vector<std::string> &text, std::string filename) {
     // Читаются инициализации объектов
 //!    file2vector(filename+".stat.seq", text);
 
+}
+std::string str_join(std::vector<std::string> vec) {
+  if(vec.empty())
+    return "";
+  if(vec.size()==1)
+    return vec[0];
+  string res{vec[0]};
+  for (int i = 1; i < vec.size(); ++i) {
+    res += " " + vec[i];
+  }
+  return res;
 }
 

@@ -4,11 +4,13 @@
 #include "set"
 #include "iostream"
 #include "memory_manager.h"
+#include "function_manager.h"
 
 class UnitTranspiler{
  public:
   UnitTranspiler() = default;
-  MemoryManager glob{"g-ram"}, stat {"s-ram"};
+  MemoryManager glob{"global-ram"}, ret {"return-ram"};
+  FunctionManager func_manager;
   friend std::ostream& operator <<(std::ostream& os, UnitTranspiler unit);
 
   std::string name;
@@ -19,6 +21,7 @@ class UnitTranspiler{
 
  private:
   std::string tmp;
+  std::vector<EOObject> objects;
   void GenerateResult();
 
 

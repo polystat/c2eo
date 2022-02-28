@@ -91,7 +91,7 @@ void initValueAnalysis_1(const VarDecl* VD, std::string &str) {
 
     // Анализ размера переменной для определения разновидности данных
     auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
-    auto size = typeInfo.Width;
+    auto mem_size = typeInfo.Width;
     //auto align = typeInfo.Align;  // не нужен
     APValue* initVal = VD->evaluateValue();
     if (initVal != nullptr) {
@@ -106,11 +106,11 @@ void initValueAnalysis_1(const VarDecl* VD, std::string &str) {
             } else {
                 str = std::to_string(intValue); // просто целое число
             }
-        } else if (initVal->isFloat() && (size == 64)) {
+        } else if (initVal->isFloat() && (mem_size == 64)) {
             auto floatValue = initVal->getFloat().convertToDouble();
             //llvm::outs() << floatValue;
             str = std::to_string(floatValue);
-        } else if (initVal->isFloat() && (size == 32)) {
+        } else if (initVal->isFloat() && (mem_size == 32)) {
             auto floatValue = initVal->getFloat().convertToFloat();
             //llvm::outs() << floatValue;
             str = std::to_string(floatValue);

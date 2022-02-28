@@ -6,7 +6,7 @@
 #include "generator.h"
 #include "util.h"
 #include "unit_transpiler.h"
-
+#include "eo_object.h"
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -71,6 +71,10 @@ int main(int argc, const char **argv) {
    //std::cout << transpiler;
    std::ofstream out(filename);
    out << transpiler;
+
+
+   // Test out for EOObject correctness testing
+   //std::cout << createSeq();
 }
 
 const char **transform_argv(const char *const *argv) {

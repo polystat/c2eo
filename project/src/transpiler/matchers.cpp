@@ -77,8 +77,7 @@ void addIntVarDeclGlobalMemoryMatcher(MatchFinder &finder) {
 
 //==============================================================================
 void addMatchers(MatchFinder &finder) {
-  // TODO вернуть обработку функций
-  //  addFuncDeclMatcher(finder);
+    addFuncDeclMatcher(finder);
     addDeclBaseVarGlobalMemoryMatcher(finder);
   // TODO вернуть обработку структур
   //  addRecordDeclMatcher(finder);
