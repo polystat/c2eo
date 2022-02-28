@@ -3,7 +3,7 @@
 
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
-  if (unit.tmp == "")
+  if (unit.tmp.empty())
     unit.GenerateResult();
   os << unit.tmp;
   return os;
@@ -11,55 +11,49 @@ std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
 
 
 void UnitTranspiler::GenerateResult() {
-  std::stringstream body;
-  body << "[args...] > global\n" ;
-  if(!glob.Empty())
-  {
-    body << "  ram "<<glob.MemorySize()<<" > " << glob.name << "\n";
-    used_external_objects.insert("c2eo.system.ram");
-  }
-
-  if(!stat.Empty())
-  {
-    body << "  ram "<<stat.MemorySize()<<" > s-ram\n";
-    used_external_objects.insert("c2eo.system.ram");
-  }
+  EOObject body(EOObjectType::EO_ABSTRACT);
+  body.arguments.emplace_back("args...");
+  body.postfix = "global";
+  body.nested.push_back(glob.GetEOObject());
+  body.nested.emplace_back("memory","empty-global-position");
+  body.nested.push_back(ret.GetEOObject());
+  body.nested.emplace_back("memory","return-mem_size");
+  EOObject ret_addr("address","return");
+  ret_addr.nested.emplace_back(ret.name);
+  ret_addr.nested.emplace_back("0");
+  body.nested.push_back(ret_addr);
 
   if(!glob.Empty()){
     for(const auto& var : glob){
-      body << "  address g-ram " << var.position << " > " << var.alias<<"\n";
+      body.nested.emplace_back(var.GetAdress(glob.name));
     }
-    used_external_objects.insert("c2eo.system.address");
   }
 
-  if(!stat.Empty()){
-    for(const auto& var : stat){
-      body << "  address s-ram " << var.position << " > " << var.alias<<"\n";
-    }
-    used_external_objects.insert("c2eo.system.address");
+  for(const auto& func : func_manager){
+    body.nested.push_back(func.GetEOObject());
   }
 
-  body << "\n";
-
-  if(!glob.Empty()||!stat.Empty()){
-    body << "  seq > @\n";
-    for(const auto& var : glob){
-      body << "    " << var.alias << ".set " << var.value <<"\n";
-    }
-    for(const auto& var : stat){
-      body << "    " << var.alias << ".set " << var.value <<"\n";
-    }
-    body << "    TRUE\n";
+  EOObject init_seq("seq","@");
+  for(const auto& var : glob){
+    init_seq.nested.push_back(var.GetInitializer());
   }
+  init_seq.nested.emplace_back("TRUE");
 
-  std::stringstream header;
-  header << "+package c2eo.src.temporary_name\n\n";
-  for(const auto& alias : used_external_objects)
+  body.nested.push_back(init_seq);
+
+
+
+
+  std::stringstream result;
+  result << "+package c2eo.src.temporary_name\n\n";
+  //TODO Make correct alias generation
+  /*for(const auto& alias : used_external_objects)
   {
     header << "+alias "<<alias<<"\n";
   }
 
-  header << "\n";
+  header << "\n"; */
 
-  tmp = header.str() + body.str();
+  result <<  body;
+  tmp = result.str();
 }

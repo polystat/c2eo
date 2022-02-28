@@ -311,3 +311,14 @@ void getParmVarDeclParameters(const ParmVarDecl *PVD) {
 */
     //PVD->dump();
 }
+void ProcessFunction(const FunctionDecl *FD) {
+  auto funcName = FD->getNameAsString();
+  llvm::outs() << "Name of Function: " << funcName << "\n";
+  // Определяем определение это или только объявление функции
+  auto isDefinition = FD->isThisDeclarationADefinition();
+  if(isDefinition){
+    llvm::outs() << "  It's definition\n";
+  } else {
+    llvm::outs() << "  It's declaration only\n";
+  }
+}

@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "eo_object.h"
 
 // Representation of a simple variable stored in RAM
 struct Variable{
@@ -12,6 +13,8 @@ struct Variable{
   std::string type;
   std::string alias;
   std::string value;
+  EOObject GetInitializer() const;
+  EOObject GetAdress(std::string mem_name) const;
 };
 
 class MemoryManager{
@@ -22,16 +25,20 @@ class MemoryManager{
 
   bool Empty();
 
-  size_t MemorySize();
+  size_t RealMemorySize();
+
+  const Variable& GetVarByID(uint64_t id) const;
 
   std::vector<Variable>::const_iterator begin() const;
 
-  std::vector<Variable>::const_iterator  end() const;
+  std::vector<Variable>::const_iterator end() const;
 
   std::string name;
+  EOObject GetEOObject() const;
  private:
   // index of first free byte in memory
   int pointer;
+  int mem_size = 2048;
   std::vector<Variable> variables;
 
 };

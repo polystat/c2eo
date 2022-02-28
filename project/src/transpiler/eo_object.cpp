@@ -37,6 +37,8 @@ std::ostream& operator<<(ostream &os, const EOObject& obj) {
   return os;
 }
 
+
+//Temporary test function
 EOObject createSeq() {
   EOObject eo(EOObjectType::EO_ABSTRACT);
   eo.postfix = "global";
@@ -52,7 +54,7 @@ EOObject createSeq() {
   ret_ram.AddNested({"1024",EOObjectType::EO_LITERAL});
   eo.AddNested(ret_ram);
 
-  eo.AddNested({"memory","return-size"});
+  eo.AddNested({"memory","return-mem_size"});
 
   EOObject ret("address", "return");
   ret.AddNested(EOObject{"return-ram"});
@@ -102,7 +104,7 @@ EOObject createSeq() {
   eo_app.arguments = {"arg"};
 
   EOObject seq2 {"seq","@"};
-  eo_app.AddNested(EOObject{"main"});
+  seq2.AddNested(EOObject{"main"});
   seq2.AddNested({"TRUE",EOObjectType::EO_LITERAL});
   eo_app.AddNested(seq2);
   eo.AddNested(eo_app);

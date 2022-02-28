@@ -55,7 +55,7 @@ void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context) {
         llvm::outs() << "  Body isn't Empty\n";
     }
     unsigned bodySize = CS->size();
-    llvm::outs() << "  Body size = " << bodySize << " \n";
+    llvm::outs() << "  Body mem_size = " << bodySize << " \n";
 
 #ifdef STM_DEB
     //getCompoundStmtGenerator(CS, 0);

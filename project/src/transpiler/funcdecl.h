@@ -26,6 +26,8 @@ using namespace clang::ast_matchers;
 
 using namespace clang;
 
+void ProcessFunction(const FunctionDecl *FD);
+
 //-------------------------------------------------------------------------------------------------
 // Определение и тестовый вывод параметров описания функции
 void getFuncDeclParameters(const FunctionDecl *FD);

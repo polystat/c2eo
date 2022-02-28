@@ -1,18 +1,20 @@
 #include "analyzers.h"
+#include "unit_transpiler.h"
 
+extern UnitTranspiler transpiler;
 //------------------------------------------------------------------------------
 // Анализ на функцию
 void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
-    ASTContext *context = Result.Context;
-    const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
-    // We do not want to convert header files!
-    ////if (!FD || !Context->getSourceManager().isWrittenInMainFile(FD->getForLoc()))
-    if (!FD)
-        return;
+  ASTContext *context = Result.Context;
+  const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
+  // We do not want to convert header files!
+  if (!FD || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+      return;
 
-    getFuncDeclParameters(FD);
+  transpiler.func_manager.Add(FD);
+  //ProcessFunction(FD);
+    //getFuncDeclParameters(FD);
 
-    //FD->dump();
 }
 
 //------------------------------------------------------------------------------

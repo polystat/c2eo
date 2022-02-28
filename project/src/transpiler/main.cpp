@@ -72,7 +72,9 @@ int main(int argc, const char **argv) {
    std::ofstream out(filename);
    out << transpiler;
 
-  std::cout << createSeq();
+
+   // Test out for EOObject correctness testing
+   //std::cout << createSeq();
 }
 
 const char **transform_argv(const char *const *argv) {
