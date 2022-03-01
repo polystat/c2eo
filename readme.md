@@ -52,9 +52,10 @@ $ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
 $ cd ../..
 ```
 
-You may also try our own pre-packaged archive:
+You may also try our own [pre-packaged archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA):
 
 ```bash
+$ sudo apt install megatools
 $ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA'
 $ tar -xvf llvm-clang.tar.gz
 ```
@@ -121,9 +122,14 @@ Also we use separate copy of `ram` named `return` for storing function return re
     return.write x
 
 seq
-  global.write 0 55
+  global.write 0 55.5
   global.write 8 78322
   foo 8 4
+╭──────────┬───────┬──────────╮
+| double z │ int a │ double x │ // variables in eo-ram
+├──────────┼───────┼──────────┤
+|    0th   │  8th  │   12th   │ // start position in eo-ram
+╰──────────┴───────┴──────────╯
 ```
 
 ### Pointers
@@ -134,35 +140,32 @@ C code may get an address of a variable, which is either in stack or in global m
 int f = 7;
 void bar() {
   int t = 42;
-  int* p = &t;  // local scope
-  *p = 500;     // write from local scope to local
-  p = &f;       // global scope
-  *p = 500;     // write from local scope to global
+  int* p = &t; // local scope
+  *p = 500;    // write from local scope to local
+  p = &f;      // global scope
+  *p = 500;    // write from local scope to global
 }
-```
-```c
 ╭───────┬───────┬────────╮
-| int f │ int t │ int* p │ // variables in ram
+| int f │ int t │ int* p │ // variables in eo-ram
 ├───────┼───────┼────────┤
-|  0th  │  4th  │   8th  │ // start position in ram
+|  0th  │  4th  │   8th  │ // start position in eo-ram
 ╰───────┴───────┴────────╯
 ```
 
 However, as in C, our variables are located in `global` and have absolute address.
 The object `param-start` provided as an argument to EO object `bar` is a calculated offset in `global` addressing the beginning of the frame for function call. Thus, `&t` would return `param-start + 0`, while `&f` would be just `0`:
 
-# TОDО
-
 ```java
 [param-start] > bar
   global.write
-    8                     // int* p
-    param-start           // &t -> function offset position in global space
+    8               // int* p
+    param-start     // &t -> function offset position in global space
   global.write
-    4
-    0
-  global.read             // read from global or stack
-    stack.read 4          
+    8
+    0               // &f -> address of f in global ram
+
+seq > @
+  bar 4
 ```
 
 
