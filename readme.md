@@ -55,7 +55,7 @@ $ cd ../..
 You may also try our own pre-packaged archive:
 
 ```bash
-$ megadl "https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA"
+$ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA'
 $ tar -xvf llvm-clang.tar.gz
 ```
 
