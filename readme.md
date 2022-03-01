@@ -86,7 +86,7 @@ Let's take the following C code as an example:
 double z = 3.14;
 ```
 
-In EO, we represent the entire global memory space as a copy of [ram](https://github.com/polystat/c2eo/blob/heap/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of 8 bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
+In EO, we represent the global memory space as a copy of [ram](https://github.com/polystat/c2eo/blob/heap/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of 8 bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
 
 ```java
 ram > global
@@ -103,9 +103,9 @@ void foo(int a) {
   return x;
 }
 ╭──────────┬───────┬──────────╮
-| double z │ int a │ double x │ // variables in eo-ram
+| double z │ int a │ double x │ // variables in global
 ├──────────┼───────┼──────────┤
-|    0th   │  8th  │   12th   │ // start position in eo-ram
+|    0th   │  8th  │   12th   │ // start position in global
 ╰──────────┴───────┴──────────╯
 ```
 
@@ -143,9 +143,9 @@ void bar() {
   *p = 500;    // write from local scope to global
 }
 ╭───────┬───────┬────────╮
-| int f │ int t │ int* p │ // variables in eo-ram
+| int f │ int t │ int* p │ // variables in global
 ├───────┼───────┼────────┤
-|  0th  │  4th  │   8th  │ // start position in eo-ram
+|  0th  │  4th  │   8th  │ // start position in global
 ╰───────┴───────┴────────╯
 ```
 
@@ -159,7 +159,7 @@ The object `param-start` provided as an argument to EO object `bar` is a calcula
     param-start     // &t -> function offset position in global space
   global.write
     8
-    0               // &f -> address of f in global ram
+    0               // &f -> address of f in global
 
 seq > @
   bar 4
