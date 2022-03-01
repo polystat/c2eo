@@ -34,7 +34,8 @@ Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [cmake](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
 [g++](https://pkgs.org/download/g++), 
-[ninja-build](https://ninja-build.org/) 
+[ninja-build](https://ninja-build.org/),
+[megatools](https://megatools.megous.com/)
 and
 [python3.+](https://www.python.org/downloads/).
 
@@ -54,7 +55,7 @@ $ cd ../..
 You may also try our own pre-packaged archive:
 
 ```bash
-$ wget https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA
+$ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA'
 $ tar -xvf llvm-clang.tar.gz
 ```
 
