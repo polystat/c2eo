@@ -105,6 +105,11 @@ void foo(int a) {
   double x = z + a;
   return x;
 }
+╭──────────┬───────┬──────────╮
+| double z │ int a │ double x │ // variables in eo-ram
+├──────────┼───────┼──────────┤
+|    0th   │  8th  │   12th   │ // start position in eo-ram
+╰──────────┴───────┴──────────╯
 ```
 
 In a similar way we deal with function call, we calculate the necessary space for arguments (`param-start` and `param-size`) and local variables in `global` for each function call. The variable `a` will be "pushed" to `global` and accessible by the code inside the function `foo` by the 0th position with local offset. The local variable `x` will also be pushed to the `global` and will be accessible by the 4th with local offset, because the length of `int` is four. 
@@ -125,11 +130,6 @@ seq
   global.write 0 55.5
   global.write 8 78322
   foo 8 4
-╭──────────┬───────┬──────────╮
-| double z │ int a │ double x │ // variables in eo-ram
-├──────────┼───────┼──────────┤
-|    0th   │  8th  │   12th   │ // start position in eo-ram
-╰──────────┴───────┴──────────╯
 ```
 
 ### Pointers
