@@ -12,6 +12,8 @@ struct FunctionDefinition {
   const clang::FunctionDecl *FD;
   std::string name;
   EOObject GetEOObject() const;
+ private:
+  EOObject GetBody() const;
 };
 
 struct FunctionDeclaration{
@@ -23,9 +25,7 @@ struct FunctionDeclaration{
 struct FunctionManager {
 
   void Add(const clang::FunctionDecl* FD);
-  std::vector<FunctionDefinition>::const_iterator begin() const;
-  std::vector<FunctionDefinition>::const_iterator end() const;
-
+  const std::vector<FunctionDefinition>& GetAllDefinitions();
  private:
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;

@@ -6,9 +6,10 @@
 #include <string>
 
 enum class EOObjectType{
-  EO_COMPLETE = 0,
-  EO_LITERAL = 1,
-  EO_ABSTRACT = 2,
+  EO_EMPTY,
+  EO_COMPLETE,
+  EO_LITERAL,
+  EO_ABSTRACT,
 };
 
 

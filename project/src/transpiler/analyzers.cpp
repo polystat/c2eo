@@ -2,10 +2,12 @@
 #include "unit_transpiler.h"
 
 extern UnitTranspiler transpiler;
+ASTContext* context;
 //------------------------------------------------------------------------------
 // Анализ на функцию
 void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
-  ASTContext *context = Result.Context;
+  if (!context)
+    context = Result.Context;
   const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
   // We do not want to convert header files!
   if (!FD || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
@@ -20,22 +22,22 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
 //------------------------------------------------------------------------------
 // Анализ на структуру или объединение
 void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
-    ASTContext *context = Result.Context;
-    const RecordDecl *RD = Result.Nodes.getNodeAs<RecordDecl>("recordDecl");
-    // We do not want to convert header files!
-    ////if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
-    if (!RD)
-        return;
-
-    getRecordDeclSubObjects(RD);
-
-    //RD->dump();
+  if (!context)
+    context = Result.Context;
+  const RecordDecl *RD = Result.Nodes.getNodeAs<RecordDecl>("recordDecl");
+  // We do not want to convert header files!
+  ////if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
+  if (!RD)
+    return;
+  getRecordDeclSubObjects(RD);
+  //RD->dump();
 }
 
 //------------------------------------------------------------------------------
 // Анализ на глобальную переменную
 void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
-  ASTContext *context = Result.Context;
+  if (!context)
+    context = Result.Context;
   const auto *VD = Result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
   // We do not want to convert header files!
   if (!VD || !context->getSourceManager().isWrittenInMainFile(VD->getLocation()))
@@ -65,8 +67,9 @@ void LoopAnalyzer::run(const MatchFinder::MatchResult &Result) {
 //------------------------------------------------------------------------------
 // Анализ на целочисленную переменную
 void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
-    ASTContext *Context = Result.Context;
-    const auto VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
+  if (!context)
+    context = Result.Context;
+  const auto VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
     // We do not want to convert header files!
     ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
     if (!VD)
@@ -81,7 +84,8 @@ void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
 //------------------------------------------------------------------------------
 // Анализ на глобальную целочисленную переменную
 void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result) {
-  ASTContext *Context = Result.Context;
+  if (!context)
+    context = Result.Context;
   const auto *VD = Result.Nodes.getNodeAs<VarDecl>("intVarGlobalMemoryDecl");
   // We do not want to convert header files!
   ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))

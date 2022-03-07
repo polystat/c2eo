@@ -34,7 +34,7 @@ void ProcessVariable(const VarDecl *VD);
 
 
 
-void getTypeName(const ValueDecl* VD, std::string &str);
+//void getTypeName(const ValueDecl* VD, std::string &str);
 void getListValue(const Stmt* stmt, std::string &str, ASTContext* context);
 
 #endif // __VARDECL__

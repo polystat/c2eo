@@ -55,7 +55,8 @@ void setSubFields(RecordGen* RG, const RecordDecl* RD) {
     RG->count = 0;
     for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
         std::string strType = "";
-        getTypeName(*it, strType);
+        //TODO fix string below
+        //getTypeName(*it, strType);
         RecordGen* VG = new RecordGen;
         if (!it->isUnnamedBitfield())
             VG->name = "f_" + it->getNameAsString();

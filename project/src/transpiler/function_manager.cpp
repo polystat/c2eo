@@ -3,6 +3,7 @@
 //
 
 #include "function_manager.h"
+#include "transpile_helper.h"
 
 
 void FunctionManager::Add(const clang::FunctionDecl *FD) {
@@ -28,18 +29,18 @@ void FunctionManager::Add(const clang::FunctionDecl *FD) {
   }
 
 }
-std::vector<FunctionDefinition>::const_iterator FunctionManager::begin() const {
-  return definitions.begin();
+const std::vector<FunctionDefinition> &FunctionManager::GetAllDefinitions() {
+  return definitions;
 }
 
-std::vector<FunctionDefinition>::const_iterator FunctionManager::end() const {
-  return definitions.end();
-}
-
- EOObject FunctionDefinition::GetEOObject() const {
+EOObject FunctionDefinition::GetEOObject() const {
    EOObject func_object(EOObjectType::EO_ABSTRACT);
    func_object.postfix = name;
+   func_object.nested.push_back(GetBody());
    return func_object;
+}
+EOObject FunctionDefinition::GetBody() const{
+  return GetFunctionBody(FD);
 }
 
 

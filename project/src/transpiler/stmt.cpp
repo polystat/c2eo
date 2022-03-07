@@ -39,8 +39,6 @@ StmtGen* getFuncCallGenerator(const CallExpr* pExpr);
 
 StmtGen* getReturnStmtGenerator(const ReturnStmt* pStmt);
 
-ASTContext* context;
-
 void getEONameOfType(const QualType qualType, std::string &str);
 
 //-------------------------------------------------------------------------------------------------
@@ -84,12 +82,12 @@ void getCompoundStmtParameters(const CompoundStmt* CS, ASTContext* context) {
 }
 
 StmtGen* getASTStmtGen(const Stmt* i, ASTContext* context) {
-    ::context = context;
+    //::context = context;
     return getStmtGen(i);
 }
 
 StmtGen* getCompoundStmtGenerator(const CompoundStmt* CS, ASTContext* context, bool isDecorator) {
-    ::context = context;
+    //::context = context;
     CompoundStmtGen* compoundStmt = new CompoundStmtGen;
     compoundStmt->is_decorator = isDecorator;
 
@@ -161,6 +159,7 @@ StmtGen* getCompoundStmtOutputGenerator(const Stmt* pExpr) {
 
 StmtGen* getStmtGen(const Stmt* i) {
     //TODO подумать над утечкой памяти
+    extern ASTContext* context;
     StmtGen* stmtGen = getEmptyUnaryGen();
     char* stmtName = (char*) (i->getStmtClassName());
     //if (strcmp(stmtName ,"BinaryOperator") == 0)
@@ -561,7 +560,7 @@ BinaryStmtGen* getBinaryStatement(const BinaryOperator* pOperator) {
     std::string opName = pOperator->getOpcodeStr().str();
     if (opName.compare("=") == 0) {
         binaryStmtGen->value = "write";
-    } else if (opName.compare("+") == 0) {
+    } else if (opName == "+") {
         binaryStmtGen->value = "add";
     } else if (opName.compare("-") == 0) {
         binaryStmtGen->value = "sub";
