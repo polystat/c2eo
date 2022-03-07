@@ -5,6 +5,7 @@
 #include "generator.h"
 #include "stmt.h"
 #include "unit_transpiler.h"
+#include "transpile_helper.h"
 
 // Анализ полученного начального значения с последующим использованием
 void initValueAnalysis(const VarDecl *VD, std::string &str);
@@ -29,8 +30,7 @@ void ProcessVariable(const VarDecl *VD){
   auto typePtr = qualType.getTypePtr();
   //auto kind = typePtr->getKind();
 
-  std::string strType = "";
-  getTypeName(VD, strType);
+  std::string strType = "c_" + GetTypeName(VD->getType());
   // StorageClass getStorageClass() const
   // Показывает на явное описани того или иного класса памяти в тексте программы
   // Наверное не во всех случаях полезно
@@ -61,9 +61,9 @@ void ProcessVariable(const VarDecl *VD){
 
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    transpiler.glob.Add(varId, typeSize, "int", "g-" + varName, strValue);
+    transpiler.glob.Add(varId, typeSize, strType, "g-" + varName, strValue);
   } else if (globalStorage && !extStorage) {
-    transpiler.glob.Add(varId, typeSize, "int", "s-" + varName, strValue);
+    transpiler.glob.Add(varId, typeSize, strType, "s-" + varName, strValue);
   }
 }
 
@@ -438,48 +438,6 @@ void initZeroValueAnalysis(const VarDecl* VD, std::string &str) {
     }
 }
 
-void getTypeName(const ValueDecl* VD, std::string &str) {
-    TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
-    uint64_t typeSize = typeInfo.Width;
-    unsigned fieldAlign = typeInfo.Align;
-    const QualType qualType = VD->getType();
-    const clang::Type* typePtr = qualType.getTypePtr();
-    str = "c_";
-
-    if (typePtr->isBooleanType()) {
-        str += "bool";
-        return;
-    }
-    if (typePtr->isFloatingType()) {
-        str += "float" + std::to_string(typeSize);
-        return;
-    }
-
-    if (!typePtr->isSignedIntegerType())
-        str += "u";
-    if (typePtr->isCharType()) {
-        str += "char";
-        return;
-    }
-    if (typePtr->isIntegerType()) {
-        str += "int" + std::to_string(typeSize);
-        return;
-    }
-
-
-    if (typePtr->isUnionType())
-        str = "un_";
-    if (typePtr->isStructureType())
-        str = "st_";
-    if (typePtr->isUnionType() || typePtr->isStructureType()) {
-        RecordDecl* RD = typePtr->getAsRecordDecl();
-        if (RD->hasNameForLinkage())
-            str += RD->getNameAsString();
-        else
-            str += std::to_string(reinterpret_cast<uint64_t>(RD));
-        return;
-    }
-}
 
 //void getListValue(const Stmt* stmt, std::string &str, ASTContext* context) {
 //    for (InitListExpr::iterator it = ((clang::InitListExpr*) stmt)->begin();

@@ -29,7 +29,8 @@ void UnitTranspiler::GenerateResult() {
     }
   }
 
-  for(const auto& func : func_manager){
+  for(const auto& func : func_manager.GetAllDefinitions()){
+
     body.nested.push_back(func.GetEOObject());
   }
 
