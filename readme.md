@@ -165,11 +165,6 @@ seq > @
   bar 4
 ```
 
-
-<hr/>
-
-**To be edited later:**
-
 ### External links
 
 To compile files with any external links, we use the following solution:
@@ -196,9 +191,25 @@ To compile files with any external links, we use the following solution:
 
 ### Arrays
 
-The transformation of arrays is similar to variables. if we know their size in advance.
+We work with fixed-size arrays in the same way as with variables.
+
+```c
+int instanceArray[2] = { 5 6 };
+╭─────┬─────╮
+|  5  │  6  │
+├─────┼─────┤
+| 0th │ 4th │
+╰─────┴─────╯
+```
+
+```java
+global.write 0 5.as-bytes
+global.write 4 6.as-bytes
+```
 
 ### Structures
+
+We know the size of structures so we still can as with variables. We can also generate additional objects to access the fields of structures.
 
 ```c
 struct Rectangle {int x; int y;} rect;
@@ -258,7 +269,6 @@ address > g-fig-t-c
 ### Enums
 
 We can work with enumerated types as well as with constants and substitute numeric values instead of names.
-
 
 </details>
 
