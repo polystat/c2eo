@@ -22,5 +22,4 @@ release:
     tar -xvf lib.tar.xz
     cd ../..
     echo "release"
-    python3 release/update-release.py --version="${tag}" ${flags}
-    exit -1
+    python3 release/update-release.py --version="${tag}"
