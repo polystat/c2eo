@@ -209,7 +209,7 @@ global.write 4 6.as-bytes
 
 ### Structures
 
-We know the size of structures so we still can as with variables. We can also generate additional objects to access the fields of structures.
+We know the size of structures so we still work as with variables. We can also generate additional objects to access the fields of structures.
 
 ```c
 struct Rectangle {int x; int y;} rect;
