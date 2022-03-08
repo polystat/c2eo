@@ -1,11 +1,9 @@
 To use this script, make sure you have the following packages installed:
 ```bash
-(venv) $ pip3 install git_config
-$ sudo apt install md5deep reprepro
-```
-Also, check that in `CMakeLists.txt` the correct path to the libraries is specified: 
-```cmake
-link_directories("/usr/lib")
+(venv) $ pip3 install git_config pgpy s3cmd
+$ sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
+# for the latest version of the cmake package, try:
+$ sudo pip3 install cmake
 ```
 
 ### How to use:
@@ -17,14 +15,13 @@ Release maker
 
 optional arguments:
   -h, --help         show this help message and exit
-  --branch BRANCH    name of the branch to check out (default is heap)
   --version VERSION  specify the new version
 ```
 Example
 ```bash
-(venv) $ python3 update-release.py --version=0.1.1 --branch="yar"
+(venv) $ python3 update-release.py --version=0.1.1
 ```
-Notes: 
+Notes:
 * Use `.` as a version delimiter.
 * This script uses the current date, time, and time zone. Make sure they are configured correctly.
 * This script extracts your name and email from `git config`. Make sure you have them.
@@ -37,9 +34,10 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
 ```
 
 ### Algorithm:
-* Build the executable file. 
-* Create a deb file (basic: https://habr.com/ru/post/78094/)
-* Create a repository (basic: https://unixforum.org/viewtopic.php?t=79513 )
+* Build the executable file.
+* Create a deb file (basic: [HABR](https://habr.com/ru/post/78094/))
+* Create a repository (basic: [UNIXFORUM](https://unixforum.org/viewtopic.php?t=79513))
+* Upload a repository tree into the bucket's virtual 'directory'.
 
 The following files will be generated:
 ```bash 
@@ -144,4 +142,4 @@ $ tree
 35 directories, 120 files
 ```
 
-Then you have to upload `./repository/dists` and `./repository/pool` to ... `TODO: Amazon S3`
+Then you have to upload `./repository/dists` and `./repository/pool` to [c2eo.polystat.org/](http://c2eo.polystat.org)debian/.
