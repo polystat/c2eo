@@ -50,6 +50,7 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   string typenm = "-"+GetTypeName(p_operator->getType());
   std::string opName = p_operator->getOpcodeStr().str();
+  auto opCode = p_operator->getOpcode();
   std::string operation;
   if (opName == "=") {
     operation = "write";
@@ -57,7 +58,10 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     operation = "add" + typenm;
   } else if (opName == "-") {
     operation = "sub" + typenm;
-  } else {
+  }else if (opCode == BinaryOperatorKind::BO_Div) {
+    operation = "div" + typenm;
+  }
+  else {
     operation = "undefined";
   }
 

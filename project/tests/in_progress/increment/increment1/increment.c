@@ -2,15 +2,17 @@
 
 typedef long long i64;
 
-i64 x = 0;
+i64 x = 42;
+i64 y = 0;
 
 i64 main() {
-    x = 1 + x;
+    x = x / y;
+  /*x = 1 + x;
     printf("%ld\n", x);
     x;
     x = x + 1;
     printf("%ld\n", x);
-    x;
+    x;*/
     return 0;
 }
 
