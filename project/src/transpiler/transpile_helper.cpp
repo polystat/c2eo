@@ -16,6 +16,21 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS) {
   EOObject res {"seq","@"};
   for (auto stmt : CS->body() ) {
+    Stmt::StmtClass stmtClass = stmt->getStmtClass();
+    // Костыльное решение для тестового выводо
+    if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
+    {
+      EOObject printer {"printf"};
+      printer.nested.emplace_back("\"%d\"",EOObjectType::EO_LITERAL);
+      EOObject read_val {"read-as-int64"};
+      extern UnitTranspiler transpiler;
+      //TODO fix unsafety code
+      read_val.nested.emplace_back(transpiler.glob.GetVarByID(
+          reinterpret_cast<uint64_t>(dyn_cast<DeclRefExpr>(*stmt->child_begin())->getFoundDecl())).alias);
+      printer.nested.push_back(read_val);
+      res.nested.push_back(printer);
+      continue;
+    }
     EOObject stmt_obj = GetStmtEOObject(stmt);
     res.nested.push_back(stmt_obj);
   }
@@ -39,7 +54,7 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     return GetStmtEOObject(*op->child_begin());
   }
   else if (stmtClass == Stmt::DeclRefExprClass) {
-    const DeclRefExpr* op = (DeclRefExpr*)stmt;
+    const auto* op = dyn_cast<DeclRefExpr>(stmt);
     extern UnitTranspiler transpiler;
     //TODO fix unsafety code
     return EOObject{transpiler.glob.GetVarByID(reinterpret_cast<uint64_t>(op->getFoundDecl())).alias};
@@ -52,11 +67,11 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   std::string opName = p_operator->getOpcodeStr().str();
   auto opCode = p_operator->getOpcode();
   std::string operation;
-  if (opName == "=") {
+  if (opCode == BinaryOperatorKind::BO_Assign) {
     operation = "write";
-  } else if (opName == "+") {
+  } else if (opCode == BinaryOperatorKind::BO_Add) {
     operation = "add" + typenm;
-  } else if (opName == "-") {
+  } else if (opCode == BinaryOperatorKind::BO_Sub) {
     operation = "sub" + typenm;
   }else if (opCode == BinaryOperatorKind::BO_Div) {
     operation = "div" + typenm;
