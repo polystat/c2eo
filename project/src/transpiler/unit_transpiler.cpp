@@ -1,6 +1,7 @@
 #include <sstream>
 #include "unit_transpiler.h"
-
+#include "transpile_helper.h"
+#include "aliases.h"
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
   if (unit.tmp.empty())
@@ -20,7 +21,7 @@ void UnitTranspiler::GenerateResult() {
   body.nested.emplace_back("memory","return-mem_size");
   EOObject ret_addr("address","return");
   ret_addr.nested.emplace_back(ret.name);
-  ret_addr.nested.emplace_back("0");
+  ret_addr.nested.emplace_back("0",EOObjectType::EO_LITERAL);
   body.nested.push_back(ret_addr);
 
   if(!glob.Empty()){
@@ -38,23 +39,40 @@ void UnitTranspiler::GenerateResult() {
   for(const auto& var : glob){
     init_seq.nested.push_back(var.GetInitializer());
   }
-  init_seq.nested.emplace_back("TRUE");
+  if (std::find_if(body.nested.begin(), body.nested.end(),
+                   [] (EOObject x) {return x.postfix=="main";})!=body.nested.end()) {
+    init_seq.nested.emplace_back("main");
+  }
+
+  init_seq.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
 
   body.nested.push_back(init_seq);
 
-
-
-
   std::stringstream result;
-  result << "+package c2eo.src.temporary_name\n\n";
+  result << "+package c2eo.src." << package_name << "\n";
+
+  used_external_objects = FindAllExternalObjects(body);
   //TODO Make correct alias generation
-  /*for(const auto& alias : used_external_objects)
+  for(const auto& ext_obj : used_external_objects)
   {
-    header << "+alias "<<alias<<"\n";
+    if(known_types.find(ext_obj)==known_types.end()) {
+      std::string alias;
+      try{
+        alias = known_aliases.at(ext_obj);
+        result << alias << "\n";
+      }
+      catch (std::out_of_range&)
+      {
+        llvm::errs() << "Not found alias for " << ext_obj << "\n";
+      }
+    }
   }
 
-  header << "\n"; */
+  result << "\n";
 
   result <<  body;
   tmp = result.str();
+}
+void UnitTranspiler::SetPackageName(std::string package_name) {
+  this->package_name = std::move(package_name);
 }

@@ -1,5 +1,6 @@
 #include "transpile_helper.h"
 #include "unit_transpiler.h"
+#include <queue>
 using namespace clang;
 using namespace llvm;
 using namespace std;
@@ -21,7 +22,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS) {
     if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
     {
       EOObject printer {"printf"};
-      printer.nested.emplace_back("\"%d\"",EOObjectType::EO_LITERAL);
+      printer.nested.emplace_back(R"("%d"\n)",EOObjectType::EO_LITERAL);
       EOObject read_val {"read-as-int64"};
       extern UnitTranspiler transpiler;
       //TODO fix unsafety code
@@ -128,6 +129,42 @@ std::string GetTypeName(QualType qualType)
     return str;
   }
   return "undefinedtype";
+}
+std::set<std::string> FindAllExternalObjects(EOObject obj) {
+  std::set<std::string> all_known = {obj.postfix};
+  std::set<std::string> unknown = {};
+  //TODO maybe should use pointers or copy constructor to avoid unnecessary copying of objects
+  std::queue<EOObject> not_visited ;
+  for(auto child : obj.nested)
+  {
+    not_visited.push(std::move(child));
+  }
+  while (!not_visited.empty())
+  {
+    EOObject cur = not_visited.front();
+    not_visited.pop();
+    switch (cur.type) {
+      case EOObjectType::EO_ABSTRACT:
+        all_known.insert(cur.postfix);
+        break;
+      case EOObjectType::EO_COMPLETE:
+        all_known.insert(cur.postfix);
+        if (all_known.find(cur.name)==all_known.end())
+          unknown.insert(cur.name);
+        break;
+      case EOObjectType::EO_EMPTY: break;
+      case EOObjectType::EO_LITERAL: break;
+    }
+    for(auto child : cur.nested)
+    {
+      not_visited.push(std::move(child));
+    }
+  }
+  for (const auto& known_obj : all_known) {
+    unknown.erase(known_obj);
+  }
+
+  return unknown;
 }
 
 

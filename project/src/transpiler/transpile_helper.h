@@ -21,6 +21,8 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD);
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS);
 EOObject GetStmtEOObject(const clang::Stmt* p_stmt);
 
+std::set<std::string> FindAllExternalObjects(EOObject obj);
+
 
 
 #endif //__TRANSPILE_HELPER__

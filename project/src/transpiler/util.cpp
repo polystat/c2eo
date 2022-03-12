@@ -51,7 +51,7 @@ void createGlobal(std::vector<std::string> &text, std::string filename) {
     // Формируется начало последовательности инициализаций
 //!    text.push_back("\n  seq > @");
     // Читаются инициализации объектов
-//!    file2vector(filename+".glob.seq", text);
+//!    file2vector(package_name+".glob.seq", text);
 }
 
 // Запись сформированного файла с глобальными объектами
@@ -86,7 +86,7 @@ void createStatic(std::vector<std::string> &text, std::string filename) {
     // Формируется начало последовательности инициализаций
 //!    text.push_back("\n  seq > @");
     // Читаются инициализации объектов
-//!    file2vector(filename+".stat.seq", text);
+//!    file2vector(package_name+".stat.seq", text);
 
 }
 std::string str_join(std::vector<std::string> vec) {

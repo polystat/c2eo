@@ -52,6 +52,6 @@ EOObject Variable::GetAdress(string mem_name) const{
   EOObject addr("address",alias);
   if(!mem_name.empty())
     addr.nested.emplace_back(std::move(mem_name));
-  addr.nested.emplace_back(to_string(position));
+  addr.nested.emplace_back(to_string(position),EOObjectType::EO_LITERAL);
   return addr;
 }
