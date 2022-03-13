@@ -21,7 +21,7 @@ void file2vector(std::string fileName, std::vector<std::string> &text);
 void createGlobal(std::vector<std::string> &text, std::string filename);
 
 // Формирование текста со статическими переменными
-// Генерируется файл filename.eo
+// Генерируется файл package_name.eo
 void createStatic(std::vector<std::string> &text, std::string filename);
 
 

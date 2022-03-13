@@ -555,6 +555,7 @@ ListStmtGen* getInitListExprClassGenerator(const InitListExpr* ile) {
     return lsg;
 }
 
+//Fully refactored
 BinaryStmtGen* getBinaryStatement(const BinaryOperator* pOperator) {
     BinaryStmtGen* binaryStmtGen = new BinaryStmtGen;
     std::string opName = pOperator->getOpcodeStr().str();

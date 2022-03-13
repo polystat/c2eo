@@ -42,6 +42,8 @@ int main(int argc, const char **argv) {
     const char* inputFileName = argv[1];
     std::string filename = argv[2];
 
+    transpiler.SetPackageName(filename.substr(0, filename.size()-3));
+
     auto ExpectedParser
             = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
 

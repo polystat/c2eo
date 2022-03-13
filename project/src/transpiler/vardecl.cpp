@@ -292,7 +292,7 @@ void getVarDeclParameters(const VarDecl* VD) {
         var->name = "s_" + varName;
         var->type = strType;
         var->value = strValue;
-        var->identifiers[varID] = AbstractGen::filename + "." + var->name;
+        var->identifiers[varID] = AbstractGen::package_name + "." + var->name;
         var->staticSpaceGenPtr->Add(var);
     }
 
