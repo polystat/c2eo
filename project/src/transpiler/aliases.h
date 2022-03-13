@@ -18,6 +18,8 @@ std::map<std::string,std::string> known_aliases =
         {"write", "+alias c2eo.coperators.write"},
         {"read-as-int64", "+alias c2eo.coperators.read-as-int64"},
         {"printf", "+alias c2eo.stdio.printf"},
+        {"while", "+alias c2eo.coperators.while"},
+        {"if", "+alias c2eo.coperators.if"},
 
     };
 
