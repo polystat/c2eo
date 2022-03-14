@@ -1,4 +1,0 @@
-+package c2eo.coperators
-
-[a b] > add-int64
-  (a.read 8).as-int.add ((b.read 8).as-int) > @
