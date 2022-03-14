@@ -73,6 +73,6 @@ void UnitTranspiler::GenerateResult() {
   result <<  body;
   tmp = result.str();
 }
-void UnitTranspiler::SetPackageName(std::string package_name) {
-  this->package_name = std::move(package_name);
+void UnitTranspiler::SetPackageName(std::string packagename) {
+  package_name = std::move(packagename);
 }

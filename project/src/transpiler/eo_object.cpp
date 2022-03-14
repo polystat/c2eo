@@ -13,9 +13,11 @@ auto EOObject::GetSpaceIndent() {
 }
 
 std::ostream& operator<<(ostream &os, const EOObject& obj) {
-  if (obj.type == EOObjectType::EO_EMPTY)
-    return os;
   os << EOObject::GetSpaceIndent();
+  if (obj.type == EOObjectType::EO_EMPTY) {
+    os << "plug" << "\n";
+    return os;
+  }
   if(obj.type == EOObjectType::EO_ABSTRACT)
   {
     os << "[" << str_join(obj.arguments)<<"]";

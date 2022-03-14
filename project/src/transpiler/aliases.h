@@ -20,6 +20,10 @@ std::map<std::string,std::string> known_aliases =
         {"printf", "+alias c2eo.stdio.printf"},
         {"while", "+alias c2eo.coperators.while"},
         {"if", "+alias c2eo.coperators.if"},
+        {"add", "+alias c2eo.coperators.add"},
+        {"plug", "+alias c2eo.coperators.plug"},
+        {"greater", "+alias c2eo.coperators.greater"},
+        {"add", "+alias c2eo.coperators.add"},
 
     };
 

@@ -8,22 +8,27 @@ using namespace std;
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt);
+EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt);
+EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt);
+EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   const CompoundStmt* funcBody = dyn_cast<CompoundStmt>(FD->getBody());
   if(!funcBody)
     return EOObject(EOObjectType::EO_EMPTY);
-  return GetCompoundStmt(funcBody);
+  return GetCompoundStmt(funcBody,true);
 }
 //Function to get eo representation of CompoundStmt
-EOObject GetCompoundStmt(const clang::CompoundStmt *CS) {
-  EOObject res {"seq","@"};
+EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
+  EOObject res {"seq"};
+  if (is_decorator)
+    res.postfix = "@";
   for (auto stmt : CS->body() ) {
     Stmt::StmtClass stmtClass = stmt->getStmtClass();
     // Костыльное решение для тестового выводо
     if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
     {
       EOObject printer {"printf"};
-      printer.nested.emplace_back(R"("%d"\n)",EOObjectType::EO_LITERAL);
+      printer.nested.emplace_back(R"("%d\n")",EOObjectType::EO_LITERAL);
       EOObject read_val {"read-as-int64"};
       extern UnitTranspiler transpiler;
       //TODO fix unsafety code
@@ -60,47 +65,64 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
   } else if (stmtClass == Stmt::IfStmtClass) {
     const auto* op = dyn_cast<IfStmt>(stmt);
     return GetIfStmtEOObject(op);
+  } else if (stmtClass == Stmt::WhileStmtClass) {
+    const auto* op = dyn_cast<WhileStmt>(stmt);
+    return GetWhileStmtEOObject(op);
+  } else if (stmtClass == Stmt::DoStmtClass) {
+    const auto* op = dyn_cast<DoStmt>(stmt);
+    return GetDoWhileStmtEOObject(op);
+  } else if (stmtClass == Stmt::CompoundStmtClass) {
+    const auto* op = dyn_cast<CompoundStmt>(stmt);
+    return GetCompoundStmt(op);
+  } else if (stmtClass == Stmt::IntegerLiteralClass) {
+    const auto* op = dyn_cast<IntegerLiteral>(stmt);
+    return GetIntegerLiteralEOObject(op);
   }
   return EOObject(EOObjectType::EO_EMPTY);
 }
+EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
+  APInt an_int = p_literal->getValue();
+  bool is_signed = p_literal->getType()->isSignedIntegerType();
+  return {an_int.toString(10, is_signed),EOObjectType::EO_LITERAL};
+}
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
-  string type_name = "-"+GetTypeName(p_operator->getType());
+  //string type_name = "-"+GetTypeName(p_operator->getType());
   auto opCode = p_operator->getOpcode();
   std::string operation;
   if (opCode == BinaryOperatorKind::BO_Assign) {
     operation = "write";
   } else if (opCode == BinaryOperatorKind::BO_Add) {
-    operation = "add" + type_name;
+    operation = "add";
   } else if (opCode == BinaryOperatorKind::BO_Sub) {
-    operation = "sub" + type_name;
+    operation = "sub";
   } else if (opCode == BinaryOperatorKind::BO_Mul) {
-    operation = "mul" + type_name;
+    operation = "mul";
   } else if (opCode == BinaryOperatorKind::BO_Div) {
-    operation = "div" + type_name;
+    operation = "div";
   } else if (opCode == BinaryOperatorKind::BO_Rem) {
-    operation = "mod" + type_name;
+    operation = "mod";
   } else if (opCode == BinaryOperatorKind::BO_And) {
-    operation = "bit-and" + type_name;
+    operation = "bit-and";
   } else if (opCode == BinaryOperatorKind::BO_Or) {
-    operation = "bit-or" + type_name;
+    operation = "bit-or";
   } else if (opCode == BinaryOperatorKind::BO_Xor) {
-    operation = "bit-xor" + type_name;
+    operation = "bit-xor";
   } else if (opCode == BinaryOperatorKind::BO_Shl) {
-    operation = "shift-left" + type_name;
+    operation = "shift-left";
   } else if (opCode == BinaryOperatorKind::BO_Shr) {
-    operation = "shift-right" + type_name;
+    operation = "shift-right";
   } else if (opCode == BinaryOperatorKind::BO_EQ) {
-    operation = "eq" + type_name;
+    operation = "eq";
   } else if (opCode == BinaryOperatorKind::BO_NE) {
-    operation = "neq" + type_name;
+    operation = "neq";
   } else if (opCode == BinaryOperatorKind::BO_LT) {
-    operation = "less" + type_name;
+    operation = "less";
   } else if (opCode == BinaryOperatorKind::BO_LE) {
-    operation = "leq" + type_name;
+    operation = "leq";
   } else if (opCode == BinaryOperatorKind::BO_GT) {
-    operation = "greater" + type_name;
+    operation = "greater";
   } else if (opCode == BinaryOperatorKind::BO_GE) {
-    operation = "geq" + type_name;
+    operation = "geq";
   } else {
     operation = "undefined";
   }
@@ -110,7 +132,6 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
-
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   EOObject if_stmt {"if"};
   if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
@@ -123,6 +144,24 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
     if_stmt.nested.push_back(empty_seq);
   }
   return if_stmt;
+}
+
+EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
+  EOObject while_stmt {"while"};
+  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  return while_stmt;
+}
+
+EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
+  EOObject do_stmt {"seq"};
+  do_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  EOObject while_stmt {"while"};
+  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  do_stmt.nested.push_back(while_stmt);
+  do_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  return do_stmt;
 }
 
 std::string GetTypeName(QualType qualType)
@@ -191,7 +230,9 @@ std::set<std::string> FindAllExternalObjects(EOObject obj) {
         if (all_known.find(cur.name)==all_known.end())
           unknown.insert(cur.name);
         break;
-      case EOObjectType::EO_EMPTY: break;
+      case EOObjectType::EO_EMPTY:
+        unknown.insert("plug");
+        break;
       case EOObjectType::EO_LITERAL: break;
     }
     for(auto child : cur.nested)
