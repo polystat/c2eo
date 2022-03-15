@@ -23,6 +23,8 @@ Then, just run:
 $ c2eo <c-file-name> <eo-file-name>
 ```
 
+ We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk. 
+
 ## How to Contribute
 
 Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
