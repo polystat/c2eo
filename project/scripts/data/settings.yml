@@ -1,6 +1,5 @@
 config: null
-current_eo_version: 0.21.8
-path_to_assembly: ../assembly/
+current_eo_version: 0.21.9
 path_to_c2eo: ../bin/
 path_to_config: data/config/
 path_to_eo: eo/
@@ -8,6 +7,5 @@ path_to_eo_parse: target/01-parse/
 path_to_eo_project: ../../result/
 path_to_eo_src: ../../result/eo/c2eo/src/
 path_to_foreign_objects: target/eo-foreign.csv
-path_to_hash: data/hash/
 path_to_meta: data/meta/
 path_to_tests: ../tests/main/
