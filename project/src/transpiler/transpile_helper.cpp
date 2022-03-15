@@ -11,6 +11,7 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt);
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt);
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt);
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
+EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   const CompoundStmt* funcBody = dyn_cast<CompoundStmt>(FD->getBody());
   if(!funcBody)
@@ -60,8 +61,11 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     const auto *op = dyn_cast<DeclRefExpr>(stmt);
     extern UnitTranspiler transpiler;
+    string type_name = "-"+GetTypeName(op->getType());
+    EOObject variable {"read-as"+type_name};
     //TODO fix unsafety code
-    return EOObject{transpiler.glob.GetVarByID(reinterpret_cast<uint64_t>(op->getFoundDecl())).alias};
+    variable.nested.emplace_back(transpiler.glob.GetVarByID(reinterpret_cast<uint64_t>(op->getFoundDecl())).alias);
+    return variable;
   } else if (stmtClass == Stmt::IfStmtClass) {
     const auto* op = dyn_cast<IfStmt>(stmt);
     return GetIfStmtEOObject(op);
@@ -86,11 +90,10 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   return {an_int.toString(10, is_signed),EOObjectType::EO_LITERAL};
 }
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
-  //string type_name = "-"+GetTypeName(p_operator->getType());
   auto opCode = p_operator->getOpcode();
   std::string operation;
   if (opCode == BinaryOperatorKind::BO_Assign) {
-    operation = "write";
+    return GetAssignmentOperatorEOObject(p_operator);
   } else if (opCode == BinaryOperatorKind::BO_Add) {
     operation = "add";
   } else if (opCode == BinaryOperatorKind::BO_Sub) {
@@ -129,6 +132,19 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
 
   EOObject binop {operation};
   binop.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+  binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  return binop;
+}
+EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
+  EOObject binop {"write"};
+  extern UnitTranspiler transpiler;
+  const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
+  if (op)
+  {
+    binop.nested.emplace_back(transpiler.glob.GetVarByID(reinterpret_cast<uint64_t>(op->getFoundDecl())).alias);
+  } else {
+    binop.nested.emplace_back(EOObjectType::EO_EMPTY);
+  }
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
