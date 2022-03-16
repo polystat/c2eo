@@ -52,7 +52,6 @@ void UnitTranspiler::GenerateResult() {
   result << "+package c2eo.src." << package_name << "\n";
 
   used_external_objects = FindAllExternalObjects(body);
-  //TODO Make correct alias generation
   for(const auto& ext_obj : used_external_objects)
   {
     if(known_types.find(ext_obj)==known_types.end()) {

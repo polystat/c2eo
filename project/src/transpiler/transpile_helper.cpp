@@ -15,6 +15,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   const CompoundStmt* funcBody = dyn_cast<CompoundStmt>(FD->getBody());
   if(!funcBody)
+    //TODO if not body may be neet to create simple complete or abstract object with correct name
     return EOObject(EOObjectType::EO_EMPTY);
   return GetCompoundStmt(funcBody,true);
 }
