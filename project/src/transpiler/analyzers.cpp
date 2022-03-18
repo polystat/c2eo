@@ -29,7 +29,8 @@ void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
   ////if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
   if (!RD)
     return;
-  getRecordDeclSubObjects(RD);
+  //TODO Return record decl analysis
+  //getRecordDeclSubObjects(RD);
   //RD->dump();
 }
 

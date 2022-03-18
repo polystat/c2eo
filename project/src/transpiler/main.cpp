@@ -3,10 +3,14 @@
 */
 
 #include "matchers.h"
-#include "generator.h"
 #include "util.h"
 #include "unit_transpiler.h"
 #include "eo_object.h"
+
+using namespace clang;
+using namespace clang::tooling;
+using namespace llvm;
+
 
 // Apply a custom category to all command-line options so that they are the
 // only ones displayed.
@@ -20,11 +24,6 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 // A help message for this specific tool can be added afterwards.
 static cl::extrahelp MoreHelp("\nMore help text...\n");
 
-
-// void generateSpace(SpaceGen &globGen, std::string objFilename,
-//                    std::string initFilename) ;
-void generateSpace(SpaceGen &globGen, std::string objFilename);
-
 const char **transform_argv(const char *const *argv);
 
 UnitTranspiler transpiler;
@@ -37,12 +36,16 @@ int main(int argc, const char **argv) {
         return -1;
     }
 
+
     int parser_argc = 3;
     const char **parser_argv = transform_argv(argv);
     const char* inputFileName = argv[1];
     std::string filename = argv[2];
 
+
     transpiler.SetPackageName(filename.substr(0, filename.size()-3));
+
+
 
     auto ExpectedParser
             = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
@@ -64,10 +67,18 @@ int main(int argc, const char **argv) {
     MatchFinder finder;
     addMatchers(finder);
 //     Finder.addMatcher(LoopMatcher, &loopAnalyzer);
-// 
+//
+   //Disable unpretty error messages from CLang
+   Tool.setPrintErrorMessage(false);
    auto result = Tool.run(newFrontendActionFactory(&finder).get());
-   //if (!result)
-   //  return result;
+
+   /*
+   if (result == 1)
+   {
+     // Error ocured
+     llvm::errs() << "An error occurred in CLang" << "\n";
+     return 0;
+   }*/
 
    // тестовый вывод
    //std::cout << transpiler;
@@ -85,30 +96,4 @@ const char **transform_argv(const char *const *argv) {
     parser_argv[1] = argv[1];
     parser_argv[2] = "--";
     return parser_argv;
-}
-
-
-// void generateSpace(SpaceGen &globGen, std::string objFilename,
-//         std::string initFilename) {
-//     std::string obj;
-//     std::string init;
-//     globGen.Generate(obj);
-//     globGen.GenValue(init);
-//     outs() << "\n===================================\n";
-//     outs() << obj;
-//     str2file(obj, objFilename);
-//     outs() << init;
-//     str2file(init, initFilename);
-// }
-
-void generateSpace(SpaceGen &globGen, std::string objFilename) {
-    std::stringstream obj;
-    //std::string init;
-    globGen.Generate(obj);
-    //globGen.GenValue(init);
-    outs() << "\n===================================\n";
-    outs() << obj.str();
-    str2file(obj.str(), objFilename);
-    //outs() << init;
-    //str2file(init, initFilename);
 }

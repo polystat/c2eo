@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.18)
 
 project(c2eo)
 
-# set(CMAKE_C_COMPILER путь/до/компилятора)
-#set(CMAKE_CXX_COMPILER "${PATH_TO_LLVM_SOURCE}/build/bin/clang")
+
 
 #  llvm_config
-set(PATH_TO_LLVM_SOURCE "../../../llvm-clang/")
+set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
+
+#set(CMAKE_C_COMPILER путь/до/компилятора)
+# set(CMAKE_CXX_COMPILER "../${PATH_TO_LLVM_SOURCE}/build/bin/clang++")
 
 
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
@@ -32,28 +34,16 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 set(SOURCE_FILES
     # Headers
     vardecl.h
-    funcdecl.h
-    recorddecl.h
-    stmt.h
     analyzers.h
     matchers.h
-        generator.h
-
     util.h
 
     # Sources
     main.cpp
     vardecl.cpp
-    funcdecl.cpp
-    recorddecl.cpp
-    stmt.cpp
     analyzers.cpp
     matchers.cpp
-        generator.cpp
-
-
-
-        util.cpp decl.h decl.cpp memory_manager.cpp memory_manager.h unit_transpiler.cpp unit_transpiler.h eo_object.cpp eo_object.h function_manager.cpp function_manager.h transpile_helper.cpp transpile_helper.h aliases.h)
+    util.cpp memory_manager.cpp memory_manager.h unit_transpiler.cpp unit_transpiler.h eo_object.cpp eo_object.h function_manager.cpp function_manager.h transpile_helper.cpp transpile_helper.h aliases.h)
 
 
 #add_executable(recvistor main.cpp)

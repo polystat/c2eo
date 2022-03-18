@@ -2,8 +2,11 @@
 #define __ANALYZERS__
 
 #include "vardecl.h"
-#include "funcdecl.h"
-#include "recorddecl.h"
+
+using namespace clang;
+using namespace clang::ast_matchers;
+
+
 
 //------------------------------------------------------------------------------
 class FuncDeclAnalyzer : public MatchFinder::MatchCallback {
