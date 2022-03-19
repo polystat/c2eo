@@ -6,8 +6,9 @@
 #include <utility>
 #include "clang/AST/Decl.h"
 #include "eo_object.h"
+#include "memory_manager.h"
 
-// Representation of a simple variable stored in RAM
+// Representation of a simple function
 struct FunctionDefinition {
   const clang::FunctionDecl *FD;
   std::string name;

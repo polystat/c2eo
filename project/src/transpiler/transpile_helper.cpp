@@ -1,9 +1,13 @@
 #include "transpile_helper.h"
+#include "memory_manager.h"
 #include "unit_transpiler.h"
+#include "vardecl.h"
 #include <queue>
 using namespace clang;
 using namespace llvm;
 using namespace std;
+
+vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, size_t shift);
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
@@ -12,12 +16,58 @@ EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt);
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt);
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
+
+extern UnitTranspiler transpiler;
+
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
-  const CompoundStmt* funcBody = dyn_cast<CompoundStmt>(FD->getBody());
+  const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
   if(!funcBody)
-    //TODO if not body may be neet to create simple complete or abstract object with correct name
+    //TODO if not body may be need to create simple complete or abstract object with correct name
     return EOObject(EOObjectType::EO_EMPTY);
-  return GetCompoundStmt(funcBody,true);
+  size_t shift = transpiler.glob.RealMemorySize();
+  vector<Variable> all_local = ProcessFunctionLocalVariables(funcBody, shift);
+  EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
+  EOObject local_start("add","local-start");
+  local_start.nested.emplace_back("param-start");
+  local_start.nested.emplace_back("param-size");
+  func_body_eo.nested.push_back(local_start);
+  for (const auto& var : all_local)
+  {
+    func_body_eo.nested.push_back(var.GetAddress(transpiler.glob.name));
+  }
+  EOObject body_seq = GetCompoundStmt(funcBody,true);
+  std::reverse(all_local.begin(), all_local.end());
+  for(const auto& var :all_local)
+  {
+    if (var.is_initialized)
+      body_seq.nested.insert(body_seq.nested.begin(),var.GetInitializer());
+  }
+  func_body_eo.nested.push_back(body_seq);
+  transpiler.glob.RemoveAllUsed(all_local);
+
+  return func_body_eo;
+}
+
+vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, size_t shift)
+{
+  vector<Variable> all_local;
+  for (auto stmt : CS->body() ) {
+    Stmt::StmtClass stmtClass = stmt->getStmtClass();
+    if (stmtClass == Stmt::DeclStmtClass)
+    {
+      auto decl_stmt = dyn_cast<DeclStmt>(stmt);
+      for( auto decl : decl_stmt->decls())
+      {
+        Decl::Kind decl_kind = decl->getKind();
+        if (decl_kind == Decl::Kind::Var)
+        {
+          auto var_decl = dyn_cast<VarDecl>(decl);
+          all_local.push_back(ProcessVariable(var_decl,"local-start", shift));
+        }
+      }
+    }
+  }
+  return all_local;
 }
 //Function to get eo representation of CompoundStmt
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
@@ -32,10 +82,9 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
       EOObject printer {"printf"};
       printer.nested.emplace_back(R"("%d\n")",EOObjectType::EO_LITERAL);
       EOObject read_val {"read-as-int64"};
-      extern UnitTranspiler transpiler;
-      //TODO fix unsafety code
-      read_val.nested.emplace_back(transpiler.glob.GetVarByID(
-          reinterpret_cast<uint64_t>(dyn_cast<DeclRefExpr>(*stmt->child_begin())->getFoundDecl())).alias);
+      uint64_t var_id = reinterpret_cast<uint64_t>(dyn_cast<DeclRefExpr>(*stmt->child_begin())->getFoundDecl());
+      const Variable& var = transpiler.glob.GetVarByID(var_id);
+      read_val.nested.emplace_back(var.alias);
       printer.nested.push_back(read_val);
       res.nested.push_back(printer);
       continue;
@@ -61,11 +110,10 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     const auto *op = dyn_cast<DeclRefExpr>(stmt);
-    extern UnitTranspiler transpiler;
-    string type_name = "-"+GetTypeName(op->getType());
-    EOObject variable {"read-as"+type_name};
-    //TODO fix unsafety code
-    variable.nested.emplace_back(transpiler.glob.GetVarByID(reinterpret_cast<uint64_t>(op->getFoundDecl())).alias);
+    auto var_id = reinterpret_cast<uint64_t>(op->getFoundDecl());
+    const Variable& var = transpiler.glob.GetVarByID(var_id);
+    EOObject variable {"read-as-"+var.type_postfix};
+    variable.nested.emplace_back(var.alias);
     return variable;
   } else if (stmtClass == Stmt::IfStmtClass) {
     const auto* op = dyn_cast<IfStmt>(stmt);
@@ -138,11 +186,12 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
 }
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   EOObject binop {"write"};
-  extern UnitTranspiler transpiler;
   const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
   if (op)
   {
-    binop.nested.emplace_back(transpiler.glob.GetVarByID(reinterpret_cast<uint64_t>(op->getFoundDecl())).alias);
+    auto var_id = reinterpret_cast<uint64_t>(dyn_cast<DeclRefExpr>(op)->getFoundDecl());
+    const Variable& var = transpiler.glob.GetVarByID(var_id);
+    binop.nested.emplace_back(var.alias);
   } else {
     binop.nested.emplace_back(EOObjectType::EO_EMPTY);
   }
@@ -240,7 +289,10 @@ std::set<std::string> FindAllExternalObjects(EOObject obj) {
     not_visited.pop();
     switch (cur.type) {
       case EOObjectType::EO_ABSTRACT:
+
         all_known.insert(cur.postfix);
+        for(const auto& arg : cur.arguments)
+          all_known.insert(arg);
         break;
       case EOObjectType::EO_COMPLETE:
         all_known.insert(cur.postfix);
@@ -248,7 +300,8 @@ std::set<std::string> FindAllExternalObjects(EOObject obj) {
           unknown.insert(cur.name);
         break;
       case EOObjectType::EO_EMPTY:
-        unknown.insert("plug");
+        if(cur.nested.empty())
+          unknown.insert("plug");
         break;
       case EOObjectType::EO_LITERAL: break;
     }

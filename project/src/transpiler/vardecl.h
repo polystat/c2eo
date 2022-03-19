@@ -16,8 +16,9 @@
 
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Decl.h"
+#include "memory_manager.h"
 
 // Обработка переменной встреченной при проходе по дереву.
-void ProcessVariable(const clang::VarDecl *VD);
+Variable ProcessVariable(const clang::VarDecl *VD, std::string local_name = "", size_t shift = 0);
 
 #endif // __VARDECL__

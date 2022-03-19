@@ -26,7 +26,7 @@ void UnitTranspiler::GenerateResult() {
 
   if(!glob.Empty()){
     for(const auto& var : glob){
-      body.nested.emplace_back(var.GetAdress(glob.name));
+      body.nested.emplace_back(var.GetAddress(glob.name));
     }
   }
 
@@ -41,7 +41,11 @@ void UnitTranspiler::GenerateResult() {
   }
   if (std::find_if(body.nested.begin(), body.nested.end(),
                    [] (EOObject x) {return x.postfix=="main";})!=body.nested.end()) {
-    init_seq.nested.emplace_back("main");
+    EOObject main_call("main");
+    extern UnitTranspiler transpiler;
+    main_call.nested.emplace_back(std::to_string(transpiler.glob.RealMemorySize()),EOObjectType::EO_LITERAL);
+    main_call.nested.emplace_back("0",EOObjectType::EO_LITERAL);
+    init_seq.nested.push_back(main_call);
   }
 
   init_seq.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);

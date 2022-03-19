@@ -36,6 +36,7 @@ const std::vector<FunctionDefinition> &FunctionManager::GetAllDefinitions() {
 EOObject FunctionDefinition::GetEOObject() const {
    EOObject func_object(EOObjectType::EO_ABSTRACT);
    func_object.postfix = name;
+   func_object.arguments = {"param-start","param-size"};
    func_object.nested.push_back(GetBody());
    return func_object;
 }
