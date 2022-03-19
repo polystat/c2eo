@@ -1,7 +1,7 @@
 #include <stdio.h>
-static int a = 0;
-int b = 10;
-int c = 30;
+static long long a = 0;
+long long b = 10;
+long long c = 30;
 
 int main() {
     a = b;

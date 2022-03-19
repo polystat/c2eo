@@ -13,7 +13,7 @@ auto EOObject::GetSpaceIndent() {
 }
 
 std::ostream& operator<<(ostream &os, const EOObject& obj) {
-  if (obj.type == EOObjectType::EO_EMPTY && !obj.nested.empty())
+  if (obj.type == EOObjectType::EO_EMPTY)
   {
     for(const auto& child : obj.nested)
     {
@@ -22,7 +22,7 @@ std::ostream& operator<<(ostream &os, const EOObject& obj) {
     return os;
   }
   os << EOObject::GetSpaceIndent();
-  if (obj.type == EOObjectType::EO_EMPTY) {
+  if (obj.type == EOObjectType::EO_PLUG) {
     os << "plug" << "\n";
     return os;
   }

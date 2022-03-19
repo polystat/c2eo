@@ -1,7 +1,7 @@
 //clang -Xclang -ast-dump -fsyntax-only test07.c
 
 #include "stdio.h"
-int n = 5;
+long long n = 5;
 int main() {
     do {
         printf("%d\n", n);

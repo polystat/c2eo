@@ -3,6 +3,7 @@
 #include "unit_transpiler.h"
 #include "vardecl.h"
 #include <queue>
+#include <sstream>
 using namespace clang;
 using namespace llvm;
 using namespace std;
@@ -17,13 +18,14 @@ EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt);
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
 
+EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
-  const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
-  if(!funcBody)
+  if(!FD->hasBody())
     //TODO if not body may be need to create simple complete or abstract object with correct name
     return EOObject(EOObjectType::EO_EMPTY);
+  const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
   size_t shift = transpiler.glob.RealMemorySize();
   vector<Variable> all_local = ProcessFunctionLocalVariables(funcBody, shift);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
@@ -79,14 +81,26 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
     // Костыльное решение для тестового выводо
     if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перчислимых типов
     {
-      EOObject printer {"printf"};
-      printer.nested.emplace_back(R"("%d\n")",EOObjectType::EO_LITERAL);
-      EOObject read_val {"read-as-int64"};
-      uint64_t var_id = reinterpret_cast<uint64_t>(dyn_cast<DeclRefExpr>(*stmt->child_begin())->getFoundDecl());
-      const Variable& var = transpiler.glob.GetVarByID(var_id);
-      read_val.nested.emplace_back(var.alias);
-      printer.nested.push_back(read_val);
-      res.nested.push_back(printer);
+      auto ref = dyn_cast<DeclRefExpr>(*stmt->child_begin());
+      if (!ref)
+        continue;
+      auto var_id = reinterpret_cast<uint64_t>(ref->getFoundDecl());
+      try {
+        const Variable &var = transpiler.glob.GetVarByID(var_id);
+        string formatter = "d";
+        if (var.type_postfix == "float32" || var.type_postfix == "float64")
+          formatter = "f";
+        EOObject printer{"printf"};
+        printer.nested.emplace_back("\"%" + formatter + "\\n\"", EOObjectType::EO_LITERAL);
+        EOObject read_val{"read-as-" + var.type_postfix};
+        read_val.nested.emplace_back(var.alias);
+        printer.nested.push_back(read_val);
+        res.nested.push_back(printer);
+      }
+      catch (invalid_argument&)
+      {
+        res.nested.emplace_back(EOObjectType::EO_PLUG);
+      }
       continue;
     }
     EOObject stmt_obj = GetStmtEOObject(stmt);
@@ -110,11 +124,20 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     const auto *op = dyn_cast<DeclRefExpr>(stmt);
-    auto var_id = reinterpret_cast<uint64_t>(op->getFoundDecl());
+    auto ref = dyn_cast<DeclRefExpr>(stmt);
+    if (!ref)
+      return EOObject{EOObjectType::EO_PLUG};
+    try {
+    auto var_id = reinterpret_cast<uint64_t>(ref->getFoundDecl());
     const Variable& var = transpiler.glob.GetVarByID(var_id);
     EOObject variable {"read-as-"+var.type_postfix};
     variable.nested.emplace_back(var.alias);
     return variable;
+    } catch (invalid_argument&)
+    {
+      return EOObject(EOObjectType::EO_PLUG);
+    }
+
   } else if (stmtClass == Stmt::IfStmtClass) {
     const auto* op = dyn_cast<IfStmt>(stmt);
     return GetIfStmtEOObject(op);
@@ -130,8 +153,19 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
   } else if (stmtClass == Stmt::IntegerLiteralClass) {
     const auto* op = dyn_cast<IntegerLiteral>(stmt);
     return GetIntegerLiteralEOObject(op);
+  } else if (stmtClass == Stmt::FloatingLiteralClass) {
+    const auto* op = dyn_cast<FloatingLiteral>(stmt);
+    return GetFloatingLiteralEOObject(op);
+  } else if (stmtClass == Stmt::DeclStmtClass) {
+    return EOObject(EOObjectType::EO_EMPTY);
   }
-  return EOObject(EOObjectType::EO_EMPTY);
+  return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
+  APFloat an_float = p_literal->getValue();
+  ostringstream ss{};
+  ss << fixed << an_float.convertToDouble() ;
+  return {ss.str(),EOObjectType::EO_LITERAL};
 }
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   APInt an_int = p_literal->getValue();
@@ -189,9 +223,15 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
   if (op)
   {
-    auto var_id = reinterpret_cast<uint64_t>(dyn_cast<DeclRefExpr>(op)->getFoundDecl());
-    const Variable& var = transpiler.glob.GetVarByID(var_id);
-    binop.nested.emplace_back(var.alias);
+    auto var_id = reinterpret_cast<uint64_t>(op->getFoundDecl());
+    try{
+      const Variable& var = transpiler.glob.GetVarByID(var_id);
+      binop.nested.emplace_back(var.alias);
+    }
+    catch (invalid_argument&)
+    {
+      binop.nested.emplace_back(EOObjectType::EO_LITERAL);
+    }
   } else {
     binop.nested.emplace_back(EOObjectType::EO_EMPTY);
   }
@@ -300,10 +340,11 @@ std::set<std::string> FindAllExternalObjects(EOObject obj) {
           unknown.insert(cur.name);
         break;
       case EOObjectType::EO_EMPTY:
+      case EOObjectType::EO_LITERAL: break;
+      case EOObjectType::EO_PLUG:
         if(cur.nested.empty())
           unknown.insert("plug");
         break;
-      case EOObjectType::EO_LITERAL: break;
     }
     for(auto child : cur.nested)
     {

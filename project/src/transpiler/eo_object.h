@@ -10,6 +10,7 @@ enum class EOObjectType{
   EO_COMPLETE,
   EO_LITERAL,
   EO_ABSTRACT,
+  EO_PLUG,
 };
 
 
