@@ -109,7 +109,7 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
         Stmt* body = (Stmt * )((clang::InitListExpr * )(VD->getInit()));
         std::stringstream ss;
         //getASTStmtGen(body, &VD->getASTContext())->Generate(ss);
-        str = ss.str();
+        str = "plug";
     }
 }
 

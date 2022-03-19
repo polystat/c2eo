@@ -6,13 +6,12 @@ i64 x = 42;
 i64 y = 0;
 
 i64 main() {
-    x = x / y;
-  /*x = 1 + x;
+    x = 1 + x;
     printf("%ld\n", x);
     x;
     x = x + 1;
     printf("%ld\n", x);
-    x;*/
+    x;
     return 0;
 }
 
@@ -28,10 +27,10 @@ i64 main() {
 
   [] > main
     seq > @
-      write x (add (read-as-int64 x) 1)
-      printf "%d\n" (read-as-int64 x)
-      write x (add 1 (read-as-int64 x))
-      printf "%d\n" (read-as-int64 x)
+      write x (add (read-as-long long64 x) 1)
+      printf "%d\n" (read-as-long long64 x)
+      write x (add 1 (read-as-long long64 x))
+      printf "%d\n" (read-as-long long64 x)
       TRUE
 
   [arg] > eo-application

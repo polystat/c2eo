@@ -10,7 +10,8 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     context = Result.Context;
   const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
   // We do not want to convert header files!
-  if (!FD || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+  // TODO !FD->isDefined() now only plug and should be fixed later
+  if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
       return;
 
   transpiler.func_manager.Add(FD);

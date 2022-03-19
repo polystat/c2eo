@@ -1,6 +1,6 @@
 #include <stdio.h>
-int b = 10;
-int c = 30;
+long long b = 10;
+long long c = 30;
 
 int main() {
     b = b + c;

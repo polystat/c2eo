@@ -1,5 +1,5 @@
 #include <stdio.h>
-int x = 1;
+long long x = 1;
 //_Bool v = 0;
 int main() {
     x = x + 1;

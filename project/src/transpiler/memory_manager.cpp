@@ -17,6 +17,9 @@ Variable MemoryManager::Add(uint64_t id,
 
   Variable var = {id, pointer,size,type,std::move(alias), std::move(value),
                   std::move(local_name), shift,type.substr(2) , is_initialized};
+  //TODO fix this plug
+  if (var.value.empty())
+    var.value = "plug";
   variables.push_back(var);
   pointer += size;
   return var;
@@ -65,7 +68,10 @@ EOObject Variable::GetInitializer() const{
     return EOObject(EOObjectType::EO_EMPTY);
   EOObject res("write");
   res.nested.emplace_back(alias);
-  res.nested.emplace_back(value,EOObjectType::EO_LITERAL);
+  if (value == "plug")
+    res.nested.emplace_back(EOObjectType::EO_PLUG);
+  else
+    res.nested.emplace_back(value,EOObjectType::EO_LITERAL);
   return res;
 }
 EOObject Variable::GetAddress(string mem_name) const{
