@@ -117,6 +117,8 @@ def compare_lines(c_data, eo_data):
             continue
 
         is_both_float = tools.is_float(c_line) and tools.is_float(eo_line)
+        c_line = c_line.replace(',', '.')
+        eo_line = eo_line.replace(',', '.')
         if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
             log_data.append(ok_line)
         else:
