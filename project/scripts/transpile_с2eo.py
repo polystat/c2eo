@@ -22,24 +22,28 @@ class Transpiler(object):
         self.path_to_c_files = os.path.join(path_to_c_files, '')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
-        self.path_to_c2eo = settings.get_setting('path_to_c2eo')
+        self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
+        self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
 
     def transpile(self):
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c', filters=self.filters,
                                                 recursive=True, print_files=True)
+        original_path = os.getcwd()
+        os.chdir(self.path_to_c2eo_build)
         eo_c_files = tools.thread_pool().map(self.start_transpilation, c_files)
         self.start_collecting(eo_c_files)
         if len(c_files) == 1:
             self.generate_run_sh(eo_c_files[0])
         tools.pprint('Transpilation done\n')
+        os.chdir(original_path)
         return c_files, eo_c_files
 
     def start_transpilation(self, path_to_c_file):
         eo_c_file = self.prepare_eo_c_file(path_to_c_file)
         output_name = tools.get_file_name(eo_c_file).replace('-eo', '')
-        transpile_cmd = f'{self.path_to_c2eo}c2eo {eo_c_file} {output_name}.eo > /dev/null'
+        transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {eo_c_file} {output_name}.eo > /dev/null'
         subprocess.run(transpile_cmd, shell=True)
         return os.path.abspath(eo_c_file)
 

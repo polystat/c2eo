@@ -25,14 +25,14 @@ class Tests(object):
             config = settings.get_setting('config')
         self.filters = settings.get_config(config)
         self.path_to_tests = path_to_tests
-        self.path_to_c2eo = settings.get_setting('path_to_c2eo')
+        self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
 
     def test(self):
         update_eo_version.main()
-        build_c2eo.main(self.path_to_c2eo)
+        build_c2eo.main(self.path_to_c2eo_transpiler)
         c_files, eo_c_files = Transpiler(self.path_to_tests, self.filters).transpile()
         self.get_result_for_tests(c_files, eo_c_files)
         results = tools.thread_pool().map(compare_test_results, eo_c_files)
