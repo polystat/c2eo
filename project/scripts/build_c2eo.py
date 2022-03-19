@@ -9,12 +9,12 @@ import tools
 import settings
 
 
-def main(path_to_c2eo_transpiler=None):
-    if path_to_c2eo_transpiler is None:
-        path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
+def main(path_to_c2eo_build=None):
+    if path_to_c2eo_build is None:
+        path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
     tools.pprint()
     original_path = os.getcwd()
-    os.chdir(path_to_c2eo_transpiler)
+    os.chdir(path_to_c2eo_build)
     subprocess.run('cmake ..', shell=True)
     subprocess.run('make', shell=True)
     os.chdir(original_path)
