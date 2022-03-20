@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-int a = 1;
-int b = 2;
-int c = 3;
-int x;
+long long a = 1;
+long long b = 2;
+long long c = 3;
+long long x;
 
 void swapABC(){
     x = a;

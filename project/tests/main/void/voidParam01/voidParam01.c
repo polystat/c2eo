@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-int a = 6;
-int b = 8;
+long long a = 6;
+long long b = 8;
 double x = 1.5;
 
-void fun(int x, double d) {
+void fun(long long x, double d) {
 //    d;
 //    d = 0.5;
 //    d;

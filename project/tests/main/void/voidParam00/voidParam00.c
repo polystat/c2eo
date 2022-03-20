@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-int a = 6;
-int b = 8;
+long long a = 6;
+long long b = 8;
 
-void fun(int x) {
+void fun(long long x) {
     a = b * 2;
     a;
     b;

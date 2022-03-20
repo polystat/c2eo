@@ -32,6 +32,29 @@ void FunctionManager::Add(const clang::FunctionDecl *FD) {
 const std::vector<FunctionDefinition> &FunctionManager::GetAllDefinitions() {
   return definitions;
 }
+EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl* FD) const{
+  auto res_def = std::find_if(definitions.begin(), definitions.end(), [&FD] (const FunctionDefinition& decl){
+    return decl.FD == FD;
+  });
+  if (res_def!=definitions.end())
+  {
+    EOObject call (res_def->name);
+    call.nested.emplace_back("local-empty-position");
+    call.nested.emplace_back("0",EOObjectType::EO_LITERAL);
+    return call;
+  }
+  auto res_decl = std::find_if(declarations.begin(), declarations.end(), [&FD] (const FunctionDeclaration& decl){
+    return decl.FD == FD;
+  });
+  if (res_decl!=declarations.end())
+  {
+    EOObject call (res_decl->name);
+    call.nested.emplace_back("local-empty-position");
+    call.nested.emplace_back("0",EOObjectType::EO_LITERAL);
+    return call;
+  }
+  return EOObject(EOObjectType::EO_PLUG);
+}
 
 EOObject FunctionDefinition::GetEOObject() const {
    EOObject func_object(EOObjectType::EO_ABSTRACT);
