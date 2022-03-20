@@ -19,6 +19,7 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
 
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal);
+EOObject GetFunctionCallEOObject(const CallExpr *op);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -33,6 +34,11 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   local_start.nested.emplace_back("param-start");
   local_start.nested.emplace_back("param-size");
   func_body_eo.nested.push_back(local_start);
+  size_t free_pointer = transpiler.glob.RealMemorySize();
+  EOObject local_empty_position("add","local-empty-position");
+  local_empty_position.nested.emplace_back("local-start");
+  local_empty_position.nested.emplace_back(to_string(free_pointer-shift),EOObjectType::EO_LITERAL);
+  func_body_eo.nested.push_back(local_empty_position);
   for (const auto& var : all_local)
   {
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob.name));
@@ -123,7 +129,6 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     //TODO if cast kinds and also split it to another func
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::DeclRefExprClass) {
-    const auto *op = dyn_cast<DeclRefExpr>(stmt);
     auto ref = dyn_cast<DeclRefExpr>(stmt);
     if (!ref)
       return EOObject{EOObjectType::EO_PLUG};
@@ -158,9 +163,16 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     return GetFloatingLiteralEOObject(op);
   } else if (stmtClass == Stmt::DeclStmtClass) {
     return EOObject(EOObjectType::EO_EMPTY);
+  }else if (stmtClass == Stmt::CallExprClass) {
+    const auto* op = dyn_cast<CallExpr>(stmt);
+    return GetFunctionCallEOObject(op);
   }
   return EOObject(EOObjectType::EO_PLUG);
 }
+EOObject GetFunctionCallEOObject(const CallExpr *op) {
+  return transpiler.func_manager.GetFunctionCall(op->getDirectCallee());
+}
+
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
   APFloat an_float = p_literal->getValue();
   ostringstream ss{};

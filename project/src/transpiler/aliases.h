@@ -45,6 +45,7 @@ std::map<std::string,std::string> known_aliases =
         {"read-as-int32", "+alias c2eo.coperators.read-as-int32"},
         {"read-as-int64", "+alias c2eo.coperators.read-as-int64"},
         {"read-as-float64", "+alias c2eo.coperators.read-as-float64"},
+        {"read-as-bool", "+alias c2eo.coperators.read-as-bool"},
         {"shift-left", "+alias c2eo.coperators.shift-left"},
         {"shift-right", "+alias c2eo.coperators.shift-right"},
         {"sub", "+alias c2eo.coperators.sub"},
