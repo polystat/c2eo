@@ -27,7 +27,7 @@ struct FunctionManager {
 
   void Add(const clang::FunctionDecl* FD);
   const std::vector<FunctionDefinition>& GetAllDefinitions();
-  EOObject GetFunctionCall(const clang::FunctionDecl* FD) const;
+  EOObject GetFunctionCall(const clang::FunctionDecl *FD, size_t param_size) const;
  private:
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;

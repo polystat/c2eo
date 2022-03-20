@@ -20,6 +20,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
 
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal);
 EOObject GetFunctionCallEOObject(const CallExpr *op);
+vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params, size_t shift);
+size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -28,17 +30,24 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
     return EOObject(EOObjectType::EO_EMPTY);
   const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
   size_t shift = transpiler.glob.RealMemorySize();
-  vector<Variable> all_local = ProcessFunctionLocalVariables(funcBody, shift);
+  size_t param_memory_size = GetParamMemorySize(FD->parameters());
+  vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
+  vector<Variable> all_local = ProcessFunctionLocalVariables(funcBody, shift + param_memory_size);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("add","local-start");
   local_start.nested.emplace_back("param-start");
   local_start.nested.emplace_back("param-size");
   func_body_eo.nested.push_back(local_start);
   size_t free_pointer = transpiler.glob.RealMemorySize();
-  EOObject local_empty_position("add","local-empty-position");
+  EOObject local_empty_position("add","empty-local-position");
   local_empty_position.nested.emplace_back("local-start");
-  local_empty_position.nested.emplace_back(to_string(free_pointer-shift),EOObjectType::EO_LITERAL);
+  local_empty_position.nested.emplace_back(to_string(free_pointer - shift - param_memory_size),
+                                           EOObjectType::EO_LITERAL);
   func_body_eo.nested.push_back(local_empty_position);
+  for (const auto& param : all_param)
+  {
+    func_body_eo.nested.push_back(param.GetAddress(transpiler.glob.name));
+  }
   for (const auto& var : all_local)
   {
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob.name));
@@ -51,9 +60,27 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
       body_seq.nested.insert(body_seq.nested.begin(),var.GetInitializer());
   }
   func_body_eo.nested.push_back(body_seq);
+  transpiler.glob.RemoveAllUsed(all_param);
   transpiler.glob.RemoveAllUsed(all_local);
 
   return func_body_eo;
+}
+size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
+  size_t res = 0;
+  for (auto VD : params)
+  {
+    TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
+    size_t type_size = type_info.Width / 8;
+    res += type_size;
+  }
+  return res;
+}
+vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params, size_t shift) {
+  vector<Variable> all_params;
+  for (auto param : params ) {
+    all_params.push_back(ProcessVariable(param, "param-start",shift));
+  }
+  return all_params;
 }
 
 vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, size_t shift)
@@ -170,7 +197,33 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
   return EOObject(EOObjectType::EO_PLUG);
 }
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
-  return transpiler.func_manager.GetFunctionCall(op->getDirectCallee());
+  EOObject call(EOObjectType::EO_EMPTY);
+  vector<std::size_t> var_sizes;
+  for (auto VD :op->getDirectCallee()->parameters())
+  {
+    TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
+    size_t type_size = type_info.Width / 8;
+    var_sizes.push_back(type_size);
+  }
+  size_t shift = 0;
+  int i = 0;
+  for (auto arg : op->arguments()) {
+    EOObject param{"write"};
+    EOObject address {"address"};
+    address.nested.emplace_back("global-ram");
+    EOObject add {"add"};
+    add.nested.emplace_back("empty-local-position");
+    add.nested.emplace_back(to_string(shift),EOObjectType::EO_LITERAL);
+    address.nested.push_back(add);
+    param.nested.push_back(address);
+    param.nested.push_back(GetStmtEOObject(arg));
+    shift += var_sizes[i];
+    //may be it will works with param.
+    i = i == var_sizes.size()-1 ? i : i + 1;
+    call.nested.push_back(param);
+  }
+  call.nested.push_back(transpiler.func_manager.GetFunctionCall(op->getDirectCallee(), shift));
+  return call;
 }
 
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {

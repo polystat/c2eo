@@ -66,8 +66,12 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
     return transpiler.glob.Add(varId, typeSize, strType, "s-" + varName, strValue);
   } else // its local variable!
   {
-    if(local_name.empty())
+    if (local_name.empty())
       return {};
+    const auto *PD = llvm::dyn_cast<ParmVarDecl>(VD);
+    if (PD) {
+      return transpiler.glob.Add(varId, typeSize, strType, "p-" + varName, strValue, local_name, shift, VD->hasInit());
+    }
     return transpiler.glob.Add(varId, typeSize, strType, "l-" + varName, strValue, local_name, shift, VD->hasInit());
   }
 }
@@ -105,6 +109,7 @@ void initValueAnalysis(const VarDecl* VD, std::string &str) {
             str = std::to_string(floatValue);
         }
     } else {
+        //TODO fix generation of non-const initialization. Maybe value in Variable should be EOObject!
         //TODO Fix Record decl generation
         Stmt* body = (Stmt * )((clang::InitListExpr * )(VD->getInit()));
         std::stringstream ss;
