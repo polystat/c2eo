@@ -24,6 +24,8 @@ class Transpiler(object):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
+        self.run_sh_code = settings.get_meta_code('run.sh')
+        self.plug_code = settings.get_meta_code('plug')
 
     def transpile(self):
         tools.pprint('\nTranspilation start\n')
@@ -62,7 +64,10 @@ class Transpiler(object):
         return prepared_eo_c_file
 
     def start_collecting(self, eo_c_files):
-        self.remove_unused_eo_files()
+        eo_assembly_files = tools.search_files_by_pattern('.', '*.eo')
+        self.remove_unused_eo_files(eo_assembly_files)
+        empty_files = list(filter(lambda file: os.stat(file).st_size == 0, eo_assembly_files))
+        tools.thread_pool().map(self.generate_plug_for_empty_eo_file, empty_files)
         difference = tools.thread_pool().map(self.move_transpilation_files, eo_c_files)
         difference = list(filter(lambda x: x, difference))  # Filter None values
         if difference:
@@ -72,9 +77,14 @@ class Transpiler(object):
         else:
             tools.pprint('\nNot found any changes in src files')
 
-    def remove_unused_eo_files(self):
-        eo_assembly_names = tools.search_files_by_pattern('.', '*.eo')
-        eo_assembly_names = set(map(tools.get_file_name, eo_assembly_names))
+    def generate_plug_for_empty_eo_file(self, file):
+        file_name = tools.get_file_name(file)
+        plug = regex.sub('<file_name>', file_name, self.plug_code)
+        with open(file, 'w') as f:
+            f.write(plug)
+
+    def remove_unused_eo_files(self, eo_assembly_files):
+        eo_assembly_names = set(map(tools.get_file_name, eo_assembly_files))
         src_eo_names = tools.search_files_by_pattern(self.path_to_eo_src, '*.eo')
         src_eo_names = set(map(tools.get_file_name, src_eo_names))
         for name in src_eo_names - eo_assembly_names:
@@ -98,8 +108,7 @@ class Transpiler(object):
 
     def generate_run_sh(self, eo_c_file):
         file_name = tools.get_file_name(eo_c_file).replace('-eo', '')
-        code = settings.get_meta_code('run.sh')
-        code = regex.sub('<object_name>', file_name, code)
+        code = regex.sub('<object_name>', file_name, self.run_sh_code)
         with open(f'{self.path_to_eo_project}run.sh', 'w') as f:
             f.write(code)
 
