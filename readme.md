@@ -197,7 +197,7 @@ To compile files with any external links, we use the following solution:
 
   ```java
   +alias c2eo.external.strcpy
-  strcpy str2 st1 8
+  strncpy str2 st1 8
   ```
 
 - Сreating a file of the same name by the specified alias with an empty implementation
@@ -205,7 +205,7 @@ To compile files with any external links, we use the following solution:
   ```java
   +package c2eo.external
 
-  [] > strcpy
+  [] > strncpy
   ```
 
 ### Arrays
