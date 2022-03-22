@@ -131,6 +131,22 @@ seq
   foo 8 4
 ```
 
+### Return
+
+```java
+
+ram 1024 > return 
+
+[param-start] > bar
+  seq > @
+  ...
+  return.write result
+  TRUE
+
+seq > @
+  bar
+```
+
 ### Pointers
 
 C code may get an address of a variable, which is either in stack or in global memory:
@@ -166,23 +182,6 @@ The object `param-start` provided as an argument to EO object `bar` is a calcula
 seq > @
   bar 4
 ```
-
-### Return
-
-```java
-
-ram 1024 > return 
-
-[param-start] > bar
-  seq > @
-  ...
-  return.write result
-  TRUE
-
-seq > @
-  bar
-```
-
 
 ### External links
 
