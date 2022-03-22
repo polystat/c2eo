@@ -167,6 +167,23 @@ seq > @
   bar 4
 ```
 
+### Return
+
+```java
+
+ram 1024 > return 
+
+[param-start] > bar
+  seq > @
+  ...
+  return.write result
+  TRUE
+
+seq > @
+  bar
+```
+
+
 ### External links
 
 To compile files with any external links, we use the following solution:
@@ -180,7 +197,7 @@ To compile files with any external links, we use the following solution:
 
   ```java
   +alias c2eo.external.strcpy
-  strcpy str2 st1 8
+  strncpy str2 st1 8
   ```
 
 - Сreating a file of the same name by the specified alias with an empty implementation
@@ -188,7 +205,8 @@ To compile files with any external links, we use the following solution:
   ```java
   +package c2eo.external
 
-  [] > strcpy
+  [args...] > strncpy
+    TRUE > @
   ```
 
 ### Arrays
