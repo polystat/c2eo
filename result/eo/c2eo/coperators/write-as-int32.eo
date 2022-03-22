@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a b] > write-as-int32
+  a.write (b.as-bytes.part (b.as-bytes.size.sub 4) 4) > @

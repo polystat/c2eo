@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a b] > write-as-float64
+  a.write b > @
