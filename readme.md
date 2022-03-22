@@ -205,7 +205,8 @@ To compile files with any external links, we use the following solution:
   ```java
   +package c2eo.external
 
-  [] > strncpy
+  [args...] > strncpy
+    TRUE > @
   ```
 
 ### Arrays
