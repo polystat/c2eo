@@ -1,7 +1,7 @@
 config: null
-current_eo_version: 0.21.9
-path_to_c2eo_transpiler: ../bin/
+current_eo_version: 0.21.10
 path_to_c2eo_build: ../build/
+path_to_c2eo_transpiler: ../bin/
 path_to_config: data/config/
 path_to_eo: eo/
 path_to_eo_parse: target/01-parse/
