@@ -167,6 +167,23 @@ seq > @
   bar 4
 ```
 
+### Return
+
+```java
+
+ram 1024 > return 
+
+[param-start] > bar
+  seq > @
+  ...
+  return.write result
+  TRUE
+
+seq > @
+  bar
+```
+
+
 ### External links
 
 To compile files with any external links, we use the following solution:
