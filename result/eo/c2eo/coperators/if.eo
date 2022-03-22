@@ -1,9 +1,4 @@
 +package c2eo.coperators
 
-+alias c2eo.coperators.as-bool
-
 [a b c] > if
-  if. > @
-    as-bool a
-    b
-    c
+  (a.eq 0).if c b > @

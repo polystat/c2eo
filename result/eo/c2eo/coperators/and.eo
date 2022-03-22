@@ -1,6 +1,4 @@
 +package c2eo.coperators
 
-+alias c2eo.coperators.as-bool
-
 [a b] > and
-  ((as-bool a).and (as-bool b)).if 1 0 > @
+  ((a.neq 0).and (b.neq 0)).if 1 0 > @
