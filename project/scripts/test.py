@@ -29,59 +29,58 @@ class Tests(object):
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
+        self.run_sh_replace = settings.get_setting('run_sh_replace')
+        self.compilation_units = []
 
     def test(self):
         update_eo_version.main()
         build_c2eo.main(self.path_to_c2eo_build)
-        c_files, eo_c_files = Transpiler(self.path_to_tests, self.filters).transpile()
-        self.get_result_for_tests(c_files, eo_c_files)
-        results = tools.thread_pool().map(compare_test_results, eo_c_files)
+        self.compilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
+        if not self.compilation_units:
+            exit(-2)
+        self.get_result_for_tests()
+        results = tools.thread_pool().map(compare_test_results, self.compilation_units)
         passed, errors, exceptions = group_comparison_results(results)
         print_tests_result(sorted(passed), sorted(errors), sorted(exceptions))
 
-    def get_result_for_tests(self, c_files, eo_c_files):
-        tools.thread_pool().map(get_result_for_c_test, c_files)
+    def get_result_for_tests(self):
+        tools.thread_pool().map(get_result_for_c_file, self.compilation_units)
         if EOBuilder().build():
             tools.pprint('\nRunning tests')
             original_path = os.getcwd()
             os.chdir(self.path_to_eo_project)
-            tools.thread_pool().map(self.get_result_for_eo_test, eo_c_files)
+            tools.thread_pool().map(self.get_result_for_eo_file, self.compilation_units)
             os.chdir(original_path)
         else:
             exit(-1)
 
-    def get_result_for_eo_test(self, eo_c_file):
-        path, file_name, _ = tools.split_path(eo_c_file, with_end_sep=True)
-        file_name = file_name.replace('-eo', '')
-        command = regex.sub('<object_name>', file_name, self.run_sh_cmd)
-        result_file = f'{path}eo_result.txt'
-        subprocess.run(f'{command} >> {result_file} 2>&1', shell=True)
+    def get_result_for_eo_file(self, unit):
+        command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
+        unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
+        subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True)
 
 
-def get_result_for_c_test(path_to_test):
-    path, file_name, _ = tools.split_path(path_to_test, with_end_sep=True)
-    compiled_file = f'{path}{file_name}.out'
-    result_file = f'{path}c_result.txt'
-    compile_cmd = f'clang {path_to_test} -o {compiled_file} -Wno-everything > /dev/null 2>>{result_file}'
+def get_result_for_c_file(unit):
+    compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
+    unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
+    compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null 2>>{unit["result_c_file"]}'
     try:
         subprocess.run(compile_cmd, shell=True, check=True)
     except subprocess.CalledProcessError as exc:
         return exc
     else:
-        subprocess.run(f'{compiled_file} >> {result_file} 2>&1', shell=True)
+        subprocess.run(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
 
 
-def compare_test_results(path_to_eo_c_file):
-    path, file_name, _ = tools.split_path(path_to_eo_c_file, with_end_sep=True)
-    with open(f'{path}c_result.txt', 'r') as f:
+def compare_test_results(unit):
+    with open(unit['result_c_file'], 'r') as f:
         c_data = f.readlines()
-    with open(f'{path}eo_result.txt', 'r') as f:
+    with open(unit['result_eo_file'], 'r') as f:
         eo_data = f.readlines()
-    file_name = file_name.replace('-eo', '')
     is_except, (is_equal, log_data) = compare_files(c_data, eo_data)
-    with open(f'{path}result.log', 'w') as f:
+    with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
         f.writelines(log_data)
-    return file_name, is_except, is_equal, log_data
+    return unit["name"], is_except, is_equal, log_data
 
 
 def compare_files(c_data, eo_data):
@@ -133,13 +132,13 @@ def group_comparison_results(results):
     exceptions = []
     errors = []
 
-    for test_name, is_except, is_equal, log_data in results:
+    for unit_name, is_except, is_equal, log_data in results:
         if is_except:
-            exceptions.append((test_name, log_data))
+            exceptions.append((unit_name, log_data))
         elif is_equal:
-            passed.append((test_name, log_data))
+            passed.append((unit_name, log_data))
         else:
-            errors.append((test_name, log_data))
+            errors.append((unit_name, log_data))
     return passed, errors, exceptions
 
 
@@ -150,29 +149,13 @@ def print_tests_result(passed, errors, exceptions):
     for test_name, _ in passed:
         tools.pprint(test_name, slowly=True, status='PASS')
     for test_name, log_data in errors:
-        print_error_test(test_name, log_data)
+        tools.print_error_test(test_name, log_data)
     for test_name, log_data in exceptions:
-        print_exception_test(test_name, log_data)
+        tools.print_exception_test(test_name, log_data)
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tests_count = len(passed) + len(errors) + len(exceptions)
     tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
                  f' Errors: {len(errors)}, Exceptions: {len(exceptions)}', slowly=True)
-
-
-def print_error_test(test_name, log_data):
-    tools.pprint(test_name, slowly=True, status='ERROR')
-    print_truncated_data(log_data, 30)
-
-
-def print_exception_test(test_name, log_data):
-    tools.pprint(test_name, slowly=True, status='EXCEPTION')
-    print_truncated_data(log_data, 10)
-
-
-def print_truncated_data(data, max_lines):
-    lines_count = min(max_lines, len(data))
-    log_data = ''.join(data[:lines_count])
-    tools.pprint(log_data, slowly=True, status=None)
 
 
 if __name__ == '__main__':

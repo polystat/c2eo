@@ -74,7 +74,7 @@ def is_float(str_num):
 def make_name_from_path(path):
     path = path.replace(os.sep, ' ').replace('.', '')
     names = filter(lambda x: x != '', path.split(' '))
-    return '_'.join(names)
+    return '.'.join(names)
 
 
 def move_to_script_dir(path_to_script):
@@ -103,6 +103,22 @@ def print_only_file_names(files):
     pprint()
 
 
+def print_error_test(test_name, log_data):
+    pprint(test_name, slowly=True, status='ERROR')
+    print_truncated_data(log_data, 30)
+
+
+def print_exception_test(test_name, log_data):
+    pprint(test_name, slowly=True, status='EXCEPTION')
+    print_truncated_data(log_data, 10)
+
+
+def print_truncated_data(data, max_lines):
+    lines_count = min(max_lines, len(data))
+    log_data = ''.join(data[:lines_count])
+    pprint(log_data, slowly=True, status='')
+
+
 def read_file_as_dictionary(path):
     _, _, extension = split_path(path)
     data = []
@@ -117,6 +133,17 @@ def read_file_as_dictionary(path):
     else:
         pprint('Unsupported file extension', status='EXCEPTION')
     return data
+
+
+def remove_empty_dirs(path):
+    is_removed = False
+    folders = list(os.walk(path))[1:]
+    for folder in folders:
+        if not folder[1] and not folder[2]:
+            os.rmdir(folder[0])
+            is_removed = True
+    if is_removed:
+        remove_empty_dirs(path)
 
 
 def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
