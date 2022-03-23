@@ -26,6 +26,8 @@
 **/*-eo.c
 **/c_result.txt
 **/eo_result.txt
+**/*-c.txt
+**/*-eo.txt
 
 # Executables
 *.exe
