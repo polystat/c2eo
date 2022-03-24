@@ -14,6 +14,19 @@ import settings
 import clean_before_transpilation
 
 
+def is_unique_files(c_files):
+    names = list(map(lambda x: tools.get_file_name(x), c_files))
+    is_unique = True
+    counter = Counter(names)
+    for key, value in counter.items():
+        if value > 1:
+            is_unique = False
+            collisions = list(filter(lambda x: f'{key}.c' in x, c_files))
+            collisions = list(map(lambda x: f'{x}\n', collisions))
+            tools.print_exception_test('Detects follow files name collisions:', collisions)
+    return is_unique
+
+
 class Transpiler(object):
 
     def __init__(self, path_to_c_files, filters):
@@ -127,16 +140,3 @@ if __name__ == '__main__':
     path_to_files = os.path.abspath(sys.argv[1])
     tools.move_to_script_dir(sys.argv[0])
     Transpiler(path_to_files, None).transpile()
-
-
-def is_unique_files(c_files):
-    names = list(map(lambda x: tools.get_file_name(x), c_files))
-    is_unique = True
-    counter = Counter(names)
-    for key, value in counter.items():
-        if value > 1:
-            is_unique = False
-            collisions = list(filter(lambda x: f'{key}.c' in x, c_files))
-            collisions = list(map(lambda x: f'{x}\n', collisions))
-            tools.print_exception_test('Detects follow files name collisions:', collisions)
-    return is_unique
