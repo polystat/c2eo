@@ -8,14 +8,20 @@
 
 // Representation of a simple variable stored in RAM
 struct Variable {
+  // TODO make id type VarDecl*
   uint64_t id;
   size_t position;
   size_t size;
+  // like c-int64
   std::string type;
+  // like g-x
   std::string alias;
+  // TODO value should be EOObject
   std::string value;
+  // address of local memory start in global
   std::string local_pointer;
   size_t shift;
+  // only -int64
   std::string type_postfix;
   bool is_initialized;
   bool operator==(const Variable& var) const;

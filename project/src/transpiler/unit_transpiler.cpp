@@ -29,7 +29,7 @@ void UnitTranspiler::GenerateResult() {
       body.nested.emplace_back(var.GetAddress(glob.name));
     }
   }
-
+  // TODO write all declarations
   for(const auto& func : func_manager.GetAllDefinitions()){
 
     body.nested.push_back(func.GetEOObject());
@@ -76,6 +76,7 @@ void UnitTranspiler::GenerateResult() {
   result <<  body;
   tmp = result.str();
 }
-void UnitTranspiler::SetPackageName(std::string packagename) {
-  package_name = std::move(packagename);
+void UnitTranspiler::SetPackageName(std::string filename) {
+  // TODO fix if path contains folder path like ../main.c
+  package_name = std::move(filename);
 }

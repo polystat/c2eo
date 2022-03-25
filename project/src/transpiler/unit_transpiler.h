@@ -17,7 +17,7 @@ class UnitTranspiler{
   // Коллекция для составления списка алиасов
   std::set<std::string> used_external_objects;
 
-  void SetPackageName(std::string packagename);
+  void SetPackageName(std::string filename);
   //std::vector<EOObject>
 
  private:

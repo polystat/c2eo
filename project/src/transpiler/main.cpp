@@ -42,11 +42,11 @@ int main(int argc, const char **argv) {
     const char* inputFileName = argv[1];
     std::string filename = argv[2];
 
-
+    // TODO fix if path contains folder path like ../main.c
     transpiler.SetPackageName(filename.substr(0, filename.size()-3));
 
 
-
+    // TODO Add path to library as parser_argv
     auto ExpectedParser
             = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
 
@@ -70,6 +70,7 @@ int main(int argc, const char **argv) {
 //
    //Disable unpretty error messages from CLang
    Tool.setPrintErrorMessage(false);
+   //TODO Catch seg fault https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux
    auto result = Tool.run(newFrontendActionFactory(&finder).get());
 
    /*

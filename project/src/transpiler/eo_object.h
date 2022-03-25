@@ -48,7 +48,7 @@ struct EOObject{
 
 
 
-#endif //__EO_OBJECT__
-
-
 EOObject createSeq();
+
+
+#endif //__EO_OBJECT__

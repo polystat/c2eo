@@ -93,6 +93,8 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
       auto decl_stmt = dyn_cast<DeclStmt>(stmt);
       for( auto decl : decl_stmt->decls())
       {
+        // TODO if var created in nested statement we don't found it. Fix
+        // TODO duplicate names problem should be resoved
         Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Kind::Var)
         {
@@ -160,13 +162,15 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     if (!ref)
       return EOObject{EOObjectType::EO_PLUG};
     try {
-    auto var_id = reinterpret_cast<uint64_t>(ref->getFoundDecl());
-    const Variable& var = transpiler.glob.GetVarByID(var_id);
-    EOObject variable {"read-as-"+var.type_postfix};
-    variable.nested.emplace_back(var.alias);
-    return variable;
-    } catch (invalid_argument&)
+      auto var_id = reinterpret_cast<uint64_t>(ref->getFoundDecl());
+      const Variable& var = transpiler.glob.GetVarByID(var_id);
+      EOObject variable {"read-as-"+var.type_postfix};
+      variable.nested.emplace_back(var.alias);
+      return variable;
+    }
+    catch (invalid_argument& er)
     {
+      cerr << er.what() << "\n";
       return EOObject(EOObjectType::EO_PLUG);
     }
 
@@ -306,6 +310,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   EOObject if_stmt {"if"};
   if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  //TODO then and else is seq everytime!
   if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getThen()));
   if (p_stmt->hasElseStorage()) {
     if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getElse()));
@@ -320,6 +325,7 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
   EOObject while_stmt {"while"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  //TODO body is seq everytime!
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
   return while_stmt;
 }
@@ -329,6 +335,7 @@ EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
   do_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
   EOObject while_stmt {"while"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  //TODO body is seq everytime!
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
   do_stmt.nested.push_back(while_stmt);
   do_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
@@ -379,7 +386,7 @@ std::string GetTypeName(QualType qualType)
   return "undefinedtype";
 }
 
-std::set<std::string> FindAllExternalObjects(EOObject obj) {
+std::set<std::string> FindAllExternalObjects(const EOObject& obj) {
   std::set<std::string> all_known = {obj.postfix};
   std::set<std::string> unknown = {};
   //TODO maybe should use pointers or copy constructor to avoid unnecessary copying of objects

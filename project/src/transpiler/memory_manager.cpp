@@ -68,6 +68,7 @@ EOObject Variable::GetInitializer() const{
     return EOObject(EOObjectType::EO_EMPTY);
   EOObject res("write");
   res.nested.emplace_back(alias);
+  // TODO if value will be EOObject then code below changed.
   if (value == "plug")
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   else
