@@ -13,7 +13,7 @@ import settings
 import build_c2eo
 import update_eo_version
 from build_eo import EOBuilder
-from transpile_с2eo import Transpiler
+from transpile_c2eo import Transpiler
 
 
 class Tests(object):
