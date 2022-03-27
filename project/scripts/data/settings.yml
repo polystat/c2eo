@@ -1,8 +1,5 @@
 config: null
-current_eo_version: 0.21.10
-result_dir_name: c2eo-result
-run_sh_replace: <object_name>
-plug_replace: <file_name>
+current_eo_version: 0.22.1
 path_to_c2eo_build: ../build/
 path_to_c2eo_transpiler: ../bin/
 path_to_config: data/config/
@@ -13,3 +10,6 @@ path_to_eo_src: ../../result/eo/c2eo/src/
 path_to_foreign_objects: target/eo-foreign.csv
 path_to_meta: data/meta/
 path_to_tests: ../tests/main/
+plug_replace: <file_name>
+result_dir_name: c2eo-result
+run_sh_replace: <object_name>
