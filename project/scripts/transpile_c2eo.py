@@ -61,7 +61,7 @@ class Transpiler(object):
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
         if len(c_files) == 1:
-            self.generate_run_sh(self.compilation_units[0])
+            self.generate_run_sh(self.compilation_units[0]['full_name'])
         tools.pprint('Transpilation done\n')
         os.chdir(original_path)
         return self.compilation_units
