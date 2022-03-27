@@ -5,11 +5,19 @@
 #include <vector>
 #include <memory>
 #include "eo_object.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "llvm/Support/CommandLine.h"
+#include "clang/ASTMatchers/ASTMatchers.h"
+#include "clang/ASTMatchers/ASTMatchFinder.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/Decl.h"
+
 
 // Representation of a simple variable stored in RAM
 struct Variable {
-  // TODO make id type VarDecl*
-  uint64_t id;
+  const clang::VarDecl* id;
   size_t position;
   size_t size;
   // like c-int64
@@ -33,7 +41,7 @@ class MemoryManager{
  public:
   explicit MemoryManager(std::string name):pointer(0),name(std::move(name)) {}
 
-  Variable Add(uint64_t id,
+  Variable Add(const clang::VarDecl* id,
                size_t size,
                const std::string &type,
                std::string alias,
@@ -46,7 +54,7 @@ class MemoryManager{
 
   size_t RealMemorySize();
 
-  const Variable& GetVarByID(uint64_t id) const;
+  const Variable& GetVarByID(const clang::VarDecl* id) const;
 
   std::vector<Variable>::const_iterator begin() const;
 

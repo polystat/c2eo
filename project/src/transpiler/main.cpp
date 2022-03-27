@@ -6,25 +6,33 @@
 #include "util.h"
 #include "unit_transpiler.h"
 #include "eo_object.h"
+#include <csignal>
 
 using namespace clang;
 using namespace clang::tooling;
 using namespace llvm;
+using namespace std;
 
-
-// Apply a custom category to all command-line options so that they are the
-// only ones displayed.
 static llvm::cl::OptionCategory MyToolCategory("c2eo options");
-
-// CommonOptionsParser declares HelpMessage with a description of the common
-// command-line options related to the compilation database and input files.
-// It's nice to have this help message in all tools.
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
-
-// A help message for this specific tool can be added afterwards.
 static cl::extrahelp MoreHelp("\nMore help text...\n");
 
 const char **transform_argv(const char *const *argv);
+
+std::string packagename;
+std::string filename;
+
+void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+{
+  llvm::errs() << "Caught segfault at address " <<  si->si_addr << " while tool run\n";
+  ofstream out(filename);
+  out << "+package c2eo.src." << packagename << "\n\n";
+  out << "[args...] > global\n";
+  out << "  TRUE > @\n";
+  out.close();
+  exit(0);
+}
+
 
 UnitTranspiler transpiler;
 //--------------------------------------------------------------------------------------------------
@@ -37,12 +45,14 @@ int main(int argc, const char **argv) {
     }
 
 
-    int parser_argc = 3;
+    int parser_argc = 6;
     const char **parser_argv = transform_argv(argv);
     const char* inputFileName = argv[1];
-    std::string filename = argv[2];
+    filename = argv[2];
 
-    // TODO fix if path contains folder path like ../main.c
+    packagename = filename.substr(0, filename.size()-3);
+    if(packagename.rfind('/')!=std::string::npos)
+      packagename = packagename.substr(packagename.rfind('/') + 1);
     transpiler.SetPackageName(filename.substr(0, filename.size()-3));
 
 
@@ -70,7 +80,14 @@ int main(int argc, const char **argv) {
 //
    //Disable unpretty error messages from CLang
    Tool.setPrintErrorMessage(false);
-   //TODO Catch seg fault https://stackoverflow.com/questions/2350489/how-to-catch-segmentation-fault-in-linux
+
+  struct sigaction sa{};
+  memset(&sa, 0, sizeof(struct sigaction));
+  sigemptyset(&sa.sa_mask);
+  sa.sa_sigaction = segfault_sigaction;
+  sa.sa_flags   = SA_SIGINFO;
+
+   sigaction(SIGSEGV, &sa, nullptr);
    auto result = Tool.run(newFrontendActionFactory(&finder).get());
 
    /*
@@ -92,9 +109,12 @@ int main(int argc, const char **argv) {
 }
 
 const char **transform_argv(const char *const *argv) {
-    const char** parser_argv = new const char*[3];
+    const char** parser_argv = new const char*[6];
     parser_argv[0] = argv[0];
     parser_argv[1] = argv[1];
     parser_argv[2] = "--";
+    parser_argv[3] = "-I/usr/include/linux";
+    parser_argv[4] = "-I/usr/include/c++/10/tr1";
+    parser_argv[5] = "-I/usr/include/c++/10";
     return parser_argv;
-}
+}S

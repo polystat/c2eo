@@ -16,8 +16,6 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
 Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift){
-  // ID переменной
-  uint64_t varId = reinterpret_cast<uint64_t>(VD);
   // Имя переменной
   auto varName = VD->getNameAsString();
   TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
@@ -61,18 +59,18 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
 
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    return transpiler.glob.Add(varId, typeSize, strType, "g-" + varName, strValue);
+    return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, strValue);
   } else if (globalStorage && !extStorage) {
-    return transpiler.glob.Add(varId, typeSize, strType, "s-" + varName, strValue);
+    return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, strValue);
   } else // its local variable!
   {
     if (local_name.empty())
       return {};
     const auto *PD = llvm::dyn_cast<ParmVarDecl>(VD);
     if (PD) {
-      return transpiler.glob.Add(varId, typeSize, strType, "p-" + varName, strValue, local_name, shift, VD->hasInit());
+      return transpiler.glob.Add(VD, typeSize, strType, "p-" + varName, strValue, local_name, shift, VD->hasInit());
     }
-    return transpiler.glob.Add(varId, typeSize, strType, "l-" + varName, strValue, local_name, shift, VD->hasInit());
+    return transpiler.glob.Add(VD, typeSize, strType, "l-" + varName, strValue, local_name, shift, VD->hasInit());
   }
 }
 

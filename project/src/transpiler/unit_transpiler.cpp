@@ -76,7 +76,6 @@ void UnitTranspiler::GenerateResult() {
   result <<  body;
   tmp = result.str();
 }
-void UnitTranspiler::SetPackageName(std::string filename) {
-  // TODO fix if path contains folder path like ../main.c
-  package_name = std::move(filename);
+void UnitTranspiler::SetPackageName(std::string packagename) {
+  package_name = std::move(packagename);
 }
