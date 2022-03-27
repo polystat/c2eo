@@ -119,9 +119,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
       auto ref = dyn_cast<DeclRefExpr>(*stmt->child_begin());
       if (!ref)
         continue;
-      auto var_id = reinterpret_cast<uint64_t>(ref->getFoundDecl());
       try {
-        const Variable &var = transpiler.glob.GetVarByID(var_id);
+        const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
         string formatter = "d";
         if (var.type_postfix == "float32" || var.type_postfix == "float64")
           formatter = "f";
@@ -162,8 +161,7 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
     if (!ref)
       return EOObject{EOObjectType::EO_PLUG};
     try {
-      auto var_id = reinterpret_cast<uint64_t>(ref->getFoundDecl());
-      const Variable& var = transpiler.glob.GetVarByID(var_id);
+      const Variable& var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
       EOObject variable {"read-as-"+var.type_postfix};
       variable.nested.emplace_back(var.alias);
       return variable;
@@ -237,8 +235,8 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
   return {ss.str(),EOObjectType::EO_LITERAL};
 }
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
-  APInt an_int = p_literal->getValue();
   bool is_signed = p_literal->getType()->isSignedIntegerType();
+  APInt an_int = p_literal->getValue();
   return {an_int.toString(10, is_signed),EOObjectType::EO_LITERAL};
 }
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
@@ -292,9 +290,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
   if (op)
   {
-    auto var_id = reinterpret_cast<uint64_t>(op->getFoundDecl());
     try{
-      const Variable& var = transpiler.glob.GetVarByID(var_id);
+      const Variable& var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
       binop.nested.emplace_back(var.alias);
     }
     catch (invalid_argument&)

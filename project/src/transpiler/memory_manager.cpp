@@ -4,9 +4,10 @@
 #include "memory_manager.h"
 
 using namespace std;
+using namespace clang;
 
 
-Variable MemoryManager::Add(uint64_t id,
+Variable MemoryManager::Add(const VarDecl* id,
                             size_t size,
                             const std::string &type,
                             std::string alias,
@@ -41,11 +42,11 @@ std::vector<Variable>::const_iterator MemoryManager::begin() const{
 std::vector<Variable>::const_iterator MemoryManager::end() const{
   return variables.end();
 }
-const Variable &MemoryManager::GetVarByID(uint64_t id) const{
+const Variable &MemoryManager::GetVarByID(const VarDecl* id) const{
   auto res = find_if(variables.begin(),variables.end(),
                      [id](const Variable& x) { return x.id == id;});
   if (res == variables.end())
-    throw invalid_argument("element with id "+ to_string(id) + " not found");
+    throw invalid_argument("element with id "+ to_string(reinterpret_cast<uint64_t>(id)) + " not found");
   return  *res;
 }
 
