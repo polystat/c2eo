@@ -88,7 +88,7 @@ class Transpiler(object):
         result_path = os.path.join(path, self.result_dir_name)
         prepared_c_file = os.path.join(result_path, f'{file_name}-eo.c')
         if not os.path.exists(result_path):
-            os.mkdir(result_path)
+            os.makedirs(result_path, exist_ok=True)
         with open(prepared_c_file, 'w') as f:
             f.writelines(data)
         return prepared_c_file, result_path
