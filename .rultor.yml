@@ -1,0 +1,25 @@
+architect:
+  - yairyabtsev
+assets:
+  private.pgp: yairyabtsev/private#assets/private.pgp
+  public.pgp: yairyabtsev/private#assets/public.pgp
+  gitconfig: yairyabtsev/private#assets/.gitconfig
+  passpharase: yairyabtsev/private#assets/passpharase
+  config: yairyabtsev/private#assets/config
+install: |-
+  sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
+  pip3 install git_config pgpy s3cmd
+  sudo pip3 install cmake
+release:
+  script: |-
+    git checkout ${branch}
+    [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit -1
+    git clone https://github.com/yairyabtsev/llvm-libs.git
+    cp -rf llvm-libs/* .
+    rm -rf llvm-libs
+    cd llvm-clang/build/
+    wget 'https://github.com/yairyabtsev/llvm-libs/releases/download/v1.0.0/lib.tar.xz'
+    tar -xvf lib.tar.xz
+    cd ../..
+    echo "release"
+    python3 release/update-release.py --version="${tag}"

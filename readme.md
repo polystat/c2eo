@@ -1,350 +1,298 @@
-# C2EO <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="32px" /> [![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)  [![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt) [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo) [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-This is a translator of C/C++ to [EOLANG](https://www.eolang.org).
-If something goes wrong, please [submit an issue](https://github.com/polystat/c2eo/issues),
-we will fix. *Other languages: [Russian](readme.ru.md)*
+[![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)
+[![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt)
+[![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo)
+[![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
-## User guide
+This is a experimental translator of C programs to [EO](https://www.eolang.org) programs.
 
-1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Packages:
-[wget](https://www.tecmint.com/install-wget-in-linux/), 
-[tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
-[cmake](https://cmake.org/download/), 
-[gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++)
+## How to Use
 
-    ```bash
-    $ sudo apt install wget tar cmake gcc g++ # Installation for Ubuntu
-    ```
-2. Installation
-    <details>
-      <summary>Variant 1 (Manual)</summary>
+Assuming, you are on [Ubuntu 20+](https://ubuntu.com/download):
 
-    Download directly from [github](https://github.com/polystat/c2eo/releases/) or use this command:
+```bash
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F7C91591CC543ECA
+$ sudo add-apt-repository 'deb http://c2eo.polystat.org/debian/ c2eo-rep non-free main contrib'
+$ sudo apt install c2eo
+```
 
-    ```bash
-    $ wget https://github.com/polystat/c2eo/releases/download/test-release/c2eo-1.0.1.deb
-    ```
+Then, just run:
 
-    Install package  
-    ```bash
-    $ sudo apt-get install path/to/c2eo-1.0.1.deb # or $ sudo dpkg -i path/to/c2eo-1.0.1.deb
-    ```
-    </details>
+```bash
+$ c2eo <c-file-name> <eo-file-name>
+```
 
-    </p>
+ We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk. 
 
-    <details>
-      <summary> Variant 2 (Automatic)</summary>
+## How to Contribute
 
-    ```bash
-    $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4B50AF6031782AA9D35898248F6E3F51D5C56594
-    $ sudo add-apt-repository 'deb http://c2eo.azurewebsites.net c2eo-rep non-free main contrib'
-    $ sudo apt install c2eo
-    ```
-    </details>
-
-</p>
-
-3. Run transpilation. It will generate `.glob` and `.stat` files in `/tmp/`
-
-    ```bash
-    $ c2eo <path-to-C-file-name> item-name
-    ```
-
-## Developer guide
-
-1. You need a [Linux](https://www.linux.org/pages/download/) operating system ( we recommend to use [Ubuntu 20.+ ver.](https://ubuntu.com/download) )  
-Packages:
+Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
 [cmake](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++),
-[ninja-build](https://ninja-build.org/),
+[g++](https://pkgs.org/download/g++), 
+[ninja-build](https://ninja-build.org/)
+and
 [python3.+](https://www.python.org/downloads/)
 
-    ```bash
-    $ sudo apt install wget tar git cmake gcc g++ ninja-build python3 # Installation for Ubuntu
-    ```
+Then, you need LLVM/Clang:
 
-2. Install LLVM/Clang. Download this [archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA), then run the following command:
+```bash
+$ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
+$ tar -xvf llvmorg-12.0.1.tar.gz
+$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
+$ cd llvm-clang
+$ mkdir build && cd $_
+$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
+$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
+$ cd ../..
+```
 
-    ```bash
-    $ tar -xvf llvm-clang.tar.gz
-    ```
+You may also try our own [pre-packaged archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA):
 
-    <details>
-    <summary> Old variant </summary>
-    <p></p>
-    <t>2. Install LLVM/Clang</t>
-    <pre><code>
-    $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
-    $ tar -xvf llvmorg-12.0.1.tar.gz
-    </code></pre>
+```bash
+$ sudo apt install megatools
+$ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA'
+$ tar -xvf llvm-clang.tar.gz
+```
 
-    <t>2.1 Build LLVM/Clang</t>
-    <pre><code>$ mv ./llvm-project-llvmorg-12.0.1 ./llvm-clang
-    $ cd llvm-clang
-    $ mkdir build && cd $_
-    </code></pre>
-    <pre><code>$ cmake --no-warn-unused-cli -DBUILD_SHARED_LIBS:STRING=ON -DLLVM_TARGETS_TO_BUILD:STRING=X86 -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE "-DLLVM_ENABLE_PROJECTS:STRING=clang;compiler-rt" -DCMAKE_BUILD_TYPE:STRING=Debug -DLLVM_OPTIMIZED_TABLEGEN:STRING=ON -DLLVM_USE_SPLIT_DWARF:STRING=ON -DLLVM_USE_LINKER:STRING=gold ../llvm -G Ninja
-    </code></pre>
-    <pre><code>$ cmake --build . --config Debug --target all -j 10 -- -j1 -l 2
-    $ cd ../..
-    </code></pre>
-    </details>
-    </p>
+It is assumed that the `llvm-clang` is located in the same dir as the `c2eo`. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
 
-3. Install C2EO
-    ```bash
-    $ git clone https://github.com/polystat/c2eo.git
-    ```
+```bash
+$ cd ./c2eo/project/build
+$ cmake ..
+$ make
+``` 
 
-4. Build C2EO
-    > IMPORTANT. Every time the transpiler code changes, you need to repeat this step
+Then, run tests:
 
-    It is assumed that the `llvm-clang` is located in the same dir as the `c2eo` . If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
+```bash
+$ cd ../scripts
+$ ./transpile_с2eo.py <path-to-dir-with-C-program>
+```
 
-    ```bash
-    $ cd ./c2eo/project/build
-    $ cmake ..
-    $ make # or $ cmake --build
-    ``` 
+Now the generated project is in `result/`.
 
-5. Run transpilation
+## Principles of Transpilation from C to EO
 
-    ```bash
-    $ cd ../scripts
-    $ ./transpile_с2eo.py <path-to-dir-with-C-program>
-    ```
+C is a _system-level procedural_ programming language with direct access to the underlying hardware architecture elements, such as memory and registers. EO, on the other hand is a _high-level object-oriented_ language. There are a number of non-trivial mechanisms of translating constructs from the former to the latter, which are explained below:
 
-6. Run generated project  
-Now the generated project in this [dir](result/) . For running the project you need this [guide](https://github.com/cqfn/eo#quick-start).Github page of [EO project](https://github.com/cqfn/eo) where you can learn about EO language.
+### Direct Memory Access
 
+Let's take the following C code as an example:
 
----
-## Additional information 
+```c
+double z = 3.14;
+```
 
-<t>1. [Project tests](./project/tests/main)</t>
+In EO, we represent the global memory space as a copy of [ram](https://github.com/polystat/c2eo/blob/heap/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of 8 bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
 
-<details>
-  <summary>2. Transpilation principles</summary>
-</p>
+```java
+ram > global
+global.write
+  0
+  3.14.as-bytes
+```
 
-1. RAM
+### Functions
 
-    To work with memory, we use the ram object. For each type of variable (local, global, static) we use a separate object of ram.
+```c
+void foo(int a) {
+  double x = z + a;
+  return x;
+}
+╭──────────┬───────┬──────────╮
+| double z │ int a │ double x │ // variables in global
+├──────────┼───────┼──────────┤
+|    0th   │  8th  │   12th   │ // start position in global
+╰──────────┴───────┴──────────╯
+```
 
-    ```java
-    ram > global-ram
-      1024
-    ram > static-ram
-      1024
-    ```
+In a similar way we deal with function call, we calculate the necessary space for arguments (`param-start` and `param-size`) and local variables in `global` for each function call. The variable `a` will be "pushed" to `global` and accessible by the code inside the function `foo` by the 0th position with local offset. The local variable `x` will also be pushed to the `global` and will be accessible by the 4th with local offset, because the length of `int` is four. 
+Also we use separate copy of `ram` named `return` for storing function return result. Here, we are trying to simulate the bevaviour of a typical C compiler. The declaration of `foo` and its execution may look like this:
 
-2. RAM indexing
-
-    With this approach, to work with pointers, we need to place and know the indexes of ram objects. We use a special array in which we place the allocated ram objects. We need to allocate local memory and add new ram objects. To do this, we use a special index of a free cage cell.
-
-    ```java
-    * > allocator
-      *
-        cage
-        cage
-        ...
-    memory > allocator-index
-    write
-      get
-        get
-          allocator
-          0
-        0
-      global-ram
-    write
-      global-ram.index
-      0
-    write
-      allocator-index
-      1
-    ```
-
-3. Scalar variables
-
-    Then we prescribe the starting address (our analogue of the pointer), from which we will read or write the required number of bytes, depending on the type of variable.
-
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    long long a = 5;
-    printf("%d", a)
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    address > a
-      global-ram
-      0
-    write
-      a
-      5
-    printf
-      "%d"
-      read-as-int64 // read-as-int64 -> read 8 byte from start (0) and convert to int64
+```java
+[param-start param-size] > foo
+  global.read param-start > a
+  global.read (add param-start 4) > x
+  seq > @
+    x.write
+      add
+        global.read 0
         a
-    <code></pre></td>
-    </tr>
-    </table>
+    return.write x
 
-4. External links
+seq
+  global.write 0 55.5
+  global.write 8 78322
+  foo 8 4
+```
 
-    To compile files with any external links, we use the following solution:
+### Return
+
+```java
+
+ram 1024 > return 
+
+[param-start] > bar
+  seq > @
+  ...
+  return.write result
+  TRUE
+
+seq > @
+  bar
+```
+
+### Pointers
+
+C code may get an address of a variable, which is either in stack or in global memory:
+
+```c
+int f = 7;
+void bar() {
+  int t = 42;
+  int* p = &t; // local scope
+  *p = 500;    // write from local scope to local
+  p = &f;      // global scope
+  *p = 500;    // write from local scope to global
+}
+╭───────┬───────┬────────╮
+| int f │ int t │ int* p │ // variables in global
+├───────┼───────┼────────┤
+|  0th  │  4th  │   8th  │ // start position in global
+╰───────┴───────┴────────╯
+```
+
+However, as in C, our variables are located in `global` and have absolute address.
+The object `param-start` provided as an argument to EO object `bar` is a calculated offset in `global` addressing the beginning of the frame for function call. Thus, `&t` would return `param-start + 0`, while `&f` would be just `0`:
+
+```java
+[param-start] > bar
+  global.write
+    8               // int* p
+    param-start     // &t -> function offset position in global space
+  global.write
+    8
+    0               // &f -> address of f in global
+
+seq > @
+  bar 4
+```
+
+### External links
+
+To compile files with any external links, we use the following solution:
+
 - In the file where the external call is used, we generate the following alias
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    #include < string >
-    strncpy(str2, str1, 8);
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    +alias c2eo.external.strcpy
-    strcpy
-      str2
-      st1
-      8
-    <code></pre></td>
-    </tr>
-    </table>
+
+  ```c
+  #include <string>
+  strncpy(str2, str1, 8);
+  ```
+
+  ```java
+  +alias c2eo.external.strcpy
+  strncpy str2 st1 8
+  ```
 
 - Сreating a file of the same name by the specified alias with an empty implementation
 
-    ```java
-    +package c2eo.extern
+  ```java
+  +package c2eo.external
 
-    [] > strcpy
-    ```
+  [args...] > strncpy
+    TRUE > @
+  ```
 
-5. Functions
+### Arrays
 
-    To pass arguments to the function and get the result, we use separate ram objects. In the function itself, we use the local version of the argument ram and local ram. 
+We work with fixed-size arrays in the same way as with variables.
 
-    ```java
-    ram > arguments-ram
-      1024
-    ram > result-ram
-      1024
+```c
+int instanceArray[2] = { 5 6 };
+╭─────┬─────╮
+|  5  │  6  │
+├─────┼─────┤
+| 0th │ 4th │
+╰─────┴─────╯
+```
 
-    [] > fun
-      ram > local-arguments-ram
-        8
-      address > x
-        local-arguments-ram
-        0
-      ram > local-ram
-        1024
-      address > y
-        local-arguments-ram
-        0
-      seq > @
-        memcpy // Сopy the specified number of bytes to this ram from another
-            local-arguments-ram
-            arguments-ram
-            8 
-        memadrcpy // Сopy the specified number of bytes to this ram from address
-            result-ram
-            y
-            8
-        TRUE
-    ```
+```java
+global.write 0 5.as-bytes
+global.write 4 6.as-bytes
+```
 
-6. Arrays
+### Structures
 
-    The transformation of arrays is similar to variables. if we know their size in advance.
+We know the size of structures so we still work as with variables. We can also generate additional objects to access the fields of structures.
 
-7. Structures
+```c
+struct Rectangle {int x; int y;} rect;
+```
 
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    struct Rectangle {int x; int y;} rect;
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    address > g-rect
-      global-ram
-      0
-    address > g-rect-x
-      global-ram
-      0
-    address > g-rect-y
-      global-ram
-      4
-    <code></pre></td>
-    </tr>
-    </table>
+```java
+address > g-rect
+  global-ram
+  0
+address > g-rect-x
+  global-ram
+  0
+address > g-rect-y
+  global-ram
+  4
+```
 
-8. Unions
+### Unions
 
-    The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
+The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
 
-    <table>
-    <tr>
-    <th>C</th>
-    <th>EO</th>
-    </tr>
-    <tr>
-    <td><pre lang="c"><code>
-    struct Rectangle {int x; int y;};
-    struct Triangle {int a, b,c;};
-    struct Figure {
-        int key;
-        union {
-            Rectangle r;
-            Triangle  t;
-    } fig;
-    <code></pre></td>
-    <td><pre lang="java"><code>
-    address > g-fig
-      global-ram
-      0
-    address > g-fig-key
-      global-ram
-      0
-    address > g-fig-r-x
-      global-ram
-      4
-    address > g-fig-r-y
-      global-ram
-      8
-    address > g-fig-t-a
-      global-ram
-      4
-    address > g-fig-t-b
-      global-ram
-      8
-    address > g-fig-t-c
-      global-ram
-      12
-    <code></pre></td>
-    </tr>
-    </table>
+```c
+struct Rectangle {int x; int y;};
+struct Triangle {int a, b,c;};
+struct Figure {
+    int key;
+    union {
+        Rectangle r;
+        Triangle  t;
+} fig;
+╭─────────┬───────────┬───────────┬───────────┬───────────┬───────────╮
+| int key │ r (int x) │ r (int y) │ t (int a) │ t (int b) │ t (int c) │
+├─────────┼───────────┼───────────┼───────────┼───────────┼───────────┤
+|   0th   │    4th    │    8th    │    4th    │    8th    │    12th   │
+╰─────────┴───────────┴───────────┴───────────┴───────────┴───────────╯
+```
 
-9. Enums
+```java
+address > g-fig
+  global-ram
+  0
+address > g-fig-key
+  global-ram
+  0
+address > g-fig-r-x
+  global-ram
+  4
+address > g-fig-r-y
+  global-ram
+  8
+address > g-fig-t-a
+  global-ram
+  4
+address > g-fig-t-b
+  global-ram
+  8
+address > g-fig-t-c
+  global-ram
+  12
+```
 
-    We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+### Enums
 
-10. Pointers
+We can work with enumerated types as well as with constants and substitute numeric values instead of names.
 
 </details>
 
