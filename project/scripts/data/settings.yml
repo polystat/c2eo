@@ -1,5 +1,5 @@
 config: null
-current_eo_version: 0.22.1
+current_eo_version: 0.22.2
 path_to_c2eo_build: ../build/
 path_to_c2eo_transpiler: ../bin/
 path_to_config: data/config/
