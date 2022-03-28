@@ -11,6 +11,7 @@ using namespace std;
 vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
                                                size_t shift);
 
+EOObject GetUnaryOperationEOObject(const UnaryOperator *p_operator);
 EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator);
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
@@ -124,6 +125,9 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::CompoundAssignOperatorClass) {
     const auto *op = dyn_cast<CompoundAssignOperator>(stmt);
     return GetAssignmentOperationOperatorEOObject(op);
+  } else if (stmtClass == Stmt::UnaryOperatorClass) {
+    const auto *op = dyn_cast<UnaryOperator>(stmt);
+    return GetUnaryOperationEOObject(op);
   } else if (stmtClass == Stmt::ParenExprClass) {
     const auto *op = dyn_cast<ParenExpr>(stmt);
     return GetStmtEOObject(*op->child_begin());
@@ -175,9 +179,14 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   return transpiler.func_manager.GetFunctionCall(op->getDirectCallee());
 }
 
+
+EOObject GetUnaryOperationEOObject(const UnaryOperator *p_operator) {
+
+}
 EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   auto op_code = p_operator->getOpcode();
   std::string operation;
+
   if (op_code == BinaryOperatorKind::BO_AddAssign) {
     operation = "add";
   } else if (op_code == BinaryOperatorKind::BO_SubAssign) {
@@ -186,6 +195,18 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     operation = "mul";
   } else if (op_code == BinaryOperatorKind::BO_DivAssign) {
     operation = "div";
+  } else if (op_code == BinaryOperatorKind::BO_RemAssign) {
+    operation = "mod";
+  } else if (op_code == BinaryOperatorKind::BO_AndAssign) {
+    operation = "bit-and";
+  } else if (op_code == BinaryOperatorKind::BO_XorAssign) {
+    operation = "bit-xor";
+  } else if (op_code == BinaryOperatorKind::BO_OrAssign) {
+    operation = "bit-or";
+  } else if (op_code == BinaryOperatorKind::BO_ShlAssign) {
+    operation = "shift-left";
+  } else if (op_code == BinaryOperatorKind::BO_ShrAssign) {
+    operation = "shift-right";
   }
 
   EOObject binop{operation};
@@ -269,7 +290,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
-// tmp
+// tmp solution for comp assign operators.
 EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
   EOObject binop{"write"};
   const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
