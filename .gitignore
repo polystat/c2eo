@@ -26,6 +26,8 @@
 **/*-eo.c
 **/c_result.txt
 **/eo_result.txt
+**/*-c.txt
+**/*-eo.txt
 
 # Executables
 *.exe
@@ -108,10 +110,3 @@ project/tests/**/*.eo
 
 # Compiled c2eo
 project/bin/c2eo
-
-# release stuff
-*.so
-*.so.*
-
-# python
-*venv*/

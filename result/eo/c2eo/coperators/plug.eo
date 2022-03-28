@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[args...] > plug
+  TRUE > @
