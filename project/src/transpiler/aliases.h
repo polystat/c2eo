@@ -51,6 +51,21 @@ std::map<std::string,std::string> known_aliases =
         {"sub", "+alias c2eo.coperators.sub"},
         {"while", "+alias c2eo.coperators.while"},
         {"write", "+alias c2eo.coperators.write"},
+
+        {"post-inc", "+alias c2eo.coperators.post-inc"},
+        {"post-dec", "+alias c2eo.coperators.post-dec"},
+        {"pre-inc", "+alias c2eo.coperators.pre-inc"},
+        {"pre-dec", "+alias c2eo.coperators.pre-dec"},
+        {"addr-of", "+alias c2eo.coperators.addr-of"},
+        {"deref", "+alias c2eo.coperators.deref"},
+        {"uno-plus", "+alias c2eo.coperators.uno-plus"},
+        {"uno-minus", "+alias c2eo.coperators.uno-minus"},
+        {"bit-not", "+alias c2eo.coperators.bit-not"},
+        {"log-not", "+alias c2eo.coperators.log-not"},
+        {"real", "+alias c2eo.coperators.real"},
+        {"imag", "+alias c2eo.coperators.imag"},
+        {"extension", "+alias c2eo.coperators.extension"},
+        {"coawait", "+alias c2eo.coperators.coawait"},
     };
 
 

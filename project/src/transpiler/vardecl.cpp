@@ -28,9 +28,9 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
   auto typePtr = qualType.getTypePtr();
   //auto kind = typePtr->getKind();
 
-  std::string strType = "c_" + GetTypeName(VD->getType());
+  std::string strType {std::string("c_" + GetTypeName(VD->getType()))};
   // StorageClass getStorageClass() const
-  // Показывает на явное описани того или иного класса памяти в тексте программы
+  // Показывает на явное описание того или иного класса памяти в тексте программы
   // Наверное не во всех случаях полезно
   auto storageClass = VD->getStorageClass();
   // Проверка на размещение переменной в локальной памяти

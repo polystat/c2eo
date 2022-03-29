@@ -11,6 +11,7 @@ using namespace std;
 vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, size_t shift);
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
+EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator);
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt);
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt);
@@ -149,6 +150,9 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
   if (stmtClass == Stmt::BinaryOperatorClass) {
     const auto* op = dyn_cast<BinaryOperator>(stmt);
     return GetBinaryStmtEOObject(op);
+  } else if (stmtClass == Stmt::UnaryOperatorClass) {
+    const auto* op = dyn_cast<UnaryOperator>(stmt);
+    return GetUnaryStmtEOObject(op);
   } else if (stmtClass == Stmt::ParenExprClass) {
     const auto* op = dyn_cast<ParenExpr>(stmt);
     return GetStmtEOObject(*op->child_begin());
@@ -239,6 +243,7 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   APInt an_int = p_literal->getValue();
   return {an_int.toString(10, is_signed),EOObjectType::EO_LITERAL};
 }
+
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   auto opCode = p_operator->getOpcode();
   std::string operation;
@@ -285,6 +290,56 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
+
+EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
+  auto opCode = p_operator->getOpcode();
+  std::string operation;
+
+  // [C99 6.5.2.4] Postfix increment and decrement
+  if (opCode == UnaryOperatorKind::UO_PostInc) { //UNARY_OPERATION(PostInc, "++")
+    operation = "post-inc";
+  } else if (opCode == UnaryOperatorKind::UO_PostDec) { // UNARY_OPERATION(PostDec, "--")
+    operation = "post-dec";
+  // [C99 6.5.3.1] Prefix increment and decrement
+  } else if (opCode == UnaryOperatorKind::UO_PreInc) { // UNARY_OPERATION(PreInc, "++")
+    operation = "pre-inc";
+  } else if (opCode == UnaryOperatorKind::UO_PreDec) { // UNARY_OPERATION(PreDec, "--")
+    operation = "pre-dec";
+  // [C99 6.5.3.2] Address and indirection
+  } else if (opCode == UnaryOperatorKind::UO_AddrOf) { // UNARY_OPERATION(AddrOf, "&")
+    operation = "addr-of";
+  } else if (opCode == UnaryOperatorKind::UO_Deref) { // UNARY_OPERATION(Deref, "*")
+    operation = "deref";
+  // [C99 6.5.3.3] Unary arithmetic
+  } else if (opCode == UnaryOperatorKind::UO_Plus) { // UNARY_OPERATION(Plus, "+")
+    operation = "uno-plus";
+  } else if (opCode == UnaryOperatorKind::UO_Minus) { // UNARY_OPERATION(Minus, "-")
+    operation = "uno-minus";
+  } else if (opCode == UnaryOperatorKind::UO_Not) { // UNARY_OPERATION(Not, "~")
+    operation = "bit-not";
+  } else if (opCode == UnaryOperatorKind::UO_LNot) { // UNARY_OPERATION(LNot, "!")
+    operation = "log-not";
+  // "__real expr"/"__imag expr" Extension.
+  } else if (opCode == UnaryOperatorKind::UO_Real) { // UNARY_OPERATION(Real, "__real")
+    operation = "real";
+  } else if (opCode == UnaryOperatorKind::UO_Imag) { // UNARY_OPERATION(Imag, "__imag")
+    operation = "imag";
+  // __extension__ marker.
+  } else if (opCode == UnaryOperatorKind::UO_Extension) { // UNARY_OPERATION(Extension, "__extension__")
+    operation = "extension";
+  // [C++ Coroutines] co_await operator
+  } else if (opCode == UnaryOperatorKind::UO_Coawait) { // UNARY_OPERATION(Coawait, "co_await")
+    operation = "coawait";
+  // Incorrect unary operator
+  } else {
+    operation = "undefined";
+  }
+
+  EOObject unoop {operation};
+  unoop.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+  return unoop;
+}
+
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   EOObject binop {"write"};
   const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
@@ -304,6 +359,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
+
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   EOObject if_stmt {"if"};
   if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
@@ -345,12 +401,18 @@ std::string GetTypeName(QualType qualType)
   const clang::Type* typePtr = qualType.getTypePtr();
   TypeInfo typeInfo = context->getTypeInfo(typePtr);
   uint64_t typeSize = typeInfo.Width;
-  std::string str;
+  std::string str{""};
 
   if (typePtr->isBooleanType()) {
     str += "bool";
     return str;
   }
+
+  if (typePtr->isPointerType()) {
+    str += "int64";
+    return str;
+  }
+
   if (typePtr->isFloatingType()) {
     str += "float" + std::to_string(typeSize);
     return str;
@@ -380,6 +442,7 @@ std::string GetTypeName(QualType qualType)
       str += std::to_string(reinterpret_cast<uint64_t>(RD));
     return str;
   }
+
   return "undefinedtype";
 }
 
