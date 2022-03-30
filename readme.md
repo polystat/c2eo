@@ -23,6 +23,8 @@ Then, just run:
 $ c2eo <c-file-name> <eo-file-name>
 ```
 
+ We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk. 
+
 ## How to Contribute
 
 Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
@@ -129,6 +131,22 @@ seq
   foo 8 4
 ```
 
+### Return
+
+```java
+
+ram 1024 > return 
+
+[param-start] > bar
+  seq > @
+  ...
+  return.write result
+  TRUE
+
+seq > @
+  bar
+```
+
 ### Pointers
 
 C code may get an address of a variable, which is either in stack or in global memory:
@@ -178,7 +196,7 @@ To compile files with any external links, we use the following solution:
 
   ```java
   +alias c2eo.external.strcpy
-  strcpy str2 st1 8
+  strncpy str2 st1 8
   ```
 
 - Сreating a file of the same name by the specified alias with an empty implementation
@@ -186,7 +204,8 @@ To compile files with any external links, we use the following solution:
   ```java
   +package c2eo.external
 
-  [] > strcpy
+  [args...] > strncpy
+    TRUE > @
   ```
 
 ### Arrays
@@ -209,7 +228,7 @@ global.write 4 6.as-bytes
 
 ### Structures
 
-We know the size of structures so we still can as with variables. We can also generate additional objects to access the fields of structures.
+We know the size of structures so we still work as with variables. We can also generate additional objects to access the fields of structures.
 
 ```c
 struct Rectangle {int x; int y;} rect;
@@ -240,6 +259,11 @@ struct Figure {
         Rectangle r;
         Triangle  t;
 } fig;
+╭─────────┬───────────┬───────────┬───────────┬───────────┬───────────╮
+| int key │ r (int x) │ r (int y) │ t (int a) │ t (int b) │ t (int c) │
+├─────────┼───────────┼───────────┼───────────┼───────────┼───────────┤
+|   0th   │    4th    │    8th    │    4th    │    8th    │    12th   │
+╰─────────┴───────────┴───────────┴───────────┴───────────┴───────────╯
 ```
 
 ```java
