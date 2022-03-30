@@ -17,7 +17,7 @@ def main():
     if is_latest_version:
         return
 
-    found_files = tools.search_files_by_pattern('../../', 'pom.xml', recursive=True)
+    found_files = tools.search_files_by_pattern('../../result/', 'pom.xml', recursive=True)
     update_version_in_files(found_files, latest_version)
     settings.set_setting('current_eo_version', latest_version)
     tools.pprint('EO version updated\n')

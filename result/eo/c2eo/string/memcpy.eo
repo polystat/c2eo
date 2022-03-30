@@ -1,0 +1,4 @@
++package c2eo.string
+
+[destptr srcptr size] > memcpy
+  destptr.write 0 (srcptr.read 0 size) > @

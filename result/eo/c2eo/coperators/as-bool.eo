@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
 [a] > as-bool
-  (a.eq 0).not > @
+  (a.eq 0).if 0 1 > @
