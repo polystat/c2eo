@@ -1,0 +1,7 @@
++package c2eo.coperators
+
+[a] > post-sub-int64
+  seq > @
+    (a.read 8).as-int > value
+    a.write ((a.read 8).as-int.sub 1)
+    value
