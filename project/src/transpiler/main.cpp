@@ -53,7 +53,7 @@ int main(int argc, const char **argv) {
     packagename = filename.substr(0, filename.size()-3);
     if(packagename.rfind('/')!=std::string::npos)
       packagename = packagename.substr(packagename.rfind('/') + 1);
-    transpiler.SetPackageName(filename.substr(0, filename.size()-3));
+    transpiler.SetPackageName(packagename);
 
 
     // TODO Add path to library as parser_argv
