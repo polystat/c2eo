@@ -11,12 +11,14 @@ using namespace std;
 vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, size_t shift);
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
+EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator);
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt);
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt);
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt);
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
+EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator);
 
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal);
 EOObject GetFunctionCallEOObject(const CallExpr *op);
@@ -149,6 +151,9 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
   if (stmtClass == Stmt::BinaryOperatorClass) {
     const auto* op = dyn_cast<BinaryOperator>(stmt);
     return GetBinaryStmtEOObject(op);
+  } else if (stmtClass == Stmt::CompoundAssignOperatorClass) {
+      const auto *op = dyn_cast<CompoundAssignOperator>(stmt);
+      return GetAssignmentOperationOperatorEOObject(op);
   } else if (stmtClass == Stmt::ParenExprClass) {
     const auto* op = dyn_cast<ParenExpr>(stmt);
     return GetStmtEOObject(*op->child_begin());
@@ -239,6 +244,37 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   APInt an_int = p_literal->getValue();
   return {an_int.toString(10, is_signed),EOObjectType::EO_LITERAL};
 }
+EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
+    auto op_code = p_operator->getOpcode();
+    std::string operation;
+
+    if (op_code == BinaryOperatorKind::BO_AddAssign) {
+        operation = "add";
+    } else if (op_code == BinaryOperatorKind::BO_SubAssign) {
+        operation = "sub";
+    } else if (op_code == BinaryOperatorKind::BO_MulAssign) {
+        operation = "mul";
+    } else if (op_code == BinaryOperatorKind::BO_DivAssign) {
+        operation = "div";
+    } else if (op_code == BinaryOperatorKind::BO_RemAssign) {
+        operation = "mod";
+    } else if (op_code == BinaryOperatorKind::BO_AndAssign) {
+        operation = "bit-and";
+    } else if (op_code == BinaryOperatorKind::BO_XorAssign) {
+        operation = "bit-xor";
+    } else if (op_code == BinaryOperatorKind::BO_OrAssign) {
+        operation = "bit-or";
+    } else if (op_code == BinaryOperatorKind::BO_ShlAssign) {
+        operation = "shift-left";
+    } else if (op_code == BinaryOperatorKind::BO_ShrAssign) {
+        operation = "shift-right";
+    }
+
+    EOObject binop{operation};
+    binop.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+    binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+    return binop;
+}
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   auto opCode = p_operator->getOpcode();
   std::string operation;
@@ -301,8 +337,29 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   } else {
     binop.nested.emplace_back(EOObjectType::EO_EMPTY);
   }
+
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
+}
+EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
+    EOObject binop {"write"};
+    const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
+    if (op)
+    {
+        try{
+            const Variable& var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
+            binop.nested.emplace_back(var.alias);
+        }
+        catch (invalid_argument&)
+        {
+            binop.nested.emplace_back(EOObjectType::EO_LITERAL);
+        }
+    } else {
+        binop.nested.emplace_back(EOObjectType::EO_EMPTY);
+    }
+
+    binop.nested.push_back(GetCompoundAssignEOObject(p_operator));
+    return binop;
 }
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   EOObject if_stmt {"if"};
