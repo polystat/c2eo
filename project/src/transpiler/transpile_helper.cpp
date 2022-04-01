@@ -307,7 +307,22 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     operation = "pre-dec";
   // [C99 6.5.3.2] Address and indirection
   } else if (opCode == UnaryOperatorKind::UO_AddrOf) { // UNARY_OPERATION(AddrOf, "&")
-    operation = "addr-of";
+    //operation = "addr-of";
+    Stmt* stmt = p_operator->getSubExpr();
+    auto ref = dyn_cast<DeclRefExpr>(stmt);
+    if (!ref)
+      return EOObject{EOObjectType::EO_PLUG};
+    try {
+      const Variable& var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
+      EOObject variable {"addr-of"};
+      variable.nested.emplace_back(var.alias);
+      return variable;
+    }
+    catch (invalid_argument& er)
+    {
+      cerr << er.what() << "\n";
+      return EOObject(EOObjectType::EO_PLUG);
+    }
   } else if (opCode == UnaryOperatorKind::UO_Deref) { // UNARY_OPERATION(Deref, "*")
     operation = "deref";
   // [C99 6.5.3.3] Unary arithmetic
