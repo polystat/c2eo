@@ -1,0 +1,6 @@
++package c2eo.coperators
+
++alias c2eo.system.address
+
+[addr] > read-as-address
+  address (addr.mem) ((addr.read 8).as-int) > @
