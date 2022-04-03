@@ -33,6 +33,7 @@ void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
   //TODO Return record decl analysis
   //getRecordDeclSubObjects(RD);
   //RD->dump();
+  ProcessRecordType(RD);
 }
 
 //------------------------------------------------------------------------------

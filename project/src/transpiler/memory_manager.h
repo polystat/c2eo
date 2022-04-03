@@ -37,7 +37,7 @@ struct Variable {
   EOObject GetAddress(std::string mem_name) const;
 };
 
-class MemoryManager{
+class MemoryManager {
  public:
   explicit MemoryManager(std::string name):pointer(0),name(std::move(name)) {}
 
