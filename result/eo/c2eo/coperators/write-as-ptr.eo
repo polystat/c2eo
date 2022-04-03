@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
-[a b] > write-as-int64
+[a b] > write-as-ptr
   a.write b > @
