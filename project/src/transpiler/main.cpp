@@ -114,7 +114,9 @@ const char **transform_argv(const char *const *argv) {
     parser_argv[1] = argv[1];
     parser_argv[2] = "--";
     parser_argv[3] = "-I/usr/include/linux";
-    parser_argv[4] = "-I/usr/include/c++/10/tr1";
-    parser_argv[5] = "-I/usr/include/c++/10";
+//    parser_argv[4] = "-I/usr/include/c++/10/tr1";
+//    parser_argv[5] = "-I/usr/include/c++/10";
+    parser_argv[4] = "-I/usr/include/c++/11.2.0/tr1";
+    parser_argv[5] = "-I/usr/include/c++/11.2.0";
     return parser_argv;
 }
