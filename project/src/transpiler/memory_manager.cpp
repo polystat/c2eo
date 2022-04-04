@@ -56,6 +56,8 @@ EOObject MemoryManager::GetEOObject() const {
   res.nested.emplace_back(to_string(mem_size), EOObjectType::EO_LITERAL);
   return res;
 }
+
+
 void MemoryManager::RemoveAllUsed(const std::vector<Variable>& all_local) {
   for (const auto& var : all_local)
   {
@@ -76,6 +78,7 @@ EOObject Variable::GetInitializer() const{
     res.nested.emplace_back(value,EOObjectType::EO_LITERAL);
   return res;
 }
+
 EOObject Variable::GetAddress(string mem_name) const{
   EOObject addr("address",alias);
   if(!mem_name.empty())

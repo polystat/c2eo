@@ -33,6 +33,8 @@ struct EOObject{
 
   // Add nested object to vector of nested
   void AddNested(const EOObject& obj);
+  // Добавление вложенного объекта в голову вектора
+  void AddToHeadInNested(const EOObject& obj);
 
   std::vector<std::string> arguments;
   std::string name;

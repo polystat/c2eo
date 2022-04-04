@@ -8,6 +8,11 @@ void EOObject::AddNested(const EOObject& obj) {
   nested.push_back(obj);
 }
 
+// Добавление вложенного объекта в голову вектора
+void EOObject::AddToHeadInNested(const EOObject& obj) {
+  nested.insert(nested.begin(), obj);
+}
+
 auto EOObject::GetSpaceIndent() {
   return string(2 * EOObject::indent,' ');
 }
