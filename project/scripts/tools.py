@@ -83,15 +83,15 @@ def move_to_script_dir(path_to_script):
         os.chdir(path_to_script)
 
 
-def pprint(*lines, slowly=False, status='INFO'):
+def pprint(*lines, slowly=False, status='INFO', end='\n'):
     if not lines:
         lines = ['']
     for line in lines:
         for token in str(line).split('\n'):
             if status:
-                print(f'[{get_status(status)}] {token}')
+                print(f'[{get_status(status)}] {token}', end=end)
             else:
-                print(token)
+                print(token, end=end)
 
             if slowly:
                 time.sleep(0.01)
