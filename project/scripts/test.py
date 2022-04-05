@@ -39,25 +39,33 @@ class Tests(object):
         if not self.compilation_units:
             exit(-2)
         self.get_result_for_tests()
-        results = tools.thread_pool().map(compare_test_results, self.compilation_units)
+        with tools.thread_pool() as threads:
+            results = threads.map(compare_test_results, self.compilation_units)
         passed, errors, exceptions = group_comparison_results(results)
         print_tests_result(sorted(passed), sorted(errors), sorted(exceptions))
 
     def get_result_for_tests(self):
-        tools.thread_pool().map(get_result_for_c_file, self.compilation_units)
+        with tools.thread_pool() as threads:
+            threads.map(get_result_for_c_file, self.compilation_units)
         if EOBuilder().build():
-            tools.pprint('\nRunning tests')
+            tools.pprint('\nRunning tests:', slowly=True)
             original_path = os.getcwd()
             os.chdir(self.path_to_eo_project)
-            tools.thread_pool().map(self.get_result_for_eo_file, self.compilation_units)
+            with tools.thread_pool() as threads:
+                threads.map(self.get_result_for_eo_file, self.compilation_units)
             os.chdir(original_path)
         else:
             exit(-1)
 
     def get_result_for_eo_file(self, unit):
         command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
+        tools.pprint(unit["name"], slowly=True)
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
-        subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True)
+        try:
+            subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True, timeout=30)
+        except subprocess.TimeoutExpired:
+            with open(unit["result_eo_file"], 'w') as f:
+                f.write('Timeout exception!')
 
 
 def get_result_for_c_file(unit):
@@ -131,6 +139,7 @@ def group_comparison_results(results):
     passed = []
     exceptions = []
     errors = []
+    tools.pprint('\nGetting results', slowly=True)
 
     for unit_name, is_except, is_equal, log_data in results:
         if is_except:
