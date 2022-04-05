@@ -1,5 +1,6 @@
 #ifndef __MEMORY_MANAGER__
 #define __MEMORY_MANAGER__
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,7 +18,7 @@
 
 // Representation of a simple variable stored in RAM
 struct Variable {
-  const clang::VarDecl* id;
+  const clang::VarDecl *id;
   size_t position;
   size_t size;
   // like c-int64
@@ -32,16 +33,19 @@ struct Variable {
   // only -int64
   std::string type_postfix;
   bool is_initialized;
-  bool operator==(const Variable& var) const;
+
+  bool operator==(const Variable &var) const;
+
   EOObject GetInitializer() const;
+
   EOObject GetAddress(std::string mem_name) const;
 };
 
-class MemoryManager{
- public:
-  explicit MemoryManager(std::string name):pointer(0),name(std::move(name)) {}
+class MemoryManager {
+public:
+  explicit MemoryManager(std::string name) : pointer(0), name(std::move(name)) {}
 
-  Variable Add(const clang::VarDecl* id,
+  Variable Add(const clang::VarDecl *id,
                size_t size,
                const std::string &type,
                std::string alias,
@@ -54,7 +58,7 @@ class MemoryManager{
 
   size_t RealMemorySize();
 
-  const Variable& GetVarByID(const clang::VarDecl* id) const;
+  const Variable &GetVarByID(const clang::VarDecl *id) const;
 
   std::vector<Variable>::const_iterator begin() const;
 
@@ -63,8 +67,10 @@ class MemoryManager{
   std::string name;
 
   EOObject GetEOObject() const;
-  void RemoveAllUsed(const std::vector<Variable>& all_local);
- private:
+
+  void RemoveAllUsed(const std::vector<Variable> &all_local);
+
+private:
   // index of first free byte in memory
   size_t pointer;
   int mem_size = 2048;
@@ -73,4 +79,4 @@ class MemoryManager{
 };
 
 
-#endif //__MEMORY_MANAGER__
+#endif // __MEMORY_MANAGER__

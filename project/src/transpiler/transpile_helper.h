@@ -18,11 +18,12 @@
 std::string GetTypeName(clang::QualType val);
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD);
+
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator = false);
-EOObject GetStmtEOObject(const clang::Stmt* p_stmt);
 
-std::set<std::string> FindAllExternalObjects(const EOObject& obj);
+EOObject GetStmtEOObject(const clang::Stmt *p_stmt);
+
+std::set<std::string> FindAllExternalObjects(const EOObject &obj);
 
 
-
-#endif //__TRANSPILE_HELPER__
+#endif // __TRANSPILE_HELPER__
