@@ -35,6 +35,9 @@ std::ostream& operator<<(ostream &os, const EOObject& obj) {
   {
     os << "[" << str_join(obj.arguments)<<"]";
   } else {
+    if(!obj.prefix.empty()) {
+      os << obj.prefix << ".";
+    }
     os << obj.name;
   }
   if (!obj.postfix.empty())

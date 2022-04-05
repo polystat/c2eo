@@ -38,6 +38,7 @@ struct EOObject{
 
   std::vector<std::string> arguments;
   std::string name;
+  std::string prefix;
   std::string postfix;
   EOObjectType type;
   std::vector<EOObject> nested;
