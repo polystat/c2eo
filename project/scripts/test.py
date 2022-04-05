@@ -54,6 +54,7 @@ class Tests(object):
             with tools.thread_pool() as threads:
                 threads.map(self.get_result_for_eo_file, self.compilation_units)
             os.chdir(original_path)
+            subprocess.run(f'killall java', shell=True)
         else:
             exit(-1)
 
@@ -62,7 +63,7 @@ class Tests(object):
         tools.pprint(unit["name"], slowly=True)
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
         try:
-            subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True, timeout=30)
+            subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True, timeout=10)
         except subprocess.TimeoutExpired:
             with open(unit["result_eo_file"], 'w') as f:
                 f.write('Timeout exception!')
