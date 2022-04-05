@@ -186,7 +186,6 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
       cerr << er.what() << "\n";
       return EOObject(EOObjectType::EO_PLUG);
     }
-
   } else if (stmtClass == Stmt::IfStmtClass) {
     const auto* op = dyn_cast<IfStmt>(stmt);
     return GetIfStmtEOObject(op);
@@ -285,7 +284,25 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     }
 
     EOObject binop{operation};
-    binop.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+    if (p_operator->getLHS()->getStmtClass() == Stmt::DeclRefExprClass) {
+        auto ref = dyn_cast<DeclRefExpr>(p_operator->getLHS());
+        if (!ref)
+            binop.nested.emplace_back(EOObjectType::EO_PLUG);
+        try {
+            const Variable& var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
+            EOObject eoObject {"read-as-" + var.type_postfix};
+            EOObject nestObj {var.alias};
+            eoObject.nested.push_back(nestObj);
+            binop.nested.emplace_back(eoObject);
+        }
+        catch (invalid_argument& er)
+        {
+            cerr << er.what() << "\n";
+            binop.nested.emplace_back(EOObject(EOObjectType::EO_PLUG));
+        }
+    } else {
+        binop.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+    }
     binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
     return binop;
 }
@@ -434,11 +451,14 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   return binop;
 }
 EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
-    EOObject binop {"write"};
+    EOObject binop {"write-as-"};
+//   EOObject binop {"write"};
     const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
     if (op)
     {
         try{
+            string type = op->getType()->isPointerType()? "ptr" : GetTypeName(op->getType());
+            binop.name += type;
             const Variable& var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
             binop.nested.emplace_back(var.alias);
         }
