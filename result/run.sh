@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -cp target/classes:target/eo-runtime.jar org.eolang.Main c2eo.src.app.global "$@"
+java -cp target/classes:target/eo-runtime.jar org.eolang.Main c2eo.src.fibonacci.fibo01.global "$@"

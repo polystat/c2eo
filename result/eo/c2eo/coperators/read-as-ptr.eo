@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > read-as-ptr
+  (a.read 8).as-int > @

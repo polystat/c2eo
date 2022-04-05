@@ -11,7 +11,7 @@ using namespace clang;
 // Анализ полученного начального значения с последующим использованием
 void initValueAnalysis(const VarDecl *VD, std::string &str);
 
-// Анализ типа для неициализированных переменны с установко нулевого значения
+// Анализ типа для неициализированных переменны с установкой нулевого значения
 void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 //std::string getIntTypeByVar(const VarDecl* VD);
 
@@ -28,9 +28,9 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
   auto typePtr = qualType.getTypePtr();
   //auto kind = typePtr->getKind();
 
-  std::string strType = "c_" + GetTypeName(VD->getType());
+  std::string strType {std::string("c_" + GetTypeName(VD->getType()))};
   // StorageClass getStorageClass() const
-  // Показывает на явное описани того или иного класса памяти в тексте программы
+  // Показывает на явное описание того или иного класса памяти в тексте программы
   // Наверное не во всех случаях полезно
   auto storageClass = VD->getStorageClass();
   // Проверка на размещение переменной в локальной памяти
@@ -130,8 +130,10 @@ void initZeroValueAnalysis(const VarDecl* VD, std::string &str) {
         str = "'\\0'";
     } else if (typePtr->isIntegerType() || typePtr->isBooleanType()) {
         str = "0";
-    } else if (typePtr->isRealFloatingType()) {
-        str = "0.0";
+    } else if (typePtr->isIntegerType() || typePtr->isBooleanType()) {
+        str = "0";
+    } else if (typePtr->isPointerType()) {
+        str = "0";
     } else if (typePtr->isRecordType()) {
         const RecordDecl* RD = typePtr->getAsRecordDecl();
         str = "";

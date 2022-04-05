@@ -56,7 +56,8 @@ class Transpiler(object):
             return self.compilation_units
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_build)
-        self.compilation_units = [unit for unit in tools.thread_pool().map(self.start_transpilation, c_files)]
+        with tools.thread_pool() as threads:
+            self.compilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
         self.remove_unused_eo_files()
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()

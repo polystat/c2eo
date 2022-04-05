@@ -27,8 +27,9 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
   llvm::errs() << "Caught segfault at address " <<  si->si_addr << " while tool run\n";
   ofstream out(filename);
   out << "+package c2eo.src." << packagename << "\n\n";
+  out << "+alias c2eo.stdio.printf\n\n";
   out << "[args...] > global\n";
-  out << "  TRUE > @\n";
+  out << "  printf \"Segfault exception at address " <<  si->si_addr << " while tool run\" > @\n";
   out.close();
   exit(0);
 }
@@ -114,7 +115,9 @@ const char **transform_argv(const char *const *argv) {
     parser_argv[1] = argv[1];
     parser_argv[2] = "--";
     parser_argv[3] = "-I/usr/include/linux";
-    parser_argv[4] = "-I/usr/include/c++/10/tr1";
-    parser_argv[5] = "-I/usr/include/c++/10";
+//    parser_argv[4] = "-I/usr/include/c++/10/tr1";
+//    parser_argv[5] = "-I/usr/include/c++/10";
+    parser_argv[4] = "-I/usr/include/c++/11/tr1";
+    parser_argv[5] = "-I/usr/include/c++/11";
     return parser_argv;
 }
