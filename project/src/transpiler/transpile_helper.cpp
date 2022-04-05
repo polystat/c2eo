@@ -213,7 +213,8 @@ EOObject GetStmtEOObject(const Stmt* stmt) {
 }
 
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
-  EOObject call(EOObjectType::EO_EMPTY);
+//   EOObject call(EOObjectType::EO_EMPTY);
+  EOObject call("seq");
   vector<std::size_t> var_sizes;
   for (auto VD :op->getDirectCallee()->parameters())
   {
@@ -221,6 +222,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     size_t type_size = type_info.Width / 8;
     var_sizes.push_back(type_size);
   }
+  // Формирование оператора, задающего последовательность действий
   size_t shift = 0;
   int i = 0;
   for (auto arg : op->arguments()) {
@@ -239,6 +241,18 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     call.nested.push_back(param);
   }
   call.nested.push_back(transpiler.func_manager.GetFunctionCall(op->getDirectCallee(), shift));
+
+  std::string postfix = GetTypeName(op->getType());
+  if(postfix != "undefinedtype") { // считается, что если тип не void,то генерация чтения данных нужна
+    EOObject read_ret{"read-as-"+postfix};
+    EOObject ret_val{"return"};
+    read_ret.nested.push_back(ret_val);
+    call.nested.push_back(read_ret);
+  } else { // если тип void,то возвращается TRUE
+    EOObject result{"TRUE"};
+    call.nested.push_back(result);
+  }
+
   return call;
 }
 
@@ -248,6 +262,7 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
   ss << fixed << an_float.convertToDouble() ;
   return {ss.str(),EOObjectType::EO_LITERAL};
 }
+
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   bool is_signed = p_literal->getType()->isSignedIntegerType();
   APInt an_int = p_literal->getValue();
@@ -455,7 +470,8 @@ std::string GetTypeName(QualType qualType)
   }
 
   if (typePtr->isPointerType()) {
-    str += "int64";
+//     str += "int64";
+    str += "ptr";
     return str;
   }
 
