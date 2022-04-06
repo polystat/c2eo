@@ -11,16 +11,16 @@ Variable MemoryManager::Add(const VarDecl *id,
                             size_t size,
                             const std::string &type,
                             std::string alias,
-                            std::string value,
+                            EOObject value,
                             std::string local_name,
                             size_t shift,
                             bool is_initialized) {
 
-  Variable var = {id, pointer, size, type, std::move(alias), std::move(value),
+  Variable var = {id, pointer, size, type, std::move(alias), value,
                   std::move(local_name), shift, type.substr(2), is_initialized};
-  // TODO fix this plug
-  if (var.value.empty())
-    var.value = "plug";
+  // TODO fix this plug (rework for check value == EoObject::PLUG)
+  if (var.value.name.empty())
+    var.value.name = "plug";
   variables.push_back(var);
   pointer += size;
   return var;
@@ -74,11 +74,13 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   EOObject res("write");
   res.nested.emplace_back(alias);
-  // TODO if value will be EOObject then code below changed.
-  if (value == "plug")
+  // TODO if value will be EOObject then code below changed. (rework for check value == EoObject::PLUG)
+  if (value.name == "plug")
+      // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   else
-    res.nested.emplace_back(value, EOObjectType::EO_LITERAL);
+      // Probably just emplace value.
+    res.nested.emplace_back(value.name, EOObjectType::EO_LITERAL);
   return res;
 }
 

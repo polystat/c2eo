@@ -26,7 +26,7 @@ struct Variable {
   // like g-x
   std::string alias;
   // TODO value should be EOObject
-  std::string value;
+  EOObject value;
   // address of local memory start in global
   std::string local_pointer;
   size_t shift;
@@ -49,7 +49,7 @@ public:
                size_t size,
                const std::string &type,
                std::string alias,
-               std::string value,
+               EOObject value,
                std::string local_name = "",
                size_t shift = 0,
                bool is_initialized = true);

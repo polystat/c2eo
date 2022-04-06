@@ -16,7 +16,9 @@ enum class EOObjectType {
 
 struct EOObject {
 public:
-  explicit EOObject(EOObjectType type) : type(type) {}
+    EOObject() {name = "";}
+
+    explicit EOObject(EOObjectType type) : type(type) {}
 
   // Create simple complete Object
   explicit EOObject(std::string name) :
