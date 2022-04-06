@@ -113,6 +113,21 @@ def print_exception_test(test_name, log_data):
     print_truncated_data(log_data, 10)
 
 
+def print_progress_bar(i, n):
+    i += 1
+    cell_count = 20
+    cell_size = n / cell_count
+    full_cell_count = int(i / (float(n) / cell_count))
+    indicator = ' ▏▎▍▌▋▊▉█'
+    last = len(indicator) - 1
+    current_cell = ''
+    if cell_count != full_cell_count:
+        current_cell = indicator[int(i % cell_size / cell_size * last)]
+    bar = f'{indicator[last] * full_cell_count}{current_cell}{" " * (cell_count - full_cell_count - 1)}'
+    percentage = f'{round(i / n * 100.0, 2):5.2f}%'
+    print(f'\r[{get_status("INFO")}] {percentage}|{bar}| {i}/{n}', end='')
+
+
 def print_truncated_data(data, max_lines):
     lines_count = min(max_lines, len(data))
     log_data = ''.join(data[:lines_count])

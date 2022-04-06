@@ -31,6 +31,7 @@ class Tests(object):
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
         self.run_sh_replace = settings.get_setting('run_sh_replace')
         self.compilation_units = []
+        self.test_count = 0
 
     def test(self):
         update_eo_version.main()
@@ -48,25 +49,29 @@ class Tests(object):
         with tools.thread_pool() as threads:
             threads.map(get_result_for_c_file, self.compilation_units)
         if EOBuilder().build():
-            tools.pprint('\nRunning tests:', slowly=True)
+            tools.pprint('\nRunning tests:\n', slowly=True)
             original_path = os.getcwd()
             os.chdir(self.path_to_eo_project)
             with tools.thread_pool() as threads:
                 threads.map(self.get_result_for_eo_file, self.compilation_units)
             os.chdir(original_path)
+            print()
+            tools.pprint()
             subprocess.run(f'killall java', shell=True)
         else:
             exit(-1)
 
     def get_result_for_eo_file(self, unit):
         command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
-        tools.pprint(unit["name"], slowly=True)
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
         try:
             subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True, timeout=10)
         except subprocess.TimeoutExpired:
             with open(unit["result_eo_file"], 'w') as f:
                 f.write('Timeout exception!')
+        finally:
+            tools.print_progress_bar(self.test_count, len(self.compilation_units))
+            self.test_count += 1
 
 
 def get_result_for_c_file(unit):
