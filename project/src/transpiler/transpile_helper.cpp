@@ -257,8 +257,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     read_ret.nested.push_back(ret_val);
     call.nested.push_back(read_ret);
   } else { // если тип void,то возвращается TRUE
-    EOObject result{"TRUE"};
-    call.nested.push_back(result);
+    call.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
   }
 
   return call;

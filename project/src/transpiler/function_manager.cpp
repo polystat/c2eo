@@ -12,9 +12,9 @@ void FunctionManager::Add(const clang::FunctionDecl *FD) {
     return;
   }
   if (isDefinition) {
-    auto declaration = std::remove_if(declarations.begin(), declarations.end(),
-                                      [&funcName](FunctionDeclaration f) { return f.name == funcName; });
-    declarations.erase(declaration, declarations.end());
+//     auto declaration = std::remove_if(declarations.begin(), declarations.end(),
+//                                       [&funcName](FunctionDeclaration f) { return f.name == funcName; });
+//     declarations.erase(declaration, declarations.end());
     definitions.push_back({FD, funcName});
   } else {
     declarations.push_back({FD, funcName});
