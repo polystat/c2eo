@@ -86,6 +86,14 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
   auto size = typeInfo.Width;
   // auto align = typeInfo.Align;  // не нужен
   APValue *initVal = VD->evaluateValue();
+
+//  auto x = VD->getInit();
+//  auto y = llvm::dyn_cast<InitListExpr>(x);
+//  auto z = y->children();
+//  for (const auto ch : z) {
+//      llvm::outs() << ch->getStmtClassName() << "\n";
+//  }
+
   if (initVal != nullptr) {
     if (initVal->isInt()) {
       auto intValue = initVal->getInt().getExtValue();
@@ -143,7 +151,9 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
       initZeroValueAnalysis((const VarDecl *) (*it), fieldVal);
       str += fieldVal;
     }
+  } else if (typePtr->isArrayType()) {
+      str = "0";
   } else {
-    str = "";
+      str = "";
   }
 }
