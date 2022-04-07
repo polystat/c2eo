@@ -59,18 +59,22 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
 
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, strValue);
+    return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, EOObject{strValue});
   } else if (globalStorage && !extStorage) {
-    return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, strValue);
+    return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, EOObject{strValue});
   } else // its local variable!
   {
-    if (local_name.empty())
-      return {};
+    if (local_name.empty()) {
+        // Тут генерируется EoObject с name = "".
+        return {};
+    }
     const auto *PD = llvm::dyn_cast<ParmVarDecl>(VD);
     if (PD) {
-      return transpiler.glob.Add(VD, typeSize, strType, "p-" + varName, strValue, local_name, shift, VD->hasInit());
+      return transpiler.glob.Add(VD, typeSize, strType, "p-" + varName,
+                                 EOObject{strValue}, local_name, shift, VD->hasInit());
     }
-    return transpiler.glob.Add(VD, typeSize, strType, "l-" + varName, strValue, local_name, shift, VD->hasInit());
+    return transpiler.glob.Add(VD, typeSize, strType, "l-" + varName,
+                               EOObject{strValue}, local_name, shift, VD->hasInit());
   }
 }
 
@@ -86,6 +90,14 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
   auto size = typeInfo.Width;
   // auto align = typeInfo.Align;  // не нужен
   APValue *initVal = VD->evaluateValue();
+
+//  auto x = VD->getInit();
+//  auto y = llvm::dyn_cast<InitListExpr>(x);
+//  auto z = y->children();
+//  for (const auto ch : z) {
+//      llvm::outs() << ch->getStmtClassName() << "\n";
+//  }
+
   if (initVal != nullptr) {
     if (initVal->isInt()) {
       auto intValue = initVal->getInt().getExtValue();
@@ -143,7 +155,9 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
       initZeroValueAnalysis((const VarDecl *) (*it), fieldVal);
       str += fieldVal;
     }
+  } else if (typePtr->isArrayType()) {
+      str = "0";
   } else {
-    str = "";
+      str = "";
   }
 }
