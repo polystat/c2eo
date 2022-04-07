@@ -23,14 +23,13 @@ def is_unique_files(c_files):
             is_unique = False
             collisions = list(filter(lambda x: f'{key}.c' in x, c_files))
             collisions = list(map(lambda x: f'{x}\n', collisions))
-            tools.print_exception_test('Detects follow files name collisions:', collisions)
+            tools.pprint_exception('Detects follow files name collisions:', collisions)
     return is_unique
 
 
 class Transpiler(object):
 
     def __init__(self, path_to_c_files, filters):
-
         if os.path.isfile(path_to_c_files):
             path_to_c_files = os.path.dirname(path_to_c_files)
         self.filters = filters
@@ -44,8 +43,10 @@ class Transpiler(object):
         self.result_dir_name = settings.get_setting('result_dir_name')
         self.run_sh_code = settings.get_meta_code('run.sh')
         self.run_sh_replace = settings.get_setting('run_sh_replace')
-        self.compilation_units = []
+        self.transpilation_units = []
         self.replaced_path = f'{os.path.split(self.path_to_c_files[:-1])[0]}{os.sep}'
+        self.files_handled_count = 0
+        self.files_count = 0
 
     def transpile(self):
         tools.pprint('\nTranspilation start\n')
@@ -53,30 +54,35 @@ class Transpiler(object):
         c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c',
                                                 filters=self.filters, recursive=True, print_files=True)
         if not is_unique_files(c_files):
-            return self.compilation_units
+            return self.transpilation_units
+        self.files_count = len(c_files)
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_build)
+        tools.pprint('\nTranspile files:\n', slowly=True)
         with tools.thread_pool() as threads:
-            self.compilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
+            self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
+        self.print_transpilation_results()
         self.remove_unused_eo_files()
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
         if len(c_files) == 1:
-            self.generate_run_sh(self.compilation_units[0]['full_name'])
+            self.generate_run_sh(self.transpilation_units[0]['full_name'])
         tools.pprint('Transpilation done\n')
         os.chdir(original_path)
-        return self.compilation_units
+        return self.transpilation_units
 
     def start_transpilation(self, c_file):
         path, name, _ = tools.split_path(c_file, with_end_sep=True)
         rel_c_path = path.replace(self.replaced_path, '')
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
         prepared_c_file, result_path = self.prepare_c_file(path, name, c_file)
-        transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {full_name}.eo > /dev/null'
+        transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {full_name}.eo'
         eo_file = f'{name}.eo'
-        subprocess.run(transpile_cmd, shell=True)
+        result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         os.rename(f'{full_name}.eo', eo_file)
-        return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name,
+        self.files_handled_count += 1
+        tools.print_progress_bar(self.files_handled_count, self.files_count)
+        return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name, 'transpilation_result': result,
                 'eo_file': os.path.abspath(eo_file), 'rel_eo_file': os.path.join(rel_c_path, eo_file),
                 'name': name,  'result_path': result_path, 'prepared_c_file': prepared_c_file}
 
@@ -95,26 +101,38 @@ class Transpiler(object):
         return prepared_c_file, result_path
 
     def remove_unused_eo_files(self):
-        eo_assembly_names = set(map(lambda x: x['rel_eo_file'], self.compilation_units))
+        eo_assembly_names = set(map(lambda x: x['rel_eo_file'], self.transpilation_units))
         src_eo_names = tools.search_files_by_pattern(self.path_to_eo_src, '*.eo', recursive=True)
         src_eo_names = set(map(lambda x: x.replace(self.path_to_eo_src, ''), src_eo_names))
         for name in src_eo_names - eo_assembly_names:
             os.remove(f'{self.path_to_eo_src}{name}')
-        for unit in self.compilation_units:
+        for unit in self.transpilation_units:
             unit['src_eo_path'] = os.path.join(self.path_to_eo_src, unit['rel_c_path'])
             unit['src_eo_file'] = os.path.join(unit['src_eo_path'], f'{unit["name"]}.eo')
         tools.remove_empty_dirs(self.path_to_eo_src)
 
     def generate_plug_for_empty_eo_file(self):
-        empty_units = list(filter(lambda unit: os.stat(unit['eo_file']).st_size == 0, self.compilation_units))
+        empty_units = list(filter(lambda unit: os.stat(unit['eo_file']).st_size == 0, self.transpilation_units))
         for empty_unit in empty_units:
             plug = regex.sub(self.plug_replace, empty_unit['full_name'], self.plug_code)
             with open(empty_unit['eo_file'], 'w') as f:
                 f.write(plug)
 
+    def print_transpilation_results(self):
+        print()
+        tools.pprint()
+        for unit in self.transpilation_units:
+            result = unit['transpilation_result']
+            if result.returncode == 0:
+                if len(result.stderr) != 0:
+                    tools.pprint(unit['name'], slowly=True, status='WARN')
+                    tools.pprint(result.stderr, slowly=True, status='')
+            else:
+                tools.pprint_exception(unit['name'], result.stderr)
+
     def move_transpiled_files(self):
         difference = []
-        for unit in self.compilation_units:
+        for unit in self.transpilation_units:
             shutil.copy(unit['eo_file'], unit['result_path'])
             if not tools.compare_files(unit['eo_file'], unit['src_eo_file']):
                 if not os.path.exists(unit['src_eo_path']):

@@ -30,36 +30,58 @@ class Tests(object):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
         self.run_sh_replace = settings.get_setting('run_sh_replace')
-        self.compilation_units = []
-        self.test_count = 0
+        self.transpilation_units = []
+        self.test_handled_count = 0
 
     def test(self):
         update_eo_version.main()
-        build_c2eo.main(self.path_to_c2eo_build)
-        self.compilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
-        if not self.compilation_units:
+        if not build_c2eo.main(self.path_to_c2eo_build):
+            exit(-1)
+
+        self.transpilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
+        if not self.transpilation_units:
             exit(-2)
+
         self.get_result_for_tests()
         with tools.thread_pool() as threads:
-            results = threads.map(compare_test_results, self.compilation_units)
+            results = threads.map(compare_test_results, self.transpilation_units)
         passed, errors, exceptions = group_comparison_results(results)
         print_tests_result(sorted(passed), sorted(errors), sorted(exceptions))
 
     def get_result_for_tests(self):
+        tools.pprint('\nRunning C tests:\n', slowly=True)
         with tools.thread_pool() as threads:
-            threads.map(get_result_for_c_file, self.compilation_units)
-        if EOBuilder().build():
-            tools.pprint('\nRunning tests:\n', slowly=True)
-            original_path = os.getcwd()
-            os.chdir(self.path_to_eo_project)
-            with tools.thread_pool() as threads:
-                threads.map(self.get_result_for_eo_file, self.compilation_units)
-            os.chdir(original_path)
-            print()
-            tools.pprint()
-            subprocess.run(f'killall java', shell=True)
+            threads.map(self.get_result_for_c_file, self.transpilation_units)
+        print()
+        tools.pprint()
+
+        if not EOBuilder().build():
+            exit(-3)
+
+        tools.pprint('\nRunning EO tests:\n', slowly=True)
+        self.test_handled_count = 0
+        original_path = os.getcwd()
+        os.chdir(self.path_to_eo_project)
+        with tools.thread_pool() as threads:
+            threads.map(self.get_result_for_eo_file, self.transpilation_units)
+        os.chdir(original_path)
+        print()
+        tools.pprint()
+        subprocess.run(f'killall java', shell=True)
+
+    def get_result_for_c_file(self, unit):
+        compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
+        unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
+        compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null 2>>{unit["result_c_file"]}'
+        try:
+            subprocess.run(compile_cmd, shell=True, check=True)
+        except subprocess.CalledProcessError as exc:
+            return exc
         else:
-            exit(-1)
+            subprocess.run(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+        finally:
+            self.test_handled_count += 1
+            tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
     def get_result_for_eo_file(self, unit):
         command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
@@ -70,20 +92,8 @@ class Tests(object):
             with open(unit["result_eo_file"], 'w') as f:
                 f.write('Timeout exception!')
         finally:
-            tools.print_progress_bar(self.test_count, len(self.compilation_units))
-            self.test_count += 1
-
-
-def get_result_for_c_file(unit):
-    compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
-    unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
-    compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null 2>>{unit["result_c_file"]}'
-    try:
-        subprocess.run(compile_cmd, shell=True, check=True)
-    except subprocess.CalledProcessError as exc:
-        return exc
-    else:
-        subprocess.run(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+            self.test_handled_count += 1
+            tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
 
 def compare_test_results(unit):
@@ -164,9 +174,9 @@ def print_tests_result(passed, errors, exceptions):
     for test_name, _ in passed:
         tools.pprint(test_name, slowly=True, status='PASS')
     for test_name, log_data in errors:
-        tools.print_error_test(test_name, log_data)
+        tools.pprint_error(test_name, log_data, max_lines=30)
     for test_name, log_data in exceptions:
-        tools.print_exception_test(test_name, log_data)
+        tools.pprint_exception(test_name, log_data, max_lines=10)
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tests_count = len(passed) + len(errors) + len(exceptions)
     tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
