@@ -53,9 +53,9 @@ def get_or_none(array, index):
 
 
 def get_status(status):
-    statuses = {'INFO': '\033[36mINFO\033[37m', 'WARN': '\033[35mWARN\033[37m',
-                'ERROR': '\033[31mERROR\033[37m', 'EXCEPTION': '\033[31mEXCEPTION\033[37m',
-                'PASS': '\033[32mPASS\033[37m'}
+    statuses = {'INFO': '\033[1;34mINFO\033[0;37m', 'WARN': '\033[1;35mWARN\033[0;37m',
+                'ERROR': '\033[1;31mERROR\033[0;37m', 'EXCEPTION': '\033[31mEXCEPTION\033[0;37m',
+                'PASS': '\033[1;32mPASS\033[0;37m'}
     return statuses.get(status)
 
 
@@ -103,18 +103,23 @@ def print_only_file_names(files):
     pprint()
 
 
-def print_error_test(test_name, log_data):
-    pprint(test_name, slowly=True, status='ERROR')
-    print_truncated_data(log_data, 30)
+def pprint_error(name, log_data, max_lines=None):
+    pprint(name, slowly=True, status='ERROR')
+    if max_lines:
+        print_truncated_data(log_data, max_lines)
+    else:
+        pprint(log_data, slowly=True, status='')
 
 
-def print_exception_test(test_name, log_data):
-    pprint(test_name, slowly=True, status='EXCEPTION')
-    print_truncated_data(log_data, 10)
+def pprint_exception(name, log_data, max_lines=None):
+    pprint(name, slowly=True, status='EXCEPTION')
+    if max_lines:
+        print_truncated_data(log_data, max_lines)
+    else:
+        pprint(log_data, slowly=True, status='')
 
 
 def print_progress_bar(i, n):
-    i += 1
     cell_count = 20
     cell_size = n / cell_count
     full_cell_count = int(i / (float(n) / cell_count))
@@ -129,8 +134,12 @@ def print_progress_bar(i, n):
 
 
 def print_truncated_data(data, max_lines):
-    lines_count = min(max_lines, len(data))
-    log_data = ''.join(data[:lines_count])
+    if type(data) == str:
+        symbols_count = min(max_lines * 20, len(data))
+        log_data = data[:symbols_count]
+    else:
+        lines_count = min(max_lines, len(data))
+        log_data = ''.join(data[:lines_count])
     pprint(log_data, slowly=True, status='')
 
 
