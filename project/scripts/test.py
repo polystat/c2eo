@@ -165,7 +165,7 @@ def group_comparison_results(results):
         if is_except:
             exceptions.append((unit_name, log_data))
         elif is_equal:
-            passed.append((unit_name, log_data))
+            passed.append(unit_name)
         else:
             errors.append((unit_name, log_data))
     return passed, errors, exceptions
@@ -175,11 +175,12 @@ def print_tests_result(passed, errors, exceptions):
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tools.pprint('TEST RESULTS', slowly=True)
     tools.pprint(f'{"-" * 60}', slowly=True)
-    for test_name, _ in passed:
-        tools.pprint(test_name, slowly=True, status='PASS')
+    tools.pprint(', '.join(passed), slowly=True, status='PASS')
     for test_name, log_data in errors:
+        print()
         tools.pprint_error(test_name, log_data, max_lines=30)
     for test_name, log_data in exceptions:
+        print()
         tools.pprint_exception(test_name, log_data, max_lines=10)
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tests_count = len(passed) + len(errors) + len(exceptions)
