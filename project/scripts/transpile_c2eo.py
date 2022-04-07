@@ -35,9 +35,9 @@ class Transpiler(object):
         self.filters = filters
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
-        self.path_to_c_files = os.path.abspath(os.path.join(path_to_c_files, ''))
+        self.path_to_c_files = os.path.join(os.path.abspath(path_to_c_files), '')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
-        self.path_to_eo_src = os.path.abspath(settings.get_setting('path_to_eo_src'))
+        self.path_to_eo_src = os.path.join(os.path.abspath(settings.get_setting('path_to_eo_src')), '')
         self.plug_code = settings.get_meta_code('plug')
         self.plug_replace = settings.get_setting('plug_replace')
         self.result_dir_name = settings.get_setting('result_dir_name')
@@ -73,7 +73,7 @@ class Transpiler(object):
 
     def start_transpilation(self, c_file):
         path, name, _ = tools.split_path(c_file, with_end_sep=True)
-        rel_c_path = path.replace(self.replaced_path, '')
+        rel_c_path = path.replace(self.replaced_path, "")
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
         prepared_c_file, result_path = self.prepare_c_file(path, name, c_file)
         transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {full_name}.eo'

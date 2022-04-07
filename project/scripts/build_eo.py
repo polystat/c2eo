@@ -52,7 +52,7 @@ class EOBuilder(object):
         difference = project_eo_files - eo_src_files
         if difference:
             tools.pprint('EO project files are incompatible', status='WARN')
-            tools.pprint(f'The following files may have been deleted: {difference}')
+            tools.pprint(f'The following files may have been deleted: {difference}\n')
             return False
         else:
             tools.pprint('EO project files are compatible', status='PASS')
