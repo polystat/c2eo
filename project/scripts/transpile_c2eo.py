@@ -121,14 +121,31 @@ class Transpiler(object):
     def print_transpilation_results(self):
         print()
         tools.pprint()
+        data = self.group_transpilation_results()
+        for warn, places in data['warnings'].items():
+            tools.pprint(warn, slowly=True, status='WARN')
+            tools.pprint(f'{", ".join(places)}\n', slowly=True, status='')
+        for name, exception in data['exceptions'].items():
+            tools.pprint_exception(name, exception)
+
+    def group_transpilation_results(self):
+        data = {'warnings': {}, 'exceptions': {}}
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
-            if result.returncode == 0:
-                if len(result.stderr) != 0:
-                    tools.pprint(unit['name'], slowly=True, status='WARN')
-                    tools.pprint(result.stderr, slowly=True, status='')
-            else:
-                tools.pprint_exception(unit['name'], result.stderr)
+            if result.returncode != 0:
+                data['exceptions'][unit['name']] = result.stderr
+                continue
+
+            for line in result.stderr.split('\n'):
+                if '.c:' not in line:
+                    continue
+
+                place, warn = line.split(' ', 1)
+                if warn not in data['warnings']:
+                    data['warnings'][warn] = []
+
+                data['warnings'][warn].append(place.split('/')[-1][:-1])
+        return data
 
     def move_transpiled_files(self):
         difference = []
