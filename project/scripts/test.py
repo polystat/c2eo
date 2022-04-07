@@ -67,7 +67,11 @@ class Tests(object):
         os.chdir(original_path)
         print()
         tools.pprint()
-        subprocess.run(f'killall java', shell=True)
+        result = subprocess.run(f'killall java', shell=True, capture_output=True, text=True)
+        if result.returncode == 0:
+            tools.pprint('\nkillall java\n', slowly=True)
+        else:
+            tools.pprint(f'\n{result.stderr}', slowly=True)
 
     def get_result_for_c_file(self, unit):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
