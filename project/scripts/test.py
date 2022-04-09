@@ -46,7 +46,7 @@ class Tests(object):
         with tools.thread_pool() as threads:
             results = threads.map(compare_test_results, self.transpilation_units)
         passed, errors, exceptions = group_comparison_results(results)
-        print_tests_result(sorted(passed), sorted(errors), sorted(exceptions))
+        print_tests_result(sorted(passed), sorted(errors), exceptions)
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
@@ -157,13 +157,15 @@ def compare_lines(c_data, eo_data):
 
 def group_comparison_results(results):
     passed = []
-    exceptions = []
+    exceptions = {}
     errors = []
     tools.pprint('\nGetting results', slowly=True)
-
     for unit_name, is_except, is_equal, log_data in results:
         if is_except:
-            exceptions.append((unit_name, log_data))
+            log_data = ' '.join([x.replace('\n', '') for x in log_data])
+            if log_data not in exceptions:
+                exceptions[log_data] = []
+            exceptions[log_data].append(unit_name)
         elif is_equal:
             passed.append(unit_name)
         else:
@@ -179,13 +181,14 @@ def print_tests_result(passed, errors, exceptions):
     for test_name, log_data in errors:
         print()
         tools.pprint_error(test_name, log_data, max_lines=30)
-    for test_name, log_data in exceptions:
+    for log_data, test_names in exceptions.items():
         print()
-        tools.pprint_exception(test_name, log_data, max_lines=10)
+        tools.pprint_exception(', '.join(test_names), log_data, max_lines=10)
     tools.pprint(f'\n{"-" * 60}', slowly=True)
-    tests_count = len(passed) + len(errors) + len(exceptions)
+    len_exceptions = sum(len(x[1]) for x in exceptions)
+    tests_count = len(passed) + len(errors) + len_exceptions
     tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
-                 f' Errors: {len(errors)}, Exceptions: {len(exceptions)}', slowly=True)
+                 f' Errors: {len(errors)}, Exceptions: {len_exceptions}', slowly=True)
 
 
 if __name__ == '__main__':
