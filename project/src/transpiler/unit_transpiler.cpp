@@ -64,7 +64,7 @@ void UnitTranspiler::GenerateResult() {
         result << alias << "\n";
       }
       catch (std::out_of_range &) {
-        llvm::errs() << "Not found alias for " << ext_obj << "\n";
+        llvm::errs() << "Exception: not found alias for " << ext_obj << "\n";
       }
     }
   }
