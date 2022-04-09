@@ -30,7 +30,7 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg) {
   out << "[args...] > global\n";
   out << "  printf \"Exception: segfault at address " << si->si_addr << " while tool run\" > @\n";
   out.close();
-  exit(0);
+  exit(-1);
 }
 
 
