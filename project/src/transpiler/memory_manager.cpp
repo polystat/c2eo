@@ -2,6 +2,7 @@
 #include <exception>
 #include <stdexcept>
 #include "memory_manager.h"
+#include "unit_transpiler.h"
 
 using namespace std;
 using namespace clang;
@@ -76,10 +77,10 @@ EOObject Variable::GetInitializer() const{
     res.nested.emplace_back(value,EOObjectType::EO_LITERAL);
   return res;
 }
-EOObject Variable::GetAddress(string mem_name) const{
+EOObject Variable::GetAddress(const string& mem_name) const{
   EOObject addr("address",alias);
   if(!mem_name.empty())
-    addr.nested.emplace_back(std::move(mem_name));
+    addr.nested.emplace_back(mem_name);
   if (!local_pointer.empty()) {
     EOObject shift_obj("add");
     shift_obj.nested.emplace_back(local_pointer);
@@ -90,6 +91,13 @@ EOObject Variable::GetAddress(string mem_name) const{
   else {
     addr.nested.emplace_back(to_string(position), EOObjectType::EO_LITERAL);
   }
+//  for(int i=0;i<5;i++) {
+//    EOObject shift_obj("field_of", alias);
+//    shift_obj.nested.emplace_back(mem_name);
+//    shift_obj.nested.emplace_back(to_string(position), EOObjectType::EO_LITERAL);
+//
+//    addr.nested.push_back(shift_obj);
+//  }
   return addr;
 }
 

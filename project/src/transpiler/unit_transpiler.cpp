@@ -24,11 +24,16 @@ void UnitTranspiler::GenerateResult() {
   ret_addr.nested.emplace_back("0",EOObjectType::EO_LITERAL);
   body.nested.push_back(ret_addr);
 
-  if(!glob.Empty()){
+  if(!glob.Empty())
     for(const auto& var : glob){
       body.nested.emplace_back(var.GetAddress(glob.name));
     }
-  }
+  if (!record_manager.Empty()) // todo: it isn't global, is it? it should be out of labels
+    for(auto type: record_manager) {
+      auto recordFields = type.GetEORecordDecl();
+      body.nested.insert(body.nested.end(), recordFields.begin(), recordFields.end());
+    }
+
   // TODO write all declarations
   for(const auto& func : func_manager.GetAllDefinitions()){
 

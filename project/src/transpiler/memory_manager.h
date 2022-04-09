@@ -22,6 +22,7 @@ struct Variable {
   size_t size;
   // like c-int64
   std::string type;
+//  bool isCustomType = false;
   // like g-x
   std::string alias;
   // TODO value should be EOObject
@@ -34,7 +35,7 @@ struct Variable {
   bool is_initialized;
   bool operator==(const Variable& var) const;
   EOObject GetInitializer() const;
-  EOObject GetAddress(std::string mem_name) const;
+  EOObject GetAddress(const std::string& mem_name) const;
 };
 
 class MemoryManager {

@@ -1,15 +1,18 @@
 //#include <stdio.h>
-struct st {
+struct st1 {
+  struct st2{
     int a;
     int b;
-} a = {1, 2};
-int b = 17;
+    int c;
+  } a;
+  int b;
+  struct st2 c;
+};
+
+struct st1 obj1;
+struct st2 obj2;
 
 int main() {
-    a.a;
-    a.b;
-    //printf("%d\n", a.a);
-    b;
-    //printf("%d\n", b);
-    return 0;
+  obj1.a.a = 8;
+  return 0;
 }
