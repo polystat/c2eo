@@ -54,14 +54,15 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
   } else {
     initZeroValueAnalysis(VD, strValue);
   }
+  EOObject eoObject{strValue};
 
   extern UnitTranspiler transpiler;
 
   // Проверка, что переменная является глобальной
   if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, EOObject{strValue});
+    return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, eoObject);
   } else if (globalStorage && !extStorage) {
-    return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, EOObject{strValue});
+    return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, eoObject);
   } else // its local variable!
   {
     if (local_name.empty()) {
@@ -71,10 +72,10 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
     const auto *PD = llvm::dyn_cast<ParmVarDecl>(VD);
     if (PD) {
       return transpiler.glob.Add(VD, typeSize, strType, "p-" + varName,
-                                 EOObject{strValue}, local_name, shift, VD->hasInit());
+                                 eoObject, local_name, shift, VD->hasInit());
     }
     return transpiler.glob.Add(VD, typeSize, strType, "l-" + varName,
-                               EOObject{strValue}, local_name, shift, VD->hasInit());
+                               eoObject, local_name, shift, VD->hasInit());
   }
 }
 
