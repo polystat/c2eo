@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
 [a b] > write-as-bool
-  a.write (b.as-bytes.part (b.as-bytes.size.sub 1) 1) > @
+  a.write ((b.eq 0).if 00- 01-) > @

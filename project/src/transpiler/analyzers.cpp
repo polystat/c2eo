@@ -12,11 +12,11 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
   // We do not want to convert header files!
   // TODO !FD->isDefined() now only plug and should be fixed later
   if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
-      return;
+    return;
 
   transpiler.func_manager.Add(FD);
-  //ProcessFunction(FD);
-    //getFuncDeclParameters(FD);
+  // ProcessFunction(FD);
+  // getFuncDeclParameters(FD);
 
 }
 
@@ -27,12 +27,11 @@ void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
     context = Result.Context;
   const auto *RD = Result.Nodes.getNodeAs<RecordDecl>("recordDecl");
   // We do not want to convert header files!
-  ////if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
+  // if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
   if (!RD)
     return;
-  //TODO Return record decl analysis
-  //getRecordDeclSubObjects(RD);
-  //RD->dump();
+  // getRecordDeclSubObjects(RD);
+  // RD->dump();
   ProcessRecordType(RD);
 }
 
@@ -44,9 +43,9 @@ void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result
   const auto *VD = Result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
   // We do not want to convert header files!
   if (!VD || !context->getSourceManager().isWrittenInMainFile(VD->getLocation()))
-      return;
+    return;
 
-  //getVarDeclParameters(VD);
+  // getVarDeclParameters(VD);
   ProcessVariable(VD);
 }
 
@@ -73,15 +72,15 @@ void IntVarDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
   if (!context)
     context = Result.Context;
   const auto VD = Result.Nodes.getNodeAs<VarDecl>("intVarDecl");
-    // We do not want to convert header files!
-    ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
-    if (!VD)
-        return;
-    llvm::outs() << "Integer variable.\n";
-    // Определение и тестовый вывод основных параметров описания переменных
-    ProcessVariable(VD);
+  // We do not want to convert header files!
+  // if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
+  if (!VD)
+    return;
+  llvm::outs() << "Integer variable.\n";
+  // Определение и тестовый вывод основных параметров описания переменных
+  ProcessVariable(VD);
 
-    //VD->dump();
+  // VD->dump();
 }
 
 //------------------------------------------------------------------------------
@@ -91,49 +90,49 @@ void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result)
     context = Result.Context;
   const auto *VD = Result.Nodes.getNodeAs<VarDecl>("intVarGlobalMemoryDecl");
   // We do not want to convert header files!
-  ////if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
+  // if (!VD || !Context->getSourceManager().isWrittenInMainFile(VD->getForLoc()))
   if (!VD)
     return;
 
   llvm::outs() << "I`m variable. My name is " << VD->getNameAsString() << "\n";
 
-  if(VD->hasLocalStorage()) {
+  if (VD->hasLocalStorage()) {
     llvm::outs() << "   hasLocalStorage.\n";
   } else {
     llvm::outs() << "   not hasLocalStorage.\n";
   }
 
-  if(VD->isStaticLocal()) {
+  if (VD->isStaticLocal()) {
     llvm::outs() << "   isStaticLocal.\n";
   } else {
     llvm::outs() << "   not isStaticLocal.\n";
   }
 
-  if(VD->hasExternalStorage()) {
+  if (VD->hasExternalStorage()) {
     llvm::outs() << "   hasExternalStorage.\n";
   } else {
     llvm::outs() << "   not hasExternalStorage.\n";
   }
 
-  if(VD->hasGlobalStorage()) {
+  if (VD->hasGlobalStorage()) {
     llvm::outs() << "   hasGlobalStorage.\n";
   } else {
     llvm::outs() << "   not hasGlobalStorage.\n";
   }
 
-  if(VD->isLocalVarDecl()) {
+  if (VD->isLocalVarDecl()) {
     llvm::outs() << "   isLocalVarDecl.\n";
   } else {
     llvm::outs() << "   not isLocalVarDecl.\n";
   }
 
-  if(VD->isLocalVarDeclOrParm()) {
+  if (VD->isLocalVarDeclOrParm()) {
     llvm::outs() << "   isLocalVarDeclOrParm.\n";
   } else {
     llvm::outs() << "   not isLocalVarDeclOrParm.\n";
   }
 
-  if(VD->getAnyInitializer()) {
+  if (VD->getAnyInitializer()) {
     llvm::outs() << "   getAnyInitializer.\n";
   } else {
     llvm::outs() << "   not getAnyInitializer.\n";
@@ -150,5 +149,5 @@ void IntVarDeclGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &Result)
 //     llvm::outs() << "   not evaluateValue.\n";
 //   }
 
-  //VD->dump();
+  // VD->dump();
 }

@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > addr-of
+  a.addr > @

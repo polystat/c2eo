@@ -6,7 +6,9 @@ $ sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
 $ sudo pip3 install cmake
 ```
 
+
 ### How to use:
+
 ```bash
 (venv) $ python3 update-release.py -h
 usage: update-release.py [-h] [--branch BRANCH] [--version VERSION]
@@ -21,7 +23,9 @@ Example
 ```bash
 (venv) $ python3 update-release.py --version=0.1.1
 ```
+
 Notes:
+
 * Use `.` as a version delimiter.
 * This script uses the current date, time, and time zone. Make sure they are configured correctly.
 * This script extracts your name and email from `git config`. Make sure you have them.
@@ -34,6 +38,7 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
 ```
 
 ### Algorithm:
+
 * Build the executable file.
 * Create a deb file (basic: [HABR](https://habr.com/ru/post/78094/))
 * Create a repository (basic: [UNIXFORUM](https://unixforum.org/viewtopic.php?t=79513))

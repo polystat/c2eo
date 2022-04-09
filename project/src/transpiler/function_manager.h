@@ -12,12 +12,14 @@
 struct FunctionDefinition {
   const clang::FunctionDecl *FD;
   std::string name;
+
   EOObject GetEOObject() const;
- private:
+
+private:
   EOObject GetBody() const;
 };
 
-struct FunctionDeclaration{
+struct FunctionDeclaration {
   const clang::FunctionDecl *FD;
   std::string name;
 };
@@ -25,10 +27,13 @@ struct FunctionDeclaration{
 
 struct FunctionManager {
 
-  void Add(const clang::FunctionDecl* FD);
-  const std::vector<FunctionDefinition>& GetAllDefinitions();
+  void Add(const clang::FunctionDecl *FD);
+
+  const std::vector<FunctionDefinition> &GetAllDefinitions();
+
   EOObject GetFunctionCall(const clang::FunctionDecl *FD, size_t param_size) const;
- private:
+
+private:
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;
 };
