@@ -1,4 +1,6 @@
 +package c2eo.coperators
 
 [a b] > write
-  a.write b > @
+  seq > @
+    a.write b
+    b

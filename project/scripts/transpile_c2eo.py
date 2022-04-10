@@ -125,25 +125,31 @@ class Transpiler(object):
         for warn, places in data['warnings'].items():
             tools.pprint(warn, slowly=True, status='WARN')
             tools.pprint(f'{", ".join(places)}\n', slowly=True, status='')
-        for name, exception in data['exceptions'].items():
-            tools.pprint_exception(name, exception)
+        for exception, names in data['exceptions'].items():
+            tools.pprint(exception, slowly=True, status='EXCEPTION')
+            tools.pprint(f'{", ".join(names)}\n', slowly=True, status='')
 
     def group_transpilation_results(self):
         data = {'warnings': {}, 'exceptions': {}}
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
-            if result.returncode != 0:
-                data['exceptions'][unit['name']] = result.stderr
-                continue
+            warnings = result.stderr
+            if result.returncode != 0 or 'exception:' in result.stderr:
+                if ' warning' in result.stderr:
+                    warnings, result.stderr = result.stderr.split(' generated.\n', 1)
+                    result.stderr = result.stderr.replace('\n', '')
+                exception = result.stderr
+                if exception not in data['exceptions']:
+                    data['exceptions'][exception] = []
+                data['exceptions'][exception].append(f'{unit["name"]}-eo.c')
 
-            for line in result.stderr.split('\n'):
+            for line in warnings.split('\n'):
                 if '.c:' not in line:
                     continue
 
                 place, warn = line.split(' ', 1)
                 if warn not in data['warnings']:
                     data['warnings'][warn] = []
-
                 data['warnings'][warn].append(place.split('/')[-1][:-1])
         return data
 
