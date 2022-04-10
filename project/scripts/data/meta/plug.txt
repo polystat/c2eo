@@ -2,4 +2,4 @@
 +alias org.eolang.io.stdout
 
 [args...] > global
-  stdout "Exception empty EO file generated!\n" > @
+  stdout "exception: empty EO file generated\n" > @
