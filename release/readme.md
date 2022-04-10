@@ -39,6 +39,7 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
 
 ### Algorithm:
 
+* Build the executable file.
 * Create a deb file (basic: [HABR](https://habr.com/ru/post/78094/))
 * Create a repository (basic: [UNIXFORUM](https://unixforum.org/viewtopic.php?t=79513))
 * Upload a repository tree into the bucket's virtual 'directory'.

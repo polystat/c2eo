@@ -109,8 +109,8 @@ int main(int argc, const char **argv) {
   // std::cout << createSeq();
 }
 
-const char **transform_argv(const char *const *argv) {
-  const char **parser_argv = new const char *[6];
+const char** transform_argv(const char* const *argv) {
+  const char** parser_argv = new const char*[6];
   parser_argv[0] = argv[0];
   parser_argv[1] = argv[1];
   parser_argv[2] = "--";

@@ -18,12 +18,11 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
 Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift) {
   // Имя переменной
   auto varName = VD->getNameAsString();
-  TypeInfo typeInfo = VD->getASTContext().getTypeInfo(VD->getType());
+  QualType qualType = VD->getType();
+  TypeInfo typeInfo = VD->getASTContext().getTypeInfo(qualType);
   // размер в байтах
   auto typeSize = typeInfo.Width / 8;
-
-  QualType qualType = VD->getType();
-  const IdentifierInfo *typeId = qualType.getBaseTypeIdentifier();
+  const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
 
   auto typePtr = qualType.getTypePtr();
   // auto kind = typePtr->getKind();
@@ -148,13 +147,13 @@ void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
     str = "0";
   } else if (typePtr->isRecordType()) {
     const RecordDecl *RD = typePtr->getAsRecordDecl();
-    str = "";
-    for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
-      if (!str.empty()) str += " ";
-      std::string fieldVal = "";
-      initZeroValueAnalysis((const VarDecl *) (*it), fieldVal);
-      str += fieldVal;
-    }
+    str = "0";
+//    for (clang::RecordDecl::field_iterator it = RD->field_begin(); it != RD->field_end(); it++) {
+//      if (!str.empty()) str += " ";
+//      std::string fieldVal = "";
+//      initZeroValueAnalysis((const VarDecl *) (*it), fieldVal);
+//      str += fieldVal;
+//    }
   } else if (typePtr->isArrayType()) {
       str = "0";
   } else {

@@ -6,6 +6,7 @@
 #include "iostream"
 #include "memory_manager.h"
 #include "function_manager.h"
+#include "record_manager.h"
 
 class UnitTranspiler {
 public:
@@ -13,8 +14,8 @@ public:
 
   MemoryManager glob{"global-ram"}, ret{"return-ram"};
   FunctionManager func_manager;
-
-  friend std::ostream &operator<<(std::ostream &os, UnitTranspiler unit);
+  RecordManager record_manager;
+  friend std::ostream& operator <<(std::ostream& os, UnitTranspiler unit);
 
   std::string name;
   // Коллекция для составления списка алиасов
