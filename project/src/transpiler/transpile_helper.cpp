@@ -44,6 +44,8 @@ EOObject GetMemberExprEOObject(const MemberExpr *opr);
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
+EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -134,7 +136,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
     if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перечислимых типов
     {
       auto ref = dyn_cast<Expr>(*stmt->child_begin());
-      string type = GetTypeName(ref->getType());
+      QualType qualType = ref->getType();
+      string type = GetTypeName(qualType);
       string formatter = "?"; // todo
       if (type == "float32" || type == "float64")
         formatter = "f";
@@ -142,8 +145,13 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
         formatter = "d";
       EOObject printer{"printf"};
       printer.nested.emplace_back("\"%" + formatter + "\\n\"", EOObjectType::EO_LITERAL);
-      EOObject read_val{"read-as-" + type};
+      EOObject read_val{"read"};
       read_val.nested.emplace_back(GetStmtEOObject(ref));
+      if (!qualType->isRecordType())
+        read_val.name += "-as-" + type;
+      else
+        read_val.nested.emplace_back(to_string(
+            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size));
       printer.nested.push_back(read_val);
       res.nested.push_back(printer);
       continue;
@@ -156,7 +164,6 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
 }
 
 EOObject GetStmtEOObject(const Stmt *stmt) {
-
   Stmt::StmtClass stmtClass = stmt->getStmtClass();
   if (stmtClass == Stmt::BinaryOperatorClass) {
     const auto *op = dyn_cast<BinaryOperator>(stmt);
@@ -173,9 +180,15 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::ImplicitCastExprClass) {
     const auto *op = dyn_cast<ImplicitCastExpr>(stmt);
     if (op->getCastKind() == clang::CK_LValueToRValue) {
-      string type = op->getType()->isPointerType() ? "ptr" : GetTypeName(op->getType());
-      EOObject read{"read-as-" + type};
+      QualType qualType = op->getType();
+      string type = GetTypeName(qualType);
+      EOObject read{"read"};
       read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+      if (!qualType->isRecordType())
+        read.name += "-as-" + type;
+      else
+        read.nested.emplace_back(to_string(
+            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size));
       return read;
     }
     // TODO if cast kinds and also split it to another func
@@ -217,9 +230,29 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetMemberExprEOObject(op);
   } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
-    // todo
+    return GetArraySubscriptExprEOObject(op);
   }
   return EOObject(EOObjectType::EO_PLUG);
+}
+
+EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
+//  EOObject shift{"add"};
+//  EOObject index{"mul"};
+//  auto left = dyn_cast<Expr*>(*op->getLHS());
+//  auto right = dyn_cast<Expr*>(*op->getRHS());
+//  // todo right should be size_t
+////  if (left->getStmtClass() != Stmt::ImplicitCastExprClass)
+////    swap(left, right);
+//
+//  QualType qualType = left->getType();
+//  TypeInfo typeInfo = left->getASTContext().getTypeInfo(qualType);
+//  auto typeSize = typeInfo.Width / 8;
+//  index.nested.push_back(GetStmtEOObject(right));
+//  index.nested.emplace_back(to_string(typeSize));
+//  shift.nested.push_back(GetStmtEOObject(left));
+//  shift.nested.push_back(index);
+//  return shift;
+  return EOObject{EOObjectType::EO_PLUG};
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
@@ -315,9 +348,14 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
 
   EOObject binop{operation};
   Expr* left = dyn_cast<Expr>(p_operator->getLHS());
-  EOObject eoObject{"read-as-"};
-  eoObject.name += GetTypeName(left->getType());
+  EOObject eoObject{"read"};
+  QualType qualType = left->getType();
   eoObject.nested.push_back(GetStmtEOObject(left));
+  if (!qualType->isRecordType())
+    eoObject.name += "-as-" + GetTypeName(qualType);
+  else
+    eoObject.nested.emplace_back(to_string(
+        transpiler.record_manager.getById(qualType->getAsRecordDecl())->size));
   binop.nested.emplace_back(eoObject);
 
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
@@ -444,9 +482,11 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 }
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
-  EOObject binop{"write-as-"};
+  EOObject binop{"write"};
   Expr* left = dyn_cast<Expr>(p_operator->getLHS());
-  binop.name += GetTypeName(left->getType());
+  QualType qualType = left->getType();
+  if (!qualType->isRecordType())
+    binop.name += "-as-" + GetTypeName(left->getType());
   binop.nested.emplace_back(GetStmtEOObject(left));
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
@@ -464,9 +504,11 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
 }
 
 EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
-  EOObject binop{"write-as-"};
+  EOObject binop{"write"};
   Expr* left = dyn_cast<Expr>(p_operator->getLHS());
-  binop.name += GetTypeName(left->getType());
+  QualType qualType = left->getType();
+  if (!qualType->isRecordType())
+    binop.name += "-as-" + GetTypeName(left->getType());
   binop.nested.emplace_back(GetStmtEOObject(left));
   binop.nested.push_back(GetCompoundAssignEOObject(p_operator));
   return binop;

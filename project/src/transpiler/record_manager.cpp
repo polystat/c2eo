@@ -1,8 +1,8 @@
 #include "record_manager.h"
 
-RecordType RecordManager::Add(const clang::RecordDecl* id, std::string name,
+RecordType RecordManager::Add(const clang::RecordDecl* id, std::string name, size_t size,
                               std::map<std::string, size_t> fields) {
-  RecordType recordType = {id, std::move(name), std::move(fields)};
+  RecordType recordType = {id, std::move(name), size,std::move(fields)};
   record_types.push_back(recordType);
   return recordType;
 }
@@ -42,8 +42,11 @@ bool RecordManager::Empty() {
 
 std::vector<EOObject> RecordType::GetEORecordDecl() {
   std::vector<EOObject> recordDecl;
+  std::string shift;
   for(const auto& field:fields) {
-    recordDecl.emplace_back(std::to_string(field.second), name + "-" + field.first);
+    shift = std::to_string(field.second);
+//    recordDecl.emplace_back(shift, EOObjectType::EO_LITERAL);
+    recordDecl.emplace_back(shift, name + "-" + field.first);
   }
   return recordDecl;
 }

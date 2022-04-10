@@ -9,8 +9,7 @@ struct st obj1;
 int main() {
   struct st obj2;
   obj1.a = 7;
-  obj2.a = obj1.a;
-//  obj2 = obj1; todo
+  obj2 = obj1;
   printf("%d\n", obj2.a);
   return 0;
 }

@@ -12,13 +12,14 @@
 struct RecordType {
   const clang::RecordDecl* id;
   std::string name;
+  size_t size;
   std::map<std::string, size_t> fields; // field.name -> field.shift
   std::vector<EOObject> GetEORecordDecl() ;
 };
 
 
 struct RecordManager {
-  RecordType Add(const clang::RecordDecl* id, std::string name,
+  RecordType Add(const clang::RecordDecl* id, std::string name, size_t size,
                  std::map<std::string, size_t> fields);
   RecordType* getById(const clang::RecordDecl* id);
   size_t getShift(const clang::RecordDecl* id, const std::string& member);
