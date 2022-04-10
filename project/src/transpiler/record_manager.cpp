@@ -24,7 +24,7 @@ size_t RecordManager::getShift(const clang::RecordDecl* id, const std::string& m
 EOObject RecordManager::getShiftAlias(const clang::RecordDecl* id, const std::string& member) {
   RecordType* rt = getById(id);
   if(rt)
-    return EOObject{rt->name + "-" + member};
+    return EOObject{rt->name + "-" + member, EOObjectType::EO_LITERAL}; // todo: is it EO_LITERAL?
   return EOObject{EOObjectType::EO_PLUG};
 }
 
@@ -45,8 +45,10 @@ std::vector<EOObject> RecordType::GetEORecordDecl() {
   std::string shift;
   for(const auto& field:fields) {
     shift = std::to_string(field.second);
+    EOObject eoShift{shift, name + "-" + field.first};
+    eoShift.type = EOObjectType::EO_LITERAL;
 //    recordDecl.emplace_back(shift, EOObjectType::EO_LITERAL);
-    recordDecl.emplace_back(shift, name + "-" + field.first);
+    recordDecl.push_back(eoShift);
   }
   return recordDecl;
 }

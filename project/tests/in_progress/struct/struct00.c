@@ -1,18 +1,50 @@
-//#include <stdio.h>
-struct st1 {
-  struct st2{
-    int a;
-    int b;
-    int c;
-  } a;
-  int b;
-  struct st2 c;
-};
+////#include <stdio.h>
+//struct st1 {
+//  struct st2{
+//    int a;
+//    int b;
+//    int c;
+//  } a;
+//  int b;
+//  struct st2 c;
+//};
+//
+//struct st1 obj1;
+//struct st2 obj2;
+//
+//int main() {
+//  obj1.a = obj2;
+//  return 0;
+//}
 
-struct st1 obj1;
-struct st2 obj2;
+//clang -Xclang -ast-dump -fsyntax-only main.c
+// #include <stdio.h>
+
+long long c = 10;
+long long d = 255;
+long long *pc;
+long long *pd;
+long long **ppc;
+long long **ppd;
 
 int main() {
-  obj1.a = obj2;
+  pc = &d;
+  c = *pc;
+//   c = **ppc;
+//   pc = &c;
+//   d = *&c;
+//   pc = &*&c;
+//   d = *&*&c;
+//   pd = pc;
+//   ppd = ppc;
+//   pd = &*pc;
+//   c = *&*pc;
+//   c = *&**&*ppc;
+
+//   printf("%lld\n", c);
+  c;
+//   printf("%lld\n", d);
+  d;
+
   return 0;
 }

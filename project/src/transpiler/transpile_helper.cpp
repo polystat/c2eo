@@ -151,7 +151,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
         read_val.name += "-as-" + type;
       else
         read_val.nested.emplace_back(to_string(
-            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size));
+            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+            EOObjectType::EO_LITERAL);
       printer.nested.push_back(read_val);
       res.nested.push_back(printer);
       continue;
@@ -188,7 +189,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
         read.name += "-as-" + type;
       else
         read.nested.emplace_back(to_string(
-            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size));
+            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                EOObjectType::EO_LITERAL);
       return read;
     }
     // TODO if cast kinds and also split it to another func
@@ -355,7 +357,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     eoObject.name += "-as-" + GetTypeName(qualType);
   else
     eoObject.nested.emplace_back(to_string(
-        transpiler.record_manager.getById(qualType->getAsRecordDecl())->size));
+        transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+            EOObjectType::EO_LITERAL);
   binop.nested.emplace_back(eoObject);
 
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
