@@ -214,7 +214,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetMemberExprEOObject(op);
   }  else if (stmtClass == Stmt::MemberExprClass) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
-    // todo @yar Records
+    return GetMemberExprEOObject(op);
   } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     // todo
@@ -226,9 +226,9 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   EOObject member{"add"};
   auto child = dyn_cast<Expr>(*op->child_begin());
   QualType qualType = child->getType();
+  member.nested.push_back(GetStmtEOObject(child));
   member.nested.push_back(transpiler.record_manager.getShiftAlias(qualType->getAsRecordDecl(),
                                                                   op->getMemberDecl()->getNameAsString()));
-  member.nested.push_back(GetStmtEOObject(child));
   return member;
 }
 
