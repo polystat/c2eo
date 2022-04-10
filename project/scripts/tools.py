@@ -155,7 +155,7 @@ def read_file_as_dictionary(path):
         with open(path) as f:
             data = json.load(f)
     else:
-        pprint('Unsupported file extension', status='EXCEPTION')
+        pprint('unsupported file extension', status='EXCEPTION')
     return data
 
 

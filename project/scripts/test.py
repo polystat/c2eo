@@ -94,7 +94,7 @@ class Tests(object):
             subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True, timeout=10)
         except subprocess.TimeoutExpired:
             with open(unit["result_eo_file"], 'w') as f:
-                f.write('Timeout exception!')
+                f.write('exception: execution time exceeded')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
@@ -185,7 +185,7 @@ def print_tests_result(passed, errors, exceptions):
         print()
         tools.pprint_exception(', '.join(test_names), log_data, max_lines=10)
     tools.pprint(f'\n{"-" * 60}', slowly=True)
-    len_exceptions = sum(len(x[1]) for x in exceptions)
+    len_exceptions = sum(len(value) for value in exceptions.values())
     tests_count = len(passed) + len(errors) + len_exceptions
     tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
                  f' Errors: {len(errors)}, Exceptions: {len_exceptions}', slowly=True)

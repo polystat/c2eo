@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[addr1 addr2 size] > addrcpy
+  addr1.write (addr2.read size) > @

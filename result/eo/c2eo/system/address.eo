@@ -7,3 +7,5 @@
 
   [value] > write
     mem.write addr (value.as-bytes) > @
+
+  addr > @
