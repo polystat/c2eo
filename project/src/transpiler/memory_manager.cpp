@@ -50,7 +50,7 @@ const Variable &MemoryManager::GetVarByID(const VarDecl *id) const {
   auto res = find_if(variables.begin(), variables.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables.end())
-    throw invalid_argument("element with id " + to_string(reinterpret_cast<uint64_t>(id)) + " not found");
+    throw invalid_argument("exception: element with id " + to_string(reinterpret_cast<uint64_t>(id)) + " not found");
   return *res;
 }
 
