@@ -4,6 +4,8 @@
 
 RecordType ProcessRecordType(const clang::RecordDecl* RD) {
   extern UnitTranspiler transpiler;
+//  std::cout<<"RD:"<<RD<<'\n';
+//  RD->dump();
 
   std::string name;
   if (RD->isUnion())
@@ -31,5 +33,5 @@ RecordType ProcessRecordType(const clang::RecordDecl* RD) {
     }
   }
 
-  return transpiler.record_manager.Add(RD->getTypeForDecl(), name, fields);
+  return transpiler.record_manager.Add(RD, name, fields);
 }

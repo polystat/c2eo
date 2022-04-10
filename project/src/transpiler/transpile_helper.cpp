@@ -1,3 +1,4 @@
+
 #include "transpile_helper.h"
 #include "memory_manager.h"
 #include "unit_transpiler.h"
@@ -38,6 +39,10 @@ EOObject GetFunctionCallEOObject(const CallExpr *op);
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params, size_t shift);
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params);
+
+EOObject GetMemberExprEOObject(const MemberExpr *opr);
+
+EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
 extern UnitTranspiler transpiler;
 
@@ -128,24 +133,19 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
     // Костыльное решение для тестового вывода
     if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перечислимых типов
     {
-      auto ref = dyn_cast<DeclRefExpr>(*stmt->child_begin());
-      if (!ref)
-        continue;
-      try {
-        const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
-        string formatter = "d";
-        if (var.type_postfix == "float32" || var.type_postfix == "float64")
-          formatter = "f";
-        EOObject printer{"printf"};
-        printer.nested.emplace_back("\"%" + formatter + "\\n\"", EOObjectType::EO_LITERAL);
-        EOObject read_val{"read-as-" + var.type_postfix};
-        read_val.nested.emplace_back(var.alias);
-        printer.nested.push_back(read_val);
-        res.nested.push_back(printer);
-      }
-      catch (invalid_argument &) {
-        res.nested.emplace_back(EOObjectType::EO_PLUG);
-      }
+      auto ref = dyn_cast<Expr>(*stmt->child_begin());
+      string type = GetTypeName(ref->getType());
+      string formatter = "?"; // todo
+      if (type == "float32" || type == "float64")
+        formatter = "f";
+      else
+        formatter = "d";
+      EOObject printer{"printf"};
+      printer.nested.emplace_back("\"%" + formatter + "\\n\"", EOObjectType::EO_LITERAL);
+      EOObject read_val{"read-as-" + type};
+      read_val.nested.emplace_back(GetStmtEOObject(ref));
+      printer.nested.push_back(read_val);
+      res.nested.push_back(printer);
       continue;
     }
     EOObject stmt_obj = GetStmtEOObject(stmt);
@@ -156,6 +156,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
 }
 
 EOObject GetStmtEOObject(const Stmt *stmt) {
+
   Stmt::StmtClass stmtClass = stmt->getStmtClass();
   if (stmtClass == Stmt::BinaryOperatorClass) {
     const auto *op = dyn_cast<BinaryOperator>(stmt);
@@ -181,16 +182,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     auto ref = dyn_cast<DeclRefExpr>(stmt);
-    if (!ref)
-      return EOObject{EOObjectType::EO_PLUG};
-    try {
-      const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
-      return EOObject{var.alias};
-    }
-    catch (invalid_argument &er) {
-      cerr << er.what() << "\n";
-      return EOObject(EOObjectType::EO_PLUG);
-    }
+    return GetEODeclRefExpr(ref);
   } else if (stmtClass == Stmt::IfStmtClass) {
     const auto *op = dyn_cast<IfStmt>(stmt);
     return GetIfStmtEOObject(op);
@@ -217,8 +209,27 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::ReturnStmtClass) {
     const auto *op = dyn_cast<ReturnStmt>(stmt);
     return GetReturnStmpEOObject(op);
+  } else if (stmtClass == Stmt::MemberExprClass) {
+    const auto *op = dyn_cast<MemberExpr>(stmt);
+    return GetMemberExprEOObject(op);
+  }  else if (stmtClass == Stmt::MemberExprClass) {
+    const auto *op = dyn_cast<MemberExpr>(stmt);
+    // todo @yar Records
+  } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
+    const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
+    // todo
   }
   return EOObject(EOObjectType::EO_PLUG);
+}
+
+EOObject GetMemberExprEOObject(const MemberExpr *op) {
+  EOObject member{"add"};
+  auto child = dyn_cast<Expr>(*op->child_begin());
+  QualType qualType = child->getType();
+  member.nested.push_back(transpiler.record_manager.getShiftAlias(qualType->getAsRecordDecl(),
+                                                                  op->getMemberDecl()->getNameAsString()));
+  member.nested.push_back(GetStmtEOObject(child));
+  return member;
 }
 
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
@@ -257,7 +268,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     read_ret.nested.push_back(ret_val);
     call.nested.push_back(read_ret);
   } else { // если тип void,то возвращается TRUE
-    call.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
+    call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
   }
 
   return call;
@@ -303,24 +314,12 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   }
 
   EOObject binop{operation};
-  if (p_operator->getLHS()->getStmtClass() == Stmt::DeclRefExprClass) {
-    auto ref = dyn_cast<DeclRefExpr>(p_operator->getLHS());
-    if (!ref)
-      binop.nested.emplace_back(EOObjectType::EO_PLUG);
-    try {
-      const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(ref->getFoundDecl()));
-      EOObject eoObject{"read-as-" + var.type_postfix};
-      EOObject nestObj{var.alias};
-      eoObject.nested.push_back(nestObj);
-      binop.nested.emplace_back(eoObject);
-    }
-    catch (invalid_argument &er) {
-      cerr << er.what() << "\n";
-      binop.nested.emplace_back(EOObject(EOObjectType::EO_PLUG));
-    }
-  } else {
-    binop.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
-  }
+  Expr* left = dyn_cast<Expr>(p_operator->getLHS());
+  EOObject eoObject{"read-as-"};
+  eoObject.name += GetTypeName(left->getType());
+  eoObject.nested.push_back(GetStmtEOObject(left));
+  binop.nested.emplace_back(eoObject);
+
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
@@ -446,42 +445,29 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   EOObject binop{"write-as-"};
-  const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
-  if (op) {
-    try {
-      string type = op->getType()->isPointerType() ? "ptr" : GetTypeName(op->getType());
-      binop.name += type;
-      const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
-      binop.nested.emplace_back(var.alias);
-    }
-    catch (invalid_argument &) {
-      binop.nested.emplace_back(EOObjectType::EO_LITERAL);
-    }
-  } else {
-    binop.nested.emplace_back(EOObjectType::EO_EMPTY);
-  }
-
+  Expr* left = dyn_cast<Expr>(p_operator->getLHS());
+  binop.name += GetTypeName(left->getType());
+  binop.nested.emplace_back(GetStmtEOObject(left));
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binop;
 }
 
+EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
+  if (!op)
+    return EOObject{EOObjectType::EO_EMPTY};
+  try {
+    const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
+    return EOObject{var.alias};
+  } catch (invalid_argument &) {
+    return EOObject{EOObjectType::EO_LITERAL};
+  }
+}
+
 EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
   EOObject binop{"write-as-"};
-  const auto *op = dyn_cast<DeclRefExpr>(p_operator->getLHS());
-  if (op) {
-    try {
-      string type = op->getType()->isPointerType() ? "ptr" : GetTypeName(op->getType());
-      binop.name += type;
-      const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
-      binop.nested.emplace_back(var.alias);
-    }
-    catch (invalid_argument &) {
-      binop.nested.emplace_back(EOObjectType::EO_LITERAL);
-    }
-  } else {
-    binop.nested.emplace_back(EOObjectType::EO_EMPTY);
-  }
-
+  Expr* left = dyn_cast<Expr>(p_operator->getLHS());
+  binop.name += GetTypeName(left->getType());
+  binop.nested.emplace_back(GetStmtEOObject(left));
   binop.nested.push_back(GetCompoundAssignEOObject(p_operator));
   return binop;
 }

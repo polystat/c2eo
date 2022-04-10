@@ -97,13 +97,6 @@ EOObject Variable::GetAddress(const string& mem_name) const {
   } else {
     addr.nested.emplace_back(to_string(position), EOObjectType::EO_LITERAL);
   }
-//  for(int i=0;i<5;i++) {
-//    EOObject shift_obj("field_of", alias);
-//    shift_obj.nested.emplace_back(mem_name);
-//    shift_obj.nested.emplace_back(to_string(position), EOObjectType::EO_LITERAL);
-//
-//    addr.nested.push_back(shift_obj);
-//  }
   return addr;
 }
 

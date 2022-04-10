@@ -8,10 +8,8 @@
 
 // Declares llvm::cl::extrahelp.
 #include "llvm/Support/CommandLine.h"
-
 #include "clang/ASTMatchers/ASTMatchers.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
-
 #include "clang/AST/ASTContext.h"
 #include "eo_object.h"
 
@@ -24,6 +22,5 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator = fals
 EOObject GetStmtEOObject(const clang::Stmt *p_stmt);
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj);
-
 
 #endif // __TRANSPILE_HELPER__
