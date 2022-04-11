@@ -32,9 +32,9 @@ def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False)
 
 
 def colorize_text(text, color):
-    colors = {'blue': '\033[36m', 'white': '\033[37m',
-              'red': '\033[31m', 'green': '\033[32m',
-              'yellow': '\033[33m', 'purple': '\033[35m'}
+    colors = {'blue': '\033[1;36m', 'white': '\033[0;37m',
+              'red': '\033[1;31m', 'green': '\033[1;32m',
+              'yellow': '\033[1;33m', 'purple': '\033[1;35m'}
     return f'{colors[color]}{text}{colors["white"]}'
 
 
