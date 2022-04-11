@@ -67,11 +67,6 @@ class Tests(object):
         os.chdir(original_path)
         print()
         tools.pprint()
-        result = subprocess.run(f'killall java', shell=True, capture_output=True, text=True)
-        if result.returncode == 0:
-            tools.pprint('\nkillall java\n', slowly=True)
-        else:
-            tools.pprint(f'\n{result.stderr}', slowly=True)
 
     def get_result_for_c_file(self, unit):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
@@ -90,9 +85,11 @@ class Tests(object):
     def get_result_for_eo_file(self, unit):
         command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
+        process = subprocess.Popen(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True)
         try:
-            subprocess.run(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True, timeout=10)
+            process.communicate(timeout=10)
         except subprocess.TimeoutExpired:
+            subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
             with open(unit["result_eo_file"], 'w') as f:
                 f.write('exception: execution time exceeded')
         finally:
