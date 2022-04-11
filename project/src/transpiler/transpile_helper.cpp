@@ -151,8 +151,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
         read_val.name += "-as-" + type;
       else
         read_val.nested.emplace_back(to_string(
-            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
-            EOObjectType::EO_LITERAL);
+                                             transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                                     EOObjectType::EO_LITERAL);
       printer.nested.push_back(read_val);
       res.nested.push_back(printer);
       continue;
@@ -189,8 +189,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
         read.name += "-as-" + type;
       else
         read.nested.emplace_back(to_string(
-            transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
-                EOObjectType::EO_LITERAL);
+                                         transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                                 EOObjectType::EO_LITERAL);
       return read;
     }
     // TODO if cast kinds and also split it to another func
@@ -227,7 +227,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::MemberExprClass) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
     return GetMemberExprEOObject(op);
-  }  else if (stmtClass == Stmt::MemberExprClass) {
+  } else if (stmtClass == Stmt::MemberExprClass) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
     return GetMemberExprEOObject(op);
   } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
@@ -240,21 +240,26 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
 //  EOObject shift{"add"};
 //  EOObject index{"mul"};
-//  auto left = dyn_cast<Expr*>(*op->getLHS());
-//  auto right = dyn_cast<Expr*>(*op->getRHS());
-//  // todo right should be size_t
-////  if (left->getStmtClass() != Stmt::ImplicitCastExprClass)
-////    swap(left, right);
-//
-//  QualType qualType = left->getType();
-//  TypeInfo typeInfo = left->getASTContext().getTypeInfo(qualType);
-//  auto typeSize = typeInfo.Width / 8;
-//  index.nested.push_back(GetStmtEOObject(right));
-//  index.nested.emplace_back(to_string(typeSize));
-//  shift.nested.push_back(GetStmtEOObject(left));
-//  shift.nested.push_back(index);
-//  return shift;
-  return EOObject{EOObjectType::EO_PLUG};
+//  auto left = dyn_cast<Expr*>(op->getLHS());
+  size_t type_size;
+  for (auto lhs_ch: op->getLHS()->children()) {
+    if (lhs_ch->getStmtClass() == Stmt::DeclRefExprClass) {
+      auto decl_ref = dyn_cast<DeclRefExpr>(lhs_ch);
+      auto qt = decl_ref->getType();
+      type_size = decl_ref->getDecl()->getASTContext().getTypeInfo(qt).Align / 8;
+    } else {
+      type_size = 0;
+    }
+  }
+
+  auto index = GetStmtEOObject(op->getLHS());
+  auto val = GetStmtEOObject(op->getRHS());
+  val.name = std::to_string(std::stoi(val.name) * type_size);
+  EOObject arr_pos{"add"};
+  arr_pos.nested.emplace_back(index);
+  arr_pos.nested.emplace_back(val);
+
+  return arr_pos;
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
@@ -349,7 +354,7 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   }
 
   EOObject binop{operation};
-  Expr* left = dyn_cast<Expr>(p_operator->getLHS());
+  Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   EOObject eoObject{"read"};
   QualType qualType = left->getType();
   eoObject.nested.push_back(GetStmtEOObject(left));
@@ -357,8 +362,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     eoObject.name += "-as-" + GetTypeName(qualType);
   else
     eoObject.nested.emplace_back(to_string(
-        transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
-            EOObjectType::EO_LITERAL);
+                                         transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                                 EOObjectType::EO_LITERAL);
   binop.nested.emplace_back(eoObject);
 
   binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
@@ -486,7 +491,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   EOObject binop{"write"};
-  Expr* left = dyn_cast<Expr>(p_operator->getLHS());
+  Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   QualType qualType = left->getType();
   if (!qualType->isRecordType())
     binop.name += "-as-" + GetTypeName(left->getType());
@@ -508,7 +513,7 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
 
 EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
   EOObject binop{"write"};
-  Expr* left = dyn_cast<Expr>(p_operator->getLHS());
+  Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   QualType qualType = left->getType();
   if (!qualType->isRecordType())
     binop.name += "-as-" + GetTypeName(left->getType());
