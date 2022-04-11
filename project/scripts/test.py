@@ -177,7 +177,7 @@ def print_tests_result(passed, errors, exceptions):
     tools.pprint(', '.join(passed), slowly=True, status='PASS')
     for test_name, log_data in errors:
         print()
-        tools.pprint_error(sorted(test_name), log_data, max_lines=30)
+        tools.pprint_error(test_name, log_data, max_lines=30)
     for log_data, test_names in exceptions.items():
         print()
         tools.pprint_exception(', '.join(sorted(test_names)), log_data, max_lines=10)
