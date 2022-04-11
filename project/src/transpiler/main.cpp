@@ -23,14 +23,14 @@ std::string packagename;
 std::string filename;
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg) {
-  llvm::errs() << "Caught segfault at address " << si->si_addr << " while tool run\n";
+  llvm::errs() << "exception: segfault at address " << si->si_addr << " while tool run\n";
   ofstream out(filename);
   out << "+package c2eo.src." << packagename << "\n\n";
   out << "+alias c2eo.stdio.printf\n\n";
   out << "[args...] > global\n";
-  out << "  printf \"Segfault exception at address " << si->si_addr << " while tool run\" > @\n";
+  out << "  printf \"exception: segfault at address " << si->si_addr << " while tool run\" > @\n";
   out.close();
-  exit(0);
+  exit(-1);
 }
 
 
@@ -41,7 +41,7 @@ UnitTranspiler transpiler;
 int main(int argc, const char **argv) {
 
   if (argc < 3) {
-    llvm::errs() << "Incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
+    llvm::errs() << "exception: Incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
     return -1;
   }
 
@@ -109,8 +109,8 @@ int main(int argc, const char **argv) {
   // std::cout << createSeq();
 }
 
-const char **transform_argv(const char *const *argv) {
-  const char **parser_argv = new const char *[6];
+const char** transform_argv(const char* const *argv) {
+  const char** parser_argv = new const char*[6];
   parser_argv[0] = argv[0];
   parser_argv[1] = argv[1];
   parser_argv[2] = "--";

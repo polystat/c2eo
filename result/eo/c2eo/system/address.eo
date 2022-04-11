@@ -7,3 +7,9 @@
 
   [value] > write
     mem.write addr (value.as-bytes) > @
+
+  [value] > add
+    address mem (addr.add value) > @
+
+  [value] > sub
+    address mem (addr.sub value) > @

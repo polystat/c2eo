@@ -24,19 +24,24 @@ void UnitTranspiler::GenerateResult() {
   ret_addr.nested.emplace_back("0", EOObjectType::EO_LITERAL);
   body.nested.push_back(ret_addr);
 
-  if (!glob.Empty()) {
-    for (const auto &var: glob) {
+  if (!glob.Empty())
+    for (const auto& var: glob) {
       body.nested.emplace_back(var.GetAddress(glob.name));
     }
-  }
+  if (!record_manager.Empty()) // todo: it isn't global, is it? it should be out of labels
+    for(auto type: record_manager) {
+      auto recordFields = type.GetEORecordDecl();
+      body.nested.insert(body.nested.end(), recordFields.begin(), recordFields.end());
+    }
+
   // TODO write all declarations
-  for (const auto &func: func_manager.GetAllDefinitions()) {
+  for (const auto& func: func_manager.GetAllDefinitions()) {
 
     body.nested.push_back(func.GetEOObject());
   }
 
   EOObject init_seq("seq", "@");
-  for (const auto &var: glob) {
+  for (const auto& var: glob) {
     init_seq.nested.push_back(var.GetInitializer());
   }
   if (std::find_if(body.nested.begin(), body.nested.end(),
@@ -56,15 +61,15 @@ void UnitTranspiler::GenerateResult() {
   result << "+package c2eo.src." << package_name << "\n";
 
   used_external_objects = FindAllExternalObjects(body);
-  for (const auto &ext_obj: used_external_objects) {
+  for (const auto& ext_obj: used_external_objects) {
     if (known_types.find(ext_obj) == known_types.end()) {
       std::string alias;
       try {
         alias = known_aliases.at(ext_obj);
         result << alias << "\n";
       }
-      catch (std::out_of_range &) {
-        llvm::errs() << "Not found alias for " << ext_obj << "\n";
+      catch (std::out_of_range&) {
+        llvm::errs() << "exception: not found alias for " << ext_obj << "\n";
       }
     }
   }

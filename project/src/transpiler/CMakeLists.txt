@@ -19,43 +19,40 @@ include_directories("${PATH_TO_LLVM_BUILD}/tools/clang/include")
 include_directories("${PATH_TO_LLVM_BUILD}/include")
 link_directories("${PATH_TO_LLVM_BUILD}/lib/")
 
-
-# llvm_config for yarrya:
-# include_directories("${PATH_TO_LLVM_SOURCE}/clang-include")
-# include_directories("${PATH_TO_LLVM_SOURCE}/llvm-include")
-# include_directories("${PATH_TO_LLVM_SOURCE}/tools-clang-include")
-# include_directories("${PATH_TO_LLVM_SOURCE}/build-include")
-# link_directories("~/Polystat/llvm-clang-12/build/lib")
-# link_directories("/usr/lib")
-
-
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 
 # Source files list
 set(SOURCE_FILES
+    main.cpp
+
     # Headers
     vardecl.h
     analyzers.h
     matchers.h
     util.h
+    memory_manager.h
+    unit_transpiler.h
+    eo_object.h
+    function_manager.h
+    transpile_helper.h
+    recorddecl.h
+    record_manager.h
+    aliases.h
 
     # Sources
-    main.cpp
     vardecl.cpp
     analyzers.cpp
     matchers.cpp
     util.cpp
     memory_manager.cpp
-    memory_manager.h
     unit_transpiler.cpp
-    unit_transpiler.h
     eo_object.cpp
-    eo_object.h
     function_manager.cpp
-    function_manager.h
     transpile_helper.cpp
-    transpile_helper.h
-    aliases.h)
+    recorddecl.cpp
+    record_manager.cpp
+
+    )
 
 
 # add_executable(recvisitor main.cpp)

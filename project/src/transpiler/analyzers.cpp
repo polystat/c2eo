@@ -2,8 +2,7 @@
 #include "unit_transpiler.h"
 
 extern UnitTranspiler transpiler;
-ASTContext *context;
-
+ASTContext* context;
 //------------------------------------------------------------------------------
 // Анализ на функцию
 void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
@@ -26,14 +25,14 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
 void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
   if (!context)
     context = Result.Context;
-  const RecordDecl *RD = Result.Nodes.getNodeAs<RecordDecl>("recordDecl");
+  const auto *RD = Result.Nodes.getNodeAs<RecordDecl>("recordDecl");
   // We do not want to convert header files!
   // if (!RD || !Context->getSourceManager().isWrittenInMainFile(RD->getForLoc()))
   if (!RD)
     return;
-  // TODO Return record decl analysis
   // getRecordDeclSubObjects(RD);
   // RD->dump();
+  ProcessRecordType(RD);
 }
 
 //------------------------------------------------------------------------------

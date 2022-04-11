@@ -2,6 +2,7 @@
 #define __ANALYZERS__
 
 #include "vardecl.h"
+#include "recorddecl.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;

@@ -18,11 +18,12 @@
 
 // Representation of a simple variable stored in RAM
 struct Variable {
-  const clang::VarDecl *id;
+  const clang::VarDecl* id;
   size_t position;
   size_t size;
   // like c-int64
   std::string type;
+//  bool isCustomType = false;
   // like g-x
   std::string alias;
   // TODO value should be EOObject
@@ -34,18 +35,18 @@ struct Variable {
   std::string type_postfix;
   bool is_initialized;
 
-  bool operator==(const Variable &var) const;
+  bool operator==(const Variable& var) const;
 
   EOObject GetInitializer() const;
 
-  EOObject GetAddress(std::string mem_name) const;
+  EOObject GetAddress(const std::string& mem_name) const;
 };
 
 class MemoryManager {
 public:
   explicit MemoryManager(std::string name) : pointer(0), name(std::move(name)) {}
 
-  Variable Add(const clang::VarDecl *id,
+  Variable Add(const clang::VarDecl* id,
                size_t size,
                const std::string &type,
                std::string alias,
@@ -58,7 +59,7 @@ public:
 
   size_t RealMemorySize();
 
-  const Variable &GetVarByID(const clang::VarDecl *id) const;
+  const Variable& GetVarByID(const clang::VarDecl* id) const;
 
   std::vector<Variable>::const_iterator begin() const;
 
@@ -68,7 +69,7 @@ public:
 
   EOObject GetEOObject() const;
 
-  void RemoveAllUsed(const std::vector<Variable> &all_local);
+  void RemoveAllUsed(const std::vector<Variable>& all_local);
 
 private:
   // index of first free byte in memory

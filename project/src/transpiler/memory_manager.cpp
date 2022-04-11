@@ -7,7 +7,7 @@ using namespace std;
 using namespace clang;
 
 
-Variable MemoryManager::Add(const VarDecl *id,
+Variable MemoryManager::Add(const VarDecl* id,
                             size_t size,
                             const std::string &type,
                             std::string alias,
@@ -32,7 +32,7 @@ bool MemoryManager::Empty() {
 
 size_t MemoryManager::RealMemorySize() {
   size_t result = 0;
-  for (const auto &v: variables) {
+  for (const auto& v : variables) {
     result += v.size;
   }
   return result;
@@ -46,11 +46,11 @@ std::vector<Variable>::const_iterator MemoryManager::end() const {
   return variables.end();
 }
 
-const Variable &MemoryManager::GetVarByID(const VarDecl *id) const {
+const Variable &MemoryManager::GetVarByID(const VarDecl* id) const {
   auto res = find_if(variables.begin(), variables.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables.end())
-    throw invalid_argument("element with id " + to_string(reinterpret_cast<uint64_t>(id)) + " not found");
+    throw invalid_argument("exception: element with id " + to_string(reinterpret_cast<uint64_t>(id)) + " not found");
   return *res;
 }
 
@@ -62,8 +62,8 @@ EOObject MemoryManager::GetEOObject() const {
 }
 
 
-void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
-  for (const auto &var: all_local) {
+void MemoryManager::RemoveAllUsed(const std::vector<Variable>& all_local) {
+  for (const auto& var: all_local) {
     pointer -= var.size;
     variables.erase(find(variables.begin(), variables.end(), var));
   }
@@ -84,10 +84,10 @@ EOObject Variable::GetInitializer() const {
   return res;
 }
 
-EOObject Variable::GetAddress(string mem_name) const {
+EOObject Variable::GetAddress(const string& mem_name) const {
   EOObject addr("address", alias);
   if (!mem_name.empty())
-    addr.nested.emplace_back(std::move(mem_name));
+    addr.nested.emplace_back(mem_name);
   if (!local_pointer.empty()) {
     EOObject shift_obj("add");
     shift_obj.nested.emplace_back(local_pointer);
@@ -100,6 +100,6 @@ EOObject Variable::GetAddress(string mem_name) const {
   return addr;
 }
 
-bool Variable::operator==(const Variable &var) const {
+bool Variable::operator==(const Variable& var) const {
   return this->id == var.id;
 }
