@@ -73,6 +73,8 @@ EOObject Variable::GetInitializer() const {
   if (!is_initialized)
     return EOObject(EOObjectType::EO_EMPTY);
   EOObject res("write");
+  if (!id->getType()->isRecordType() && type_postfix != "undefinedtype" && type_postfix != "char") // todo char!?
+    res.name += "-as-" + type_postfix;
   res.nested.emplace_back(alias);
   // TODO if value will be EOObject then code below changed. (rework for check value == EoObject::PLUG)
   if (value.name == "plug")

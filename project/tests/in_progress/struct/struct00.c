@@ -1,50 +1,22 @@
-////#include <stdio.h>
-//struct st1 {
-//  struct st2{
-//    int a;
-//    int b;
-//    int c;
-//  } a;
+//typedef struct st st;
+//#include "stdio.h"
+//struct st{
+//  int a;
 //  int b;
-//  struct st2 c;
-//};
-//
-//struct st1 obj1;
-//struct st2 obj2;
+//  int c;
+//} obj1 = {1,2, 3};
 //
 //int main() {
-//  obj1.a = obj2;
+//  printf("%d %d %d\n", obj1.a, obj1.b, obj1.c);
+//  st obj2 = {511, 1023, 2047};
+//  printf("%d %d %d\n", obj2.a, obj2.b, obj2.c);
 //  return 0;
 //}
 
-//clang -Xclang -ast-dump -fsyntax-only main.c
-// #include <stdio.h>
-
-long long c = 10;
-long long d = 255;
-long long *pc;
-long long *pd;
-long long **ppc;
-long long **ppd;
-
-int main() {
-  pc = &d;
-  c = *pc;
-//   c = **ppc;
-//   pc = &c;
-//   d = *&c;
-//   pc = &*&c;
-//   d = *&*&c;
-//   pd = pc;
-//   ppd = ppc;
-//   pd = &*pc;
-//   c = *&*pc;
-//   c = *&**&*ppc;
-
-//   printf("%lld\n", c);
-  c;
-//   printf("%lld\n", d);
-  d;
-
-  return 0;
-}
+//enum a{
+//  a,b,c,
+//};
+//
+//int main(){
+//  return 0;
+//}

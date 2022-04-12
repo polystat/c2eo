@@ -118,7 +118,6 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
       str = std::to_string(floatValue);
     }
   } else {
-    // TODO fix generation of non-const initialization. Maybe value in Variable should be EOObject!
     // TODO Fix Record decl generation
     Stmt *body = (Stmt *) ((clang::InitListExpr *) (VD->getInit()));
     std::stringstream ss;
