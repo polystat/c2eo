@@ -1,4 +1,4 @@
-//#include "stdio.h"
+#include "stdio.h"
 
 int getPos(int x) {
   x *= 2;
@@ -8,7 +8,7 @@ int getPos(int x) {
 int arr[10];
 int main() {
     arr[getPos(3)] = 19;
-    //  printf("%d\n", obj1.a);
+    printf("%d\n", arr[getPos(3)]);
     arr[getPos(3)];
     return 0;
 }

@@ -1,4 +1,4 @@
-//#include "stdio.h"
+#include "stdio.h"
 
 struct st{
     double b;
@@ -11,8 +11,9 @@ int main() {
     st1.a = 15;
     st1.b = 2.22;
     a[3] = st1;
-  //  printf("%d\n", obj1.a);
+    printf("%d\n", a[3].a);
     a[3].a;
+    printf("%f\n", a[3].b);
     a[3].b;
     return 0;
 }
