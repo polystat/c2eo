@@ -252,12 +252,17 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
     }
   }
 
-  auto index = GetStmtEOObject(op->getLHS());
-  auto val = GetStmtEOObject(op->getRHS());
-  val.name = std::to_string(std::stoi(val.name) * type_size);
+  auto arr_name = GetStmtEOObject(op->getLHS());
+  auto index_name = GetStmtEOObject(op->getRHS());
+  // вычисляем с с какого места памяти начинать писать в переменную массива.
+  EOObject count_pos{"mul"};
+  count_pos.nested.emplace_back(index_name);
+  EOObject str_type_size{std::to_string(type_size), EOObjectType::EO_LITERAL};
+  count_pos.nested.emplace_back(str_type_size);
+  // сдвигаем указатель объекта массива
   EOObject arr_pos{"add"};
-  arr_pos.nested.emplace_back(index);
-  arr_pos.nested.emplace_back(val);
+  arr_pos.nested.emplace_back(arr_name);
+  arr_pos.nested.emplace_back(count_pos);
 
   return arr_pos;
 }
