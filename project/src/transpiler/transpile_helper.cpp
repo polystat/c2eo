@@ -238,9 +238,6 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
 }
 
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
-//  EOObject shift{"add"};
-//  EOObject index{"mul"};
-//  auto left = dyn_cast<Expr*>(op->getLHS());
   size_t type_size;
   for (auto lhs_ch: op->getLHS()->children()) {
     if (lhs_ch->getStmtClass() == Stmt::DeclRefExprClass) {
