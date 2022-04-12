@@ -1,22 +1,19 @@
-//typedef struct st st;
-//#include "stdio.h"
-//struct st{
-//  int a;
-//  int b;
-//  int c;
-//} obj1 = {1,2, 3};
-//
-//int main() {
-//  printf("%d %d %d\n", obj1.a, obj1.b, obj1.c);
-//  st obj2 = {511, 1023, 2047};
-//  printf("%d %d %d\n", obj2.a, obj2.b, obj2.c);
-//  return 0;
-//}
+typedef struct st1 st1;
+typedef struct st2 st2;
 
-//enum a{
-//  a,b,c,
-//};
-//
-//int main(){
-//  return 0;
-//}
+struct st2{
+  int a, b, c[3];
+};
+
+struct st1{
+  st2 a, b[3], c;
+} obj[5];
+
+int main() {
+  obj[2].b[2].c[2] = 7;
+  obj[2].b[2].c[2];
+//  2[obj[2].b[2].c];
+//  2[2[obj[2].b].c];
+//  2[2[2[obj].b].c];
+  return 0;
+}

@@ -36,7 +36,6 @@ void UnitTranspiler::GenerateResult() {
 
   // TODO write all declarations
   for (const auto& func: func_manager.GetAllDefinitions()) {
-
     body.nested.push_back(func.GetEOObject());
   }
 

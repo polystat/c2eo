@@ -49,10 +49,13 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
+
   if (!FD->hasBody())
     // TODO if not body may be need to create simple complete or abstract object with correct name
     return EOObject(EOObjectType::EO_EMPTY);
   const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
+  if (!funcBody) // TODO: segfault at address 0x0
+    return EOObject(EOObjectType::EO_EMPTY);
   size_t shift = transpiler.glob.RealMemorySize();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
@@ -238,8 +241,13 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
 }
 
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
+  auto left = op->getLHS();
+  auto right = op->getRHS();
+  if (left->getType()->isIntegerType() && right->getType()->isPointerType())
+    swap(left, right);
+
   size_t type_size;
-  for (auto lhs_ch: op->getLHS()->children()) {
+  for (auto lhs_ch: left->children()) {
     if (lhs_ch->getStmtClass() == Stmt::DeclRefExprClass) {
       auto decl_ref = dyn_cast<DeclRefExpr>(lhs_ch);
       auto qt = decl_ref->getType();
@@ -249,8 +257,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
     }
   }
 
-  auto arr_name = GetStmtEOObject(op->getLHS());
-  auto index_name = GetStmtEOObject(op->getRHS());
+  auto arr_name = GetStmtEOObject(left);
+  auto index_name = GetStmtEOObject(right);
   // вычисляем с с какого места памяти начинать писать в переменную массива.
   EOObject count_pos{"mul"};
   count_pos.nested.emplace_back(index_name);
