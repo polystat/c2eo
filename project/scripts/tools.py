@@ -174,7 +174,7 @@ def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, p
     if recursive:
         path = os.path.join(path, '**')
     pprint(f'\nLooking for "{file_pattern}" files in "{path}"')
-    found_files = glob.glob(f'{os.path.join(path, file_pattern)}', recursive=recursive)
+    found_files = glob.glob(os.path.join(path, file_pattern), recursive=recursive)
     pprint(f'Found {len(found_files)} files')
     found_files = apply_filters_to_files(found_files, filters)
     if print_files:
