@@ -1,6 +1,9 @@
+#include <iostream>
 #include "function_manager.h"
 #include "transpile_helper.h"
 
+using namespace clang;
+using namespace llvm;
 
 void FunctionManager::Add(const clang::FunctionDecl *FD) {
   auto funcName = FD->getNameAsString();
@@ -62,4 +65,70 @@ EOObject FunctionDefinition::GetBody() const {
   return GetFunctionBody(FD);
 }
 
+
+//------------------------------------------------------------------------------
+// Тестовая функция, осуществляющая вывод содержимого функции
+// и ее тела (добавление будет по ходу тестирования)
+void FunctionDefinition::TestOut() {
+  std::cout << name << "\n";
+  if (FD == nullptr) {
+    std::cout << "  Incorrect pointer to definition\n";
+  }
+  else {
+    // Вывод содержимого функции
+    DeclarationNameInfo declNameInfo{FD->getNameInfo()};
+    std::string func_name{declNameInfo.getAsString()};
+//     std::string func_name{FD->getNameAsString()};
+    std::cout << func_name << ": ";
+    Stmt* body{(FD->getBody())};
+    CompoundStmt* funcBody = dyn_cast<CompoundStmt>(body);
+    if(funcBody != nullptr) {
+      std::cout << "Has body!\n";
+      if(funcBody->size() > 0) {
+        int i = 0;
+        for (auto stmt: funcBody->body()) {
+          Stmt::StmtClass stmtClass = stmt->getStmtClass();
+          std::cout << "    Statement # " << i++ << "\n";
+        }
+      }
+      else {
+        std::cout << "    The body is empty\n";
+      }
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+// Тестовая функция, осуществляющая вывод прототипа функции
+// и ее тела (добавление будет по ходу тестирования)
+void FunctionDeclaration::TestOut() {
+  std::cout << name << "\n";
+  if (FD == nullptr) {
+    std::cout << "  Incorrect pointer to definition\n";
+  }
+  else {
+    // Вывод содержимого функции
+    std::cout << FD->getNameAsString() << "\n";
+  }
+}
+
+// Тестовый вывод содержимого контейнеров объявления и определения функций
+void FunctionManager::TestOut() {
+  if (declarations.size() > 0) {
+    for(auto declaration: declarations) {
+      declaration.TestOut();
+    }
+  }
+  else {
+    std::cout << "No function declarations\n";
+  }
+  if (definitions.size() > 0) {
+    for(auto definition: definitions) {
+      definition.TestOut();
+    }
+  }
+  else {
+    std::cout << "No function definitions\n";
+  }
+}
 
