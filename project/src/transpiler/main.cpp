@@ -2,11 +2,15 @@
  * На первом этапе делается попытка разнести код по разным единицам компиляции
 */
 
+//!!! Попытка изменить стек
+//#include <sys/resource.h>
+
 #include "matchers.h"
 #include "util.h"
 #include "unit_transpiler.h"
 #include "eo_object.h"
 #include <csignal>
+#include <stdlib.h>
 
 using namespace clang;
 using namespace clang::tooling;
@@ -22,33 +26,61 @@ const char **transform_argv(const char *const *argv);
 std::string packagename;
 std::string filename;
 
+UnitTranspiler transpiler;
+
 void segfault_sigaction(int signal, siginfo_t *si, void *arg) {
-  llvm::errs() << "exception: segfault at address " << si->si_addr << " while tool run\n";
+  llvm::errs() << "Caught segfault at address " << si->si_addr << " while tool run\n";
   ofstream out(filename);
   out << "+package c2eo.src." << packagename << "\n\n";
   out << "+alias c2eo.stdio.printf\n\n";
   out << "[args...] > global\n";
-  out << "  printf \"exception: segfault at address " << si->si_addr << " while tool run\" > @\n";
+  out << "  printf \"Segfault exception at address " << si->si_addr << " while tool run\" > @\n";
   out.close();
-  exit(-1);
+  //cout << transpiler;
+  exit(0);
 }
 
-
-UnitTranspiler transpiler;
 
 //--------------------------------------------------------------------------------------------------
 // Главная функция, обеспечивающая начальный запуск и обход AST
 int main(int argc, const char **argv) {
+  //!!! Попытка изменить стек
+//   const rlim_t kStackSize = 1024L * 1024L * 1024L;   // min stack size = 1024 Mb
+//   struct rlimit rl;
+//   int sResult;
+//
+//   sResult = getrlimit(RLIMIT_STACK, &rl);
+//   cout << "default sResult = " << sResult << "\n";
+//   if (sResult == 0) {
+//       cout << "Old stack size = " << rl.rlim_cur << "\n";
+//       if (rl.rlim_cur < kStackSize) {
+//           rl.rlim_cur = kStackSize;
+//           sResult = setrlimit(RLIMIT_STACK, &rl);
+//           if (sResult != 0)
+//           {
+//               cout << "setrlimit returned sResult = " << sResult << "\n";
+//           }
+//       }
+//       cout << "New stack size = " << rl.rlim_cur << "\n";
+//   }
 
   if (argc < 3) {
-    llvm::errs() << "exception: Incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
+    llvm::errs() << "Incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
     return -1;
   }
 
+  // Вызов препроцессора для предварительной обработки файла
+  std::string new_in_file_name{std::string(argv[1]) + ".i"};
+//   system("clang -Wall -O0 -masm=intel -E" + std::string(argv[1]) + " > " + new_in_file_name);
+  std::string ppc_command{"clang -E " + std::string(argv[1]) + std::string(" > ") + new_in_file_name};
+  const char* ppc = ppc_command.c_str();
+  system(ppc);
 
   int parser_argc = 6;
+  argv[1] = new_in_file_name.c_str();
   const char **parser_argv = transform_argv(argv);
-  const char *inputFileName = argv[1];
+//   const char *inputFileName = argv[1];
+//   const char *inputFileName = new_in_file_name.c_str();
   filename = argv[2];
 
   packagename = filename.substr(0, filename.size() - 3);
@@ -109,15 +141,15 @@ int main(int argc, const char **argv) {
   // std::cout << createSeq();
 }
 
-const char** transform_argv(const char* const *argv) {
-  const char** parser_argv = new const char*[6];
+const char **transform_argv(const char *const *argv) {
+  const char **parser_argv = new const char *[6];
   parser_argv[0] = argv[0];
   parser_argv[1] = argv[1];
   parser_argv[2] = "--";
   parser_argv[3] = "-I/usr/include/linux";
-  // parser_argv[4] = "-I/usr/include/c++/10/tr1";
-  // parser_argv[5] = "-I/usr/include/c++/10";
-  parser_argv[4] = "-I/usr/include/c++/11/tr1";
-  parser_argv[5] = "-I/usr/include/c++/11";
+  // parser_argv[4] = "-I/usr/include/c++/11/tr1";
+  // parser_argv[5] = "-I/usr/include/c++/11";
+  parser_argv[4] = "-I/usr/include/c++/11.2.0/tr1";
+  parser_argv[5] = "-I/usr/include/c++/11.2.0";
   return parser_argv;
 }

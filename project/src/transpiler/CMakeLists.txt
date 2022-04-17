@@ -5,8 +5,8 @@ project(c2eo)
 
 
 # llvm_config
-#set(PATH_TO_LLVM_SOURCE "~/llvm-clang-12")
-set(PATH_TO_LLVM_SOURCE "~/llvm-clang-14")
+set(PATH_TO_LLVM_SOURCE "~/llvm-clang-12")
+#set(PATH_TO_LLVM_SOURCE "~/llvm-clang-14")
 #set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
 
 
@@ -25,37 +25,37 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 
 # Source files list
 set(SOURCE_FILES
-    main.cpp
-
-    # Headers
-    vardecl.h
-    analyzers.h
-    matchers.h
-    util.h
-    memory_manager.h
-    unit_transpiler.h
-    eo_object.h
-    function_manager.h
-    transpile_helper.h
-    recorddecl.h
-    record_manager.h
-    aliases.h
+  # Headers
+  vardecl.h
+  analyzers.h
+  matchers.h
+  util.h
+  memory_manager.h
+  unit_transpiler.h
+  eo_object.h
+  function_manager.h
+  transpile_helper.h
+  recorddecl.h
+  record_manager.h
+  aliases.h
+  tracer.h
 
     # Sources
-    vardecl.cpp
-    analyzers.cpp
-    matchers.cpp
-    util.cpp
-    memory_manager.cpp
-    unit_transpiler.cpp
-    eo_object.cpp
-    function_manager.cpp
-    transpile_helper.cpp
-    recorddecl.cpp
-    record_manager.cpp
+  main.cpp
+  vardecl.cpp
+  analyzers.cpp
+  matchers.cpp
+  util.cpp
+  memory_manager.cpp
+  unit_transpiler.cpp
+  eo_object.cpp
+  function_manager.cpp
+  transpile_helper.cpp
+  recorddecl.cpp
+  record_manager.cpp
+  tracer.cpp
 
     )
-
 
 # add_executable(recvisitor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})
@@ -63,14 +63,14 @@ add_executable(c2eo ${SOURCE_FILES})
 
 # llvm libraries
 target_link_libraries(c2eo
-                      clangAST
-                      clangASTMatchers
-                      clangBasic
-                      clangFrontend
-                      clangSerialization
-                      clangTooling
-                      LLVMSupport
-                      LLVMFrontendOpenMP)
+  clangAST
+  clangASTMatchers
+  clangBasic
+  clangFrontend
+  clangSerialization
+  clangTooling
+  LLVMSupport
+  LLVMFrontendOpenMP)
 
 set(LLVM_LINK_COMPONENTS
     Support)

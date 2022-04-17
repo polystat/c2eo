@@ -1,18 +1,31 @@
 #include "analyzers.h"
 #include "unit_transpiler.h"
+#include "tracer.h"
+#include "transpile_helper.h"
 
 extern UnitTranspiler transpiler;
 ASTContext* context;
+
 //------------------------------------------------------------------------------
 // Анализ на функцию
 void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
-  if (!context)
+  if (!context) {
     context = Result.Context;
+  }
   const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
   // We do not want to convert header files!
   // TODO !FD->isDefined() now only plug and should be fixed later
-  if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+  //   if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+  if (!FD) {
     return;
+  }
+
+  #ifdef TRACEOUT_FUNC_DEF
+  TraceOutFunctionDecl(FD);   // Тестовый вывод содержимого функции
+  #endif
+
+  EOObject eoFunc = GetFunctionBody(FD);
+  //   std::cout << eoFunc;
 
   transpiler.func_manager.Add(FD);
   // ProcessFunction(FD);
