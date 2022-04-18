@@ -29,7 +29,7 @@ std::string filename;
 UnitTranspiler transpiler;
 
 void segfault_sigaction(int signal, siginfo_t *si, void *arg) {
-  llvm::errs() << "Caught segfault at address " << si->si_addr << " while tool run\n";
+  llvm::errs() << "exception: segfault at address " << si->si_addr << " while tool run\n";
   ofstream out(filename);
   out << "+package c2eo.src." << packagename << "\n\n";
   out << "+alias c2eo.stdio.printf\n\n";
@@ -65,7 +65,7 @@ int main(int argc, const char **argv) {
 //   }
 
   if (argc < 3) {
-    llvm::errs() << "Incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
+    llvm::errs() << "exception: incorrect command line format. Necessary: c2eo <C-file-name> <EO-file-name>\n";
     return -1;
   }
 
