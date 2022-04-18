@@ -1,12 +1,11 @@
 //clang -Xclang -ast-dump -fsyntax-only main.c
 #include <stdio.h>
 
-long long c = 10;
+//long long x;
+long long x = 6;
 
 int main() {
-  c--;
-  printf("%lld\n", c);
-  c;
-
-  return 0;
+    x = 42 / x;
+    x;
+    printf("%lld\n", x);
 }

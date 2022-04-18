@@ -1,11 +1,9 @@
 //clang -Xclang -ast-dump -fsyntax-only main.c
-// 1) Assigment the address to pointer
-// 2) Assigment the value to variable across pointer
-
 #include <stdio.h>
 
 long long c = 10;
 long long d = 255;
+long long e = 333;
 long long *pc;
 long long *pd;
 long long **ppc;
@@ -13,12 +11,16 @@ long long **ppd;
 
 int main() {
   pc = &d;
-  c = *pc;
+  c = c + 1;
+//   c = *(pc + 1);
+  pd = pc + 1;
 
   printf("%lld\n", c);
   c;
   printf("%lld\n", d);
   d;
+  printf("%lld\n", e);
+  e;
 
   return 0;
 }
