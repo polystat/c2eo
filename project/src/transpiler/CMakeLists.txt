@@ -5,9 +5,8 @@ project(c2eo)
 
 
 # llvm_config
-#set(PATH_TO_LLVM_SOURCE "~/llvm-clang-12")
-set(PATH_TO_LLVM_SOURCE "~/llvm-clang-14")
-#set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
+set(PATH_TO_LLVM_SOURCE "~/llvm-clang-12")
+set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
 
 
 # set(CMAKE_C_COMPILER путь/до/компилятора)
