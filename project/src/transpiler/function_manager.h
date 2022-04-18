@@ -35,8 +35,15 @@ struct FunctionDeclaration {
 struct FunctionManager {
 
   void Add(const clang::FunctionDecl *FD);
+  // Добавление определения функции в список определений без проверки
+  void AddDefinition(FunctionDefinition funcDef);
+  // Добавление объявления функции в список объявлений без проверки
+  void AddDeclaration(FunctionDeclaration funcDecl);
+  // Добавление функционального объекта в список функциональных объектов
+  void AddEOObject(const EOObject func);
 
   const std::vector<FunctionDefinition> &GetAllDefinitions();
+  const std::vector<EOObject> &GetAllEODefinitions();
 
   EOObject GetFunctionCall(const clang::FunctionDecl *FD, size_t param_size) const;
 
@@ -46,6 +53,7 @@ struct FunctionManager {
 private:
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;
+  std::vector<EOObject> functions;
 };
 
 #endif // __FUNCTION_MANAGER__
