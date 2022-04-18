@@ -1,4 +1,8 @@
 +package c2eo.coperators
 
++alias c2eo.coperators.read-as-bool
+
 [a b] > write-as-bool
-  a.write ((b.eq 0).if 00- 01-) > @
+  seq > @
+    a ((b.eq 0).if 00- 01-)
+    read-as-bool a
