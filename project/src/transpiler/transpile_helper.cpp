@@ -326,7 +326,17 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   bool is_signed = p_literal->getType()->isSignedIntegerType();
   APInt an_int = p_literal->getValue();
-  return {an_int.toString(10, is_signed), EOObjectType::EO_LITERAL};
+  // Формирование строкового значения для целого числа
+  int64_t val = 0;
+  if(is_signed) {
+    val = an_int.getSExtValue();
+  }
+  else {
+    val = an_int.getZExtValue();
+  }
+  std::string strVal{std::to_string(val)};
+  return EOObject{strVal, EOObjectType::EO_LITERAL};
+//   return {an_int.toString(10, is_signed), EOObjectType::EO_LITERAL};
 }
 
 EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {

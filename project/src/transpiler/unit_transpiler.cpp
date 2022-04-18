@@ -4,6 +4,8 @@
 #include "aliases.h"
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
+//   unit.func_manager.TestOut();
+
   if (unit.tmp.empty())
     unit.GenerateResult();
   os << unit.tmp;
@@ -35,9 +37,13 @@ void UnitTranspiler::GenerateResult() {
     }
 
   // TODO write all declarations
-  for (const auto& func: func_manager.GetAllDefinitions()) {
+//   for (const auto& func: func_manager.GetAllDefinitions()) {
+//     body.nested.push_back(func.GetEOObject());
+//   }
 
-    body.nested.push_back(func.GetEOObject());
+  // Получение всех функциональных объектов для их последующего вывода
+  for (const auto& func: func_manager.GetAllEODefinitions()) {
+    body.nested.push_back(func);
   }
 
   EOObject init_seq("seq", "@");

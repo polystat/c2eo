@@ -18,21 +18,16 @@ struct EOObject {
 public:
   EOObject() {name = "";}
 
-  explicit EOObject(EOObjectType type) : type(type) {}
+  explicit EOObject(EOObjectType type);
 
   // Create simple complete Object
-  explicit EOObject(std::string name) :
-      name(std::move(name)),
-      type(EOObjectType::EO_COMPLETE) {}
+  explicit EOObject(std::string name);
 
   // Create simple object, may be used for literal
-  EOObject(std::string name, EOObjectType type) : name(std::move(name)), type(type) {}
+  EOObject(std::string name, EOObjectType type);
 
   // create complete name with body
-  EOObject(std::string name, std::string postfix) :
-      name(std::move(name)),
-      postfix(std::move(postfix)),
-      type(EOObjectType::EO_COMPLETE) {}
+  EOObject(std::string name, std::string postfix);
 
   // Add nested object to vector of nested
   void AddNested(const EOObject &obj);

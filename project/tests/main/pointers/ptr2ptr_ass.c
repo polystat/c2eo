@@ -1,17 +1,17 @@
 //clang -Xclang -ast-dump -fsyntax-only main.c
-//#include <stdio.h>
+#include <stdio.h>
 
 // Проверка инициализации указателей
 long long c = 255;
-// long long d = 10;
-long long *pc; // = &c;
+long long *pc; // = &d;
 long long *pd; // = &d;
-// long long **ppc; // = &c;
 
 int main() {
+  pc = &c;
   pd = pc;
-//   printf("%lld\n", c);
-//   c;
+  c = *pd;
+  printf("%lld\n", c);
+  c;
 
   return 0;
 }

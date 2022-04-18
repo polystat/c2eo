@@ -5,6 +5,42 @@ using namespace std;
 
 int EOObject::indent = 0;
 
+EOObject::EOObject(EOObjectType type) : type(type) {
+  //   nested.reserve(10000);
+  #ifdef TRACEOUT_NEW_EO
+  std::cout << *this; // << "\n";
+  #endif
+}
+
+// Create simple complete Object
+EOObject::EOObject(std::string name) :
+name(std::move(name)),
+type(EOObjectType::EO_COMPLETE) {
+  //   nested.reserve(10000);
+  #ifdef TRACEOUT_NEW_EO
+  std::cout << *this; // << "\n";
+  #endif
+}
+
+// Create simple object, may be used for literal
+EOObject::EOObject(std::string name, EOObjectType type) : name(std::move(name)), type(type) {
+  //   nested.reserve(10000);
+  #ifdef TRACEOUT_NEW_EO
+  std::cout << *this; // << "\n";
+  #endif
+}
+
+// create complete name with body
+EOObject::EOObject(std::string name, std::string postfix) :
+name(std::move(name)),
+postfix(std::move(postfix)),
+type(EOObjectType::EO_COMPLETE) {
+  //   nested.reserve(10000);
+  #ifdef TRACEOUT_NEW_EO
+  std::cout << *this; // << "\n";
+  #endif
+}
+
 void EOObject::AddNested(const EOObject &obj) {
   nested.push_back(obj);
 }

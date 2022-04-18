@@ -22,12 +22,13 @@
 *.a
 *.lib
 
-#test result scripts
+# Test results
 **/*-eo.c
 **/c_result.txt
 **/eo_result.txt
 **/*-c.txt
 **/*-eo.txt
+**/*.i
 
 # Executables
 *.exe
