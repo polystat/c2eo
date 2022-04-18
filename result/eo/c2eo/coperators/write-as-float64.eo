@@ -1,4 +1,8 @@
 +package c2eo.coperators
 
++alias c2eo.coperators.read-as-float64
+
 [a b] > write-as-float64
-  a.write b > @
+  seq > @
+    a.write b
+    read-as-float64 a

@@ -1,6 +1,9 @@
 +package c2eo.coperators
 
 +alias c2eo.coperators.write-as-int64
++alias c2eo.coperators.read-as-int64
 
 [a b] > write-as-ptr
-  write-as-int64 a b > @
+  seq > @
+    write-as-int64 a b
+    read-as-int64 a

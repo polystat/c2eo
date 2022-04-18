@@ -1,4 +1,8 @@
 +package c2eo.coperators
 
++alias c2eo.coperators.read-as-int64
+
 [a b] > write-as-int64
-  a.write b > @
+  seq > @
+    a.write b
+    read-as-int64 a
