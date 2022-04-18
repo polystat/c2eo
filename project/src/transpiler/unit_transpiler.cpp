@@ -35,8 +35,13 @@ void UnitTranspiler::GenerateResult() {
     }
 
   // TODO write all declarations
-  for (const auto& func: func_manager.GetAllDefinitions()) {
-    body.nested.push_back(func.GetEOObject());
+//   for (const auto& func: func_manager.GetAllDefinitions()) {
+//     body.nested.push_back(func.GetEOObject());
+//   }
+
+  // Получение всех функциональных объектов для их последующего вывода
+  for (const auto& func: func_manager.GetAllEODefinitions()) {
+    body.nested.push_back(func);
   }
 
   EOObject init_seq("seq", "@");

@@ -1,20 +1,59 @@
 #include "analyzers.h"
 #include "unit_transpiler.h"
+#include "tracer.h"
+#include "transpile_helper.h"
 
 extern UnitTranspiler transpiler;
 ASTContext* context;
+
 //------------------------------------------------------------------------------
 // Анализ на функцию
 void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &Result) {
-  if (!context)
+  if (!context) {
     context = Result.Context;
+  }
   const FunctionDecl *FD = Result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
   // We do not want to convert header files!
   // TODO !FD->isDefined() now only plug and should be fixed later
-  if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+  //   if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+  if (!FD) {
     return;
+  }
 
-  transpiler.func_manager.Add(FD);
+  #ifdef TRACEOUT_FUNC_DEF
+  TraceOutFunctionDecl(FD);   // Тестовый вывод содержимого функции
+  #endif
+
+  // Формирование определения или объявления.
+  // Перенесено в точку их анализа, так как формируются разные объекты
+  DeclarationNameInfo declNameInfo{FD->getNameInfo()};
+  std::string funcName{declNameInfo.getAsString()};
+//   auto funcName = FD->getNameAsString();
+  if (funcName != "main")
+    funcName = "f-" + funcName;
+  auto isDefinition = FD->isThisDeclarationADefinition();
+  if (isDefinition) {
+    // При наличии определения осуществляется формирование функции
+    // Можно также сохранить ее здесь в списке имен, чтобы не дублировать ниже
+    FunctionDefinition funcDef{FD, funcName};
+    // Добавление в список определений функций
+    transpiler.func_manager.AddDefinition(funcDef);
+
+    EOObject eoFuncDef = funcDef.GetEOObject();
+    transpiler.func_manager.AddEOObject(eoFuncDef);
+//     std::cout << eoFuncDef;
+    // Формирование действий, связанных с объявлением. Пока никак. Но нужно думать о добавлении алиасов
+    // Наверное нужно сохранять только имена
+//     definitions.push_back({FD, funcName});
+  } else {
+    // Прототипы тоже должны сохраняться, чтобы потом сформировать алиасы. И убрать неиспользуемые алиасы,
+    // так как может быть много лишних из внешних заголовочных файлов
+    // Добавление в список определений функций
+    FunctionDeclaration funcDecl{FD, funcName};
+    transpiler.func_manager.AddDeclaration(funcDecl);
+  }
+
+//   transpiler.func_manager.Add(FD);  // Этот код пока дублируется. В дальнейшем можно будет заменить.
   // ProcessFunction(FD);
   // getFuncDeclParameters(FD);
 
