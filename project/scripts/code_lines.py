@@ -7,7 +7,7 @@ import glob
 if __name__ == '__main__':
     path_to_files = os.path.abspath(sys.argv[1])
     path_to_files = os.path.join(path_to_files, '**')
-    code_lines = {'c': 0, 'i': 0, 'eo': 0}
+    code_lines = {'c': 0, 'i': 0, 'eo': 0, 'h': 0}
     if len(sys.argv) == 3 and sys.argv[2] in code_lines.keys():
         code_lines = {sys.argv[2]: 0}
     for extension in code_lines.keys():
