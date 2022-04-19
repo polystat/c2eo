@@ -136,7 +136,10 @@ class Transpiler(object):
             warnings = result.stderr
             if result.returncode != 0 or 'exception:' in result.stderr:
                 if ' warning' in result.stderr:
-                    warnings, result.stderr = result.stderr.split(' generated.\n', 1)
+                    if ' generated.\n' in result.stderr:
+                        warnings, result.stderr = result.stderr.split(' generated.\n', 1)
+                    else:
+                        warnings, result.stderr = result.stderr.rstrip('\n').rsplit('\n', 1)
                     result.stderr = result.stderr.replace('\n', '')
                 exception = result.stderr
                 if exception not in data['exceptions']:
