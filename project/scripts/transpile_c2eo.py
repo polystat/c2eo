@@ -90,7 +90,8 @@ class Transpiler(object):
         with open(f'{c_file}', 'r') as f:
             data = f.readlines()
         for i, line in enumerate(data):
-            if '#' in line or 'printf' in line:
+            #if '#' in line or 'printf' in line:
+            if '#include' in line or 'printf' in line:
                 data[i] = f'// {line}'
         result_path = os.path.join(path, self.result_dir_name)
         prepared_c_file = os.path.join(result_path, f'{file_name}-eo.c')

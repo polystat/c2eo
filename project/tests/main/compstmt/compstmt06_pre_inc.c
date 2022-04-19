@@ -1,5 +1,5 @@
 //clang -Xclang -ast-dump -fsyntax-only main.c
-//#include <stdio.h>
+#include <stdio.h>
 
 long long c;
 long long d;
@@ -116,7 +116,8 @@ int main() {
   ++c;
 //100
 
-//   cll;
-//   printf("%lld\n", c)ll;
-  return 0ll;
+  c;
+  printf("%lld\n", c);
+
+  return 0;
 }

@@ -1,5 +1,5 @@
 //clang -Xclang -ast-dump -fsyntax-only main.c
-//#include <stdio.h>
+#include <stdio.h>
 
 long long c;
 
@@ -148,7 +148,8 @@ int main() {
   c = 255;
   //130
 
-//   c;
-//   printf("%lld\n", c);
-//   return 0;
+  printf("%lld\n", c);
+  c;
+
+  return 0;
 }
