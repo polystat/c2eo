@@ -28,13 +28,13 @@ def is_update_needed(current_version, latest_version):
     is_latest_version = False
     if compare == 1:
         latest_version = current_version
-        tools.pprint(f'Manual update latest EO version to {latest_version}', status='WARN')
+        tools.pprint(f'Manual update latest EO version to {latest_version}', status='WARNING')
     elif compare == 0:
         is_latest_version = True
         tools.pprint('We use latest EO version', status='PASS')
         tools.pprint()
     else:
-        tools.pprint(f'We use old EO version: "{current_version}"', status='WARN')
+        tools.pprint(f'We use old EO version: "{current_version}"', status='WARNING')
         tools.pprint(f'Start updating files')
 
     return is_latest_version, latest_version
