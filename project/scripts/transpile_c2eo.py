@@ -47,6 +47,7 @@ class Transpiler(object):
         self.replaced_path = f'{os.path.split(self.path_to_c_files[:-1])[0]}{os.sep}'
         self.files_handled_count = 0
         self.files_count = 0
+        self.ignored_warnings = settings.get_setting('ignored_warnings')
 
     def transpile(self):
         tools.pprint('\nTranspilation start\n')
@@ -90,7 +91,6 @@ class Transpiler(object):
         with open(f'{c_file}', 'r') as f:
             data = f.readlines()
         for i, line in enumerate(data):
-            #if '#' in line or 'printf' in line:
             if '#include' in line or 'printf' in line:
                 data[i] = f'// {line}'
         result_path = os.path.join(path, self.result_dir_name)
@@ -123,38 +123,29 @@ class Transpiler(object):
         print()
         tools.pprint()
         data = self.group_transpilation_results()
-        for warn, places in data['warnings'].items():
-            tools.pprint(warn, slowly=True, status='WARN')
-            tools.pprint(f'{", ".join(places)}\n', slowly=True, status='')
-        for exception, names in data['exceptions'].items():
-            tools.pprint(exception, slowly=True, status='EXCEPTION')
-            tools.pprint(f'{", ".join(names)}\n', slowly=True, status='')
+        for level in ['note', 'warning', 'error', 'exception']:
+            for name, places in data[level].items():
+                tools.pprint(name, slowly=True, status=level.upper())
+                tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
     def group_transpilation_results(self):
-        data = {'warnings': {}, 'exceptions': {}}
+        data = {'note': {}, 'warning': {}, 'error': {}, 'exception': {}}
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
-            warnings = result.stderr
-            if result.returncode != 0 or 'exception:' in result.stderr:
-                if ' warning' in result.stderr:
-                    if ' generated.\n' in result.stderr:
-                        warnings, result.stderr = result.stderr.split(' generated.\n', 1)
-                    else:
-                        warnings, result.stderr = result.stderr.rstrip('\n').rsplit('\n', 1)
-                    result.stderr = result.stderr.replace('\n', '')
-                exception = result.stderr
-                if exception not in data['exceptions']:
-                    data['exceptions'][exception] = []
-                data['exceptions'][exception].append(f'{unit["name"]}-eo.c')
-
-            for line in warnings.split('\n'):
-                if '.c:' not in line:
+            for line in result.stderr.split('\n'):
+                if any(warning in line for warning in self.ignored_warnings):
                     continue
 
-                place, warn = line.split(' ', 1)
-                if warn not in data['warnings']:
-                    data['warnings'][warn] = []
-                data['warnings'][warn].append(place.split('/')[-1][:-1])
+                for level in ['note', 'warning', 'error', 'exception']:
+                    if f'{level}:' in line:
+                        place, _, message = line.partition(f'{level}:')
+                        message = message.strip()
+                        if message not in data[level]:
+                            data[level][message] = []
+                        if unit['name'] in place:
+                            data[level][message].append(place.split('/')[-1][:-1])
+                        else:
+                            data[level][message].append(f'{unit["name"]}-eo.c')
         return data
 
     def move_transpiled_files(self):

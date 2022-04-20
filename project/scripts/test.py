@@ -46,7 +46,7 @@ class Tests(object):
         with tools.thread_pool() as threads:
             results = threads.map(compare_test_results, self.transpilation_units)
         passed, errors, exceptions = group_comparison_results(results)
-        print_tests_result(sorted(passed), sorted(errors), exceptions)
+        print_tests_result(sorted(passed, key=str.casefold), sorted(errors, key=str.casefold), exceptions)
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
@@ -180,7 +180,7 @@ def print_tests_result(passed, errors, exceptions):
         tools.pprint_error(test_name, log_data, max_lines=30)
     for log_data, test_names in exceptions.items():
         print()
-        tools.pprint_exception(', '.join(sorted(test_names)), log_data, max_lines=10)
+        tools.pprint_exception(', '.join(sorted(test_names, key=str.casefold)), log_data, max_lines=10)
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     len_exceptions = sum(len(value) for value in exceptions.values())
     tests_count = len(passed) + len(errors) + len_exceptions

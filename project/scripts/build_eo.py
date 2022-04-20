@@ -32,13 +32,13 @@ class EOBuilder(object):
 
     def is_good_for_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):
-            tools.pprint('Compile dir not found', status='WARN')
+            tools.pprint('Compile dir not found', status='WARNING')
             return False
         else:
             tools.pprint('Compile dir found', status='PASS')
 
         if not self.is_actual_object_version():
-            tools.pprint('Old version detected', status='WARN')
+            tools.pprint('Old version detected', status='WARNING')
             return False
         else:
             tools.pprint('Latest version detected', status='PASS')
@@ -51,8 +51,8 @@ class EOBuilder(object):
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
         if difference:
-            tools.pprint('EO project files are incompatible', status='WARN')
-            tools.pprint(f'The following files may have been deleted: {difference}\n')
+            tools.pprint('EO project files are incompatible', status='WARNING')
+            tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
             return False
         else:
             tools.pprint('EO project files are compatible', status='PASS')

@@ -1,5 +1,8 @@
 config: null
 current_eo_version: 0.22.2
+ignored_warnings:
+- Wunused-command-line-argument
+- Wunused-value
 path_to_c2eo_build: ../build/
 path_to_c2eo_transpiler: ../bin/
 path_to_config: data/config/
