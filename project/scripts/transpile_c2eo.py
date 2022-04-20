@@ -124,10 +124,10 @@ class Transpiler(object):
         data = self.group_transpilation_results()
         for warn, places in data['warnings'].items():
             tools.pprint(warn, slowly=True, status='WARN')
-            tools.pprint(f'{", ".join(places)}\n', slowly=True, status='')
+            tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
         for exception, names in data['exceptions'].items():
             tools.pprint(exception, slowly=True, status='EXCEPTION')
-            tools.pprint(f'{", ".join(names)}\n', slowly=True, status='')
+            tools.pprint(f'{", ".join(sorted(names, key=str.casefold))}\n', slowly=True, status='')
 
     def group_transpilation_results(self):
         data = {'warnings': {}, 'exceptions': {}}
