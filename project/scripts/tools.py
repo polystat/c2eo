@@ -54,7 +54,7 @@ def get_or_none(array, index):
 
 def get_status(status):
     statuses = {'INFO': '\033[1;34mINFO\033[0;37m', 'WARNING': '\033[1;35mWARN\033[0;37m',
-                'ERROR': '\033[1;31mERROR\033[0;37m', 'EXCEPTION': '\033[31mEXCEPTION\033[0;37m',
+                'ERROR': '\033[1;31mERROR\033[0;37m', 'EXCEPTION': '\033[1;31mEXCEPTION\033[0;37m',
                 'PASS': '\033[1;32mPASS\033[0;37m', 'NOTE': '\033[1;33mNOTE\033[0;37m'}
     return statuses.get(status)
 
