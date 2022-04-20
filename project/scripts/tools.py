@@ -160,14 +160,14 @@ def read_file_as_dictionary(path):
 
 
 def remove_empty_dirs(path):
-    is_removed = False
-    folders = list(os.walk(path))[1:]
-    for folder in folders:
-        if not folder[1] and not folder[2]:
-            os.rmdir(folder[0])
-            is_removed = True
-    if is_removed:
-        remove_empty_dirs(path)
+    is_removed = True
+    while is_removed:
+        is_removed = False
+        folders = list(os.walk(path))[1:]
+        for folder in folders:
+            if not folder[1] and not folder[2]:
+                os.rmdir(folder[0])
+                is_removed = True
 
 
 def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
