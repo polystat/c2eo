@@ -90,7 +90,6 @@ class Transpiler(object):
         with open(f'{c_file}', 'r') as f:
             data = f.readlines()
         for i, line in enumerate(data):
-            #if '#' in line or 'printf' in line:
             if '#include' in line or 'printf' in line:
                 data[i] = f'// {line}'
         result_path = os.path.join(path, self.result_dir_name)
