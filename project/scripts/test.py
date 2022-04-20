@@ -159,7 +159,7 @@ def group_comparison_results(results):
     tools.pprint('\nGetting results', slowly=True)
     for unit, is_except, is_equal, log_data in results:
         if is_except:
-            log_data = ' '.join([x.replace('\n', '') for x in log_data])
+            log_data = ''.join(log_data)
             if log_data not in exceptions:
                 exceptions[log_data] = []
             exceptions[log_data].append(unit['name'])
