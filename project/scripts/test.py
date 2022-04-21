@@ -46,7 +46,7 @@ class Tests(object):
         with tools.thread_pool() as threads:
             results = threads.map(compare_test_results, self.transpilation_units)
         passed, errors, exceptions = group_comparison_results(results)
-        print_tests_result(sorted(passed, key=str.casefold), sorted(errors, key=str.casefold), exceptions)
+        print_tests_result(passed, errors, exceptions)
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
@@ -105,7 +105,7 @@ def compare_test_results(unit):
     is_except, (is_equal, log_data) = compare_files(c_data, eo_data)
     with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
         f.writelines(log_data)
-    return unit["name"], is_except, is_equal, log_data
+    return unit, is_except, is_equal, log_data
 
 
 def compare_files(c_data, eo_data):
@@ -126,7 +126,7 @@ def compare_files(c_data, eo_data):
 
 
 def is_exception(lines):
-    return len(lines) > 0 and ('exception' in lines[0].lower() or 'error' in lines[0].lower())
+    return len(lines) > 0 and ('exception' in lines[0].casefold() or 'error' in lines[0].casefold())
 
 
 def compare_lines(c_data, eo_data):
@@ -157,16 +157,16 @@ def group_comparison_results(results):
     exceptions = {}
     errors = []
     tools.pprint('\nGetting results', slowly=True)
-    for unit_name, is_except, is_equal, log_data in results:
+    for unit, is_except, is_equal, log_data in results:
         if is_except:
-            log_data = ' '.join([x.replace('\n', '') for x in log_data])
+            log_data = ''.join(log_data)
             if log_data not in exceptions:
                 exceptions[log_data] = []
-            exceptions[log_data].append(unit_name)
+            exceptions[log_data].append(unit['name'])
         elif is_equal:
-            passed.append(unit_name)
+            passed.append(unit['name'])
         else:
-            errors.append((unit_name, log_data))
+            errors.append((unit['name'], log_data))
     return passed, errors, exceptions
 
 
@@ -174,11 +174,11 @@ def print_tests_result(passed, errors, exceptions):
     tools.pprint(f'\n{"-" * 60}', slowly=True)
     tools.pprint('TEST RESULTS', slowly=True)
     tools.pprint(f'{"-" * 60}', slowly=True)
-    tools.pprint(', '.join(passed), slowly=True, status='PASS')
-    for test_name, log_data in errors:
+    tools.pprint(', '.join(sorted(passed, key=str.casefold)), slowly=True, status='PASS')
+    for test_name, log_data in sorted(errors, key=lambda x: x[0].casefold()):
         print()
         tools.pprint_error(test_name, log_data, max_lines=30)
-    for log_data, test_names in exceptions.items():
+    for log_data, test_names in sorted(exceptions.items(), key=lambda x: x[0].casefold()):
         print()
         tools.pprint_exception(', '.join(sorted(test_names, key=str.casefold)), log_data, max_lines=10)
     tools.pprint(f'\n{"-" * 60}', slowly=True)

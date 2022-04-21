@@ -24,7 +24,6 @@ std::map<std::string, std::string> known_aliases = {
     {"as-string",        "+alias c2eo.coperators.as-string"},
     {"bit-and",          "+alias c2eo.coperators.bit-and"},
     {"bit-not",          "+alias c2eo.coperators.bit-not"},
-    {"bit-not",          "+alias c2eo.coperators.bit-not"},
     {"bit-or",           "+alias c2eo.coperators.bit-or"},
     {"bit-xor",          "+alias c2eo.coperators.bit-xor"},
     {"coawait",          "+alias c2eo.coperators.coawait"},

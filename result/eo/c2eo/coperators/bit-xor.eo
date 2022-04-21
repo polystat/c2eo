@@ -1,0 +1,6 @@
++package c2eo.coperators
+
++alias c2eo.stdio.printf
+
+[args...] > bit-xor
+  printf "exception: TODO bit-xor\n" > @

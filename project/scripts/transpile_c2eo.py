@@ -161,7 +161,7 @@ class Transpiler(object):
                 os.remove(unit['eo_file'])
         difference = list(filter(lambda x: x, difference))  # Filter None values
         if difference:
-            tools.pprint(f'\nDetect changes in src files:')
+            tools.pprint(f'\nDetected changes in src files:')
             tools.print_only_file_names(difference)
             tools.pprint('Move these files to src dir\n')
         else:
