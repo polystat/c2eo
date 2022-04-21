@@ -1,6 +1,4 @@
 +package c2eo.coperators
 
-+alias c2eo.stdio.printf
-
-[args...] > shift-left
-  printf "exception: TODO shift-left\n" > @
+[a b] > shift-left
+  (a.as-bytes.left b).as-int > @
