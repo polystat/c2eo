@@ -2,7 +2,7 @@
 //clang -Xclang -ast-dump -fsyntax-only main.cpp
 #include <stdio.h>
 
-double d01;
+double d01 = 0.0;
 double d02 = 3.0 + 5.0;
 double d03 = 3.14;      // не конвертирует
 static double d04 = 3.14;

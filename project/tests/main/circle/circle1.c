@@ -2,16 +2,13 @@
 
 double pi = 3.14192;
 static double r = 10.0;
-double p;
-double s;
-double tmp;
-
+double p = 0.0;
+double s = 0.0;
 main() {
-    tmp = pi * r;
-    p = 2.0 * tmp;
-     printf("%e\n", p);
+    p = 2.0 * pi * r;
+    printf("%e\n", p);
     p;
-    s = tmp * r;
+    s = pi * r * r;
     printf("%e\n", s);
     s;
 }
