@@ -132,33 +132,32 @@ void initValueAnalysis(const VarDecl *VD, std::string &str) {
 }
 
 void arraayToBytes(Stmt *stmt, size_t size, const VarDecl *pDecl, std::string& str) {
-  stmt->dump();
-  if (stmt->getStmtClass() == clang::Stmt::InitListExprClass) {
-    auto *body = llvm::dyn_cast<InitListExpr>(stmt);
-    QualType qualType = body->getType();
-    size_t elementSize = 0;
-    if (qualType->isArrayType()) {
-      auto *arrayType = llvm::dyn_cast<ConstantArrayType>(qualType);
-      auto elementType = arrayType->getElementType();
-      elementSize = pDecl->getASTContext().getTypeInfo(elementType).Width / 8;
-    }
-    for (auto element = body->child_begin(); element != body->child_end(); element++) {
-      if (qualType->isRecordType()) {
-        elementSize = 4; // todo
-      }
-      arraayToBytes(*element, elementSize, pDecl, str);
-    }
-  } else if (stmt->getStmtClass() == Stmt::IntegerLiteralClass) {
-    auto *body = llvm::dyn_cast<IntegerLiteral>(stmt);
-    intToBytes(body, size, str);
-  } else if (stmt->getStmtClass() == Stmt::FloatingLiteralClass) {
-    auto *body = llvm::dyn_cast<FloatingLiteral>(stmt);
-    floatToBytes(body, size, str);
-  } else if (stmt->getStmtClass() == Stmt::ImplicitCastExprClass) {
-    for (auto child = stmt->child_begin(); child != stmt->child_end(); child++)
-      arraayToBytes(*child, size, pDecl, str);
-  }
-  llvm::errs() << "\n";
+//  if (stmt->getStmtClass() == clang::Stmt::InitListExprClass) {
+//    auto *body = llvm::dyn_cast<InitListExpr>(stmt);
+//    QualType qualType = body->getType();
+//    size_t elementSize = 0;
+//    if (qualType->isArrayType()) {
+//      auto *arrayType = llvm::dyn_cast<ConstantArrayType>(qualType);
+//      auto elementType = arrayType->getElementType();
+//      elementSize = pDecl->getASTContext().getTypeInfo(elementType).Width / 8;
+//    }
+//    for (auto element = body->child_begin(); element != body->child_end(); element++) {
+//      if (qualType->isRecordType()) {
+//        elementSize = 4; // todo
+//      }
+//      arraayToBytes(*element, elementSize, pDecl, str);
+//    }
+//  } else if (stmt->getStmtClass() == Stmt::IntegerLiteralClass) {
+//    auto *body = llvm::dyn_cast<IntegerLiteral>(stmt);
+//    intToBytes(body, size, str);
+//  } else if (stmt->getStmtClass() == Stmt::FloatingLiteralClass) {
+//    auto *body = llvm::dyn_cast<FloatingLiteral>(stmt);
+//    floatToBytes(body, size, str);
+//  } else if (stmt->getStmtClass() == Stmt::ImplicitCastExprClass) {
+//    for (auto child = stmt->child_begin(); child != stmt->child_end(); child++)
+//      arraayToBytes(*child, size, pDecl, str);
+//  } else
+    str += "plug";
 }
 
 void floatToBytes(FloatingLiteral *pLiteral, size_t size, std::string &str) {
