@@ -1,8 +1,8 @@
 //clang -Xclang -ast-dump -fsyntax-only main.c
-//#include <stdio.h>
+#include <stdio.h>
 
-long long c;
-long long d;
+long long c = 0;
+long long d = 1;
 
 int main() {
   c = c + d;
@@ -61,7 +61,8 @@ int main() {
   c = c + d;
   //50
 
-//   cll;
-//   printf("%lld\n", c)ll;
-  return 0ll;
+  printf("%lld\n", c);
+  c;
+
+  return 0;
 }

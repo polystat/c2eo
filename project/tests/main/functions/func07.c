@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-double c;
+double c = 0.0;
 
 double func1() {
     return c - 111.0;

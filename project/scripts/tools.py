@@ -53,9 +53,9 @@ def get_or_none(array, index):
 
 
 def get_status(status):
-    statuses = {'INFO': '\033[1;34mINFO\033[0;37m', 'WARN': '\033[1;35mWARN\033[0;37m',
-                'ERROR': '\033[1;31mERROR\033[0;37m', 'EXCEPTION': '\033[31mEXCEPTION\033[0;37m',
-                'PASS': '\033[1;32mPASS\033[0;37m'}
+    statuses = {'INFO': '\033[1;34mINFO\033[0;37m', 'WARNING': '\033[1;35mWARN\033[0;37m',
+                'ERROR': '\033[1;31mERROR\033[0;37m', 'EXCEPTION': '\033[1;31mEXCEPTION\033[0;37m',
+                'PASS': '\033[1;32mPASS\033[0;37m', 'NOTE': '\033[1;33mNOTE\033[0;37m'}
     return statuses.get(status)
 
 
@@ -99,7 +99,7 @@ def pprint(*lines, slowly=False, status='INFO', end='\n'):
 
 def print_only_file_names(files):
     names = list(map(lambda x: get_file_name(x), files))
-    pprint(sorted(names))
+    pprint(sorted(names, key=str.casefold))
     pprint()
 
 
@@ -160,14 +160,14 @@ def read_file_as_dictionary(path):
 
 
 def remove_empty_dirs(path):
-    is_removed = False
-    folders = list(os.walk(path))[1:]
-    for folder in folders:
-        if not folder[1] and not folder[2]:
-            os.rmdir(folder[0])
-            is_removed = True
-    if is_removed:
-        remove_empty_dirs(path)
+    is_removed = True
+    while is_removed:
+        is_removed = False
+        folders = list(os.walk(path))[1:]
+        for folder in folders:
+            if not folder[1] and not folder[2]:
+                os.rmdir(folder[0])
+                is_removed = True
 
 
 def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):

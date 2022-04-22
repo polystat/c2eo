@@ -2,9 +2,9 @@
 
 double pi = 3.14192;
 static double r = 10.0;
-double p;
-double s;
-double tmp;
+double p = 0.0;
+double s = 0.0;
+double tmp = 0.0;
 
 main() {
     tmp = pi * r;
