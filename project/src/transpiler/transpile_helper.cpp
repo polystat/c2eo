@@ -310,12 +310,19 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     call.nested.push_back(param);
   }
   call.nested.push_back(transpiler.func_manager.GetFunctionCall(op->getDirectCallee(), shift));
-
-  std::string postfix = GetTypeName(op->getType());
+  QualType qualType = op->getType();
+  std::string postfix = GetTypeName(qualType);
   if (postfix != "undefinedtype") { // считается, что если тип не void,то генерация чтения данных нужна
-    EOObject read_ret{"read-as-" + postfix};
+    EOObject read_ret{"read"};
     EOObject ret_val{"return"};
     read_ret.nested.push_back(ret_val);
+    if (qualType->isRecordType() || qualType->isArrayType()) {
+      read_ret.nested.emplace_back(
+          to_string(var_sizes[0]),
+          EOObjectType::EO_LITERAL
+      );
+    } else
+      read_ret.name += "-as-" + postfix;
     call.nested.push_back(read_ret);
   } else { // если тип void,то возвращается TRUE
     call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
