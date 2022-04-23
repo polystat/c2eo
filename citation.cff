@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Alexander"
+  given-names: "Legalov"
+  orcid: "https://orcid.org/0000-0002-5487-0699"
+- family-names: "Nikolay"
+  given-names: "Chuikin"
+- family-names: "Maxim"
+  given-names: "Shipitsin"
+  orcid: "https://orcid.org/0000-0002-4957-5695"
+- family-names: "Yaroslav"
+  given-names: "Ryabtsev"
+- family-names: "Andrey"
+  given-names: "Kamensky"
+title: "c2eo"
+version: 0.1.7
+date-released: 2022-04-19
+url: "https://github.com/polystat/c2eo"
