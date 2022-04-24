@@ -89,8 +89,8 @@ void UnitTranspiler::GenerateResult() {
         std::string aliasFileName{path_name + ext_obj + ".eo.alias"};
         std::ofstream alias_out(aliasFileName);
         alias_out << "+package c2eo.external\n\n"
-                  << "+alias c2eo.external." << ext_obj << "\n\n"
-                  << "[args...] > plug\n"
+                  << "+alias c2eo.stdio.printf\n\n"
+                  << "[args...] > " << ext_obj << "\n"
                   << "  printf \"" << ext_obj << " is declaration only\\n\" > @";
       }
     }

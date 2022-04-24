@@ -91,7 +91,6 @@ EOObject MemoryManager::GetEOObject() const {
   return res;
 }
 
-
 void MemoryManager::RemoveAllUsed(const std::vector<Variable>& all_local) {
   for (const auto& var: all_local) {
     pointer -= var.size;
