@@ -46,13 +46,20 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
 
+EOObject GetForStmtEOObject(const ForStmt *p_stmt);
+
+EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
+
   if (!FD->hasBody())
     // TODO if not body may be need to create simple complete or abstract object with correct name
     return EOObject(EOObjectType::EO_EMPTY);
   const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
+  if (!funcBody) // TODO: segfault at address 0x0
+    return EOObject(EOObjectType::EO_EMPTY);
   size_t shift = transpiler.glob.RealMemorySize();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
@@ -233,13 +240,39 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     return GetArraySubscriptExprEOObject(op);
+  } else if (stmtClass == Stmt::ForStmtClass) {
+    const auto *op = dyn_cast<ForStmt>(stmt);
+    return GetForStmtEOObject(op);
   }
   return EOObject(EOObjectType::EO_PLUG);
 }
+EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
+  EOObject for_stmt(EOObjectType::EO_EMPTY);
+  for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
+
+  auto init = p_stmt->getInit();
+  auto cond = p_stmt->getCond();
+  auto inc = p_stmt->getInc();
+  auto body = p_stmt->getBody();
+
+  EOObject while_stmt{"while"};
+  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  EOObject seq{"seq"};
+  seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
+  seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
+  while_stmt.nested.push_back(seq);
+  for_stmt.nested.push_back(while_stmt);
+  return for_stmt;
+}
 
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
+  auto left = op->getLHS();
+  auto right = op->getRHS();
+  if (left->getType()->isIntegerType() && right->getType()->isPointerType())
+    swap(left, right);
+
   size_t type_size;
-  for (auto lhs_ch: op->getLHS()->children()) {
+  for (auto lhs_ch: left->children()) {
     if (lhs_ch->getStmtClass() == Stmt::DeclRefExprClass) {
       auto decl_ref = dyn_cast<DeclRefExpr>(lhs_ch);
       auto qt = decl_ref->getType();
@@ -249,8 +282,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
     }
   }
 
-  auto arr_name = GetStmtEOObject(op->getLHS());
-  auto index_name = GetStmtEOObject(op->getRHS());
+  auto arr_name = GetStmtEOObject(left);
+  auto index_name = GetStmtEOObject(right);
   // вычисляем с с какого места памяти начинать писать в переменную массива.
   EOObject count_pos{"mul"};
   count_pos.nested.emplace_back(index_name);
@@ -302,12 +335,19 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     call.nested.push_back(param);
   }
   call.nested.push_back(transpiler.func_manager.GetFunctionCall(op->getDirectCallee(), shift));
-
-  std::string postfix = GetTypeName(op->getType());
+  QualType qualType = op->getType();
+  std::string postfix = GetTypeName(qualType);
   if (postfix != "undefinedtype") { // считается, что если тип не void,то генерация чтения данных нужна
-    EOObject read_ret{"read-as-" + postfix};
+    EOObject read_ret{"read"};
     EOObject ret_val{"return"};
     read_ret.nested.push_back(ret_val);
+    if (qualType->isRecordType() || qualType->isArrayType()) {
+      read_ret.nested.emplace_back(
+          to_string(var_sizes[0]),
+          EOObjectType::EO_LITERAL
+      );
+    } else
+      read_ret.name += "-as-" + postfix;
     call.nested.push_back(read_ret);
   } else { // если тип void,то возвращается TRUE
     call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
@@ -546,10 +586,9 @@ EOObject GetReturnStmpEOObject(const ReturnStmt *p_stmt) {
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   EOObject if_stmt{"if"};
   if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  // TODO then and else is seq everytime!
-  if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getThen()));
+  if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
   if (p_stmt->hasElseStorage()) {
-    if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getElse()));
+    if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
   } else {
     EOObject empty_seq{"seq"};
     empty_seq.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
@@ -561,8 +600,7 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
   EOObject while_stmt{"while"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  // TODO body is seq everytime!
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
   return while_stmt;
 }
 
@@ -571,11 +609,19 @@ EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
   do_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
   EOObject while_stmt{"while"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  // TODO body is seq everytime!
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
   do_stmt.nested.push_back(while_stmt);
   do_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
   return do_stmt;
+}
+
+EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
+  if (p_stmt->getStmtClass() == clang::Stmt::CompoundStmtClass)
+    return GetStmtEOObject(p_stmt);
+  EOObject seq("seq");
+  seq.nested.push_back(GetStmtEOObject(p_stmt));
+  seq.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
+  return seq;
 }
 
 std::string GetTypeName(QualType qualType) {
@@ -583,7 +629,7 @@ std::string GetTypeName(QualType qualType) {
   const clang::Type *typePtr = qualType.getTypePtr();
   TypeInfo typeInfo = context->getTypeInfo(typePtr);
   uint64_t typeSize = typeInfo.Width;
-  std::string str{""};
+  std::string str;
 
   if (typePtr->isBooleanType()) {
     str += "bool";
