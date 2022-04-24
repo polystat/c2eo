@@ -73,7 +73,7 @@ EOObject Variable::GetInitializer() const {
   if (!is_initialized)
     return EOObject(EOObjectType::EO_EMPTY);
   EOObject res("write");
-  if ((type_postfix.size() < 3 || type_postfix.substr(0, 3) != "st_") && type_postfix != "undefinedtype" &&
+  if ((type_postfix.size() < 3 || type_postfix.substr(0, 3) != "st-") && type_postfix != "undefinedtype" &&
       type_postfix != "char") // todo char!?
     res.name += "-as-" + type_postfix;
   res.nested.emplace_back(alias);
