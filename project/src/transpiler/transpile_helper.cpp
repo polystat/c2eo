@@ -46,6 +46,10 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
 
+EOObject GetForStmtEOObject(const ForStmt *p_stmt);
+
+EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -236,8 +240,29 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     return GetArraySubscriptExprEOObject(op);
+  } else if (stmtClass == Stmt::ForStmtClass) {
+    const auto *op = dyn_cast<ForStmt>(stmt);
+    return GetForStmtEOObject(op);
   }
   return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
+  EOObject for_stmt(EOObjectType::EO_EMPTY);
+  for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
+
+  auto init = p_stmt->getInit();
+  auto cond = p_stmt->getCond();
+  auto inc = p_stmt->getInc();
+  auto body = p_stmt->getBody();
+
+  EOObject while_stmt{"while"};
+  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  EOObject seq{"seq"};
+  seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
+  seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
+  while_stmt.nested.push_back(seq);
+  for_stmt.nested.push_back(while_stmt);
+  return for_stmt;
 }
 
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
@@ -561,10 +586,9 @@ EOObject GetReturnStmpEOObject(const ReturnStmt *p_stmt) {
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   EOObject if_stmt{"if"};
   if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  // TODO then and else is seq everytime!
-  if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getThen()));
+  if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
   if (p_stmt->hasElseStorage()) {
-    if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getElse()));
+    if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
   } else {
     EOObject empty_seq{"seq"};
     empty_seq.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
@@ -576,8 +600,7 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
   EOObject while_stmt{"while"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  // TODO body is seq everytime!
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
   return while_stmt;
 }
 
@@ -586,11 +609,19 @@ EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
   do_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
   EOObject while_stmt{"while"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  // TODO body is seq everytime!
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
   do_stmt.nested.push_back(while_stmt);
   do_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
   return do_stmt;
+}
+
+EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
+  if (p_stmt->getStmtClass() == clang::Stmt::CompoundStmtClass)
+    return GetStmtEOObject(p_stmt);
+  EOObject seq("seq");
+  seq.nested.push_back(GetStmtEOObject(p_stmt));
+  seq.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
+  return seq;
 }
 
 std::string GetTypeName(QualType qualType) {
@@ -598,7 +629,7 @@ std::string GetTypeName(QualType qualType) {
   const clang::Type *typePtr = qualType.getTypePtr();
   TypeInfo typeInfo = context->getTypeInfo(typePtr);
   uint64_t typeSize = typeInfo.Width;
-  std::string str{""};
+  std::string str;
 
   if (typePtr->isBooleanType()) {
     str += "bool";
