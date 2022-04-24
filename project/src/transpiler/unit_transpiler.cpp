@@ -5,8 +5,6 @@
 #include "aliases.h"
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
-//   unit.func_manager.TestOut();
-
   if (unit.tmp.empty())
     unit.GenerateResult();
   os << unit.tmp;
