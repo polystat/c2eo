@@ -1,7 +1,7 @@
 //clang -Xclang -ast-dump -fsyntax-only func01.c
 //Одна из функций запускается как параметр другой
 
-//#include <stdio.h>
+#include <stdio.h>
 
 long long c = 10;
 
@@ -16,7 +16,7 @@ long long func2(long long x) {
 int main() {
     long long a;
     a = func1(func2(c));
-//    printf("%lld\n", a);
+    printf("%lld\n", a);
     a;
     return 0;
 }
