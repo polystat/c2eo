@@ -153,6 +153,7 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD, size_t 
 // Тестовый вывод содержимого контейнеров объявления и определения функций
 void FunctionManager::TestOut() {
   if (declarations.size() > 0) {
+    std::cout << "Declarations:\n";
     for(auto declaration: declarations) {
       declaration.TestOut();
     }
@@ -161,6 +162,7 @@ void FunctionManager::TestOut() {
     std::cout << "No function declarations\n";
   }
   if (definitions.size() > 0) {
+    std::cout << "Definitions:\n";
     for(auto definition: definitions) {
       definition.TestOut();
     }

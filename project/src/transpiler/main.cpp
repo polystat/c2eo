@@ -83,10 +83,19 @@ int main(int argc, const char **argv) {
 //   const char *inputFileName = new_in_file_name.c_str();
   filename = argv[2];
 
+  // Получение имени для пакета из имени файла *.eo
   packagename = filename.substr(0, filename.size() - 3);
   if (packagename.rfind('/') != std::string::npos)
     packagename = packagename.substr(packagename.rfind('/') + 1);
   transpiler.SetPackageName(packagename);
+
+  // Получение пути к файлам для сохранения результатов
+  std::string pathName{""};
+  auto pos = filename.rfind('/');
+  if (pos != std::string::npos)
+    pathName = filename.substr(0, pos+1);
+  transpiler.SetPathName(pathName);
+//   std::cout << "pathName = " << pathName << "\n";
 
 
   // TODO Add path to library as parser_argv

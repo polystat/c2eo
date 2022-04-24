@@ -12,6 +12,7 @@ class UnitTranspiler {
 public:
   UnitTranspiler() = default;
 
+//   MemoryManager glob{"global-ram", 8}, ret{"return-ram"};
   MemoryManager glob{"global-ram"}, ret{"return-ram"};
   FunctionManager func_manager;
   RecordManager record_manager;
@@ -22,10 +23,12 @@ public:
   std::set<std::string> used_external_objects;
 
   void SetPackageName(std::string packagename);
+  void SetPathName(std::string pathName);
   // std::vector<EOObject>
 
 private:
   std::string package_name;
+  std::string path_name;
   std::string tmp;
   std::vector<EOObject> objects;
 

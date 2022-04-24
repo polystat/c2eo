@@ -44,7 +44,8 @@ struct Variable {
 
 class MemoryManager {
 public:
-  explicit MemoryManager(std::string name) : pointer(0), name(std::move(name)) {}
+  explicit MemoryManager(std::string name, size_t start_pointer = 0):
+                        pointer(start_pointer), name(std::move(name)) {}
 
   Variable Add(const clang::VarDecl* id,
                size_t size,
@@ -54,6 +55,15 @@ public:
                std::string local_name = "",
                size_t shift = 0,
                bool is_initialized = true);
+
+  Variable AddExternal(const clang::VarDecl* id,
+               size_t size,
+               const std::string &type,
+               std::string alias,
+               EOObject value,
+               std::string local_name = "",
+               size_t shift = 0,
+               bool is_initialized = false);
 
   bool Empty();
 
@@ -70,6 +80,10 @@ public:
   EOObject GetEOObject() const;
 
   void RemoveAllUsed(const std::vector<Variable>& all_local);
+
+  // Поиск имен внешних объявлений, совпадающих с глобальными именами
+  // и установка в одинаковое значение их адресов в глобальной памяти
+  void SetExtEqGlob();
 
 private:
   // index of first free byte in memory

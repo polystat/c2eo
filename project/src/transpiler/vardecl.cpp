@@ -62,6 +62,8 @@ Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift
     return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, eoObject);
   } else if (globalStorage && !extStorage) {
     return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, eoObject);
+  } else if (globalStorage && extStorage) {
+    return transpiler.glob.AddExternal(VD, typeSize, strType, "e-" + varName, eoObject);
   } else // its local variable!
   {
     if (local_name.empty()) {

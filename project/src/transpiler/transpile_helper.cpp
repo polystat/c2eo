@@ -631,7 +631,7 @@ std::string GetTypeName(QualType qualType) {
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
   std::set<std::string> all_known = {obj.postfix};
-  std::set<std::string> unknown = {};
+  std::set<std::string> unknown{};
   // TODO maybe should use pointers or copy constructor to avoid unnecessary copying of objects
   std::queue<EOObject> not_visited;
   for (auto child: obj.nested) {
@@ -642,7 +642,6 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
     not_visited.pop();
     switch (cur.type) {
       case EOObjectType::EO_ABSTRACT:
-
         all_known.insert(cur.postfix);
         for (const auto &arg: cur.arguments)
           all_known.insert(arg);
