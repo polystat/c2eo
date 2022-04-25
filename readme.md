@@ -103,7 +103,44 @@ The main tests are in the folder `/project/tests/main`, if they pass, then every
 
 C is a _system-level procedural_ programming language with direct access to the underlying hardware architecture elements, such as memory and registers. EO, on the other hand is a _high-level object-oriented_ language. There are a number of non-trivial mechanisms of translating constructs from the former to the latter, which are explained below:
 
-### Direct Memory Access
+:heavy_check_mark: [Implemented](#implemented):
+- [basic data types: double, int, bool](#direct-memory-access-for-basic-data-types)
+- description of global and local variables
+- [one-dimensional arrays](#arrays)
+- [structures](#structures)
+- [functions](#functions)
+- function call operators
+- [single return at the end of the function](#single-return)
+- [pointers](#pointers)
+- [external links](#external-links)
+- conditional branching if else operators
+- while do loop operator
+- unary operations with base types, pointers and their and assignment modifications
+- binary operations with base types and assignment modifications
+
+:yellow_circle: In progress:
+- initial initialization of global variables
+- calling functions with local variables from other functions
+- bit operations (inconsistent implementation in the EO)
+- basic char types, string initialization, unsigned + short + int, float (not supported by EO)
+
+:x: [Not implemented](#not-implemented):
+- [structures initialization](#structures-initialization)
+- [multidimensional arrays](#multidimensional-arrays)
+- [multiple return](#multiple-return)
+- [switch case default](#switch-case-default)
+- [const](#const)
+- [enums](#enums)
+- [for statements](#for-statements)
+- [break](#break)
+- [continue](#continue)
+- [goto and labels](#goto-and-labels)
+- [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
+- [unions](#unions)
+
+## :heavy_check_mark: Implemented:
+
+### Direct memory access for basic data types
 
 Let's take the following C code as an example:
 
@@ -118,6 +155,44 @@ ram > global
 global.write
   0
   3.14.as-bytes
+```
+
+### Arrays
+
+We work with fixed-size arrays in the same way as with variables.
+
+```c
+int instanceArray[2] = { 5 6 };
+╭─────┬─────╮
+|  5  │  6  │
+├─────┼─────┤
+| 0th │ 4th │
+╰─────┴─────╯
+```
+
+```java
+global.write 0 5.as-bytes
+global.write 4 6.as-bytes
+```
+
+### Structures
+
+We know the size of structures so we still work as with variables. We can also generate additional objects to access the fields of structures.
+
+```c
+struct Rectangle {int x; int y;} rect;
+```
+
+```java
+address > g-rect
+  global-ram
+  0
+address > g-rect-x
+  global-ram
+  0
+address > g-rect-y
+  global-ram
+  4
 ```
 
 ### Functions
@@ -154,7 +229,7 @@ seq
   foo 8 4
 ```
 
-### Return
+### Single return
 
 ```java
 
@@ -231,43 +306,38 @@ To compile files with any external links, we use the following solution:
     TRUE > @
   ```
 
-### Arrays
+## :x: Not implemented:
 
-We work with fixed-size arrays in the same way as with variables.
+### Structures initialization
+---
 
-```c
-int instanceArray[2] = { 5 6 };
-╭─────┬─────╮
-|  5  │  6  │
-├─────┼─────┤
-| 0th │ 4th │
-╰─────┴─────╯
-```
+### Multidimensional arrays
+---
 
-```java
-global.write 0 5.as-bytes
-global.write 4 6.as-bytes
-```
+### Multiple return
+---
 
-### Structures
+### Switch case default
+---
 
-We know the size of structures so we still work as with variables. We can also generate additional objects to access the fields of structures.
+### Const
+---
 
-```c
-struct Rectangle {int x; int y;} rect;
-```
+### Enums
 
-```java
-address > g-rect
-  global-ram
-  0
-address > g-rect-x
-  global-ram
-  0
-address > g-rect-y
-  global-ram
-  4
-```
+We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+
+### For statements
+---
+
+### Break
+---
+
+### Continue
+---
+
+### Goto and labels
+---
 
 ### Unions
 
@@ -312,9 +382,5 @@ address > g-fig-t-c
   global-ram
   12
 ```
-
-### Enums
-
-We can work with enumerated types as well as with constants and substitute numeric values instead of names.
 
 </details>
