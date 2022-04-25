@@ -5,7 +5,7 @@
 [![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo)
 [![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
 
-This is a experimental translator of C programs to [EO](https://www.eolang.org) programs.
+This is a experimental translator of [C](https://en.wikipedia.org/wiki/C_(programming_language)) programs to [EO](https://www.eolang.org) programs.
 
 ## How to Use
 
@@ -20,12 +20,15 @@ $ sudo apt install c2eo
 Then, just run:
 
 ```bash
-$ c2eo <c-file-name> <eo-file-name>
+$ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
+# ./c2eo ../some_dir/example.c example.eo
 ```
 
  We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk. 
 
 ## How to Contribute
+
+### Preparations
 
 Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
@@ -59,22 +62,41 @@ $ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA
 $ tar -xvf llvm-clang.tar.gz
 ```
 
-It is assumed that the `llvm-clang` is located in the same dir as the `c2eo`. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7). Then:
+It is assumed that the `llvm-clang` is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7).
+
+This completes the preparations for work, now you can start making changes.
+
+### Making changes
+
+All sources files of transpiler are located in `project/src/transpiler`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project/build` dir and run the following commands:
 
 ```bash
-$ cd ./c2eo/project/build
 $ cmake ..
 $ make
 ``` 
-
-Then, run tests:
+As you have already noticed, the project is being built in the `project/build` folder. The result of this build is the `c2eo` file in `project/bin`. Now you have a transpiler and you can convert programs from C to EO. Just run:
 
 ```bash
-$ cd ../scripts
-$ ./transpile_с2eo.py <path-to-dir-with-C-program>
+$ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
+# ./c2eo ../some_dir/example.c example.eo
+```
+Ok, it works, but you're not going to manually broadcast each file and check if everything is OK. To do this, there are a couple of scripts that will simplify your life:
+
+```bash
+# Transpile and run all c files in folder, then compare their results and show statistics
+$ python3 test.py ../tests/main
+
+# Only transpile all c files, EO files are located in the /result dir
+$ python3 transpile_c2eo.py
+
+# Single-threaded launch of c2eo without formatting the output to the console for all c files
+$ python3 c2eo-all ../tests/main
+
+# Show code lines statistics in this dir 
+$ python3 code_lines.py ../tests/main
 ```
 
-Now the generated project is in `result/`.
+The main tests are in the folder `/project/tests/main`, if they pass, then everything is ok. [Here](./project/scripts/readme.md) you can find more information about scripts.
 
 ## Principles of Transpilation from C to EO
 
@@ -295,160 +317,3 @@ address > g-fig-t-c
 We can work with enumerated types as well as with constants and substitute numeric values instead of names.
 
 </details>
-
-</p>
-
-<details>
-  <summary>3. Project structure</summary>
-
-    .
-    ├── collection
-    │   ├── c-sources
-    │   └── eo-sources
-    ├── doc 
-    ├── llvm-clang 
-    ├── project 
-    │   ├── assembly
-    │   ├── bin
-    │   │   └── c2eo
-    │   ├── build
-    │   ├── scripts
-    │   ├── lib
-    │   ├── src
-    │   │   └── transpiler
-    │   ├── tests
-    │   └── CMakeLists.txt
-    └── result
-        ├── pom.xml
-        ├── README.md
-        ├── run.sh
-        └── eo
-            └── c2eo
-                └── src
-
-* ### collection
-  The `collection` directory contains source codes for programs in the C and EO programming languages, which are supposed to be used both for integration testing of the transpiler and for testing possible options for transforming into EO. C programs are located in the `c-sources` subdirectory. They form data sets that allow assessing the performance of the transpiler being developed. The subdirectory `eo-sources` contains programs on EO, which are used to analyze various variants of code generation, as well as to analyze the possibility of transforming programs from C to EO.
-
-* ### doc
-  The `doc` directory contains the documentation generated during the work on the project.
-
-
-* ### llvm-clang
-  The `llvm-clang` directory is for storing the build of the llvm project. It is assumed that this assembly will be formed at the level of binary codes for a specific autonomous implementation (docker, VM) and will not change subsequently. It is unlikely that during the development of the project it is worth switching to a more recent version of llvm without special reason. Being within the project will allow it to be distributed along with the result of the work. At the same time, you can look at and throw away all unnecessary things that are not needed for the project, thereby reducing 8 gigabytes to a more acceptable value.
-
-* ### project
-  The `project` directory contains everything that is the result of development. The following directories are currently being viewed in it:
-
-  * #### assembly
-    A directory intended for storing intermediate results, as well as the final result of the transpiler operation. The final file `global.eo` is formed from individual intermediate files in it, which is then copied (sent) to the corresponding subdirectory of the` result` directory.
-
-  * #### bin
-    The directory in which all executable files and scripts that provide the transpiler operation are grouped.
-
-  * #### build
-    The directory for building the project. It is supposed to build the project using `cmake`. In this regard, the hierarchical organization of files is used in each of the subprojects that provide the execution of individual functions, if necessary, a separate` CMakeLists.txt` file should be placed. Also, the root file `CMakeLists.txt` is located in the` project` directory.
-
-  * #### lib
-    A directory intended for storing static and (or) dynamic libraries generated during project creation, if any.
-
-  * #### src
-    The src directory is key for development. At this stage, two main projects are viewed, placed in the respective catalogs. In general, its content is likely to change.
-
-    * ##### transpiler
-      A transpiler that parses the AST of a single compilation unit and produces EO objects as output. These objects are located in the assembly directory and split over two files. One collects all objects corresponding to global artifacts, and the other - static. Taking into account the specifics of the AST analysis, this project is implemented in C ++.
-
-    * ##### collector
-      The directory in which the `global.eo` file collector is developed. In general, after the transpiler has processed all compilation units, it links from multiple files containing both static and global objects into a single object file on EO. The development of this program can be carried out in the scripting language.
-
-    * ##### launcher
-      A directory containing a program that runs the transpiler several times according to the number of compilation units, and then transfers control to the collector of the resulting individual files into the monolith. After completing the build, this program transfers the generated file `global.eo` to the directory` result / eo / c2eo / src`.
-
-  * #### [tests](./project/tests/scripts)
-    A directory with various test programs and data that check the functionality of the code being developed.
-
-* ### result
-  Directory for storing data used by the EO compiler. It contains information about the project on EO, updated every time the project of this compiler is updated.
-
-  * #### README.md
-    Description of the compiled project, which is formed by the c2eo developers and practically does not change (it can only be corrected);
-
-  * #### run.sh
-    A script that launches the compiled application;
-
-  * #### eo
-    A directory containing the libraries used, written in EO to support C artifacts, as well as EO sources generated by the transpiler or generated by hand. Within the `eo` directory, the structure is formed by subdirectories. Directly under `eo` is the` c2eo` directory, which defines the common name of the package. It contains:
-
-    * ##### app.eo
-      Responsible for launching the application (it is written manually and does not change);
-
-    * ##### ctypes
-      A directory that essentially defines some library of objects written in EO and designed to simulate various artifacts of the C language;
-
-    * ##### src
-      The directory where the file `global.eo` is written with objects generated by the transpiler during the analysis of a C program (it contains a `global` object, in which all artifacts are collected in the form of corresponding objects).
-
-The formation of the `global.eo` file is essentially the main task of the transpiler and provides, by assembling many units, the compilation of the source C program.
-
-&nbsp;
-## Placing a program on EO obtained during transpilation
-The presented structure became possible due to the use of initial initialization of objects that mimic C variables.
-
-Transpilation is carried out separately for each compilation unit, which generates two files at the output:
-
-* a file with a description of all global objects, which include abstract objects obtained by transforming abstract data types, global variables, global function descriptions;
-
-* a file with a description of all static objects that are transformed from the descriptions of static variables and functions located in the global space, static variables located inside functions.
-
-These two files are a basic stub for further build after transpilation of all compilation units of the project. The assembly itself at the moment consists in the formation of a common file in the EO programming language. It forms a global object `global`, which contains all objects obtained as a result of compilation of abstract data types, external variables, external functions, as well as objects that are obtained from files describing static objects.
-
-The number of static objects is determined by the number of files with static artifacts. Placing all data in a single object `global` allows you to easily provide access both from global objects to their static data and from external static objects to global data. The compiler of this file can, in principle, be a separate program implemented in any convenient programming language.
-
-If there is a `main` function in one of the compilation units, it is converted to the corresponding object of the global space. And immediately after its description, a description of its launch follows. The function can be located anywhere in the global object.
-
-In general, the order in which a file with global objects and static objects is assembled is irrelevant.
-
-The presented scheme provides complete autonomy for the formation of the program on EO. The object that launches the application contains only the dateization of the global object. It does not change, remaining constant regardless of the transpiled project.
-
-</details>
-
-</p>
-
-<details>
-    <summary>4. About working with the project</summary>
-
-&nbsp;
-## Executable transpiler file and scripts for building the program on EO
-
----
-## Directory Hierarchy
-
-These files are located in the `project/bin` directory
-
-&nbsp;
-## Run scripts
-
-### Launching the program builder on EO
-
-`python3 launcher.py <file-of-c-program>`
-
-The `c2eo` transpiler is launched, then the `collector.py` script is launched. As a result of processing the source file in the C language, the file `global.eo` on EO is generated, which is transferred to the directory `result/eo/c2eo/src/` of the project on EO.
-
-&nbsp;
-## Support scripts and programs
----
-### Transpilation and formation of intermediate files
-
-`c2eo <file-of-c-program> <name>`
-
-Executable native code launched from the launcher. Carries out transpilation of a C program with the formation of intermediate files containing separately external (global) and static artifacts with the extensions `*.glob` and `*.stat`, respectively. The files are created in the `project/assembly` directory. The transmitted name is generated by the launcher and sets the names for intermediate files. It can also run autonomously.
-
-### Generating the global.eo file
-
-`collector`
-
-Based on intermediate files located in the `project/assembly` directory, it also creates a program file on EO `global.eo`. Launched from the launcher.
-
----
-</details>
-
-</p>
