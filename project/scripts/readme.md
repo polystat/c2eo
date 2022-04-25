@@ -1,10 +1,8 @@
 # Scripts for building the program on EO
 
-*Read in another language: [Russian](readme.ru.md)*
-
 Make sure you completely follow the main [guide](https://github.com/polystat/c2eo#2-build-llvm--clang)
 
-All scripts are run from the `c2eo/project/scripts` folder
+All scripts are run from the `project/scripts` folder
 
 ## Possible commands
 
@@ -12,17 +10,17 @@ All scripts are run from the `c2eo/project/scripts` folder
     ```bash
     # By default, the path "path_to_tests" and the "config" configuration in settings.yml will be taken, you can set other values in settings.yml
 
-    $ ./test.py
+    $ python3 test.py
 
 
     # You can specify a different path at startup
 
-    $ ./test.py ../tests/nkchuykin
+    $ python3 test.py ../tests/nkchuykin
 
 
     # You can specify a different path and configuration at startup
 
-    $ ./test.py ../tests/nkchuykin without_struct
+    $ python3 test.py ../tests/nkchuykin without_struct
     ```
 
     <details>
@@ -39,7 +37,7 @@ All scripts are run from the `c2eo/project/scripts` folder
 1. Transpilation and assembly of all C-files found in this directory
 
     ```bash
-    $ ./transpile_c2eo.py ../tests/nchuikin
+    $ python3 transpile_c2eo.py ../tests/nchuikin
     ```
 
 1. Clear all the entire catalog, leaving only C-files (without -o at the end)
@@ -47,18 +45,18 @@ All scripts are run from the `c2eo/project/scripts` folder
     ```bash
     # By default, the path "path_to_tests" will be taken, you can set a different value in settings.yml
     
-    $ ./clean_before_transpilation.py
+    $ python3 clean_before_transpilation.py
 
 
     # You can specify a different path and configuration at startup
 
-    $ ./clean_before_transpilation.py ../tests/nkchuykin
+    $ python3 clean_before_transpilation.py ../tests/nkchuykin
     ```
 
 1. Build EO project `../../ result`
 
     ```bash
-    $ ./build_eo.py
+    $ python3 build_eo.py
     ```
 
 1. Build c2eo
@@ -66,28 +64,32 @@ All scripts are run from the `c2eo/project/scripts` folder
     ```bash
     # By default, the path "path_to_c2eo" will be taken, you can set a different value in settings.yml
     
-    $ ./build_c2eo.py
+    $ python3 build_c2eo.py
 
 
     # You can specify a different path at startup
 
-    $ ./build_c2eo.py ../my_dir/bin
+    $ python3 build_c2eo.py ../my_dir/bin
     ```
 
-1. Build all the `.glob` and `.stat` files into the `.eo` files
+1. Single-threaded launch of c2eo without formatting the output to the console for all c files 
 
     ```bash
-    # By default, the path "path_to_assembly" will be taken, you can set a different value in settings.yml
-    
-    $ ./collect_transpiled_code.py
+    $ python3 c2eo-all.py ../tests/main
+    ```
+
+1. Show code lines statistics for this dir 
+
+    ```bash
+    $ python3 code_lines.py ../tests/main
     ```
 
 1. Update EO version
 
     ```bash
-    $ ./update_eo_version.py
+    $ python3 update_eo_version.py
     ```
 
-1. `settings.py` - script with access to project settings
+2. `settings.py` - script with access to project settings
 
-1. `tools.py` - script with useful functions
+3. `tools.py` - script with useful functions
