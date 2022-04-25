@@ -1,9 +1,10 @@
 <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-[![build-project](https://github.com/polystat/c2eo/actions/workflows/build.yml/badge.svg)](https://github.com/polystat/c2eo/actions/workflows/build.yml)
-[![License](https://img.shields.io/badge/license-MIT-white.svg)](https://github.com/polystat/c2eo/blob/master/license.txt)
-[![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)](https://tokei.rs/b1/github/polystat/c2eo)
-[![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)](https://hitsofcode.com/github/polystat/c2eo/view?branch=master)
+![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)
+![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)
+![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)
+![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)
+![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)
 
 This is a experimental translator of [C](https://en.wikipedia.org/wiki/C_(programming_language)) programs to [EO](https://www.eolang.org) programs.
 
