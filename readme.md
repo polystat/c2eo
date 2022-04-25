@@ -118,7 +118,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 - unary operations with base types, pointers and their and assignment modifications
 - binary operations with base types and assignment modifications
 
-:yellow_circle: In progress:
+:hammer: In progress:
 - initial initialization of global variables
 - calling functions with local variables from other functions
 - bit operations (inconsistent implementation in the EO)
@@ -138,7 +138,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
 - [unions](#unions)
 
-## :heavy_check_mark: Implemented:
+### :heavy_check_mark: Implemented:
 
 ### Direct memory access for basic data types
 
@@ -306,7 +306,7 @@ To compile files with any external links, we use the following solution:
     TRUE > @
   ```
 
-## :x: Not implemented:
+### :x: Not implemented:
 
 ### Structures initialization
 ---
