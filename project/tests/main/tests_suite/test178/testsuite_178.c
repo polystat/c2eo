@@ -1,12 +1,14 @@
 #include <stdio.h>
-extern int x;
+//extern int x;
 int x;
+extern int x;
 
 int
 test()
 {
 	return x;
 }
+
 int main () {
   int x;
   x = test();

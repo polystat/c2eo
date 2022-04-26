@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fstream>
 #include "unit_transpiler.h"
 #include "transpile_helper.h"
 #include "aliases.h"
@@ -24,10 +25,14 @@ void UnitTranspiler::GenerateResult() {
   ret_addr.nested.emplace_back("0", EOObjectType::EO_LITERAL);
   body.nested.push_back(ret_addr);
 
-  if (!glob.Empty())
+  if (!glob.Empty()) {
+    glob.SetExtEqGlob();
     for (const auto& var: glob) {
-      body.nested.emplace_back(var.GetAddress(glob.name));
+      // body.nested.emplace_back(var.GetAddress(glob.name));
+      body.nested.push_back(EOObject(var.GetAddress(glob.name)));
     }
+  }
+
   if (!record_manager.Empty()) // todo: it isn't global, is it? it should be out of labels
     for(auto type: record_manager) {
       auto recordFields = type.GetEORecordDecl();
@@ -58,7 +63,6 @@ void UnitTranspiler::GenerateResult() {
   }
 
   init_seq.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-
   body.nested.push_back(init_seq);
 
   std::stringstream result;
@@ -73,7 +77,19 @@ void UnitTranspiler::GenerateResult() {
         result << alias << "\n";
       }
       catch (std::out_of_range&) {
-        llvm::errs() << "exception: not found alias for " << ext_obj << "\n";
+//         llvm::errs() << "exception: not found alias for " << ext_obj << "\n";
+//         llvm::errs() << "warning: not found alias for " << ext_obj << "\n";
+        result << "+alias c2eo.external." << ext_obj << "\n";
+        // Скорее всего здесь нужно еще добавить формирование пустой обертки
+        // в соответствующем каталоге (каком?)
+        // Скорее всего в том же, что и результат. Но со специфическим именем.
+        // Тогда его можно будет перенести в другое место
+        std::string aliasFileName{path_name + ext_obj + ".eo.alias"};
+        std::ofstream alias_out(aliasFileName);
+        alias_out << "+package c2eo.external\n\n"
+                  << "+alias c2eo.stdio.printf\n\n"
+                  << "[args...] > " << ext_obj << "\n"
+                  << "  printf \"" << ext_obj << " is declaration only\\n\" > @";
       }
     }
   }
@@ -86,4 +102,8 @@ void UnitTranspiler::GenerateResult() {
 
 void UnitTranspiler::SetPackageName(std::string packagename) {
   package_name = std::move(packagename);
+}
+
+void UnitTranspiler::SetPathName(std::string pathName) {
+  path_name = std::move(pathName);
 }

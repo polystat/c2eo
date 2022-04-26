@@ -8,16 +8,16 @@
 #include "clang/AST/Expr.h"
 #include "llvm/ADT/APInt.h"
 
+// #define TRACEOUT
+// #define TRACEOUT_EO
+#define TRACEOUT_NEW_EO
+// #define TRACEOUT_FUNC_DEF
+
 #include "eo_object.h"
 
 using namespace clang;
 using namespace llvm;
 using namespace std;
-
-// #define TRACEOUT
-// #define TRACEOUT_EO
-// #define TRACEOUT_NEW_EO
-// #define TRACEOUT_FUNC_DEF
 
 // Вывод операторного узла синтаксического дерева
 void TraceOutASTnode(clang::Stmt::StmtClass stmtClass);
