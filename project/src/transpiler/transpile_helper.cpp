@@ -660,9 +660,9 @@ std::string GetTypeName(QualType qualType) {
 
 
   if (typePtr->isUnionType())
-    str = "un_";
+    str = "un-";
   if (typePtr->isStructureType())
-    str = "st_";
+    str = "st-";
   if (typePtr->isUnionType() || typePtr->isStructureType()) {
     RecordDecl *RD = typePtr->getAsRecordDecl();
     if (RD->hasNameForLinkage())
