@@ -4,14 +4,12 @@
 
 RecordType ProcessRecordType(const clang::RecordDecl* RD) {
   extern UnitTranspiler transpiler;
-//  std::cout<<"RD:"<<RD<<'\n';
-//  RD->dump();
 
   std::string name;
   if (RD->isUnion())
-    name = "un_";
+    name = "un-";
   if (RD->isStruct())
-    name = "st_";
+    name = "st-";
   if (RD->hasNameForLinkage())
     name += RD->getNameAsString();
   else
@@ -24,7 +22,7 @@ RecordType ProcessRecordType(const clang::RecordDecl* RD) {
   for (auto it = RD->field_begin(); it != RD->field_end(); it++) {
     std::string fieldName;
     if (!it->isUnnamedBitfield())
-      fieldName = /* "f_" + */ it->getNameAsString();
+      fieldName = /* "f-" + */ it->getNameAsString();
     else
       fieldName = "field" + std::to_string(fields.size());
     fields[fieldName] = shift;
