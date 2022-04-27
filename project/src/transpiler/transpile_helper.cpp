@@ -50,6 +50,8 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
 EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
 
+int GetTypeSize(QualType qualType);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -143,6 +145,11 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
     if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перечислимых типов
     {
       auto ref = dyn_cast<Expr>(*stmt->child_begin());
+//       auto ref = dyn_cast<ImplicitCastExpr>(*stmt->child_begin());
+//       // Определения подвида (далее по нему нужно будет выстроить анализ, включая уже написанный)
+//       CastKind castKind = ref->getCastKind();
+//       if(castKind == CK_ArrayToPointerDecay) {} // Пока пусто
+
       QualType qualType = ref->getType();
       string type = GetTypeName(qualType);
       string formatter = "?"; // todo
@@ -474,27 +481,66 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   std::string operation;
   Stmt *stmt = nullptr;
 
+//   QualType argType = p_operator->getType();
+//   uint64_t typeSize = GetTypeSize(argType);
+
   // [C99 6.5.2.4] Postfix increment and decrement
   if (opCode == UnaryOperatorKind::UO_PostInc) { // UNARY_OPERATION(PostInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+    // Здесь необходимо определить размер типа данных если указатель
+    QualType resultType = p_operator->getType();  // Получили тип операнда
+    if (resultType->isPointerType()) {
+      // Необходимо определить тип (точнее размер) указателя
+      QualType argType = p_operator->getType();
+      uint64_t typeSize = GetTypeSize(argType);
+      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+      variable.nested.push_back(value);
+    }
     return variable;
   } else if (opCode == UnaryOperatorKind::UO_PostDec) { // UNARY_OPERATION(PostDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+    // Здесь необходимо определить размер типа данных если указатель
+    QualType resultType = p_operator->getType();  // Получили тип операнда
+    if (resultType->isPointerType()) {
+      // Необходимо определить тип (точнее размер) указателя
+      QualType argType = p_operator->getType();
+      uint64_t typeSize = GetTypeSize(argType);
+      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+      variable.nested.push_back(value);
+    }
     return variable;
     // [C99 6.5.3.1] Prefix increment and decrement
   } else if (opCode == UnaryOperatorKind::UO_PreInc) { // UNARY_OPERATION(PreInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+    // Здесь необходимо определить размер типа данных если указатель
+    QualType resultType = p_operator->getType();  // Получили тип операнда
+    if (resultType->isPointerType()) {
+      // Необходимо определить тип (точнее размер) указателя
+      QualType argType = p_operator->getType();
+      uint64_t typeSize = GetTypeSize(argType);
+      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+      variable.nested.push_back(value);
+    }
     return variable;
   } else if (opCode == UnaryOperatorKind::UO_PreDec) { // UNARY_OPERATION(PreDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+    // Здесь необходимо определить размер типа данных если указатель
+    QualType resultType = p_operator->getType();  // Получили тип операнда
+    if (resultType->isPointerType()) {
+      // Необходимо определить тип (точнее размер) указателя
+      QualType argType = p_operator->getType();
+      uint64_t typeSize = GetTypeSize(argType);
+      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+      variable.nested.push_back(value);
+    }
     return variable;
     // [C99 6.5.3.2] Address and indirection
   } else if (opCode == UnaryOperatorKind::UO_AddrOf) { // UNARY_OPERATION(AddrOf, "&")
@@ -622,6 +668,27 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
   seq.nested.push_back(GetStmtEOObject(p_stmt));
   seq.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
   return seq;
+}
+
+int GetTypeSize(QualType qualType) {
+  extern ASTContext *context;
+  const clang::Type *typePtr = qualType.getTypePtr();
+  TypeInfo typeInfo = context->getTypeInfo(typePtr);
+  uint64_t typeSize = typeInfo.Width;
+  // Проверка размера типа
+  // std::cout << "Type size = " << typeSize / 8 << "\n";
+
+  if (typePtr->isPointerType()) {
+    // В этом случае необходимо определить размер типа, на который указывает указатель
+    const clang::Type* pointeeType =  typePtr->getPointeeType().getTypePtr();
+    TypeInfo pointeeTypeInfo = context->getTypeInfo(pointeeType);
+    uint64_t pointeeTypeSize = pointeeTypeInfo.Width;
+    // Проверка размера типа, на который указывает указатель
+    // std::cout << "Poinee type size = " << pointeeTypeSize / 8 << "\n";
+    return pointeeTypeSize / 8;
+  }
+
+  return typeSize / 8;
 }
 
 std::string GetTypeName(QualType qualType) {
