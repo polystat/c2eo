@@ -39,6 +39,8 @@ EOObject GetFunctionCallEOObject(const CallExpr *op);
 
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params, size_t shift);
 
+vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS);
+
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params);
 
 EOObject GetMemberExprEOObject(const MemberExpr *opr);
@@ -50,6 +52,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
 EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
 EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
+
+int GetTypeSize(QualType qualType);
 
 extern UnitTranspiler transpiler;
 
