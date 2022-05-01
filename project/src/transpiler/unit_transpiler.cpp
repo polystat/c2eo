@@ -34,10 +34,11 @@ void UnitTranspiler::GenerateResult() {
   }
 
   if (!record_manager.Empty()) // todo: it isn't global, is it? it should be out of labels
-    for(auto type: record_manager) {
-      auto recordFields = type.GetEORecordDecl();
-      body.nested.insert(body.nested.end(), recordFields.begin(), recordFields.end());
-    }
+    for (auto type: record_manager)
+      if (!type.is_local) {
+        auto recordFields = type.GetEORecordDecl();
+        body.nested.insert(body.nested.end(), recordFields.begin(), recordFields.end());
+      }
 
   // TODO write all declarations
 //   for (const auto& func: func_manager.GetAllDefinitions()) {

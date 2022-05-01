@@ -1,8 +1,8 @@
 #include "record_manager.h"
 
 RecordType RecordManager::Add(const clang::RecordDecl* id, std::string name, size_t size,
-                              std::map<std::string, size_t> fields) {
-  RecordType recordType = {id, std::move(name), size,std::move(fields)};
+                              std::map<std::string, size_t> fields, bool is_local=false) {
+  RecordType recordType = {id, std::move(name), size,std::move(fields), is_local};
   record_types.push_back(recordType);
   return recordType;
 }

@@ -3,6 +3,7 @@
 #include "memory_manager.h"
 #include "unit_transpiler.h"
 #include "vardecl.h"
+#include "recorddecl.h"
 #include <queue>
 #include <sstream>
 
@@ -50,6 +51,8 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
 EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
 
+vector<EOObject> PrecessRecordTypes(CompoundStmt *const funcBody);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -63,6 +66,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   size_t shift = transpiler.glob.RealMemorySize();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
+  vector<EOObject> all_types = PrecessRecordTypes(funcBody);
   vector<Variable> all_local = ProcessFunctionLocalVariables(funcBody, shift + param_memory_size);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("add", "local-start");
@@ -78,6 +82,9 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   for (const auto &param: all_param) {
     func_body_eo.nested.push_back(param.GetAddress(transpiler.glob.name));
   }
+  for (const auto &var: all_types) {
+    func_body_eo.nested.push_back(var);
+  }
   for (const auto &var: all_local) {
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob.name));
   }
@@ -92,6 +99,28 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   transpiler.glob.RemoveAllUsed(all_local);
 
   return func_body_eo;
+}
+
+vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
+  vector<EOObject> local_type_decls;
+  for (auto stmt: CS->body()) {
+    Stmt::StmtClass stmtClass = stmt->getStmtClass();
+    if (stmtClass == Stmt::DeclStmtClass) {
+      auto decl_stmt = dyn_cast<DeclStmt>(stmt);
+      for (auto decl: decl_stmt->decls()) {
+        Decl::Kind decl_kind = decl->getKind();
+        if (decl_kind == Decl::Kind::Record) {
+          auto record_decl = dyn_cast<RecordDecl>(decl);
+          auto types = ProcessRecordType(record_decl, true);
+          for (auto type = types.begin(); type != types.end(); type++) {
+            auto eo_objs = type->GetEORecordDecl();
+            local_type_decls.insert(local_type_decls.end(), eo_objs.begin(), eo_objs.end());
+          }
+        }
+      }
+    }
+  }
+  return local_type_decls;
 }
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {

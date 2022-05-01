@@ -15,12 +15,13 @@ struct RecordType {
   size_t size;
   std::map<std::string, size_t> fields; // field.name -> field.shift
   std::vector<EOObject> GetEORecordDecl() ;
+  bool is_local;
 };
 
 
 struct RecordManager {
   RecordType Add(const clang::RecordDecl* id, std::string name, size_t size,
-                 std::map<std::string, size_t> fields);
+                 std::map<std::string, size_t> fields, bool is_local);
   RecordType* getById(const clang::RecordDecl* id);
   size_t getShift(const clang::RecordDecl* id, const std::string& member);
   std::vector<RecordType>::const_iterator begin() const;
