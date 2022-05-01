@@ -5,12 +5,13 @@
 #include "aliases.h"
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
+//   unit.func_manager.TestOut();
+
   if (unit.tmp.empty())
     unit.GenerateResult();
   os << unit.tmp;
   return os;
 }
-
 
 void UnitTranspiler::GenerateResult() {
   EOObject body(EOObjectType::EO_ABSTRACT);
@@ -28,7 +29,6 @@ void UnitTranspiler::GenerateResult() {
   if (!glob.Empty()) {
     glob.SetExtEqGlob();
     for (const auto& var: glob) {
-      // body.nested.emplace_back(var.GetAddress(glob.name));
       body.nested.push_back(EOObject(var.GetAddress(glob.name)));
     }
   }

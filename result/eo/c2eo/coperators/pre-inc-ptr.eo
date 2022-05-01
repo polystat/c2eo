@@ -1,0 +1,6 @@
++package c2eo.coperators
+
+[a b] > pre-inc-ptr
+  seq > @
+    a.write ((a.read 8).as-int.add b)
+    (a.read 8).as-int
