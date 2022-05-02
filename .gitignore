@@ -49,6 +49,7 @@ llvm-clang/**
 **/build/**
 !**/build/.gitkeep
 **/src/result/**
+*.bak
 
 *.cmake
 CMakeCache.txt
