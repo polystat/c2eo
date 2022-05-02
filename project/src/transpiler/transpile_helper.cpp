@@ -52,6 +52,7 @@ EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
 
 int GetTypeSize(QualType qualType);
 
+EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -194,21 +195,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::ImplicitCastExprClass) {
     const auto *op = dyn_cast<ImplicitCastExpr>(stmt);
-    if (op->getCastKind() == clang::CK_LValueToRValue) {
-      QualType qualType = op->getType();
-      string type = GetTypeName(qualType);
-      EOObject read{"read"};
-      read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-      if (!qualType->isRecordType())
-        read.name += "-as-" + type;
-      else
-        read.nested.emplace_back(to_string(
-                                         transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
-                                 EOObjectType::EO_LITERAL);
-      return read;
-    }
-    // TODO if cast kinds and also split it to another func
-    return GetStmtEOObject(*op->child_begin());
+    return GetImplicitCastEOObject(op);
+
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     auto ref = dyn_cast<DeclRefExpr>(stmt);
     return GetEODeclRefExpr(ref);
@@ -250,8 +238,38 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmtClass == Stmt::ForStmtClass) {
     const auto *op = dyn_cast<ForStmt>(stmt);
     return GetForStmtEOObject(op);
+  } else if (stmtClass == Stmt::CStyleCastExprClass) {
+    const auto *op = dyn_cast<CStyleCastExpr>(stmt);
+    //TODO in explicit inegral casts CStyle cast is only empty wrapper with Imp cast, may be it shouldn't work
+    // for other cases.
+    return GetStmtEOObject(*op->child_begin());
   }
   return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op) {
+  auto cast_kind = op->getCastKind();
+  if (cast_kind == clang::CK_LValueToRValue) {
+    QualType qualType = op->getType();
+    string type = GetTypeName(qualType);
+    EOObject read{"read"};
+    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    if (!qualType->isRecordType())
+      read.name += "-as-" + type;
+    else
+      read.nested.emplace_back(to_string(
+                                   transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                               EOObjectType::EO_LITERAL);
+    return read;
+  } else if (cast_kind == clang::CK_FloatingToIntegral || cast_kind == clang::CK_IntegralToFloating)
+  {
+    QualType qualType = op->getType();
+    string type = GetTypeName(qualType);
+    EOObject cast{"as-"+type};
+    cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    return cast;
+  }
+  // TODO if cast kinds and also split it to another func
+  return GetStmtEOObject(*op->child_begin());
 }
 EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   EOObject for_stmt(EOObjectType::EO_EMPTY);
