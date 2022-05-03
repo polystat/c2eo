@@ -2,8 +2,12 @@
 #include "unit_transpiler.h"
 #include "transpile_helper.h"
 
-RecordType ProcessRecordType(const clang::RecordDecl* RD) {
+std::vector<RecordType> ProcessRecordType(const clang::RecordDecl* RD, bool is_local) {
   extern UnitTranspiler transpiler;
+  std::vector<RecordType> types;
+  RecordType* existed = transpiler.record_manager.getById(RD);
+  if (existed)
+    return {};
 
   std::string name;
   if (RD->isUnion())
@@ -19,21 +23,31 @@ RecordType ProcessRecordType(const clang::RecordDecl* RD) {
 
   std::map<std::string, size_t> fields;
   size_t shift = 0;
-  for (auto it = RD->field_begin(); it != RD->field_end(); it++) {
-    std::string fieldName;
-    if (!it->isUnnamedBitfield())
-      fieldName = /* "f-" + */ it->getNameAsString();
-    else
-      fieldName = "field" + std::to_string(fields.size());
-    fields[fieldName] = shift;
 
-    clang::QualType qualType = it->getType();
-    clang::TypeInfo typeInfo = it->getASTContext().getTypeInfo(qualType);
-    if (RD->isStruct()) {
-      shift += typeInfo.Width / 8;
-      size = shift;
-    } else
-      size = std::max(size, typeInfo.Width / 8);
+  for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
+    if (it->getKind() == clang::Decl::Record) {
+      auto new_types = ProcessRecordType(llvm::dyn_cast<clang::RecordDecl>(*it), is_local);
+      types.insert(types.end(), new_types.begin(), new_types.end());
+    } else if(it->getKind() == clang::Decl::Field) {
+      auto field = llvm::dyn_cast<clang::FieldDecl>(*it);
+
+      std::string fieldName;
+      if (!field->isUnnamedBitfield())
+        fieldName = /* "f-" + */ field->getNameAsString();
+      else
+        fieldName = "field" + std::to_string(fields.size());
+      fields[fieldName] = shift;
+
+
+      clang::QualType qualType = field->getType();
+      clang::TypeInfo typeInfo = field->getASTContext().getTypeInfo(qualType);
+      if (RD->isStruct()) {
+        shift += typeInfo.Width / 8;
+        size = shift;
+      } else
+        size = std::max(size, typeInfo.Width / 8);
+    }
   }
-  return transpiler.record_manager.Add(RD, name, size, fields);
+  types.push_back(transpiler.record_manager.Add(RD, name, size, fields, is_local));
+  return types;
 }

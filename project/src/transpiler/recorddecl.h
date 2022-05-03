@@ -16,6 +16,6 @@
 #include "record_manager.h"
 
 // Обработка переменной встреченной при проходе по дереву.
-RecordType ProcessRecordType(const clang::RecordDecl* RD);
+std::vector<RecordType> ProcessRecordType(const clang::RecordDecl* RD, bool is_local=false);
 
 #endif // __RECORDDECL__
