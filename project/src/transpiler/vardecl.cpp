@@ -171,36 +171,6 @@ EOObject arrayToBytes(Stmt *stmt, size_t size, const VarDecl *pDecl) { //todo: m
   }
 }
 
-//void floatToBytes(FloatingLiteral *pLiteral, size_t size, std::string &str) {
-//  std::string alph = "0123456789abcdef";
-//  llvm::APFloat an_float = pLiteral->getValue();
-//  auto fVal = (an_float.convertToDouble());
-//  long long val = *(reinterpret_cast<long*>(&fVal));
-//  while (size--) {
-//    str += alph[(val / 16 % 16)];
-//    str += alph[(val % 16)];
-//    val /= 256;
-//    str += " ";
-//  }
-//}
-
-//void intToBytes(IntegerLiteral *pLiteral, size_t size, std::string &str) {
-//  std::string alph = "0123456789abcdef";
-//  bool is_signed = pLiteral->getType()->isSignedIntegerType();
-//  llvm::APInt an_int = pLiteral->getValue();
-//  int64_t val = 0;
-//  if(is_signed)
-//    val = an_int.getSExtValue();
-//  else
-//    val = an_int.getZExtValue();
-//  while (size--) {
-//    str += alph[(val / 16 % 16)];
-//    str += alph[(val % 16)];
-//    val /= 256;
-//    str += " ";
-//  }
-//}
-
 // Анализ полученного начального значения с тестовым выводом его
 // и формированием строки со значением на выходе
 EOObject initZeroValueAnalysis(const VarDecl *VD) {
