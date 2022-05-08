@@ -336,7 +336,6 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
     for (auto base_ch: op->getBase()->children()) {
         auto index_name = GetStmtEOObject(op->getIdx());
 
-        // TODO: размер должен искаться как перемножение размеров всех внутренних подмассивов
         EOObject curr_shift{"mul"};
         EOObject type_size_obj{std::to_string(dim_size), EOObjectType::EO_LITERAL};
         curr_shift.nested.emplace_back(index_name); // индекс массива.
