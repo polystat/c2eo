@@ -47,7 +47,8 @@ EOObject GetMemberExprEOObject(const MemberExpr *opr);
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
-EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
+EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op, std::vector<uint64_t> *dims, size_t depth);
+std::pair<size_t, EOObject> getMultiDimArrayTypeSize(const ArraySubscriptExpr *op, std::vector<uint64_t> *dims);
 
 EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
@@ -55,6 +56,7 @@ EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
 
 int GetTypeSize(QualType qualType);
 
+EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -223,21 +225,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::ImplicitCastExprClass) {
     const auto *op = dyn_cast<ImplicitCastExpr>(stmt);
-    if (op->getCastKind() == clang::CK_LValueToRValue) {
-      QualType qualType = op->getType();
-      string type = GetTypeName(qualType);
-      EOObject read{"read"};
-      read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-      if (!qualType->isRecordType())
-        read.name += "-as-" + type;
-      else
-        read.nested.emplace_back(to_string(
-                                         transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
-                                 EOObjectType::EO_LITERAL);
-      return read;
-    }
-    // TODO if cast kinds and also split it to another func
-    return GetStmtEOObject(*op->child_begin());
+    return GetImplicitCastEOObject(op);
+
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     auto ref = dyn_cast<DeclRefExpr>(stmt);
     return GetEODeclRefExpr(ref);
@@ -275,12 +264,43 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetMemberExprEOObject(op);
   } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
-    return GetArraySubscriptExprEOObject(op);
+    std::vector<uint64_t> dims;
+    return GetArraySubscriptExprEOObject(op, &dims, 0);
   } else if (stmtClass == Stmt::ForStmtClass) {
     const auto *op = dyn_cast<ForStmt>(stmt);
     return GetForStmtEOObject(op);
+  } else if (stmtClass == Stmt::CStyleCastExprClass) {
+    const auto *op = dyn_cast<CStyleCastExpr>(stmt);
+    //TODO in explicit inegral casts CStyle cast is only empty wrapper with Imp cast, may be it shouldn't work
+    // for other cases.
+    return GetStmtEOObject(*op->child_begin());
   }
   return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op) {
+  auto cast_kind = op->getCastKind();
+  if (cast_kind == clang::CK_LValueToRValue) {
+    QualType qualType = op->getType();
+    string type = GetTypeName(qualType);
+    EOObject read{"read"};
+    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    if (!qualType->isRecordType())
+      read.name += "-as-" + type;
+    else
+      read.nested.emplace_back(to_string(
+                                   transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                               EOObjectType::EO_LITERAL);
+    return read;
+  } else if (cast_kind == clang::CK_FloatingToIntegral || cast_kind == clang::CK_IntegralToFloating)
+  {
+    QualType qualType = op->getType();
+    string type = GetTypeName(qualType);
+    EOObject cast{"as-"+type};
+    cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    return cast;
+  }
+  // TODO if cast kinds and also split it to another func
+  return GetStmtEOObject(*op->child_begin());
 }
 EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   EOObject for_stmt(EOObjectType::EO_EMPTY);
@@ -301,36 +321,78 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   return for_stmt;
 }
 
-EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
-  auto left = op->getLHS();
-  auto right = op->getRHS();
-  if (left->getType()->isIntegerType() && right->getType()->isPointerType())
-    swap(left, right);
-
-  size_t type_size;
-  for (auto lhs_ch: left->children()) {
-    if (lhs_ch->getStmtClass() == Stmt::DeclRefExprClass) {
-      auto decl_ref = dyn_cast<DeclRefExpr>(lhs_ch);
-      auto qt = decl_ref->getType();
-      type_size = decl_ref->getDecl()->getASTContext().getTypeInfo(qt).Align / 8;
-    } else {
-      type_size = 0;
+EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
+                                       std::vector<uint64_t> *dims, size_t depth) {
+    std::vector<uint64_t> tmp_dims;
+    auto decl_info = getMultiDimArrayTypeSize(op, &tmp_dims);
+    if (tmp_dims.size() > dims->size()) {
+        dims = &tmp_dims;
     }
-  }
+    uint64_t dim_size = decl_info.first; // current dimension size.
+    for (int i = 0; i < depth && i < dims->size(); ++i) {
+        dim_size *= dims->at(i);
+    }
 
-  auto arr_name = GetStmtEOObject(left);
-  auto index_name = GetStmtEOObject(right);
-  // вычисляем с с какого места памяти начинать писать в переменную массива.
-  EOObject count_pos{"mul"};
-  count_pos.nested.emplace_back(index_name);
-  EOObject str_type_size{std::to_string(type_size), EOObjectType::EO_LITERAL};
-  count_pos.nested.emplace_back(str_type_size);
-  // сдвигаем указатель объекта массива
-  EOObject arr_pos{"add"};
-  arr_pos.nested.emplace_back(arr_name);
-  arr_pos.nested.emplace_back(count_pos);
+    for (auto base_ch: op->getBase()->children()) {
+        auto index_name = GetStmtEOObject(op->getIdx());
 
-  return arr_pos;
+        EOObject curr_shift{"mul"};
+        EOObject type_size_obj{std::to_string(dim_size), EOObjectType::EO_LITERAL};
+        curr_shift.nested.emplace_back(index_name); // индекс массива.
+        curr_shift.nested.emplace_back(type_size_obj); // размер типа *  размер измерения массива.
+
+        auto stmt_class = base_ch->getStmtClass();
+        if (stmt_class == Stmt::ArraySubscriptExprClass) {
+            EOObject add_shift{"add"};
+
+            auto arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
+            EOObject next_shift = GetArraySubscriptExprEOObject(arr_sub_expr, dims, depth + 1);
+
+            add_shift.nested.emplace_back(curr_shift);
+            add_shift.nested.emplace_back(next_shift);
+
+            if (depth == 0) {
+                EOObject final_write{"add"};
+                final_write.nested.emplace_back(decl_info.second);
+                final_write.nested.emplace_back(add_shift);
+                return final_write;
+            }
+            return add_shift;
+        } else if (stmt_class == Stmt::DeclRefExprClass) {
+            if (depth == 0) {
+                EOObject final_write{"add"};
+                final_write.nested.emplace_back(decl_info.second);
+                final_write.nested.emplace_back(curr_shift);
+                return final_write;
+            }
+            return  curr_shift;
+        }
+    }
+}
+
+std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(const ArraySubscriptExpr *op, std::vector<uint64_t> *dims) {
+    for (auto base_ch: op->getBase()->children()) {
+        auto stmt_class = base_ch->getStmtClass();
+        if (stmt_class == Stmt::DeclRefExprClass) {
+            auto decl_ref_expr = dyn_cast<DeclRefExpr>(base_ch);
+            auto qt = decl_ref_expr->getType();
+            EOObject arr_name = GetStmtEOObject(op->getBase());
+            size_t sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align / 8;
+            return std::make_pair(sz, arr_name);
+        } else if (stmt_class == Stmt::ArraySubscriptExprClass) {
+            auto arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
+            auto qt = arr_sub_expr->getType();
+            if (qt->isArrayType()) {
+                auto arr = qt->getAsArrayTypeUnsafe();
+                if (arr->isConstantArrayType()) {
+                    auto const_arr = dyn_cast<clang::ConstantArrayType>(qt);
+                    dims->emplace_back(const_arr->getSize().getLimitedValue());
+                }
+            }
+            return getMultiDimArrayTypeSize(arr_sub_expr, dims);
+        }
+    }
+    return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG}); // не должно до сюда дойти
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
