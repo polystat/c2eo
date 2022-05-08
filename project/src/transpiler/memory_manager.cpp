@@ -131,7 +131,7 @@ EOObject Variable::GetInitializer() const {
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   else
       // Probably just emplace value.
-    res.nested.emplace_back(value.name, EOObjectType::EO_LITERAL);
+    res.nested.emplace_back(value);
   return res;
 }
 
