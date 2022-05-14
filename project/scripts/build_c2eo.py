@@ -16,19 +16,20 @@ def main(path_to_c2eo_build=None):
     original_path = os.getcwd()
     os.chdir(path_to_c2eo_build)
     result = subprocess.run('cmake ..', shell=True, capture_output=True, text=True)
-    success = True
-    if result.returncode == 0:
-        tools.pprint(result.stdout, slowly=True)
-    else:
+    if result.returncode != 0:
         tools.pprint_exception('cmake ..', result.stderr)
-        success = False
+        os.chdir(original_path)
+        return False
 
-    if success:
-        subprocess.run('make', shell=True)
-        tools.pprint()
-
+    tools.pprint(result.stdout, slowly=True)
+    result = subprocess.run('make', shell=True)
     os.chdir(original_path)
-    return success
+
+    if result.returncode != 0:
+        return False
+
+    tools.pprint()
+    return True
 
 
 if __name__ == '__main__':
