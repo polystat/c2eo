@@ -368,6 +368,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
             return  curr_shift;
         }
     }
+    return EOObject{"plug", EOObjectType::EO_PLUG};
 }
 
 std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(const ArraySubscriptExpr *op, std::vector<uint64_t> *dims) {
@@ -399,7 +400,15 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   EOObject member{"add"};
   auto child = dyn_cast<Expr>(*op->child_begin());
   QualType qualType = child->getType();
-  member.nested.push_back(GetStmtEOObject(child));
+  EOObject record;
+  if (qualType->isPointerType()) {
+    qualType = dyn_cast<clang::PointerType>(qualType.getCanonicalType())->getPointeeType();
+    record.name = "address";
+    record.nested.emplace_back("global-ram");
+    record.nested.push_back(GetStmtEOObject(child));
+  } else
+    record = GetStmtEOObject(child);
+  member.nested.push_back(record);
   member.nested.push_back(transpiler.record_manager.getShiftAlias(qualType->getAsRecordDecl(),
                                                                   op->getMemberDecl()->getNameAsString()));
   return member;
