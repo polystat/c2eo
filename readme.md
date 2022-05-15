@@ -485,12 +485,19 @@ while
 ==|eq
 !=|neq
 <|less|
-<=|leq|leq
-\>|greater|greater
-\>=|geq|geq
--x|neg|neg
-(float)|as-float
-(int)|as-int
+<=|leq
+\>|greater
+\>=|geq
+&&|and
+\|\||or
+!|not
+-x|neg
+++x|pre-inc-\<type>
+x++|post-inc-\<type>
+--x|pre-dec-\<type>
+x--|post-dec-\<type>
+(double)|as-float64
+(long long int)|as-int64
 
 ### In progress
 
