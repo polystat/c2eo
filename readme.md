@@ -105,38 +105,35 @@ C is a _system-level procedural_ programming language with direct access to the 
 
 :heavy_check_mark: [Implemented](#implemented):
 - [basic data types: double, int, bool](#direct-memory-access-for-basic-data-types)
-- description of global and local variables
-- [one-dimensional arrays](#arrays)
+- [arrays](#arrays)
 - [structures](#structures)
+- [unions](#unions)
 - [functions](#functions)
-- function call operators
+- [function call operators](#function-call-operators)
 - [single return at the end of the function](#single-return)
 - [pointers](#pointers)
 - [external links](#external-links)
-- conditional branching if else operators
-- while do loop operator
-- unary operations with base types, pointers and their and assignment modifications
-- binary operations with base types and assignment modifications
+- [if-else](#if-else)
+- [while-do](#while-do)
+- [for](#for)
+- [unary operations with base types, pointers and their and assignment modifications](#operators)
+- [binary operations with base types and assignment modifications](#operators)
 
 :hammer: In progress:
-- initial initialization of global variables
-- calling functions with local variables from other functions
-- bit operations (inconsistent implementation in the EO)
-- basic char types, string initialization, unsigned + short + int, float (not supported by EO)
+- [initial initialization of global variables](#global-initialization)
+- [calling functions with local variables from other functions](#calling-functions-with-local-variables-from-other-functions)
+- [bit operators (inconsistent implementation in the EO)](#bit-operators)
+- [char, unsigned + short + int, float (not supported by EO)](#basic-types)
 
 :x: [Not implemented](#not-implemented):
-- [structures initialization](#structures-initialization)
-- [multidimensional arrays](#multidimensional-arrays)
 - [multiple return](#multiple-return)
 - [switch case default](#switch-case-default)
 - [const](#const)
 - [enums](#enums)
-- [for statements](#for-statements)
 - [break](#break)
 - [continue](#continue)
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
-- [unions](#unions)
 
 ### :heavy_check_mark: Implemented:
 
@@ -152,17 +149,15 @@ In EO, we represent the global memory space as a copy of [ram](https://github.co
 
 ```java
 ram > global
-global.write
-  0
-  3.14.as-bytes
+global.write 0 (3.14.as-bytes)
 ```
 
 ### Arrays
 
-We work with fixed-size arrays in the same way as with variables.
+  If we have fixed-size arrays we can work like with one-dimension array and calculate bias from start for any element and dimensions.
 
 ```c
-int instanceArray[2] = { 5 6 };
+int a[2] = { 5, 6 };
 ╭─────┬─────╮
 |  5  │  6  │
 ├─────┼─────┤
@@ -171,28 +166,46 @@ int instanceArray[2] = { 5 6 };
 ```
 
 ```java
-global.write 0 5.as-bytes
-global.write 4 6.as-bytes
+address global-ram 0 > a
+a.write (4.mul 0) (5.as-bytes)
+a.write (4.mul 1) (6.as-bytes)
 ```
 
 ### Structures
 
-We know the size of structures so we still work as with variables. We can also generate additional objects to access the fields of structures.
+We know the size of structures so we generate additional objects that store the bias of the fields of the structure and allow access to them.
 
 ```c
 struct Rectangle {int x; int y;} rect;
+rect.x = 5;
 ```
 
 ```java
-address > g-rect
-  global-ram
-  0
-address > g-rect-x
-  global-ram
-  0
-address > g-rect-y
-  global-ram
-  4
+address global-ram 0 > rect
+0 > x
+4 > y
+(rect.add x).write 5
+```
+
+### Unions
+
+The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
+
+```c
+union { int a; int b; } u;
+u.a = 5;
+╭───────┬───────╮
+| int a │ int b │
+├───────┼───────┤
+|  0th  │  0th  │
+╰───────┴───────╯
+```
+
+```java
+address global-ram 0 > u
+0 > a
+0 > b
+(u.add a).write 5
 ```
 
 ### Functions
@@ -229,20 +242,72 @@ seq
   foo 8 4
 ```
 
+### Function call operators
+
+```c
+long long func1(long long x) {
+  return x - 111;
+}
+
+long long func2(long long x) {
+  return x - 10;
+}
+
+void main() {
+  long long a;
+  a = func1(func2(5));
+  printf("%lld\n", a);
+}  
+```
+
+```java
+[param-start param-size] > func1
+  add param-start param-size > local-start
+  add local-start 0 > empty-local-position
+  address global-ram (param-start.add 0) > x
+  seq > @
+    return.write (x.sub 111)
+    TRUE
+
+[param-start param-size] > func2
+  add param-start param-size > local-start
+  add local-start 0 > empty-local-position
+  address global-ram (param-start.add 0) > x
+  seq > @
+    return.write (x.sub 10)
+    TRUE
+
+[] > main
+  seq > @
+    a.write
+      seq
+        write
+          address global-ram (add empty-local-position 0) 
+          seq
+            write
+              address global-ram (add empty-local-position 0)
+              5
+            ^.f-func2 empty-local-position 8
+            return
+        ^.f-func1 empty-local-position 8
+        return
+    printf "%d\n" a
+```
+
 ### Single return
 
 ```java
-
 ram 1024 > return 
 
 [param-start] > bar
   seq > @
-  ...
+  ... // calculating some result
   return.write result
   TRUE
 
 seq > @
   bar
+  ... // work with result
 ```
 
 ### Pointers
@@ -285,102 +350,364 @@ seq > @
 
 To compile files with any external links, we use the following solution:
 
-- In the file where the external call is used, we generate the following alias
+In the file where the external call is used, we generate the following alias
 
-  ```c
-  #include <string>
-  strncpy(str2, str1, 8);
-  ```
+```c
+#include <string>
+strncpy(str2, str1, 8);
+```
 
-  ```java
-  +alias c2eo.external.strcpy
-  strncpy str2 st1 8
-  ```
+```java
++alias c2eo.external.strcpy
+strncpy str2 st1 8
+```
 
-- Сreating a file of the same name by the specified alias with an empty implementation
+Сreating a file of the same name by the specified alias with an empty implementation
 
-  ```java
-  +package c2eo.external
+```java
++package c2eo.external
 
-  [args...] > strncpy
-    TRUE > @
-  ```
+[args...] > strncpy
+  TRUE > @
+```
 
-### :x: Not implemented:
+### if-else
 
-### Structures initialization
----
+In EO, we have an analog of an if-else object, so we just convert without any significant changes.
 
-### Multidimensional arrays
----
+```c
+if (condition) {
+  ...
+}
+else {
+  ...
+}
+```
+
+```java
+if
+  condition
+  seq
+    ...
+    TRUE
+  seq // else
+    ...
+    TRUE
+```
+
+### while-do
+
+In EO, we have an analog of the while object, so we just convert without any significant changes.
+
+```c
+while (condition) {
+  ...
+}
+```
+
+```java
+while
+  condition
+  seq
+    ...
+    TRUE
+```
+
+For do-while, we need to create the while object and duplicate its body before it.
+
+```c
+do {
+  ...
+} while (condition)
+```
+
+```java
+seq  // duplicated body
+  ...
+  TRUE
+while
+  condition
+  seq
+    ...
+    TRUE
+```
+
+### for
+
+For "for" we can also use the while objecе by placing the "for" expression blocks in different places:
+
+```c
+for (initialization, condition, modification) {
+  body
+}
+```
+
+```java
+seq // initialization
+  ...
+  TRUE
+while
+  condition
+  seq 
+    body // first
+    modification // last
+    TRUE
+```
+
+example:
+
+```c
+for (i=0; i<x; i++) {
+  printf("%d\n",i);
+}
+```
+
+```java
+i.write 0
+while
+  i.less < x
+  seq 
+    printf "%d\n" i
+    i.write (i.add 1)
+    TRUE
+```
+
+### Operators
+
+С|EO
+-|-
++|add
+-|sub
+*|mul
+/|div
+=|write
+%|mod
+==|eq
+!=|neq
+<|less|
+<=|leq
+\>|greater
+\>=|geq
+&&|and
+\|\||or
+!|not
+-x|neg
+++x|pre-inc-\<type>
+x++|post-inc-\<type>
+--x|pre-dec-\<type>
+x--|post-dec-\<type>
+(double)|as-float64
+(long long int)|as-int64
+
+### In progress
+
+### Global initialization
+
+```c
+int a = 3;
+```
+
+```java
+address global-ram 0 > a
+seq > @
+  a.write-as-int32 3
+```
+
+### Calling functions with local variables from other functions
+
+```c
+int foo1 () {
+  int b;
+  foo2(a);
+  retun 0;
+}
+
+int foo2 () {
+  int b;
+  return 0;
+}
+
+void main () {
+  foo1()
+}
+```
+
+### Basic types
+
+
+```c
+char a = '1';
+short int b = 2;
+long int c = 3;
+float d = 4.0;
+unsigned int e = 5;
+```
+
+### Bit operators
+
+C|EO
+-|-
+&|bit-left
+\||bit-or
+^|bit-xor
+~|bit-not
+<<|shift-right
+\>>|shift-left
+
+
+### Not implemented
 
 ### Multiple return
----
+
+```c
+int foo(int a) {
+  if (a == 1) {
+    return 1;
+  }
+
+  return 5;
+}
+```
 
 ### Switch case default
----
+
+```c
+switch (expression) {
+  case const1:
+    break;
+  case const2: case const3:
+    break;
+  default:
+    break;
+}
+```
+
+We can convert the switch statement to the nested if object.
+
+```java
+if
+  expression.eq const1
+  seq
+    ...
+    True
+  if
+    or
+      expression.eq const2
+      expression.eq const3
+    seq
+      ...
+      True
+    seq // default
+      ...
+      True
+}
+```
 
 ### Const
----
+
+We will replace all calls to the constant with its value.
+
+```c
+const int a = 3;
+if (a == 10) {
+  ...
+}
+```
+
+```java
+if
+  3.eq 10
+  seq
+    ...
+    True
+  seq
+    True
+```
 
 ### Enums
 
 We can work with enumerated types as well as with constants and substitute numeric values instead of names.
 
-### For statements
----
+```c
+enum State {Working = 1, Failed = 0};
+if (10 == Working) {
+  ...
+}
+```
+
+```java
+if
+  10.eq 1
+  seq
+    ...
+    True
+  seq
+    True
+```
 
 ### Break
 ---
 
-### Continue
----
-
-### Goto and labels
----
-
-### Unions
-
-The size of the union is determined by the nested object with the maximum size. The main feature is that internal objects are located at the beginning of the same address.
-
 ```c
-struct Rectangle {int x; int y;};
-struct Triangle {int a, b,c;};
-struct Figure {
-    int key;
-    union {
-        Rectangle r;
-        Triangle  t;
-} fig;
-╭─────────┬───────────┬───────────┬───────────┬───────────┬───────────╮
-| int key │ r (int x) │ r (int y) │ t (int a) │ t (int b) │ t (int c) │
-├─────────┼───────────┼───────────┼───────────┼───────────┼───────────┤
-|   0th   │    4th    │    8th    │    4th    │    8th    │    12th   │
-╰─────────┴───────────┴───────────┴───────────┴───────────┴───────────╯
+for (initialization, condition, modification) {
+  ...
+  break;
+  ...
+}
 ```
 
-```java
-address > g-fig
-  global-ram
-  0
-address > g-fig-key
-  global-ram
-  0
-address > g-fig-r-x
-  global-ram
-  4
-address > g-fig-r-y
-  global-ram
-  8
-address > g-fig-t-a
-  global-ram
-  4
-address > g-fig-t-b
-  global-ram
-  8
-address > g-fig-t-c
-  global-ram
-  12
+### Continue
+
+```c
+for (initialization, condition, modification) {
+  ...
+  continue;
+  ...
+}
+```
+
+### Goto and labels
+
+```c
+int program() {
+  _0:
+    if(lc==KWBEGIN) {nxl(); goto _1;}
+    return 0;
+  _1:
+    if(decl()) {goto _2;}
+    if(oper()) {goto _2;}
+    er(4); return 0;
+  _2:
+    if(lc==PCL) {nxl(); goto _1;}
+    if(lc==KWEND) {nxl(); goto _end;}
+    er(4); return 0;
+  _end:
+    return 1;
+}
+```
+
+### Calling functions with variable number of arguments
+
+```c
+double average(int num,...) {
+  va_list valist;
+  double sum = 0.0;
+  int i;
+  /* initialize valist for num number of arguments */
+  va_start(valist, num);
+  /* access all the arguments assigned to valist */
+  for (i = 0; i < num; i++) {
+    sum += va_arg(valist, int);
+  }
+  /* clean memory reserved for valist */
+  va_end(valist);
+  return sum / num;
+}
+
+int main() {
+  printf("Average of 1, 2, 3, 4 = %f\n", average(4,  1, 2, 3, 4));
+  printf("Average of 1, 2, 3 = %f\n",    average(3,  1, 2, 3));
+}
 ```
 
 </details>

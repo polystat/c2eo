@@ -56,7 +56,7 @@ EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
 
 int GetTypeSize(QualType qualType);
 
-EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op);
+EOObject GetCastEOObject(const CastExpr *op);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -225,8 +225,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetStmtEOObject(*op->child_begin());
   } else if (stmtClass == Stmt::ImplicitCastExprClass) {
     const auto *op = dyn_cast<ImplicitCastExpr>(stmt);
-    return GetImplicitCastEOObject(op);
-
+    return GetCastEOObject(op);
   } else if (stmtClass == Stmt::DeclRefExprClass) {
     auto ref = dyn_cast<DeclRefExpr>(stmt);
     return GetEODeclRefExpr(ref);
@@ -273,11 +272,11 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<CStyleCastExpr>(stmt);
     //TODO in explicit inegral casts CStyle cast is only empty wrapper with Imp cast, may be it shouldn't work
     // for other cases.
-    return GetStmtEOObject(*op->child_begin());
+    return GetCastEOObject(op);
   }
   return EOObject(EOObjectType::EO_PLUG);
 }
-EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op) {
+EOObject GetCastEOObject(const CastExpr *op) {
   auto cast_kind = op->getCastKind();
   if (cast_kind == clang::CK_LValueToRValue) {
     QualType qualType = op->getType();
@@ -369,7 +368,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
         } else
           return  curr_shift;
     }
-    return EOObject{"plug", EOObjectType::EO_PLUG};
+    return EOObject{EOObjectType::EO_PLUG};
 }
 
 std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(const ArraySubscriptExpr *op, std::vector<uint64_t> *dims) {
