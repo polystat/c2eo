@@ -10,7 +10,7 @@
 
 // Representation of a specific type (union or struct)
 struct RecordType {
-  const clang::RecordDecl* id;
+  int64_t id;
   std::string name;
   size_t size;
   std::map<std::string, size_t> fields; // field.name -> field.shift
@@ -20,15 +20,15 @@ struct RecordType {
 
 
 struct RecordManager {
-  RecordType Add(const clang::RecordDecl* id, std::string name, size_t size,
+  RecordType Add(int64_t id, std::string name, size_t size,
                  std::map<std::string, size_t> fields, bool is_local);
-  RecordType* getById(const clang::RecordDecl* id);
-  size_t getShift(const clang::RecordDecl* id, const std::string& member);
+  RecordType* getById(int64_t id);
+  size_t getShift(int64_t id, const std::string& member);
   std::vector<RecordType>::const_iterator begin() const;
   std::vector<RecordType>::const_iterator end() const;
 
   bool Empty();
-  EOObject getShiftAlias(const clang::RecordDecl *id, const std::string &member);
+  EOObject getShiftAlias(int64_t id, const std::string &member);
 private:
   std::vector<RecordType> record_types;
 };

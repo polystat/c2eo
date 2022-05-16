@@ -196,7 +196,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
         read_val.name += "-as-" + type;
       else
         read_val.nested.emplace_back(to_string(
-                                             transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                                             transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size),
                                      EOObjectType::EO_LITERAL);
       printer.nested.push_back(read_val);
       res.nested.push_back(printer);
@@ -288,7 +288,7 @@ EOObject GetImplicitCastEOObject(const ImplicitCastExpr *op) {
       read.name += "-as-" + type;
     else
       read.nested.emplace_back(to_string(
-                                   transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                                   transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size),
                                EOObjectType::EO_LITERAL);
     return read;
   } else if (cast_kind == clang::CK_FloatingToIntegral || cast_kind == clang::CK_IntegralToFloating)
@@ -358,7 +358,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
                 return final_write;
             }
             return add_shift;
-        } else if (stmt_class == Stmt::DeclRefExprClass) {
+        } else if (stmt_class == Stmt::DeclRefExprClass || stmt_class == Stmt::MemberExprClass) {
             if (depth == 0) {
                 EOObject final_write{"add"};
                 final_write.nested.emplace_back(decl_info.second);
@@ -366,7 +366,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
                 return final_write;
             }
             return  curr_shift;
-        }
+        } else
+          return  curr_shift;
     }
     return EOObject{"plug", EOObjectType::EO_PLUG};
 }
@@ -391,7 +392,15 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(const ArraySubscriptExpr 
                 }
             }
             return getMultiDimArrayTypeSize(arr_sub_expr, dims);
-        }
+        } else if (stmt_class == Stmt::MemberExprClass) {
+          auto memb_expr = dyn_cast<MemberExpr>(base_ch);
+          auto child = dyn_cast<Expr>(*memb_expr->child_begin());
+          QualType qualType = child->getType();
+          EOObject arr_name = GetStmtEOObject(op->getBase());
+          size_t sz = transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size;
+          return std::make_pair(sz, arr_name);
+        } else
+          cerr << base_ch->getStmtClassName() << "\n\n";
     }
     return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG}); // не должно до сюда дойти
 }
@@ -409,7 +418,7 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   } else
     record = GetStmtEOObject(child);
   member.nested.push_back(record);
-  member.nested.push_back(transpiler.record_manager.getShiftAlias(qualType->getAsRecordDecl(),
+  member.nested.push_back(transpiler.record_manager.getShiftAlias(qualType->getAsRecordDecl()->getID(),
                                                                   op->getMemberDecl()->getNameAsString()));
   return member;
 }
@@ -521,7 +530,7 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     eoObject.name += "-as-" + GetTypeName(qualType);
   else
     eoObject.nested.emplace_back(to_string(
-                                         transpiler.record_manager.getById(qualType->getAsRecordDecl())->size),
+                                         transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size),
                                  EOObjectType::EO_LITERAL);
   binop.nested.emplace_back(eoObject);
 

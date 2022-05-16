@@ -1,27 +1,27 @@
 #include "record_manager.h"
 
-RecordType RecordManager::Add(const clang::RecordDecl* id, std::string name, size_t size,
+RecordType RecordManager::Add(int64_t id, std::string name, size_t size,
                               std::map<std::string, size_t> fields, bool is_local=false) {
   RecordType recordType = {id, std::move(name), size,std::move(fields), is_local};
   record_types.push_back(recordType);
   return recordType;
 }
 
-RecordType* RecordManager::getById(const clang::RecordDecl* id) {
+RecordType* RecordManager::getById(int64_t id) {
   for(auto it = record_types.begin(); it != record_types.end(); it++)
     if(it->id == id)
       return it.base();
   return nullptr;
 }
 
-size_t RecordManager::getShift(const clang::RecordDecl* id, const std::string& member) {
+size_t RecordManager::getShift(int64_t id, const std::string& member) {
   RecordType* rt = getById(id);
   if(rt)
     return rt->fields[member];
   return -1;
 }
 
-EOObject RecordManager::getShiftAlias(const clang::RecordDecl* id, const std::string& member) {
+EOObject RecordManager::getShiftAlias(int64_t id, const std::string& member) {
   RecordType* rt = getById(id);
   if(rt)
     return EOObject{rt->name + "-" + member, EOObjectType::EO_LITERAL}; // todo: is it EO_LITERAL?
