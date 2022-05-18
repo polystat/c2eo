@@ -402,15 +402,24 @@ In EO, we have an analog of the while object, so we just convert without any sig
 ```c
 while (condition) {
   ...
+  break;
+  ...
+  continue;
 }
 ```
 
 ```java
-while
-  condition
-  seq
-    ...
-    TRUE
+goto
+  [g]
+    seq > @
+      while
+        condition
+        seq
+          ...
+          g.forward
+          ...
+          g.backward
+          TRUE
 ```
 
 For do-while, we need to create the while object and duplicate its body before it.
@@ -560,12 +569,30 @@ C|EO
 ### Multiple return
 
 ```c
-int foo(int a) {
-  if (a == 1) {
-    return 1;
-  }
+function {
+  ...
+  return <result_1>;
+  ...
+  return <result_2>;
+  ...
+  return <result_3>;
+}
+```
 
-  return 5;
+```java
+[] > function
+  goto > @
+    [g]
+      seq > @
+        ...
+        return.write <result_1>
+        g.forward
+        ...
+        return.write <result_2>
+        g.forward
+        ...
+        return.write <result_3>
+        g.forward
 }
 ```
 
