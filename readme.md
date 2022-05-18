@@ -431,10 +431,7 @@ do {
 ```
 
 ```java
-seq  // duplicated body
-  ...
-  TRUE
-while
+dowhile
   condition
   seq
     ...
