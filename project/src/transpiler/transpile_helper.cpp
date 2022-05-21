@@ -742,14 +742,10 @@ EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
 }
 
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
-  EOObject do_stmt{"seq"};
-  do_stmt.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
-  EOObject while_stmt{"while"};
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  do_stmt.nested.push_back(while_stmt);
-  do_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-  return do_stmt;
+  EOObject do_while_stmt{"do-while"};
+  do_while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  do_while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
+  return do_while_stmt;
 }
 
 EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {

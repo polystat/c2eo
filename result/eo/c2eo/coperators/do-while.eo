@@ -1,0 +1,9 @@
++package c2eo.coperators
+
+[a b] > do-while
+  seq > @
+    b
+    while.
+      a.neq 0
+      [i]
+        b > @
