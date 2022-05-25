@@ -6,7 +6,6 @@ long long c = 10;
 int main() {
   c--;
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

@@ -7,15 +7,11 @@ long long c = 15;
 
 int main() {
   printf("%lld\n", a);
-  a;
   printf("%lld\n", b);
-  b;
   printf("%lld\n", c);
-  c;
 
   a /= c;
   printf("%lld\n", a);
-  a;
 
   return 0;
 }

@@ -10,8 +10,6 @@ main() {
     tmp = pi * r;
     p = 2.0 * tmp;
      printf("%e\n", p);
-    p;
     s = tmp * r;
     printf("%e\n", s);
-    s;
 }

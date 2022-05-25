@@ -44,7 +44,6 @@ int main() {
   a = area(&t);
 
   printf("%f\n", a);
-  a;
 
   return 0;
 }

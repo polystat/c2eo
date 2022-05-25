@@ -7,9 +7,7 @@ int main() {
   long long x;
   x = c++;
   printf("%lld\n", c);
-  c;
   printf("%lld\n", x);
-  x;
 
   return 0;
 }

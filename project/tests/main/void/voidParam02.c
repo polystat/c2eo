@@ -5,8 +5,6 @@ long long b = 8;
 
 void fun(long long x) {
   a = b * x;
-  a;
-  b;
   printf("%d\n", a);
   printf("%d\n", b);
 }

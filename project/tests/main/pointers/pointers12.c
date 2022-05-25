@@ -19,7 +19,6 @@ int main() {
 //  ppc = &pc;
 //  d = **ppc;
  printf("%lld\n", d);
- d;
 
   return 0;
 }

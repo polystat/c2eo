@@ -149,7 +149,6 @@ int main() {
   //130
 
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

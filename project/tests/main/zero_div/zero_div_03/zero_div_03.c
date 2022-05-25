@@ -3,14 +3,11 @@
 
 void zero_div(long long c, long long x) {
   printf("%lld\n", x);
-  x;
 
   x = c / x;
 
   printf("%lld\n", c);
-  c;
   printf("%lld\n", x);
-  x;
 }
 
 int main() {

@@ -11,7 +11,6 @@ int main() {
   ppc = &pc;
   c = *&**&*ppc;
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

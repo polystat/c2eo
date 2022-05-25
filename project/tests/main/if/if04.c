@@ -11,6 +11,5 @@ int main() {
         r = y;
     }
     printf("%d\n", r);
-    r;
     return 0;
 }

@@ -11,7 +11,6 @@ int64 main() {
         n = n-1;
     }
     printf("%lld\n", f);
-    f;
 
     return 0;
 }

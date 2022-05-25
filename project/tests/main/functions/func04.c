@@ -13,6 +13,5 @@ int main() {
     long long a;
     a = func1();
     printf("%lld\n", a);
-    a;
     return 0;
 }

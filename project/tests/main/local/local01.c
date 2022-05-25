@@ -9,6 +9,5 @@ int main() {
     b = 4;
     c = a + b;
     printf("%d\n", c);
-    c;
     return 0;
 }

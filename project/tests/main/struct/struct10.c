@@ -22,7 +22,6 @@ int main() {
 
 
   a.y.h = 7;
-  a.y.h;
   printf("%d\n", a.y.h);
   return 0;
 }

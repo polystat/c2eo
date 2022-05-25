@@ -12,13 +12,9 @@ struct st1{
 
 int main() {
   obj[2].b[2].c[2] = 7;
-  obj[2].b[2].c[2];
   printf("%d\n", obj[2].b[2].c[2]);
-  2[obj[2].b[2].c];
   printf("%d\n", 2[obj[2].b[2].c]);
-  2[2[obj[2].b].c];
   printf("%d\n", 2[2[obj[2].b].c]);
-  2[2[2[obj].b].c];
   printf("%d\n", 2[2[2[obj].b].c]);
   return 0;
 }

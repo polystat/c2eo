@@ -11,7 +11,6 @@ int main() {
   pd = pc;
   c = *pd;
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

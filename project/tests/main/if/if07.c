@@ -18,6 +18,5 @@ int main() {
             r = z;
     }
     printf("%d\n", r);
-    r;
     return 0;
 }

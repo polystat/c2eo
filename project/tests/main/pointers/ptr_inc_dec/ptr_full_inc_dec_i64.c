@@ -29,15 +29,10 @@ int main() {
   a = **ppc;
   b = *(++pc);
   printf("%lld\n", a);
-  a;
   printf("%lld\n", b);
-  b;
   printf("%lld\n", c);
-  c;
   printf("%lld\n", d);
-  d;
   printf("%lld\n", e);
-  e;
 
   return 0;
 }

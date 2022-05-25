@@ -17,7 +17,6 @@ int main() {
   int64 f;
   f = factorial(5);
   printf("%lld\n", f);
-  f;
 
   return 0;
 }

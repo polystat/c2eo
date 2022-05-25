@@ -8,11 +8,8 @@ long long c = 37;
 int main() {
   a = b = c;
   printf("%lld\n", a);
-  a;
   printf("%lld\n", b);
-  b;
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

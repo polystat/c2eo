@@ -9,7 +9,6 @@ void do_math() {
 
 void do_print() {
     printf("%d\n", a);
-    a;
 }
 
 int main() {

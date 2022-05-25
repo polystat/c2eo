@@ -62,7 +62,6 @@ int main() {
 //50
 
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

@@ -16,11 +16,8 @@ int main() {
   pd = pc + 1;
 
   printf("%lld\n", c);
-  c;
   printf("%lld\n", d);
-  d;
   printf("%lld\n", e);
-  e;
 
   return 0;
 }

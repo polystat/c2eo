@@ -116,7 +116,6 @@ int main() {
   ++c;
 //100
 
-  c;
   printf("%lld\n", c);
 
   return 0;

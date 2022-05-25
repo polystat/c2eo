@@ -24,8 +24,6 @@ int main() {
   e.q.q = 7;
   f.q2.q = 6;
   printf("%d\n", e.q.q);
-  e.q.q;
   printf("%d\n", f.q2.q);
-  f.q2.q;
   return 0;
 }

@@ -23,7 +23,6 @@ int main() {
   p = area(&c);
 
   printf("%f\n", p);
-  p;
 
   return 0;
 }

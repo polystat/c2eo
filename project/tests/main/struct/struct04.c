@@ -11,6 +11,5 @@ int main() {
   obj1.a = 7;
   obj2 = obj1;
   printf("%d\n", obj2.a);
-  obj2.a;
   return 0;
 }

@@ -23,9 +23,7 @@ int main() {
   result2 = max(x, y);
 
   printf("%lld\n", result1);
-  result1;
   printf("%lld\n", result2);
-  result2;
 
   return 0;
 }

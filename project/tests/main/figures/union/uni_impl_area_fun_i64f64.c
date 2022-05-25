@@ -89,40 +89,32 @@ int main() {
   double p;
   p = circle_area(f.c);
   printf("%f\n", p);
-  p;
 
   p = rect_area(f.r);
   printf("%f\n", p);
-  p;
 
   p = trian_area(f.t);
   printf("%f\n", p);
-  p;
 
   f.key = 0;
   p = figure_area(f);
   printf("%f\n", p);
-  p;
 
   f.key = 1;
   p = figure_area(f);
   printf("%f\n", p);
-  p;
 
   f.key = 2;
   p = figure_area(f);
   printf("%f\n", p);
-  p;
 
   f.key = 3;
   p = figure_area(f);
   printf("%f\n", p);
-  p;
 
   f.key = 10;
   p = figure_area(f);
   printf("%f\n", p);
-  p;
 
   return 0;
 }

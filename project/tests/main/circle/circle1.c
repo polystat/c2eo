@@ -7,8 +7,6 @@ double s = 0.0;
 main() {
     p = 2.0 * pi * r;
     printf("%e\n", p);
-    p;
     s = pi * r * r;
     printf("%e\n", s);
-    s;
 }

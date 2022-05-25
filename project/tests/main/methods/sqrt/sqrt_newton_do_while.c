@@ -24,16 +24,13 @@ int main() {
   double x;
   x = 741;
   printf("%lf\n", x);
-  x;
 
   double result;
   result = sqrt_newton(741);
   printf("%lf\n", result);
-  result;
 
   result = sqrt_newton(2.0);
   printf("%lf\n", result);
-  result;
 
   return 0;
 }
