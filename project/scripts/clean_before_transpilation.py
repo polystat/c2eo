@@ -10,7 +10,7 @@ import settings
 def main(path_to_tests=None):
     if path_to_tests is None:
         path_to_tests = settings.get_setting('path_to_tests')
-    for pattern in ['*-eo.c', '*.eo', '*.out', '*.log', '*.txt', '*.i']:
+    for pattern in ['*.alias', '*-eo.c', '*.eo', '*.out', '*.log', '*.txt', '*.i']:
         tools.clear_dir_by_pattern(path_to_tests, pattern, recursive=True)
     tools.remove_empty_dirs(path_to_tests)
     path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
