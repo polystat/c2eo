@@ -14,6 +14,5 @@ int main() {
     double a;
     a = func1();
     printf("%f\n", a);
-    a;
     return 0;
 }

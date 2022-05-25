@@ -8,8 +8,6 @@ double two = 2.0;
 main() {
     p = two * pi * r;
     printf("%f\n", p);
-    p;
     s = pi * r * r;
     printf("%f\n", s);
-    s;
 }

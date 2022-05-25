@@ -14,7 +14,6 @@ int main() {
   int64 result;
   result = 0;
   printf("%lld\n", result);
-  result;
 
   return 0;
 }

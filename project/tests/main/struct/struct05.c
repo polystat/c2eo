@@ -12,9 +12,7 @@ int main() {
   a.b.x = 2;
   a.b.y = 3;
 
-  a.b.x;
   printf("%d\n", a.b.x);
-  b;
   printf("%d\n", b);
   return 0;
 }

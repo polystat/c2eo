@@ -15,6 +15,5 @@ int main() {
     a = x2.next->val;
 
     printf("%d\n", a);
-    a;
     return 0;
 }

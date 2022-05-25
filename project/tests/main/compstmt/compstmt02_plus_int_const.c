@@ -127,7 +127,6 @@ int main() {
   //110
 
   printf("%lld\n", c);
-  c;
 
   return 0;
 }

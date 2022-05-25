@@ -22,7 +22,6 @@ int main() {
   p = perimeter(t);
 
   printf("%f\n", p);
-  p;
 
   return 0;
 }

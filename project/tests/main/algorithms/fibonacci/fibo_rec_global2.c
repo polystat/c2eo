@@ -30,8 +30,6 @@ int main() {
   arg = 10;
   fibo();
   printf("%lld\n", arg);
-  arg;
   printf("%lld\n", result);
-  result;
   return 0;
 }

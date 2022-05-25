@@ -21,7 +21,6 @@ int main() {
   p = area(r);
 
   printf("%f\n", p);
-  p;
 
   return 0;
 }

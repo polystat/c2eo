@@ -11,8 +11,6 @@ main() {
     tmp = pi * r;
     p = two * tmp;
      printf("%e\n", p);
-    p;
     s = tmp * r;
     printf("%e\n", s);
-    s;
 }

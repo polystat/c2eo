@@ -19,7 +19,6 @@ int main() {
   a = y;
 
   printf("%lld\n", a);
-  a;
 
   return 0;
 }

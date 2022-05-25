@@ -10,7 +10,6 @@ int main() {
   i = 0;
   while (i < 10) {
     printf("%d\n", arr[i]);
-    arr[i];
     i += 1;
   }
   return 0;

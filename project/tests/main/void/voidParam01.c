@@ -10,10 +10,8 @@ void fun(long long x, double d) {
 //    d;
 
     printf("%d\n", a);
-    a;
     a = b * 5;
     printf("%d\n", a);
-    a;
 }
 
 int main(){

@@ -23,9 +23,7 @@ int main() {
 //   c = *&**&*ppc;
 
   printf("%lld\n", c);
-  c;
   printf("%lld\n", d);
-  d;
 
   return 0;
 }

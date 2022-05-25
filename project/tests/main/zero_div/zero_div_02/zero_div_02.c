@@ -6,6 +6,5 @@ long long x = 6;
 
 int main() {
     x = 42 / x;
-    x;
     printf("%lld\n", x);
 }

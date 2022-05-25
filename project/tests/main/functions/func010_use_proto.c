@@ -22,12 +22,10 @@ int main() {
     long long a;
     a = func1(c);
     printf("%lld\n", a);
-    a;
 
     long long b;
     b = func1(a);
     printf("%lld\n", b);
-    b;
 
     return 0;
 }

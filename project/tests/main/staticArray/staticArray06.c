@@ -10,6 +10,5 @@ int main() {
     st1.a = 212;
     a[2] = st1;
     printf("%d\n", a[2].a);
-    a[2].a;
     return 0;
 }

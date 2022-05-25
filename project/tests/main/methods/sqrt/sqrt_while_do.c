@@ -28,13 +28,11 @@ int main() {
   double S;
   S = 2.0;
   printf("%f\n", S);
-  S;
 
   double result;
   result = sqrt(S);
 
   printf("%f\n", result);
-  result;
 
   return 0;
 }

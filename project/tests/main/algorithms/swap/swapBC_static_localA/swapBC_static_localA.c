@@ -7,9 +7,6 @@ int main() {
     a = b;
     b = c;
     c = a;
-    a;
-    b;
-    c;
     printf("%lld\n", a);
     printf("%lld\n", b);
     printf("%lld\n", c);

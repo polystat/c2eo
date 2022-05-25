@@ -53,7 +53,6 @@ int64 main() {
   fib = fibonacci(10);
 
   printf("%lld\n", fib);
-  fib;
 
   return 0;
 }

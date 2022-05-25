@@ -14,7 +14,6 @@ int main() {
   while(i < n) {
     A[i] = i;
     printf("%lld\n", A[i]);
-    A[i];
     ++i;
   }
 
@@ -24,7 +23,6 @@ int main() {
   while(i < n) {
      x = *ptr;
      printf("%lld\n", x);
-     x;
     ++ptr;
     ++i;
  }

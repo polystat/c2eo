@@ -6,6 +6,5 @@ long long x = 12;
 int main() {
     a[i] = x;
     printf("%lld\n", a[i]);
-    a[i];
     return 0;
 }

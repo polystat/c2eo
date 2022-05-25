@@ -8,6 +8,5 @@ int main() {
         r = x;
     }
     printf("%d\n", r);
-    r;
     return 0;
 }

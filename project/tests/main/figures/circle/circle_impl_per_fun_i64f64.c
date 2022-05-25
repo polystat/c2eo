@@ -23,7 +23,6 @@ int main() {
   p = perimeter(c);
 
   printf("%f\n", p);
-  p;
 
   return 0;
 }

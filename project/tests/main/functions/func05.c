@@ -14,7 +14,6 @@ int main() {
     a = func1(c, 5, 10);
 
     printf("%lld\n", a);
-    a;
 
     return 0;
 }

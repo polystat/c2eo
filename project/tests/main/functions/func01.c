@@ -17,6 +17,5 @@ int main() {
     long long a;
     a = func1(func2(c));
     printf("%lld\n", a);
-    a;
     return 0;
 }

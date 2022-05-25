@@ -29,7 +29,6 @@ int main() {
   long long a;
   a = func1(c, func2(c) + func3() + func4());
   printf("%lld\n", a);
-  a;
 
  return 0;
 }

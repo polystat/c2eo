@@ -24,17 +24,11 @@ int main () {
   v.s.b = 5;
 
   printf("%d\n", v.a);
-  v.a;
   printf("%d\n", v.b);
-  v.b;
   printf("%d\n", v.c);
-  v.c;
   printf("%d\n", v.d);
-  v.d;
   printf("%d\n", v.s.a);
-  v.s.a;
   printf("%d\n", v.s.b);
-  v.s.b;
 
   return 0;
 }

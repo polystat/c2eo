@@ -14,11 +14,9 @@ int main() {
 
   x = sp->a;
   printf("%lld\n", x);
-  x;
 
   x = (*sp).a;
   printf("%lld\n", x);
-  x;
 
   return 0;
 }

@@ -17,13 +17,9 @@ int main() {
   e = **ppc;
 
   printf("%lld\n", b);
-  b;
   printf("%lld\n", c);
-  c;
   printf("%lld\n", d);
-  d;
   printf("%lld\n", e);
-  e;
 
   return 0;
 }

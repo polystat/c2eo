@@ -16,12 +16,9 @@ int main() {
   b.d=a.d+1;
 
 
-  a.b;
   printf("%d\n", a.b);
-  b.b;
   printf("%d\n", b.b);
   a = b;
-  a.b;
   printf("%d\n", a.b);
   return 0;
 }

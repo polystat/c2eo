@@ -67,40 +67,32 @@ int main() {
   double p;
   p = circle_perimeter(&f.c);
   printf("%f\n", p);
-  p;
 
   p = rect_perimeter(&f.r);
   printf("%f\n", p);
-  p;
 
   p = trian_perimeter(&f.t);
   printf("%f\n", p);
-  p;
 
   f.key = 0;
   p = figure_perimeter(&f);
   printf("%f\n", p);
-  p;
 
   f.key = 1;
   p = figure_perimeter(&f);
   printf("%f\n", p);
-  p;
 
   f.key = 2;
   p = figure_perimeter(&f);
   printf("%f\n", p);
-  p;
 
   f.key = 3;
   p = figure_perimeter(&f);
   printf("%f\n", p);
-  p;
 
   f.key = 10;
   p = figure_perimeter(&f);
   printf("%f\n", p);
-  p;
 
   return 0;
 }
