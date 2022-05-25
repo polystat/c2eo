@@ -38,6 +38,7 @@ class Transpiler(object):
         self.path_to_c_files = os.path.join(os.path.abspath(path_to_c_files), '')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.path_to_eo_src = os.path.join(os.path.abspath(settings.get_setting('path_to_eo_src')), '')
+        self.path_to_eo_external = os.path.join(os.path.abspath(settings.get_setting('path_to_eo_external')), '')
         self.plug_code = settings.get_meta_code('plug')
         self.plug_replace = settings.get_setting('plug_replace')
         self.result_dir_name = settings.get_setting('result_dir_name')
@@ -66,6 +67,7 @@ class Transpiler(object):
         self.remove_unused_eo_files()
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
+        self.move_aliases()
         if len(c_files) == 1:
             self.generate_run_sh(self.transpilation_units[0]['full_name'])
         tools.pprint('Transpilation done\n')
@@ -166,6 +168,16 @@ class Transpiler(object):
             tools.pprint('Move these files to src dir\n')
         else:
             tools.pprint('\nNot found any changes in src files')
+
+    def move_aliases(self):
+        aliases = tools.search_files_by_pattern('.', '*.alias', print_files=True)
+        if not os.path.exists(self.path_to_eo_external):
+            os.makedirs(self.path_to_eo_external, exist_ok=True)
+        tools.clear_dir_by_pattern(self.path_to_eo_external, '*.eo')
+        for alias in aliases:
+            file_name = tools.get_file_name(alias)
+            destination_file = os.path.join(self.path_to_eo_external, file_name)
+            shutil.move(alias, destination_file)
 
     def generate_run_sh(self, full_name):
         code = regex.sub(self.run_sh_replace, full_name, self.run_sh_code)
