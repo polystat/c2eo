@@ -34,15 +34,15 @@ $ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
 Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [wget](https://www.tecmint.com/install-wget-in-linux/), 
 [tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
-[git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git), 
-[cmake](https://cmake.org/download/), 
+[git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
+[cmake 3.18+](https://cmake.org/download/), 
 [gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
 [g++](https://pkgs.org/download/g++), 
 [ninja-build](https://ninja-build.org/)
 and
 [python3.+](https://www.python.org/downloads/)
 
-Then, you need LLVM/Clang:
+Then, you need to install [LLVM/Clang 12.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1) :
 
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
@@ -65,7 +65,7 @@ $ tar -xvf llvm-clang.tar.gz
 
 It is assumed that the `llvm-clang` is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7).
 
-This completes the preparations for work, now you can start making changes.
+Formally speaking, this is where the preparation can be completed. However, in order to fully work with the project, testing and executing the translated code, you need to study the [EO compiler project](https://github.com/objectionary/eo) and fulfill its necessary requirements. After that, it will be possible to proceed with further steps.
 
 ### Making changes
 
@@ -88,7 +88,7 @@ Ok, it works, but you're not going to manually broadcast each file and check if 
 $ python3 test.py ../tests/main
 
 # Only transpile all c files, EO files are located in the /result dir
-$ python3 transpile_c2eo.py
+$ python3 transpile_c2eo.py ../tests/main
 
 # Single-threaded launch of c2eo without formatting the output to the console for all c files
 $ python3 c2eo-all ../tests/main
