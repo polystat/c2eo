@@ -2,28 +2,28 @@
 
 RecordType RecordManager::Add(int64_t id, std::string name, size_t size,
                               std::map<std::string, size_t> fields, bool is_local=false) {
-  RecordType recordType = {id, std::move(name), size,std::move(fields), is_local};
-  record_types.push_back(recordType);
-  return recordType;
+  RecordType record_type = {id, std::move(name), size, std::move(fields), is_local};
+  record_types.push_back(record_type);
+  return record_type;
 }
 
-RecordType* RecordManager::getById(int64_t id) {
-  for(auto it = record_types.begin(); it != record_types.end(); it++)
-    if(it->id == id)
+RecordType *RecordManager::GetById(int64_t id) {
+  for (auto it = record_types.begin(); it != record_types.end(); it++)
+    if (it->id == id)
       return it.base();
   return nullptr;
 }
 
-size_t RecordManager::getShift(int64_t id, const std::string& member) {
-  RecordType* rt = getById(id);
-  if(rt)
+__attribute__((unused)) size_t RecordManager::GetShift(int64_t id, const std::string &member) {
+  RecordType *rt = GetById(id);
+  if (rt)
     return rt->fields[member];
   return -1;
 }
 
-EOObject RecordManager::getShiftAlias(int64_t id, const std::string& member) {
-  RecordType* rt = getById(id);
-  if(rt)
+EOObject RecordManager::GetShiftAlias(int64_t id, const std::string &member) {
+  RecordType *rt = GetById(id);
+  if (rt)
     return EOObject{rt->name + "-" + member, EOObjectType::EO_LITERAL}; // todo: is it EO_LITERAL?
   return EOObject{EOObjectType::EO_PLUG};
 }
@@ -41,14 +41,13 @@ bool RecordManager::Empty() {
 }
 
 std::vector<EOObject> RecordType::GetEORecordDecl() {
-  std::vector<EOObject> recordDecl;
+  std::vector<EOObject> record_decl;
   std::string shift;
   for(const auto& field:fields) {
     shift = std::to_string(field.second);
-    EOObject eoShift{shift, name + "-" + field.first};
-    eoShift.type = EOObjectType::EO_LITERAL;
-//    recordDecl.emplace_back(shift, EOObjectType::EO_LITERAL);
-    recordDecl.push_back(eoShift);
+    EOObject eo_shift{shift, name + "-" + field.first};
+    eo_shift.type = EOObjectType::EO_LITERAL;
+    record_decl.push_back(eo_shift);
   }
-  return recordDecl;
+  return record_decl;
 }

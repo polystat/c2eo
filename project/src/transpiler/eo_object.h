@@ -1,5 +1,5 @@
-#ifndef __EO_OBJECT__
-#define __EO_OBJECT__
+#ifndef C2EO_SRC_TRANSPILER_EO_OBJECT_H_
+#define C2EO_SRC_TRANSPILER_EO_OBJECT_H_
 
 #include <ostream>
 #include <vector>
@@ -16,7 +16,7 @@ enum class EOObjectType {
 
 struct EOObject {
 public:
-  EOObject() {name = "";}
+  EOObject() = default;
 
   explicit EOObject(EOObjectType type);
 
@@ -26,32 +26,24 @@ public:
   // Create simple object, may be used for literal
   EOObject(std::string name, EOObjectType type);
 
-  // create complete name with body
+  // create complete name_ with body
   EOObject(std::string name, std::string postfix);
 
   // Add nested object to vector of nested
-  void AddNested(const EOObject &obj);
-
-  // Добавление вложенного объекта в голову вектора
-  void AddToHeadInNested(const EOObject &obj);
+  __attribute__((unused)) void AddNested(const EOObject &obj);
 
   std::vector<std::string> arguments;
   std::string name;
   std::string prefix;
   std::string postfix;
-  EOObjectType type;
+  EOObjectType type = EOObjectType::EO_EMPTY;
   std::vector<EOObject> nested;
 
   friend std::ostream &operator<<(std::ostream &os, const EOObject &obj);
 
 private:
   static auto GetSpaceIndent();
-
   static int indent;
 };
 
-
-EOObject createSeq();
-
-
-#endif // __EO_OBJECT__
+#endif // C2EO_SRC_TRANSPILER_EO_OBJECT_H_

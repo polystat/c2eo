@@ -5,7 +5,7 @@
 std::vector<RecordType> ProcessRecordType(const clang::RecordDecl* RD, bool is_local) {
   extern UnitTranspiler transpiler;
   std::vector<RecordType> types;
-  RecordType* existed = transpiler.record_manager.getById(RD->getID());
+  RecordType *existed = transpiler.record_manager_.GetById(RD->getID());
   if (existed)
     return {};
 
@@ -31,23 +31,22 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl* RD, bool is_l
     } else if(it->getKind() == clang::Decl::Field) {
       auto field = llvm::dyn_cast<clang::FieldDecl>(*it);
 
-      std::string fieldName;
+      std::string field_name;
       if (!field->isUnnamedBitfield())
-        fieldName = /* "f-" + */ field->getNameAsString();
+        field_name = /* "f-" + */ field->getNameAsString();
       else
-        fieldName = "field" + std::to_string(fields.size());
-      fields[fieldName] = shift;
+        field_name = "field" + std::to_string(fields.size());
+      fields[field_name] = shift;
 
-
-      clang::QualType qualType = field->getType();
-      clang::TypeInfo typeInfo = field->getASTContext().getTypeInfo(qualType);
+      clang::QualType qual_type = field->getType();
+      clang::TypeInfo type_info = field->getASTContext().getTypeInfo(qual_type);
       if (RD->isStruct()) {
-        shift += typeInfo.Width / 8;
+        shift += type_info.Width / 8;
         size = shift;
       } else
-        size = std::max(size, typeInfo.Width / 8);
+        size = std::max(size, type_info.Width / 8);
     }
   }
-  types.push_back(transpiler.record_manager.Add(RD->getID(), name, size, fields, is_local));
+  types.push_back(transpiler.record_manager_.Add(RD->getID(), name, size, fields, is_local));
   return types;
 }

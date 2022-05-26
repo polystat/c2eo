@@ -1,44 +1,58 @@
-// Вспомогательные функции, осуществляющие трассировку программы
 #include "tracer.h"
 
-// Вывод узла синтаксического дерева
-void TraceOutASTnode(Stmt::StmtClass stmtClass) {
+__attribute__((unused)) void TraceOutASTnode(Stmt::StmtClass stmt_class) {
   std::string message;
-  switch(stmtClass) {
-    case Stmt::BinaryOperatorClass: message = "BinaryOperator"; break;
-    case Stmt::CallExprClass: message = "CallExpr"; break;
-    case Stmt::CompoundAssignOperatorClass: message = "CompoundAssignOperator"; break;
-    case Stmt::CompoundStmtClass: message = "CompoundStmt"; break;
-    case Stmt::DeclRefExprClass: message = "DeclRefExpr"; break;
-    case Stmt::DeclStmtClass: message = "DeclStmt"; break;
-    case Stmt::DoStmtClass: message = "DoStmt"; break;
-    case Stmt::FloatingLiteralClass: message = "FloatingLiteral"; break;
-    case Stmt::IfStmtClass: message = "IfStmt"; break;
-    case Stmt::ImplicitCastExprClass: message = "ImplicitCastExpr"; break;
+  switch (stmt_class) {
+    case Stmt::BinaryOperatorClass: message = "BinaryOperator";
+      break;
+    case Stmt::CallExprClass: message = "CallExpr";
+      break;
+    case Stmt::CompoundAssignOperatorClass: message = "CompoundAssignOperator";
+      break;
+    case Stmt::CompoundStmtClass: message = "CompoundStmt";
+      break;
+    case Stmt::DeclRefExprClass: message = "DeclRefExpr";
+      break;
+    case Stmt::DeclStmtClass: message = "DeclStmt";
+      break;
+    case Stmt::DoStmtClass: message = "DoStmt";
+      break;
+    case Stmt::FloatingLiteralClass: message = "FloatingLiteral";
+      break;
+    case Stmt::IfStmtClass: message = "IfStmt";
+      break;
+    case Stmt::ImplicitCastExprClass: message = "ImplicitCastExpr";
+      break;
     case Stmt::IntegerLiteralClass: message = "IntegerLiteral"; break;
     case Stmt::ParenExprClass: message = "ParenExpr"; break;
     case Stmt::ReturnStmtClass: message = "ReturnStmt"; break;
     case Stmt::UnaryOperatorClass: message = "UnaryOperator"; break;
     case Stmt::WhileStmtClass: message = "WhileStmt"; break;
-//     case : message = ""; break;
     default:
       message = "Unknown Object Class";
   }
   std::cout << "AST stmt class = " << message << "\n";
 }
 
-// Тестовый вывод информации о бинарном операторе
-void TraceOutBinaryOperator(BinaryOperatorKind kind) {
+__attribute__((unused)) void TraceOutBinaryOperator(BinaryOperatorKind kind) {
   std::string message;
-  switch(kind) {
-    case BinaryOperatorKind::BO_Assign: message = "Assign (=)"; break;
-    case BinaryOperatorKind::BO_Add: message = "Add (+)"; break;
-    case BinaryOperatorKind::BO_Sub: message = "Sub (-)"; break;
-    case BinaryOperatorKind::BO_Mul: message = "Mul (*)"; break;
-    case BinaryOperatorKind::BO_Div: message = "Div (/)"; break;
-    case BinaryOperatorKind::BO_Rem: message = "Rem (%)"; break;
-    case BinaryOperatorKind::BO_And: message = "And (&)"; break;
-    case BinaryOperatorKind::BO_Or: message = "Or (|)"; break;
+  switch (kind) {
+    case BinaryOperatorKind::BO_Assign: message = "Assign (=)";
+      break;
+    case BinaryOperatorKind::BO_Add: message = "Add (+)";
+      break;
+    case BinaryOperatorKind::BO_Sub: message = "Sub (-)";
+      break;
+    case BinaryOperatorKind::BO_Mul: message = "Mul (*)";
+      break;
+    case BinaryOperatorKind::BO_Div: message = "Div (/)";
+      break;
+    case BinaryOperatorKind::BO_Rem: message = "Rem (%)";
+      break;
+    case BinaryOperatorKind::BO_And: message = "And (&)";
+      break;
+    case BinaryOperatorKind::BO_Or: message = "Or (|)";
+      break;
     case BinaryOperatorKind::BO_Xor: message = "Xor (^)"; break;
     case BinaryOperatorKind::BO_Shl: message = "Shl (<<)"; break;
     case BinaryOperatorKind::BO_Shr: message = "Shr (>>)"; break;
@@ -48,65 +62,51 @@ void TraceOutBinaryOperator(BinaryOperatorKind kind) {
     case BinaryOperatorKind::BO_LE: message = "LE (<=)"; break;
     case BinaryOperatorKind::BO_GT: message = "GT (>)"; break;
     case BinaryOperatorKind::BO_GE: message = "GE (>=)"; break;
-//    case : message = ""; break;
-    default:
-      message = "Unknown Binary Operantion Kind";
+    default:message = "Unknown Binary Operation Kind";
   }
   std::cout << "  AST binary operation = " << message << "\n";
 }
 
-// Тестовый вывод информации о целочисленных литералах
-void TraceOutIntegerLiteral(APInt &v, bool is_signed) {
-//   std::string message{v.toString(10, is_signed)};
-//   toString(message, 10, true);
-  int64_t val = 0;
-  if(is_signed) {
-    val = v.getSExtValue();
+__attribute__((unused)) void TraceOutIntegerLiteral(APInt &v, bool is_signed) {
+  if (is_signed) {
+    std::cout << "    APInt Literal = " << v.getSExtValue() << "\n";
+  } else {
+    std::cout << "    APInt Literal = " << v.getZExtValue() << "\n";
   }
-  else {
-    val = v.getZExtValue();
-  }
-  std::cout << "    APInt Literal = " << val << "\n";
 }
 
-// Тестовый вывод объекта EO
-void TraceOutEOObject(EOObject &eoObject) {
-  cout << eoObject;
+__attribute__((unused)) void TraceOutEOObject(EOObject &eo_object) {
+  cout << eo_object;
 }
 
-// Тестовый вывод объекта содержимого функции
 void TraceOutFunctionDecl(const clang::FunctionDecl* FD) {
   if (FD == nullptr) {
-    std::cout << "  Incorrect pointer to definition\n";
+    std::cout << "  Incorrect pointer_ to definition\n";
   }
   else {
-    // Вывод содержимого функции
-    DeclarationNameInfo declNameInfo{FD->getNameInfo()};
-    std::string func_name{declNameInfo.getAsString()};
+    DeclarationNameInfo decl_name_info{FD->getNameInfo()};
+    std::string func_name{decl_name_info.getAsString()};
     std::cout << func_name << ": ";
     std::cout.flush();
 
-    if(FD->isDefined()) {
+    if (FD->isDefined()) {
       std::cout << "  Defined!\n";
-    }
-    else {
+    } else {
       std::cout << "  No defined!\n";
     }
 
     if(FD->hasBody()) {
       std::cout << "  Has body!\n";
-      Stmt* body = FD->getBody();
-      CompoundStmt* funcBody = dyn_cast<CompoundStmt>(body);
-      if(funcBody != nullptr) {
-        std::cout << "  Has body! Body pointer =  " << body << "\n";
-        if(funcBody->size() > 0) {
+      Stmt *body = FD->getBody();
+      auto *func_body = dyn_cast<CompoundStmt>(body);
+      if (func_body != nullptr) {
+        std::cout << "  Has body! Body pointer_ =  " << body << "\n";
+        if (func_body->size() > 0) {
           int i = 0;
-          for (auto stmt: funcBody->body()) {
-            Stmt::StmtClass stmtClass = stmt->getStmtClass();
+          for (__attribute__((unused)) auto stmt : func_body->body()) {
             std::cout << "    Statement # " << i++ << "\n";
           }
-        }
-        else {
+        } else {
           std::cout << "    The body is empty\n";
         }
       }

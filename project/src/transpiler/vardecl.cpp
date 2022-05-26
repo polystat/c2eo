@@ -1,6 +1,3 @@
-#define  VAR_DECL_INFO
-// Функции, используемые при анализе переменных
-
 #include "vardecl.h"
 #include "unit_transpiler.h"
 #include "transpile_helper.h"
@@ -8,159 +5,103 @@
 
 using namespace clang;
 
-// Анализ полученного начального значения с последующим использованием
-void initValueAnalysis(const VarDecl *VD, std::string &str);
+void InitValueAnalysis(const VarDecl *VD, std::string &str);
 
-// Анализ типа для неициализированных переменны с установкой нулевого значения
-void initZeroValueAnalysis(const VarDecl *VD, std::string &str);
-// std::string getIntTypeByVar(const VarDecl* VD);
+void InitZeroValueAnalysis(const VarDecl *VD, std::string &str);
 
-void arraayToBytes(Stmt *stmt, size_t size, const VarDecl *pDecl, std::string& string);
+void ArrayToBytes(__attribute__((unused)) Stmt *stmt, size_t size, const VarDecl *p_decl, std::string &string);
 
-void intToBytes(IntegerLiteral *pLiteral, size_t size, std::string &str);
+Variable ProcessVariable(const VarDecl *VD, const std::string &local_name, size_t shift) {
+  auto var_name = VD->getNameAsString();
+  QualType qual_type = VD->getType();
+  TypeInfo type_info = VD->getASTContext().getTypeInfo(qual_type);
+  auto type_size = type_info.Width / 8;
 
-void floatToBytes(FloatingLiteral *pLiteral, size_t size, std::string &str);
-
-Variable ProcessVariable(const VarDecl *VD, std::string local_name, size_t shift) {
-  // Имя переменной
-  auto varName = VD->getNameAsString();
-  QualType qualType = VD->getType();
-  TypeInfo typeInfo = VD->getASTContext().getTypeInfo(qualType);
-  // размер в байтах
-  auto typeSize = typeInfo.Width / 8;
-  const IdentifierInfo* typeId = qualType.getBaseTypeIdentifier();
-
-  auto typePtr = qualType.getTypePtr();
-  // auto kind = typePtr->getKind();
-
-  std::string strType{std::string("c_" + GetTypeName(VD->getType()))};
-  // StorageClass getStorageClass() const
-  // Показывает на явное описание того или иного класса памяти в тексте программы
-  // Наверное не во всех случаях полезно
-  auto storageClass = VD->getStorageClass();
-  // Проверка на размещение переменной в локальной памяти
-  auto inLocalStorage = VD->hasLocalStorage();
-  // Проверка на статическую локальную переменную
-  auto staticLocal = VD->isStaticLocal();
-  // Внешняя переменная (описатель external)
-  auto extStorage = VD->hasExternalStorage();
-  // Размещение переменной в глобальной памяти
-  // Глобальных и статических переменных
-  auto globalStorage = VD->hasGlobalStorage();
-  // Переменная с локальной видимостью
-  auto localVarDecl = VD->isLocalVarDecl();
-  // Переменная или параметр с локальной видимостью
-  auto localVarDeclOrParm = VD->isLocalVarDeclOrParm();
-  // Наличие начальной инициализации
-  auto isInit = VD->hasInit();
-  std::string strValue;
-  if (isInit) {
-    initValueAnalysis(VD, strValue);
+  std::string str_type{std::string("c_" + GetTypeName(VD->getType()))};
+  auto storage_class = VD->getStorageClass();
+  auto static_local = VD->isStaticLocal();
+  auto ext_storage = VD->hasExternalStorage();
+  auto global_storage = VD->hasGlobalStorage();
+  auto is_init = VD->hasInit();
+  std::string str_value;
+  if (is_init) {
+    InitValueAnalysis(VD, str_value);
   } else {
-    initZeroValueAnalysis(VD, strValue);
+    InitZeroValueAnalysis(VD, str_value);
   }
-  EOObject eoObject{strValue};
+  EOObject eo_object{str_value};
 
   extern UnitTranspiler transpiler;
 
-  // Проверка, что переменная является глобальной
-  if (globalStorage && !extStorage && !staticLocal && (storageClass != SC_Static)) {
-    return transpiler.glob.Add(VD, typeSize, strType, "g-" + varName, eoObject);
-  } else if (globalStorage && !extStorage) {
-    return transpiler.glob.Add(VD, typeSize, strType, "s-" + varName, eoObject);
-  } else if (globalStorage && extStorage) {
-    return transpiler.glob.AddExternal(VD, typeSize, strType, "e-" + varName, eoObject);
+  if (global_storage && !ext_storage && !static_local && (storage_class != SC_Static)) {
+    return transpiler.glob_.Add(VD, type_size, str_type, "g-" + var_name, eo_object);
+  } else if (global_storage && !ext_storage) {
+    return transpiler.glob_.Add(VD, type_size, str_type, "s-" + var_name, eo_object);
+  } else if (global_storage) {
+    return transpiler.glob_.AddExternal(VD, type_size, str_type, "e-" + var_name, eo_object);
   } else // its local variable!
   {
     if (local_name.empty()) {
-        // Тут генерируется EoObject с name = "".
-        return {};
+      return {};
     }
     const auto *PD = llvm::dyn_cast<ParmVarDecl>(VD);
     if (PD) {
-      return transpiler.glob.Add(VD, typeSize, strType, "p-" + varName,
-                                 eoObject, local_name, shift, VD->hasInit());
+      return transpiler.glob_.Add(VD, type_size, str_type, "p-" + var_name,
+                                  eo_object, local_name, shift, VD->hasInit());
     }
-    return transpiler.glob.Add(VD, typeSize, strType, "l-" + varName,
-                               eoObject, local_name, shift, VD->hasInit());
+    return transpiler.glob_.Add(VD, type_size, str_type, "l-" + var_name,
+                                eo_object, local_name, shift, VD->hasInit());
   }
 }
 
-// Анализ полученного начального значения с тестовым выводом его
-// и формированием строки со значением на выходе
-void initValueAnalysis(const VarDecl *VD, std::string &str) {
-  // Анализ типа переменной для корректного преобразования в тип Eolang
-  auto qualType = VD->getType();      // квалифицированный тип (QualType)
-  auto typePtr = qualType.getTypePtr();   // указатель на тип (Type)
+void InitValueAnalysis(const VarDecl *VD, std::string &str) {
+  auto qual_type = VD->getType();
+  auto type_ptr = qual_type.getTypePtr();
 
-  // Анализ размера переменной для определения разновидности данных
-  auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
-  auto size = typeInfo.Width;
-  // auto align = typeInfo.Align;  // не нужен
-  APValue *initVal = VD->evaluateValue();
+  auto type_info = VD->getASTContext().getTypeInfo(qual_type);
+  auto size = type_info.Width;
+  APValue *init_val = VD->evaluateValue();
 
-//  auto x = VD->getInit();
-//  auto y = llvm::dyn_cast<InitListExpr>(x);
-//  auto z = y->children();
-//  for (const auto ch : z) {
-//      llvm::outs() << ch->getStmtClassName() << "\n";
-//  }
-
-  if (initVal != nullptr) {
-    if (initVal->isInt()) {
-      auto intValue = initVal->getInt().getExtValue();
-      // llvm::outs() << intValue;
-      if (typePtr->isCharType()) {
+  if (init_val != nullptr) {
+    if (init_val->isInt()) {
+      auto int_value = init_val->getInt().getExtValue();
+      if (type_ptr->isCharType()) {
         str = "'";
-        str += char(intValue);
+        str += char(int_value);
         str += "'";
       } else {
-        str = std::to_string(intValue); // просто целое число
+        str = std::to_string(int_value);
       }
-    } else if (initVal->isFloat() && (size == 64)) {
-      auto floatValue = initVal->getFloat().convertToDouble();
-      // llvm::outs() << floatValue;
-      str = std::to_string(floatValue);
-    } else if (initVal->isFloat() && (size == 32)) {
-      auto floatValue = initVal->getFloat().convertToFloat();
-      // llvm::outs() << floatValue;
-      str = std::to_string(floatValue);
+    } else if (init_val->isFloat() && (size == 64)) {
+      auto float_value = init_val->getFloat().convertToDouble();
+      str = std::to_string(float_value);
+    } else if (init_val->isFloat() && (size == 32)) {
+      auto float_value = init_val->getFloat().convertToFloat();
+      str = std::to_string(float_value);
     }
   } else {
     Stmt *body = (Stmt *) ((clang::InitListExpr *) (VD->getInit()));
-    arraayToBytes(body, size, VD, str);
-//    str = "(" + str + ")";
+    ArrayToBytes(body, size, VD, str);
   }
 }
 
-void arraayToBytes(Stmt *stmt, size_t size, const VarDecl *pDecl, std::string& str) {
-    str += "plug";
+void ArrayToBytes(__attribute__((unused)) Stmt *stmt,
+                  __attribute__((unused)) size_t size,
+                  __attribute__((unused)) const VarDecl *p_decl,
+                  std::string &string) {
+  string += "plug";
 }
 
-// Анализ полученного начального значения с тестовым выводом его
-// и формированием строки со значением на выходе
-void initZeroValueAnalysis(const VarDecl *VD, std::string &str) {
-  // Анализ типа переменной для корректного преобразования в тип Eolang
-  auto qualType = VD->getType();      // квалифицированный тип (QualType)
-  auto typePtr = qualType.getTypePtr();   // указатель на тип (Type)
+void InitZeroValueAnalysis(const VarDecl *VD, std::string &str) {
+  auto qual_type = VD->getType();
+  auto type_ptr = qual_type.getTypePtr();
 
-  // Анализ размера переменной для определения разновидности данных
-  auto typeInfo = VD->getASTContext().getTypeInfo(qualType);
-  auto size = typeInfo.Width;
-  if (typePtr->isCharType()) {
+  if (type_ptr->isCharType()) {
     str = "'\\0'";
-  } else if (typePtr->isIntegerType() || typePtr->isBooleanType()) {
+  } else if (type_ptr->isIntegerType() || type_ptr->isBooleanType()
+      || type_ptr->isPointerType() || type_ptr->isRecordType() || type_ptr->isArrayType()) {
     str = "0";
-  } else if (typePtr->isIntegerType() || typePtr->isBooleanType()) {
-    str = "0";
-  } else if (typePtr->isPointerType()) {
-    str = "0";
-  } else if (typePtr->isRecordType()) {
-    const RecordDecl *RD = typePtr->getAsRecordDecl();
-    str = "0";
-  } else if (typePtr->isArrayType()) {
-      str = "0";
   } else {
-      str = "";
+    str = "";
   }
 }
