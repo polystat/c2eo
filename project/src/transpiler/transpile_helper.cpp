@@ -297,18 +297,26 @@ EOObject GetCastEOObject(const CastExpr *op) {
 }
 EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   EOObject for_stmt(EOObjectType::EO_EMPTY);
-  for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
 
   auto init = p_stmt->getInit();
   auto cond = p_stmt->getCond();
   auto inc = p_stmt->getInc();
   auto body = p_stmt->getBody();
-
+  if(init) {
+    for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
+  }
   EOObject while_stmt{"while"};
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  if(cond) {
+    while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  }
+  else{
+    while_stmt.nested.emplace_back("TRUE",EOObjectType::EO_LITERAL);
+  }
   EOObject seq{"seq"};
   seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
+  if(init) {
+    seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
+  }
   while_stmt.nested.push_back(seq);
   for_stmt.nested.push_back(while_stmt);
   return for_stmt;
