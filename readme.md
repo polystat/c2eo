@@ -32,16 +32,16 @@ $ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
 ### Preparations
 
 Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
-[wget](https://www.tecmint.com/install-wget-in-linux/), 
-[tar](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
-[git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
+[wget 1.21+](https://www.tecmint.com/install-wget-in-linux/), 
+[tar 1.30+](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
+[git 2.32.+](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
 [cmake 3.18+](https://cmake.org/download/), 
-[gcc](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++](https://pkgs.org/download/g++), 
-[ninja-build](https://ninja-build.org/)
+[gcc 11.2.+](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
+[g++ 11.2.+](https://pkgs.org/download/g++), 
+[ninja-build 1.10.1+](https://ninja-build.org/)
 and
-[python3.+](https://www.python.org/downloads/).
-You will also need requirements for [the EO project](https://github.com/objectionary/eo) ([Maven](https://maven.apache.org) and Java 8+)
+[python3 3.9.7+](https://www.python.org/downloads/).
+You will also need requirements for [the EO project](https://github.com/objectionary/eo) ([Maven 3.3+](https://maven.apache.org) and Java 8+)
 
 Then, you need to install [LLVM/Clang 12.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1) :
 
