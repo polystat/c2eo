@@ -41,7 +41,7 @@ Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [ninja-build](https://ninja-build.org/)
 and
 [python3.+](https://www.python.org/downloads/).
-Also requirements from [the EO project](https://github.com/objectionary/eo) ([Maven](https://maven.apache.org) and Java 8+)
+You will also need requirements for [the EO project](https://github.com/objectionary/eo) ([Maven](https://maven.apache.org) and Java 8+)
 
 Then, you need to install [LLVM/Clang 12.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1) :
 
