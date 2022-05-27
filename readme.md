@@ -88,14 +88,14 @@ Ok, it works, but you're not going to manually broadcast each file and check if 
 # Transpile and run all c files in folder, then compare their results and show statistics
 $ python3 test.py ../tests/main
 
-# Only transpile all c files, EO files are located in the /result dir
-$ python3 transpile_c2eo.py ../tests/main
-
 # Single-threaded launch of c2eo without formatting the output to the console for all c files
 $ python3 c2eo-all ../tests/main
 
 # Show code lines statistics in this dir 
 $ python3 code_lines.py ../tests/main
+
+# Transpile all c files and run EO compiler
+$ python3 compile.py ../tests/main
 ```
 
 The main tests are in the folder `/project/tests/main`, if they pass, then everything is ok. [Here](./project/scripts/readme.md) you can find more information about scripts.
