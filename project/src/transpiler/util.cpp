@@ -1,22 +1,18 @@
-// Файл util.h с реализацией вспомогательных утилит
-
 #include "util.h"
 
 using namespace std;
 
-// Запись строки символов в указанный файл
-void str2file(std::string str, std::string fileName) {
-  std::ofstream out;          // поток для записи
-  out.open(fileName); // окрываем файл для записи
+__attribute__((unused)) void Str2File(const std::string &str, const std::string &file_name) {
+  std::ofstream out;
+  out.open(file_name);
   if (out.is_open()) {
     out << str;
   }
 }
 
-// Чтение из файла в вектор строк
-void file2vector(std::string fileName, std::vector<std::string> &text) {
-  std::ifstream in;          // поток для чтения
-  in.open(fileName); // окрываем файл для записи
+__attribute__((unused)) void File2Vector(const std::string &file_name, std::vector<std::string> &text) {
+  std::ifstream in;
+  in.open(file_name);
   std::string line;
   if (in.is_open()) {
     while (getline(in, line)) {
@@ -25,18 +21,17 @@ void file2vector(std::string fileName, std::vector<std::string> &text) {
   }
 }
 
-// Запись сформированного файла с глобальными объектами
-void text2file(std::vector<std::string> &text, std::string fileName) {
-  std::ofstream out;          // поток для записи
-  out.open(fileName); // окрываем файл для записи
+__attribute__((unused)) void Text2File(std::vector<std::string> &text, const std::string &file_name) {
+  std::ofstream out;
+  out.open(file_name);
   if (out.is_open()) {
-    for (auto line: text) {
+    for (const auto &line : text) {
       out << line << "\n";
     }
   }
 }
 
-std::string str_join(std::vector<std::string> vec) {
+std::string StrJoin(std::vector<std::string> vec) {
   if (vec.empty())
     return "";
   if (vec.size() == 1)

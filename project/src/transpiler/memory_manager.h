@@ -1,5 +1,5 @@
-#ifndef __MEMORY_MANAGER__
-#define __MEMORY_MANAGER__
+#ifndef C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_
+#define C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_
 
 #include <string>
 #include <utility>
@@ -44,8 +44,8 @@ struct Variable {
 
 class MemoryManager {
 public:
-  explicit MemoryManager(std::string name, size_t start_pointer = 0):
-                        pointer(start_pointer), name(std::move(name)) {}
+  explicit MemoryManager(std::string name, size_t start_pointer = 0) :
+      pointer_(start_pointer), name_(std::move(name)) {}
 
   Variable Add(const clang::VarDecl* id,
                size_t size,
@@ -56,42 +56,39 @@ public:
                size_t shift = 0,
                bool is_initialized = true);
 
-  Variable AddExternal(const clang::VarDecl* id,
-               size_t size,
-               const std::string &type,
-               std::string alias,
-               EOObject value,
-               std::string local_name = "",
-               size_t shift = 0,
-               bool is_initialized = false);
+  Variable AddExternal(const clang::VarDecl *id,
+                       size_t size,
+                       const std::string &type,
+                       std::string alias,
+                       EOObject value,
+                       std::string local_name = "",
+                       size_t shift = 0,
+                       __attribute__((unused)) bool is_initialized = false);
 
   bool Empty();
 
   size_t RealMemorySize();
 
-  const Variable& GetVarByID(const clang::VarDecl* id) const;
+  const Variable &GetVarById(const clang::VarDecl *id) const;
 
   std::vector<Variable>::const_iterator begin() const;
 
   std::vector<Variable>::const_iterator end() const;
 
-  std::string name;
+  std::string name_;
 
   EOObject GetEOObject() const;
 
-  void RemoveAllUsed(const std::vector<Variable>& all_local);
+  void RemoveAllUsed(const std::vector<Variable> &all_local);
 
-  // Поиск имен внешних объявлений, совпадающих с глобальными именами
-  // и установка в одинаковое значение их адресов в глобальной памяти
   void SetExtEqGlob();
 
-private:
+ private:
   // index of first free byte in memory
-  size_t pointer;
-  int mem_size = 2048;
-  std::vector<Variable> variables;
+  size_t pointer_;
+  int mem_size_ = 2048;
+  std::vector<Variable> variables_;
 
 };
 
-
-#endif // __MEMORY_MANAGER__
+#endif // C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_

@@ -1,5 +1,5 @@
-#ifndef __UNIT_TRANSPILER__
-#define __UNIT_TRANSPILER__
+#ifndef C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_
+#define C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_
 
 #include "string"
 #include "set"
@@ -9,33 +9,30 @@
 #include "record_manager.h"
 
 class UnitTranspiler {
-public:
+ public:
   UnitTranspiler() = default;
 
-//   MemoryManager glob{"global-ram", 8}, ret{"return-ram"};
-  MemoryManager glob{"global-ram"}, ret{"return-ram"};
-  FunctionManager func_manager;
-  RecordManager record_manager;
-  friend std::ostream& operator <<(std::ostream& os, UnitTranspiler unit);
+//   MemoryManager glob_{"global-ram", 8}, ret_{"return-ram"};
+  MemoryManager glob_{"global-ram"}, ret_{"return-ram"};
+  FunctionManager func_manager_;
+  RecordManager record_manager_;
+  friend std::ostream &operator<<(std::ostream &os, UnitTranspiler unit);
 
-  std::string name;
-  // Коллекция для составления списка алиасов
-  std::set<std::string> used_external_objects;
+  std::string name_;
+  std::set<std::string> used_external_objects_;
 
-  void SetPackageName(std::string packagename);
-  void SetPathName(std::string pathName);
+  void SetPackageName(std::string package_name);
+  static void SetPathName(std::string path_name);
   // std::vector<EOObject>
 
-private:
-  std::string package_name;
-  std::string path_name;
-  std::string tmp;
-  std::vector<EOObject> objects;
+ private:
+  std::string package_name_;
+  std::string path_name_;
+  std::string tmp_;
+  std::vector<EOObject> objects_;
 
   void GenerateResult();
 
-
 };
 
-
-#endif // __UNIT_TRANSPILER__
+#endif // C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_

@@ -5,11 +5,9 @@
 #include "aliases.h"
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
-//   unit.func_manager.TestOut();
-
-  if (unit.tmp.empty())
+  if (unit.tmp_.empty())
     unit.GenerateResult();
-  os << unit.tmp;
+  os << unit.tmp_;
   return os;
 }
 
@@ -17,48 +15,42 @@ void UnitTranspiler::GenerateResult() {
   EOObject body(EOObjectType::EO_ABSTRACT);
   body.arguments.emplace_back("args...");
   body.postfix = "global";
-  body.nested.push_back(glob.GetEOObject());
+  body.nested.push_back(glob_.GetEOObject());
   body.nested.emplace_back("memory", "empty-global-position");
-  body.nested.push_back(ret.GetEOObject());
+  body.nested.push_back(ret_.GetEOObject());
   body.nested.emplace_back("memory", "return-mem_size");
-  EOObject ret_addr("address", "return");
-  ret_addr.nested.emplace_back(ret.name);
-  ret_addr.nested.emplace_back("0", EOObjectType::EO_LITERAL);
-  body.nested.push_back(ret_addr);
+  EOObject ret_address("address", "return");
+  ret_address.nested.emplace_back(ret_.name_);
+  ret_address.nested.emplace_back("0", EOObjectType::EO_LITERAL);
+  body.nested.push_back(ret_address);
 
-  if (!glob.Empty()) {
-    glob.SetExtEqGlob();
-    for (const auto& var: glob) {
-      body.nested.push_back(EOObject(var.GetAddress(glob.name)));
+  if (!glob_.Empty()) {
+    glob_.SetExtEqGlob();
+    for (const auto &var : glob_) {
+      body.nested.emplace_back(var.GetAddress(glob_.name_));
     }
   }
 
-  if (!record_manager.Empty()) // todo: it isn't global, is it? it should be out of labels
-    for (auto type: record_manager)
+  if (!record_manager_.Empty()) // todo: it isn't global, is it? it should be out of labels
+    for (auto type : record_manager_)
       if (!type.is_local) {
-        auto recordFields = type.GetEORecordDecl();
-        body.nested.insert(body.nested.end(), recordFields.begin(), recordFields.end());
+        auto record_fields = type.GetEORecordDecl();
+        body.nested.insert(body.nested.end(), record_fields.begin(), record_fields.end());
       }
 
-  // TODO write all declarations
-//   for (const auto& func: func_manager.GetAllDefinitions()) {
-//     body.nested.push_back(func.GetEOObject());
-//   }
-
-  // Получение всех функциональных объектов для их последующего вывода
-  for (const auto& func: func_manager.GetAllEODefinitions()) {
+  for (const auto &func : func_manager_.GetAllEoDefinitions()) {
     body.nested.push_back(func);
   }
 
   EOObject init_seq("seq", "@");
-  for (const auto& var: glob) {
+  for (const auto &var : glob_) {
     init_seq.nested.push_back(var.GetInitializer());
   }
   if (std::find_if(body.nested.begin(), body.nested.end(),
-                   [](EOObject x) { return x.postfix == "main"; }) != body.nested.end()) {
+                   [](const EOObject &x) { return x.postfix == "main"; }) != body.nested.end()) {
     EOObject main_call("main");
     extern UnitTranspiler transpiler;
-    main_call.nested.emplace_back(std::to_string(transpiler.glob.RealMemorySize()), EOObjectType::EO_LITERAL);
+    main_call.nested.emplace_back(std::to_string(transpiler.glob_.RealMemorySize()), EOObjectType::EO_LITERAL);
     main_call.nested.emplace_back("0", EOObjectType::EO_LITERAL);
     init_seq.nested.push_back(main_call);
   }
@@ -67,26 +59,20 @@ void UnitTranspiler::GenerateResult() {
   body.nested.push_back(init_seq);
 
   std::stringstream result;
-  result << "+package c2eo.src." << package_name << "\n";
+  result << "+package c2eo.src." << package_name_ << "\n";
 
-  used_external_objects = FindAllExternalObjects(body);
-  for (const auto& ext_obj: used_external_objects) {
+  used_external_objects_ = FindAllExternalObjects(body);
+  for (const auto &ext_obj : used_external_objects_) {
     if (known_types.find(ext_obj) == known_types.end()) {
       std::string alias;
       try {
         alias = known_aliases.at(ext_obj);
         result << alias << "\n";
       }
-      catch (std::out_of_range&) {
-//         llvm::errs() << "exception: not found alias for " << ext_obj << "\n";
-//         llvm::errs() << "warning: not found alias for " << ext_obj << "\n";
+      catch (std::out_of_range &) {
         result << "+alias c2eo.external." << ext_obj << "\n";
-        // Скорее всего здесь нужно еще добавить формирование пустой обертки
-        // в соответствующем каталоге (каком?)
-        // Скорее всего в том же, что и результат. Но со специфическим именем.
-        // Тогда его можно будет перенести в другое место
-        std::string aliasFileName{path_name + ext_obj + ".eo.alias"};
-        std::ofstream alias_out(aliasFileName);
+        std::string alias_file_name{path_name_ + ext_obj + ".eo.alias"};
+        std::ofstream alias_out(alias_file_name);
         alias_out << "+package c2eo.external\n\n"
                   << "+alias c2eo.stdio.printf\n\n"
                   << "[args...] > " << ext_obj << "\n"
@@ -98,13 +84,13 @@ void UnitTranspiler::GenerateResult() {
   result << "\n";
 
   result << body;
-  tmp = result.str();
+  tmp_ = result.str();
 }
 
-void UnitTranspiler::SetPackageName(std::string packagename) {
-  package_name = std::move(packagename);
+void UnitTranspiler::SetPackageName(std::string package_name) {
+  package_name_ = std::move(package_name);
 }
 
-void UnitTranspiler::SetPathName(std::string pathName) {
-  path_name = std::move(pathName);
+void UnitTranspiler::SetPathName(std::string path_name) {
+  path_name = std::move(path_name);
 }

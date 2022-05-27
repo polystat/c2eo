@@ -27,7 +27,7 @@ EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt);
 
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal);
 
-EOObject GetReturnStmpEOObject(const ReturnStmt *p_stmt);
+EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt);
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator);
 
@@ -39,7 +39,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op);
 
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params, size_t shift);
 
-vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS);
+vector<EOObject> PrecessRecordTypes(CompoundStmt *CS);
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params);
 
@@ -54,7 +54,7 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
 EOObject GetSeqForBodyEOObject(const Stmt* p_stmt);
 
-int GetTypeSize(QualType qualType);
+uint64_t GetTypeSize(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
 extern UnitTranspiler transpiler;
@@ -62,45 +62,45 @@ extern UnitTranspiler transpiler;
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 
   if (!FD->hasBody())
-    // TODO if not body may be need to create simple complete or abstract object with correct name
+    // TODO if not body may be need to create simple complete or abstract object with correct name_
     return EOObject(EOObjectType::EO_EMPTY);
-  const auto funcBody = dyn_cast<CompoundStmt>(FD->getBody());
-  if (!funcBody) // TODO: segfault at address 0x0
+  const auto func_body = dyn_cast<CompoundStmt>(FD->getBody());
+  if (!func_body) // TODO: segfault at address 0x0
     return EOObject(EOObjectType::EO_EMPTY);
-  size_t shift = transpiler.glob.RealMemorySize();
+  size_t shift = transpiler.glob_.RealMemorySize();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
-  vector<EOObject> all_types = PrecessRecordTypes(funcBody);
-  vector<Variable> all_local = ProcessFunctionLocalVariables(funcBody, shift + param_memory_size);
+  vector<EOObject> all_types = PrecessRecordTypes(func_body);
+  vector<Variable> all_local = ProcessFunctionLocalVariables(func_body, shift + param_memory_size);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("add", "local-start");
   local_start.nested.emplace_back("param-start");
   local_start.nested.emplace_back("param-size");
   func_body_eo.nested.push_back(local_start);
-  size_t free_pointer = transpiler.glob.RealMemorySize();
+  size_t free_pointer = transpiler.glob_.RealMemorySize();
   EOObject local_empty_position("add", "empty-local-position");
   local_empty_position.nested.emplace_back("local-start");
   local_empty_position.nested.emplace_back(to_string(free_pointer - shift - param_memory_size),
                                            EOObjectType::EO_LITERAL);
   func_body_eo.nested.push_back(local_empty_position);
   for (const auto &param: all_param) {
-    func_body_eo.nested.push_back(param.GetAddress(transpiler.glob.name));
+    func_body_eo.nested.push_back(param.GetAddress(transpiler.glob_.name_));
   }
   for (const auto &var: all_types) {
     func_body_eo.nested.push_back(var);
   }
-  for (const auto &var: all_local) {
-    func_body_eo.nested.push_back(var.GetAddress(transpiler.glob.name));
+  for (const auto &var : all_local) {
+    func_body_eo.nested.push_back(var.GetAddress(transpiler.glob_.name_));
   }
-  EOObject body_seq = GetCompoundStmt(funcBody, true);
+  EOObject body_seq = GetCompoundStmt(func_body, true);
   std::reverse(all_local.begin(), all_local.end());
-  for (const auto &var: all_local) {
+  for (const auto &var : all_local) {
     if (var.is_initialized)
       body_seq.nested.insert(body_seq.nested.begin(), var.GetInitializer());
   }
   func_body_eo.nested.push_back(body_seq);
-  transpiler.glob.RemoveAllUsed(all_param);
-  transpiler.glob.RemoveAllUsed(all_local);
+  transpiler.glob_.RemoveAllUsed(all_param);
+  transpiler.glob_.RemoveAllUsed(all_local);
 
   return func_body_eo;
 }
@@ -108,16 +108,16 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
   vector<EOObject> local_type_decls;
   for (auto stmt: CS->body()) {
-    Stmt::StmtClass stmtClass = stmt->getStmtClass();
-    if (stmtClass == Stmt::DeclStmtClass) {
+    Stmt::StmtClass stmt_class = stmt->getStmtClass();
+    if (stmt_class == Stmt::DeclStmtClass) {
       auto decl_stmt = dyn_cast<DeclStmt>(stmt);
-      for (auto decl: decl_stmt->decls()) {
+      for (auto decl : decl_stmt->decls()) {
         Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Kind::Record) {
           auto record_decl = dyn_cast<RecordDecl>(decl);
           auto types = ProcessRecordType(record_decl, true);
-          for (auto type = types.begin(); type != types.end(); type++) {
-            auto eo_objs = type->GetEORecordDecl();
+          for (auto &type : types) {
+            auto eo_objs = type.GetEORecordDecl();
             local_type_decls.insert(local_type_decls.end(), eo_objs.begin(), eo_objs.end());
           }
         }
@@ -148,12 +148,12 @@ vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params, size_t sh
 vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, size_t shift) {
   vector<Variable> all_local;
   for (auto stmt: CS->body()) {
-    Stmt::StmtClass stmtClass = stmt->getStmtClass();
-    if (stmtClass == Stmt::DeclStmtClass) {
+    Stmt::StmtClass stmt_class = stmt->getStmtClass();
+    if (stmt_class == Stmt::DeclStmtClass) {
       auto decl_stmt = dyn_cast<DeclStmt>(stmt);
-      for (auto decl: decl_stmt->decls()) {
+      for (auto decl : decl_stmt->decls()) {
         // TODO if var created in nested statement we don't found it. Fix
-        // TODO duplicate names problem should be resoved
+        // TODO duplicate names problem should be resolved
         Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Kind::Var) {
           auto var_decl = dyn_cast<VarDecl>(decl);
@@ -171,18 +171,11 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
   if (is_decorator)
     res.postfix = "@";
   for (auto stmt: CS->body()) {
-    Stmt::StmtClass stmtClass = stmt->getStmtClass();
-    // Костыльное решение для тестового вывода
-    if (stmtClass == Stmt::ImplicitCastExprClass) // Нужно разобраться с именами перечислимых типов
-    {
+    Stmt::StmtClass stmt_class = stmt->getStmtClass();
+    if (stmt_class == Stmt::ImplicitCastExprClass) {
       auto ref = dyn_cast<Expr>(*stmt->child_begin());
-//       auto ref = dyn_cast<ImplicitCastExpr>(*stmt->child_begin());
-//       // Определения подвида (далее по нему нужно будет выстроить анализ, включая уже написанный)
-//       CastKind castKind = ref->getCastKind();
-//       if(castKind == CK_ArrayToPointerDecay) {} // Пока пусто
-
-      QualType qualType = ref->getType();
-      string type = GetTypeName(qualType);
+      QualType qual_type = ref->getType();
+      string type = GetTypeName(qual_type);
       string formatter = "?"; // todo
       if (type == "float32" || type == "float64")
         formatter = "f";
@@ -192,11 +185,11 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
       printer.nested.emplace_back("\"%" + formatter + "\\n\"", EOObjectType::EO_LITERAL);
       EOObject read_val{"read"};
       read_val.nested.emplace_back(GetStmtEOObject(ref));
-      if (!qualType->isRecordType())
+      if (!qual_type->isRecordType())
         read_val.name += "-as-" + type;
       else
         read_val.nested.emplace_back(to_string(
-                                             transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size),
+                                         transpiler.record_manager_.GetById(qual_type->getAsRecordDecl()->getID())->size),
                                      EOObjectType::EO_LITERAL);
       printer.nested.push_back(read_val);
       res.nested.push_back(printer);
@@ -210,91 +203,92 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
 }
 
 EOObject GetStmtEOObject(const Stmt *stmt) {
-  Stmt::StmtClass stmtClass = stmt->getStmtClass();
-  if (stmtClass == Stmt::BinaryOperatorClass) {
+  Stmt::StmtClass stmt_class = stmt->getStmtClass();
+  if (stmt_class == Stmt::BinaryOperatorClass) {
     const auto *op = dyn_cast<BinaryOperator>(stmt);
     return GetBinaryStmtEOObject(op);
-  } else if (stmtClass == Stmt::UnaryOperatorClass) {
+  } else if (stmt_class == Stmt::UnaryOperatorClass) {
     const auto *op = dyn_cast<UnaryOperator>(stmt);
     return GetUnaryStmtEOObject(op);
-  } else if (stmtClass == Stmt::CompoundAssignOperatorClass) {
+  } else if (stmt_class == Stmt::CompoundAssignOperatorClass) {
     const auto *op = dyn_cast<CompoundAssignOperator>(stmt);
     return GetAssignmentOperationOperatorEOObject(op);
-  } else if (stmtClass == Stmt::ParenExprClass) {
+  } else if (stmt_class == Stmt::ParenExprClass) {
     const auto *op = dyn_cast<ParenExpr>(stmt);
     return GetStmtEOObject(*op->child_begin());
-  } else if (stmtClass == Stmt::ImplicitCastExprClass) {
+  } else if (stmt_class == Stmt::ImplicitCastExprClass) {
     const auto *op = dyn_cast<ImplicitCastExpr>(stmt);
     return GetCastEOObject(op);
-  } else if (stmtClass == Stmt::DeclRefExprClass) {
+  } else if (stmt_class == Stmt::DeclRefExprClass) {
     auto ref = dyn_cast<DeclRefExpr>(stmt);
     return GetEODeclRefExpr(ref);
-  } else if (stmtClass == Stmt::IfStmtClass) {
+  } else if (stmt_class == Stmt::IfStmtClass) {
     const auto *op = dyn_cast<IfStmt>(stmt);
     return GetIfStmtEOObject(op);
-  } else if (stmtClass == Stmt::WhileStmtClass) {
+  } else if (stmt_class == Stmt::WhileStmtClass) {
     const auto *op = dyn_cast<WhileStmt>(stmt);
     return GetWhileStmtEOObject(op);
-  } else if (stmtClass == Stmt::DoStmtClass) {
+  } else if (stmt_class == Stmt::DoStmtClass) {
     const auto *op = dyn_cast<DoStmt>(stmt);
     return GetDoWhileStmtEOObject(op);
-  } else if (stmtClass == Stmt::CompoundStmtClass) {
+  } else if (stmt_class == Stmt::CompoundStmtClass) {
     const auto *op = dyn_cast<CompoundStmt>(stmt);
     return GetCompoundStmt(op);
-  } else if (stmtClass == Stmt::IntegerLiteralClass) {
+  } else if (stmt_class == Stmt::IntegerLiteralClass) {
     const auto *op = dyn_cast<IntegerLiteral>(stmt);
     return GetIntegerLiteralEOObject(op);
-  } else if (stmtClass == Stmt::FloatingLiteralClass) {
+  } else if (stmt_class == Stmt::FloatingLiteralClass) {
     const auto *op = dyn_cast<FloatingLiteral>(stmt);
     return GetFloatingLiteralEOObject(op);
-  } else if (stmtClass == Stmt::DeclStmtClass) {
+  } else if (stmt_class == Stmt::DeclStmtClass) {
     return EOObject(EOObjectType::EO_EMPTY);
-  } else if (stmtClass == Stmt::CallExprClass) {
+  } else if (stmt_class == Stmt::CallExprClass) {
     const auto *op = dyn_cast<CallExpr>(stmt);
     return GetFunctionCallEOObject(op);
-  } else if (stmtClass == Stmt::ReturnStmtClass) {
+  } else if (stmt_class == Stmt::ReturnStmtClass) {
     const auto *op = dyn_cast<ReturnStmt>(stmt);
-    return GetReturnStmpEOObject(op);
-  } else if (stmtClass == Stmt::MemberExprClass) {
+    return GetReturnStmtEOObject(op);
+  } else if (stmt_class == Stmt::MemberExprClass) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
     return GetMemberExprEOObject(op);
-  } else if (stmtClass == Stmt::MemberExprClass) {
+  } else if (stmt_class == Stmt::MemberExprClass) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
     return GetMemberExprEOObject(op);
-  } else if (stmtClass == Stmt::ArraySubscriptExprClass) {
+  } else if (stmt_class == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     std::vector<uint64_t> dims;
     return GetArraySubscriptExprEOObject(op, &dims, 0);
-  } else if (stmtClass == Stmt::ForStmtClass) {
+  } else if (stmt_class == Stmt::ForStmtClass) {
     const auto *op = dyn_cast<ForStmt>(stmt);
     return GetForStmtEOObject(op);
-  } else if (stmtClass == Stmt::CStyleCastExprClass) {
+  } else if (stmt_class == Stmt::CStyleCastExprClass) {
     const auto *op = dyn_cast<CStyleCastExpr>(stmt);
-    //TODO in explicit inegral casts CStyle cast is only empty wrapper with Imp cast, may be it shouldn't work
+    //TODO in explicit integral casts CStyle cast is only empty wrapper with Imp cast, may be it shouldn't work
     // for other cases.
     return GetCastEOObject(op);
+  } else {
+    llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName() << "\n";
   }
   return EOObject(EOObjectType::EO_PLUG);
 }
 EOObject GetCastEOObject(const CastExpr *op) {
   auto cast_kind = op->getCastKind();
   if (cast_kind == clang::CK_LValueToRValue) {
-    QualType qualType = op->getType();
-    string type = GetTypeName(qualType);
+    QualType qual_type = op->getType();
+    string type = GetTypeName(qual_type);
     EOObject read{"read"};
     read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-    if (!qualType->isRecordType())
+    if (!qual_type->isRecordType())
       read.name += "-as-" + type;
     else
       read.nested.emplace_back(to_string(
-                                   transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size),
+                                   transpiler.record_manager_.GetById(qual_type->getAsRecordDecl()->getID())->size),
                                EOObjectType::EO_LITERAL);
     return read;
-  } else if (cast_kind == clang::CK_FloatingToIntegral || cast_kind == clang::CK_IntegralToFloating)
-  {
-    QualType qualType = op->getType();
-    string type = GetTypeName(qualType);
-    EOObject cast{"as-"+type};
+  } else if (cast_kind == clang::CK_FloatingToIntegral || cast_kind == clang::CK_IntegralToFloating) {
+    QualType qual_type = op->getType();
+    string type = GetTypeName(qual_type);
+    EOObject cast{"as-" + type};
     cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
     return cast;
   }
@@ -333,22 +327,22 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
     }
 
     for (auto base_ch: op->getBase()->children()) {
-        auto index_name = GetStmtEOObject(op->getIdx());
+      auto index_name = GetStmtEOObject(op->getIdx());
 
-        EOObject curr_shift{"mul"};
-        EOObject type_size_obj{std::to_string(dim_size), EOObjectType::EO_LITERAL};
-        curr_shift.nested.emplace_back(index_name); // индекс массива.
-        curr_shift.nested.emplace_back(type_size_obj); // размер типа *  размер измерения массива.
+      EOObject curr_shift{"mul"};
+      EOObject type_size_obj{std::to_string(dim_size), EOObjectType::EO_LITERAL};
+      curr_shift.nested.emplace_back(index_name);
+      curr_shift.nested.emplace_back(type_size_obj);
 
-        auto stmt_class = base_ch->getStmtClass();
-        if (stmt_class == Stmt::ArraySubscriptExprClass) {
-            EOObject add_shift{"add"};
+      auto stmt_class = base_ch->getStmtClass();
+      if (stmt_class == Stmt::ArraySubscriptExprClass) {
+        EOObject add_shift{"add"};
 
-            auto arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
-            EOObject next_shift = GetArraySubscriptExprEOObject(arr_sub_expr, dims, depth + 1);
+        auto arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
+        EOObject next_shift = GetArraySubscriptExprEOObject(arr_sub_expr, dims, depth + 1);
 
-            add_shift.nested.emplace_back(curr_shift);
-            add_shift.nested.emplace_back(next_shift);
+        add_shift.nested.emplace_back(curr_shift);
+        add_shift.nested.emplace_back(next_shift);
 
             if (depth == 0) {
                 EOObject final_write{"add"};
@@ -394,36 +388,35 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(const ArraySubscriptExpr 
         } else if (stmt_class == Stmt::MemberExprClass) {
           auto memb_expr = dyn_cast<MemberExpr>(base_ch);
           auto child = dyn_cast<Expr>(*memb_expr->child_begin());
-          QualType qualType = child->getType();
+          QualType qual_type = child->getType();
           EOObject arr_name = GetStmtEOObject(op->getBase());
-          size_t sz = transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size;
+          size_t sz = transpiler.record_manager_.GetById(qual_type->getAsRecordDecl()->getID())->size;
           return std::make_pair(sz, arr_name);
         } else
           cerr << base_ch->getStmtClassName() << "\n\n";
     }
-    return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG}); // не должно до сюда дойти
+  return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
   EOObject member{"add"};
   auto child = dyn_cast<Expr>(*op->child_begin());
-  QualType qualType = child->getType();
-  EOObject record;
-  if (qualType->isPointerType()) {
-    qualType = dyn_cast<clang::PointerType>(qualType.getCanonicalType())->getPointeeType();
-    record.name = "address";
+  QualType qual_type = child->getType();
+  if (qual_type->isPointerType()) {
+    EOObject record{"address"};
+    qual_type = dyn_cast<clang::PointerType>(qual_type.getCanonicalType())->getPointeeType();
     record.nested.emplace_back("global-ram");
     record.nested.push_back(GetStmtEOObject(child));
-  } else
-    record = GetStmtEOObject(child);
-  member.nested.push_back(record);
-  member.nested.push_back(transpiler.record_manager.getShiftAlias(qualType->getAsRecordDecl()->getID(),
-                                                                  op->getMemberDecl()->getNameAsString()));
+    member.nested.push_back(record);
+  } else {
+    member.nested.push_back(GetStmtEOObject(child));
+  }
+  member.nested.push_back(transpiler.record_manager_.GetShiftAlias(qual_type->getAsRecordDecl()->getID(),
+                                                                   op->getMemberDecl()->getNameAsString()));
   return member;
 }
 
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
-  // EOObject call(EOObjectType::EO_EMPTY);
   EOObject call("seq");
   vector<std::size_t> var_sizes;
   for (auto VD: op->getDirectCallee()->parameters()) {
@@ -431,7 +424,6 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     size_t type_size = type_info.Width / 8;
     var_sizes.push_back(type_size);
   }
-  // Формирование оператора, задающего последовательность действий
   size_t shift = 0;
   int i = 0;
   for (auto arg: op->arguments()) {
@@ -445,18 +437,18 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     param.nested.push_back(address);
     param.nested.push_back(GetStmtEOObject(arg));
     shift += var_sizes[i];
-    // may be it will works with param.
+    // maybe it will work with param.
     i = i == var_sizes.size() - 1 ? i : i + 1;
     call.nested.push_back(param);
   }
-  call.nested.push_back(transpiler.func_manager.GetFunctionCall(op->getDirectCallee(), shift));
-  QualType qualType = op->getType();
-  std::string postfix = GetTypeName(qualType);
-  if (postfix != "undefinedtype") { // считается, что если тип не void,то генерация чтения данных нужна
+  call.nested.push_back(transpiler.func_manager_.GetFunctionCall(op->getDirectCallee(), shift));
+  QualType qual_type = op->getType();
+  std::string postfix = GetTypeName(qual_type);
+  if (postfix != "undefinedtype") {
     EOObject read_ret{"read"};
     EOObject ret_val{"return"};
     read_ret.nested.push_back(ret_val);
-    if (qualType->isRecordType() || qualType->isArrayType()) {
+    if (qual_type->isRecordType() || qual_type->isArrayType()) {
       read_ret.nested.emplace_back(
           to_string(var_sizes[0]),
           EOObjectType::EO_LITERAL
@@ -464,7 +456,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     } else
       read_ret.name += "-as-" + postfix;
     call.nested.push_back(read_ret);
-  } else { // если тип void,то возвращается TRUE
+  } else {
     call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
   }
 
@@ -481,17 +473,14 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   bool is_signed = p_literal->getType()->isSignedIntegerType();
   APInt an_int = p_literal->getValue();
-  // Формирование строкового значения для целого числа
-  int64_t val = 0;
-  if(is_signed) {
-    val = an_int.getSExtValue();
+  if (is_signed) {
+    int64_t val = an_int.getSExtValue();
+    std::string str_val{std::to_string(val)};
+    return EOObject{str_val, EOObjectType::EO_LITERAL};
   }
-  else {
-    val = an_int.getZExtValue();
-  }
-  std::string strVal{std::to_string(val)};
-  return EOObject{strVal, EOObjectType::EO_LITERAL};
-//   return {an_int.toString(10, is_signed), EOObjectType::EO_LITERAL};
+  uint64_t val = an_int.getZExtValue();
+  std::string str_val{std::to_string(val)};
+  return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
 
 EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
@@ -520,72 +509,73 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     operation = "shift-right";
   }
 
-  EOObject binop{operation};
+  EOObject binary_op{operation};
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
-  EOObject eoObject{"read"};
-  QualType qualType = left->getType();
-  eoObject.nested.push_back(GetStmtEOObject(left));
-  if (!qualType->isRecordType())
-    eoObject.name += "-as-" + GetTypeName(qualType);
+  EOObject eo_object{"read"};
+  QualType qual_type = left->getType();
+  eo_object.nested.push_back(GetStmtEOObject(left));
+  if (!qual_type->isRecordType())
+    eo_object.name += "-as-" + GetTypeName(qual_type);
   else
-    eoObject.nested.emplace_back(to_string(
-                                         transpiler.record_manager.getById(qualType->getAsRecordDecl()->getID())->size),
-                                 EOObjectType::EO_LITERAL);
-  binop.nested.emplace_back(eoObject);
+    eo_object.nested.emplace_back(to_string(
+                                      transpiler.record_manager_.GetById(qual_type->getAsRecordDecl()->getID())->size),
+                                  EOObjectType::EO_LITERAL);
+  binary_op.nested.emplace_back(eo_object);
 
-  binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
-  return binop;
+  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  return binary_op;
 }
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
-  auto opCode = p_operator->getOpcode();
+  auto op_code = p_operator->getOpcode();
   std::string operation;
-  if (opCode == BinaryOperatorKind::BO_Assign) {
+  if (op_code == BinaryOperatorKind::BO_Assign) {
     return GetAssignmentOperatorEOObject(p_operator);
-  } else if (opCode == BinaryOperatorKind::BO_Add) {
+  } else if (op_code == BinaryOperatorKind::BO_Add) {
     operation = "add";
-  } else if (opCode == BinaryOperatorKind::BO_Sub) {
+  } else if (op_code == BinaryOperatorKind::BO_Sub) {
     operation = "sub";
-  } else if (opCode == BinaryOperatorKind::BO_Mul) {
+  } else if (op_code == BinaryOperatorKind::BO_Mul) {
     operation = "mul";
-  } else if (opCode == BinaryOperatorKind::BO_Div) {
+  } else if (op_code == BinaryOperatorKind::BO_Div) {
     operation = "div";
-  } else if (opCode == BinaryOperatorKind::BO_Rem) {
+  } else if (op_code == BinaryOperatorKind::BO_Rem) {
     operation = "mod";
-  } else if (opCode == BinaryOperatorKind::BO_And) {
+  } else if (op_code == BinaryOperatorKind::BO_And) {
     operation = "bit-and";
-  } else if (opCode == BinaryOperatorKind::BO_Or) {
+  } else if (op_code == BinaryOperatorKind::BO_Or) {
     operation = "bit-or";
-  } else if (opCode == BinaryOperatorKind::BO_Xor) {
+  } else if (op_code == BinaryOperatorKind::BO_Xor) {
     operation = "bit-xor";
-  } else if (opCode == BinaryOperatorKind::BO_Shl) {
+  } else if (op_code == BinaryOperatorKind::BO_Shl) {
     operation = "shift-left";
-  } else if (opCode == BinaryOperatorKind::BO_Shr) {
+  } else if (op_code == BinaryOperatorKind::BO_Shr) {
     operation = "shift-right";
-  } else if (opCode == BinaryOperatorKind::BO_EQ) {
+  } else if (op_code == BinaryOperatorKind::BO_EQ) {
     operation = "eq";
-  } else if (opCode == BinaryOperatorKind::BO_NE) {
+  } else if (op_code == BinaryOperatorKind::BO_NE) {
     operation = "neq";
-  } else if (opCode == BinaryOperatorKind::BO_LT) {
+  } else if (op_code == BinaryOperatorKind::BO_LT) {
     operation = "less";
-  } else if (opCode == BinaryOperatorKind::BO_LE) {
+  } else if (op_code == BinaryOperatorKind::BO_LE) {
     operation = "leq";
-  } else if (opCode == BinaryOperatorKind::BO_GT) {
+  } else if (op_code == BinaryOperatorKind::BO_GT) {
     operation = "greater";
-  } else if (opCode == BinaryOperatorKind::BO_GE) {
+  } else if (op_code == BinaryOperatorKind::BO_GE) {
     operation = "geq";
   } else {
     operation = "undefined";
+    llvm::errs() << "Warning: Unknown operator " << p_operator->getOpcodeStr() << "\n";
   }
 
-  EOObject binop{operation};
-  binop.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
-  binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
-  return binop;
+  EOObject binary_op{operation};
+  binary_op.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  return binary_op;
 }
 
 EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
-  auto opCode = p_operator->getOpcode();
+  auto op_code = p_operator->getOpcode();
   std::string operation;
   Stmt *stmt = nullptr;
 
@@ -593,124 +583,113 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 //   uint64_t typeSize = GetTypeSize(argType);
 
   // [C99 6.5.2.4] Postfix increment and decrement
-  if (opCode == UnaryOperatorKind::UO_PostInc) { // UNARY_OPERATION(PostInc, "++")
+  if (op_code == UnaryOperatorKind::UO_PostInc) { // UNARY_OPERATION(PostInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
-    // Здесь необходимо определить размер типа данных если указатель
-    QualType resultType = p_operator->getType();  // Получили тип операнда
-    if (resultType->isPointerType()) {
-      // Необходимо определить тип (точнее размер) указателя
-      QualType argType = p_operator->getType();
-      uint64_t typeSize = GetTypeSize(argType);
-      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+    QualType result_type = p_operator->getType();
+    if (result_type->isPointerType()) {
+      QualType arg_type = p_operator->getType();
+      uint64_t type_size = GetTypeSize(arg_type);
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
     return variable;
-  } else if (opCode == UnaryOperatorKind::UO_PostDec) { // UNARY_OPERATION(PostDec, "--")
+  } else if (op_code == UnaryOperatorKind::UO_PostDec) { // UNARY_OPERATION(PostDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
-    // Здесь необходимо определить размер типа данных если указатель
-    QualType resultType = p_operator->getType();  // Получили тип операнда
-    if (resultType->isPointerType()) {
-      // Необходимо определить тип (точнее размер) указателя
-      QualType argType = p_operator->getType();
-      uint64_t typeSize = GetTypeSize(argType);
-      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+    QualType result_type = p_operator->getType();
+    if (result_type->isPointerType()) {
+      QualType arg_type = p_operator->getType();
+      uint64_t type_size = GetTypeSize(arg_type);
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
     return variable;
     // [C99 6.5.3.1] Prefix increment and decrement
-  } else if (opCode == UnaryOperatorKind::UO_PreInc) { // UNARY_OPERATION(PreInc, "++")
+  } else if (op_code == UnaryOperatorKind::UO_PreInc) { // UNARY_OPERATION(PreInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
-    // Здесь необходимо определить размер типа данных если указатель
-    QualType resultType = p_operator->getType();  // Получили тип операнда
-    if (resultType->isPointerType()) {
-      // Необходимо определить тип (точнее размер) указателя
-      QualType argType = p_operator->getType();
-      uint64_t typeSize = GetTypeSize(argType);
-      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+    QualType result_type = p_operator->getType();
+    if (result_type->isPointerType()) {
+      QualType arg_type = p_operator->getType();
+      uint64_t type_size = GetTypeSize(arg_type);
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
     return variable;
-  } else if (opCode == UnaryOperatorKind::UO_PreDec) { // UNARY_OPERATION(PreDec, "--")
+  } else if (op_code == UnaryOperatorKind::UO_PreDec) { // UNARY_OPERATION(PreDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
-    // Здесь необходимо определить размер типа данных если указатель
-    QualType resultType = p_operator->getType();  // Получили тип операнда
-    if (resultType->isPointerType()) {
-      // Необходимо определить тип (точнее размер) указателя
-      QualType argType = p_operator->getType();
-      uint64_t typeSize = GetTypeSize(argType);
-      EOObject value{std::to_string(typeSize), EOObjectType::EO_LITERAL};
+    QualType result_type = p_operator->getType();
+    if (result_type->isPointerType()) {
+      QualType arg_type = p_operator->getType();
+      uint64_t type_size = GetTypeSize(arg_type);
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
     return variable;
     // [C99 6.5.3.2] Address and indirection
-  } else if (opCode == UnaryOperatorKind::UO_AddrOf) { // UNARY_OPERATION(AddrOf, "&")
-    // stmt = p_operator->getSubExpr();
+  } else if (op_code == UnaryOperatorKind::UO_AddrOf) { // UNARY_OPERATION(AddrOf, "&")
     EOObject variable{"addr-of"};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     return variable;
-  } else if (opCode == UnaryOperatorKind::UO_Deref) { // UNARY_OPERATION(Deref, "*")
+  } else if (op_code == UnaryOperatorKind::UO_Deref) { // UNARY_OPERATION(Deref, "*")
     EOObject variable{"address"};
     EOObject ram{"global-ram"};
     variable.nested.push_back(ram);
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     return variable;
-    // operation = "read-as-address";
-    // EOObject unoop {operation};
-    return GetStmtEOObject(p_operator->getSubExpr());
     // [C99 6.5.3.3] Unary arithmetic
-  } else if (opCode == UnaryOperatorKind::UO_Plus) { // UNARY_OPERATION(Plus, "+")
+  } else if (op_code == UnaryOperatorKind::UO_Plus) { // UNARY_OPERATION(Plus, "+")
     operation = "plus";
-  } else if (opCode == UnaryOperatorKind::UO_Minus) { // UNARY_OPERATION(Minus, "-")
+  } else if (op_code == UnaryOperatorKind::UO_Minus) { // UNARY_OPERATION(Minus, "-")
     operation = "neg";
-  } else if (opCode == UnaryOperatorKind::UO_Not) { // UNARY_OPERATION(Not, "~")
+  } else if (op_code == UnaryOperatorKind::UO_Not) { // UNARY_OPERATION(Not, "~")
     operation = "bit-not";
-  } else if (opCode == UnaryOperatorKind::UO_LNot) { // UNARY_OPERATION(LNot, "!")
+  } else if (op_code == UnaryOperatorKind::UO_LNot) { // UNARY_OPERATION(LNot, "!")
     operation = "not";
     // "__real expr"/"__imag expr" Extension.
-  } else if (opCode == UnaryOperatorKind::UO_Real) { // UNARY_OPERATION(Real, "__real")
+  } else if (op_code == UnaryOperatorKind::UO_Real) { // UNARY_OPERATION(Real, "__real")
     operation = "real";
-  } else if (opCode == UnaryOperatorKind::UO_Imag) { // UNARY_OPERATION(Imag, "__imag")
+  } else if (op_code == UnaryOperatorKind::UO_Imag) { // UNARY_OPERATION(Imag, "__imag")
     operation = "imag";
     // __extension__ marker.
-  } else if (opCode == UnaryOperatorKind::UO_Extension) { // UNARY_OPERATION(Extension, "__extension__")
+  } else if (op_code == UnaryOperatorKind::UO_Extension) { // UNARY_OPERATION(Extension, "__extension__")
     operation = "extension";
     // [C++ Coroutines] co_await operator
-  } else if (opCode == UnaryOperatorKind::UO_Coawait) { // UNARY_OPERATION(Coawait, "co_await")
+  } else if (op_code == UnaryOperatorKind::UO_Coawait) { // UNARY_OPERATION(Coawait, "co_await")
     operation = "coawait";
     // Incorrect unary operator
   } else {
     operation = "undefined";
+    llvm::errs() << "Warning: Unknown operator " << UnaryOperator::getOpcodeStr(p_operator->getOpcode()) << "\n";
   }
 
-  EOObject unoop{operation};
-  unoop.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
-  return unoop;
+  EOObject unary_op{operation};
+  unary_op.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+  return unary_op;
 }
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
-  EOObject binop{"write"};
+  EOObject binary_op{"write"};
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
-  QualType qualType = left->getType();
-  if (!qualType->isRecordType())
-    binop.name += "-as-" + GetTypeName(left->getType());
-  binop.nested.emplace_back(GetStmtEOObject(left));
-  binop.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
-  return binop;
+  QualType qual_type = left->getType();
+  if (!qual_type->isRecordType())
+    binary_op.name += "-as-" + GetTypeName(left->getType());
+  binary_op.nested.emplace_back(GetStmtEOObject(left));
+  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  return binary_op;
 }
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
   if (!op)
     return EOObject{EOObjectType::EO_EMPTY};
   try {
-    const Variable &var = transpiler.glob.GetVarByID(dyn_cast<VarDecl>(op->getFoundDecl()));
+    const Variable &var = transpiler.glob_.GetVarById(dyn_cast<VarDecl>(op->getFoundDecl()));
     return EOObject{var.alias};
   } catch (invalid_argument &) {
     return EOObject{EOObjectType::EO_LITERAL};
@@ -718,21 +697,21 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
 }
 
 EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_operator) {
-  EOObject binop{"write"};
+  EOObject binary_op{"write"};
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
-  QualType qualType = left->getType();
-  if (!qualType->isRecordType())
-    binop.name += "-as-" + GetTypeName(left->getType());
-  binop.nested.emplace_back(GetStmtEOObject(left));
-  binop.nested.push_back(GetCompoundAssignEOObject(p_operator));
-  return binop;
+  QualType qual_type = left->getType();
+  if (!qual_type->isRecordType())
+    binary_op.name += "-as-" + GetTypeName(left->getType());
+  binary_op.nested.emplace_back(GetStmtEOObject(left));
+  binary_op.nested.push_back(GetCompoundAssignEOObject(p_operator));
+  return binary_op;
 }
 
-EOObject GetReturnStmpEOObject(const ReturnStmt *p_stmt) {
-  // TODO: Нужно сделать write-as-...
+EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
+  // TODO: Should make write-as-...
   EOObject ret{"write"};
-  EOObject addr{"return"};
-  ret.nested.push_back(addr);
+  EOObject address{"return"};
+  ret.nested.push_back(address);
   ret.nested.push_back(GetStmtEOObject(p_stmt->getRetValue()));
   return ret;
 }
@@ -774,68 +753,62 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
   return seq;
 }
 
-int GetTypeSize(QualType qualType) {
+uint64_t GetTypeSize(QualType qual_type) {
   extern ASTContext *context;
-  const clang::Type *typePtr = qualType.getTypePtr();
-  TypeInfo typeInfo = context->getTypeInfo(typePtr);
-  uint64_t typeSize = typeInfo.Width;
-  // Проверка размера типа
-  // std::cout << "Type size = " << typeSize / 8 << "\n";
+  const clang::Type *type_ptr = qual_type.getTypePtr();
+  TypeInfo type_info = context->getTypeInfo(type_ptr);
+  uint64_t type_size = type_info.Width;
 
-  if (typePtr->isPointerType()) {
-    // В этом случае необходимо определить размер типа, на который указывает указатель
-    const clang::Type* pointeeType =  typePtr->getPointeeType().getTypePtr();
-    TypeInfo pointeeTypeInfo = context->getTypeInfo(pointeeType);
-    uint64_t pointeeTypeSize = pointeeTypeInfo.Width;
-    // Проверка размера типа, на который указывает указатель
-    // std::cout << "Poinee type size = " << pointeeTypeSize / 8 << "\n";
-    return pointeeTypeSize / 8;
+  if (type_ptr->isPointerType()) {
+    const clang::Type *pointee_type = type_ptr->getPointeeType().getTypePtr();
+    TypeInfo pointee_type_info = context->getTypeInfo(pointee_type);
+    uint64_t pointee_type_size = pointee_type_info.Width;
+    return pointee_type_size / 8;
   }
 
-  return typeSize / 8;
+  return type_size / 8;
 }
 
-std::string GetTypeName(QualType qualType) {
+std::string GetTypeName(QualType qual_type) {
   extern ASTContext *context;
-  const clang::Type *typePtr = qualType.getTypePtr();
-  TypeInfo typeInfo = context->getTypeInfo(typePtr);
-  uint64_t typeSize = typeInfo.Width;
+  const clang::Type *type_ptr = qual_type.getTypePtr();
+  TypeInfo type_info = context->getTypeInfo(type_ptr);
+  uint64_t type_size = type_info.Width;
   std::string str;
 
-  if (typePtr->isBooleanType()) {
+  if (type_ptr->isBooleanType()) {
     str += "bool";
     return str;
   }
 
-  if (typePtr->isPointerType()) {
+  if (type_ptr->isPointerType()) {
     // str += "int64";
     str += "ptr";
     return str;
   }
 
-  if (typePtr->isFloatingType()) {
-    str += "float" + std::to_string(typeSize);
+  if (type_ptr->isFloatingType()) {
+    str += "float" + std::to_string(type_size);
     return str;
   }
 
-  if (!typePtr->isSignedIntegerType())
+  if (!type_ptr->isSignedIntegerType())
     str += "u";
-  if (typePtr->isCharType()) {
+  if (type_ptr->isCharType()) {
     str += "char";
     return str;
   }
-  if (typePtr->isIntegerType()) {
-    str += "int" + std::to_string(typeSize);
+  if (type_ptr->isIntegerType()) {
+    str += "int" + std::to_string(type_size);
     return str;
   }
 
-
-  if (typePtr->isUnionType())
+  if (type_ptr->isUnionType())
     str = "un-";
-  if (typePtr->isStructureType())
+  if (type_ptr->isStructureType())
     str = "st-";
-  if (typePtr->isUnionType() || typePtr->isStructureType()) {
-    RecordDecl *RD = typePtr->getAsRecordDecl();
+  if (type_ptr->isUnionType() || type_ptr->isStructureType()) {
+    RecordDecl *RD = type_ptr->getAsRecordDecl();
     if (RD->hasNameForLinkage())
       str += RD->getNameAsString();
     else
@@ -849,7 +822,7 @@ std::string GetTypeName(QualType qualType) {
 std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
   std::set<std::string> all_known = {obj.postfix};
   std::set<std::string> unknown{};
-  // TODO maybe should use pointers or copy constructor to avoid unnecessary copying of objects
+  // TODO maybe should use pointers or copy constructor to avoid unnecessary copying of objects_
   std::queue<EOObject> not_visited;
   for (auto child: obj.nested) {
     not_visited.push(std::move(child));

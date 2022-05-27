@@ -1,11 +1,8 @@
-#ifndef __MATCHERS__
-#define __MATCHERS__
+#ifndef C2EO_SRC_TRANSPILER_MATCHERS_H_
+#define C2EO_SRC_TRANSPILER_MATCHERS_H_
 
 #include "analyzers.h"
-// #include "codeGenerator.h"
 
-// void addLoopMatcher(MatchFinder &finder);
+void AddMatchers(MatchFinder &finder);
 
-void addMatchers(MatchFinder &finder);
-
-#endif // __MATCHERS__
+#endif // C2EO_SRC_TRANSPILER_MATCHERS_H_

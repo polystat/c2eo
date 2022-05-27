@@ -1,5 +1,5 @@
-#ifndef __RECORDDECL__
-#define __RECORDDECL__
+#ifndef C2EO_SRC_TRANSPILER_RECORDDECL_H_
+#define C2EO_SRC_TRANSPILER_RECORDDECL_H_
 
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
@@ -15,7 +15,6 @@
 #include "clang/AST/Decl.h"
 #include "record_manager.h"
 
-// Обработка переменной встреченной при проходе по дереву.
 std::vector<RecordType> ProcessRecordType(const clang::RecordDecl* RD, bool is_local=false);
 
-#endif // __RECORDDECL__
+#endif // C2EO_SRC_TRANSPILER_RECORDDECL_H_

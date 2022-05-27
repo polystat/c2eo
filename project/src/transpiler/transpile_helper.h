@@ -1,5 +1,5 @@
-#ifndef __TRANSPILE_HELPER__
-#define __TRANSPILE_HELPER__
+#ifndef C2EO_SRC_TRANSPILER_TRANSPILE_HELPER_H_
+#define C2EO_SRC_TRANSPILER_TRANSPILE_HELPER_H_
 
 // Declares clang::SyntaxOnlyAction.
 #include "clang/Frontend/FrontendActions.h"
@@ -13,7 +13,7 @@
 #include "clang/AST/ASTContext.h"
 #include "eo_object.h"
 
-std::string GetTypeName(clang::QualType val);
+std::string GetTypeName(clang::QualType qual_type);
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD);
 
@@ -23,4 +23,4 @@ EOObject GetStmtEOObject(const clang::Stmt *p_stmt);
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj);
 
-#endif // __TRANSPILE_HELPER__
+#endif // C2EO_SRC_TRANSPILER_TRANSPILE_HELPER_H_

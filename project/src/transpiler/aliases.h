@@ -1,5 +1,5 @@
-#ifndef __ALIASES__
-#define __ALIASES__
+#ifndef C2EO_SRC_TRANSPILER_ALIASES_H_
+#define C2EO_SRC_TRANSPILER_ALIASES_H_
 
 #include "map"
 #include "set"
