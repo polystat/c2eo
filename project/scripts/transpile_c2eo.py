@@ -15,9 +15,10 @@ import clean_before_transpilation
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files, filters):
+    def __init__(self, path_to_c_files, filters, need_to_prepare_c_code=True):
         if os.path.isfile(path_to_c_files):
             path_to_c_files = os.path.dirname(path_to_c_files)
+        self.need_to_prepare_c_code = need_to_prepare_c_code
         self.filters = filters
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
@@ -75,15 +76,8 @@ class Transpiler(object):
     def prepare_c_file(self, path, file_name, c_file):
         with open(f'{c_file}', 'r') as f:
             data = f.readlines()
-        for i, line in enumerate(data):
-            if ('#include' in line) or ('printf' in line):
-                new_line = line.lstrip()
-                whitespace_count = len(line) - len(new_line)
-                indent = ' ' * whitespace_count
-                data[i] = f'{indent}// {new_line}'
-                if new_line.startswith('printf'):
-                    argument = line.rsplit(',', maxsplit=1)[1].replace(');', '').replace(',', '').strip()
-                    data[i] += f'{indent}{argument};\n'
+        if self.need_to_prepare_c_code:
+            prepare_c_code(data)
         result_path = os.path.join(path, self.result_dir_name)
         prepared_c_file = os.path.join(result_path, f'{file_name}-eo.c')
         if not os.path.exists(result_path):
@@ -172,6 +166,18 @@ class Transpiler(object):
         code = regex.sub(self.run_sh_replace, full_name, self.run_sh_code)
         with open(f'{self.path_to_eo_project}run.sh', 'w') as f:
             f.write(code)
+
+
+def prepare_c_code(data):
+    for i, line in enumerate(data):
+        if ('#include' in line) or ('printf' in line):
+            new_line = line.lstrip()
+            whitespace_count = len(line) - len(new_line)
+            indent = ' ' * whitespace_count
+            data[i] = f'{indent}// {new_line}'
+            if new_line.startswith('printf'):
+                argument = line.rsplit(',', maxsplit=1)[1].replace(');', '').replace(',', '').strip()
+                data[i] += f'{indent}{argument};\n'
 
 
 if __name__ == '__main__':
