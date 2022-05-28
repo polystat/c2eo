@@ -62,10 +62,9 @@ extern UnitTranspiler transpiler;
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 
   if (!FD->hasBody())
-    // TODO if not body may be need to create simple complete or abstract object with correct name_
     return EOObject(EOObjectType::EO_EMPTY);
   const auto func_body = dyn_cast<CompoundStmt>(FD->getBody());
-  if (!func_body) // TODO: segfault at address 0x0
+  if (!func_body)
     return EOObject(EOObjectType::EO_EMPTY);
   size_t shift = transpiler.glob_.RealMemorySize();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
@@ -92,13 +91,18 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   for (const auto &var : all_local) {
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob_.name_));
   }
+  EOObject goto_object{"goto", "@"};
+  EOObject return_label{EOObjectType::EO_ABSTRACT};
+  return_label.arguments.emplace_back("goto-return-label");
   EOObject body_seq = GetCompoundStmt(func_body, true);
   std::reverse(all_local.begin(), all_local.end());
   for (const auto &var : all_local) {
     if (var.is_initialized)
       body_seq.nested.insert(body_seq.nested.begin(), var.GetInitializer());
   }
-  func_body_eo.nested.push_back(body_seq);
+  return_label.nested.push_back(body_seq);
+  goto_object.nested.push_back(return_label);
+  func_body_eo.nested.push_back(goto_object);
   transpiler.glob_.RemoveAllUsed(all_param);
   transpiler.glob_.RemoveAllUsed(all_local);
 
@@ -216,9 +220,6 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmt_class == Stmt::ParenExprClass) {
     const auto *op = dyn_cast<ParenExpr>(stmt);
     return GetStmtEOObject(*op->child_begin());
-  } else if (stmt_class == Stmt::ImplicitCastExprClass) {
-    const auto *op = dyn_cast<ImplicitCastExpr>(stmt);
-    return GetCastEOObject(op);
   } else if (stmt_class == Stmt::DeclRefExprClass) {
     auto ref = dyn_cast<DeclRefExpr>(stmt);
     return GetEODeclRefExpr(ref);
@@ -261,10 +262,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   } else if (stmt_class == Stmt::ForStmtClass) {
     const auto *op = dyn_cast<ForStmt>(stmt);
     return GetForStmtEOObject(op);
-  } else if (stmt_class == Stmt::CStyleCastExprClass) {
-    const auto *op = dyn_cast<CStyleCastExpr>(stmt);
-    //TODO in explicit integral casts CStyle cast is only empty wrapper with Imp cast, may be it shouldn't work
-    // for other cases.
+  } else if (stmt_class >= clang::Stmt::firstCastExprConstant && stmt_class <= clang::Stmt::lastCastExprConstant) {
+    const auto *op = dyn_cast<CastExpr>(stmt);
     return GetCastEOObject(op);
   } else {
     llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName() << "\n";
@@ -716,12 +715,16 @@ EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_
 }
 
 EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
+  EOObject result{EOObjectType::EO_EMPTY};
   // TODO: Should make write-as-...
   EOObject ret{"write"};
   EOObject address{"return"};
   ret.nested.push_back(address);
   ret.nested.push_back(GetStmtEOObject(p_stmt->getRetValue()));
-  return ret;
+  result.nested.push_back(ret);
+  EOObject label{"goto-return-label.forward TRUE",EOObjectType::EO_LITERAL};
+  result.nested.push_back(label);
+  return result;
 }
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {

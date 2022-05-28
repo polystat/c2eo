@@ -57,7 +57,7 @@ int main(int argc, const char **argv) {
   auto pos = filename.rfind('/');
   if (pos != std::string::npos)
     path_name = filename.substr(0, pos + 1);
-  transpiler.SetPathName(path_name);
+  UnitTranspiler::SetPathName(path_name);
 
   auto expected_parser
       = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);

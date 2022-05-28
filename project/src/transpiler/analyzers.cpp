@@ -14,7 +14,6 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
   }
   const auto *FD = result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
   // We do not want to convert header files!
-  // TODO !FD->isDefined() now only plug and should be fixed later
   //   if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
   if (!FD) {
     return;

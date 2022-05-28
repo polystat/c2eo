@@ -120,13 +120,12 @@ EOObject Variable::GetInitializer() const {
       type_postfix != "char") // todo char!?
     res.name += "-as-" + type_postfix;
   res.nested.emplace_back(alias);
-  // TODO if value will be EOObject then code below changed. (rework for check value == EoObject::PLUG)
-  if (value.name == "plug")
+  if (value.type == EOObjectType::EO_PLUG)
       // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   else
       // Probably just emplace value.
-    res.nested.emplace_back(value.name, EOObjectType::EO_LITERAL);
+    res.nested.emplace_back(value);
   return res;
 }
 
