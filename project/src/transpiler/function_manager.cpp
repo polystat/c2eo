@@ -62,7 +62,9 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD, size_t 
   });
   if (res_decl != declarations.end()) {
     EOObject call(res_decl->name);
-    call.prefix = "^";
+    if (res_decl->FD->getDefinition()) {
+      call.prefix = "^";
+    }
     call.nested.emplace_back("empty-local-position");
     call.nested.emplace_back(std::to_string(param_size), EOObjectType::EO_LITERAL);
     return call;

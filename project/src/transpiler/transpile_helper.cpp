@@ -302,11 +302,11 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   auto cond = p_stmt->getCond();
   auto inc = p_stmt->getInc();
   auto body = p_stmt->getBody();
-  if(init) {
+  if (init) {
     for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
   }
   EOObject while_stmt{"while"};
-  if(cond) {
+  if (cond) {
     while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   }
   else{
@@ -314,7 +314,7 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   }
   EOObject seq{"seq"};
   seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  if(init) {
+  if (inc) {
     seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
   }
   while_stmt.nested.push_back(seq);
