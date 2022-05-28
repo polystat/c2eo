@@ -26,8 +26,9 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
 
   DeclarationNameInfo decl_name_info{FD->getNameInfo()};
   std::string func_name{decl_name_info.getAsString()};
-  if (func_name != "main")
+  if (func_name != "main") {
     func_name = "f-" + func_name;
+  }
   auto is_definition = FD->isThisDeclarationADefinition();
   if (is_definition) {
     FunctionDefinition func_def{FD, func_name};
