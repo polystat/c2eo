@@ -39,13 +39,20 @@ def colorize_text(text, color):
 
 
 def compare_files(file1, file2):
-    if not os.path.isfile(file1) or not os.path.isfile(file2):
+    if not (os.path.isfile(file1) and os.path.isfile(file2)):
         return False
     with open(file1, 'r') as f1:
         data1 = f1.read()
     with open(file2, 'r') as f2:
         data2 = f2.read()
     return data1 == data2
+
+
+def cpu_count():
+    count = os.cpu_count()
+    if count is None:
+        return 1
+    return count
 
 
 def get_or_none(array, index):
@@ -191,10 +198,7 @@ def split_path(path_to_file, with_end_sep=False):
 
 
 def thread_pool():
-    cpu_count = os.cpu_count()
-    if cpu_count is None:
-        cpu_count = 1
-    return ThreadPool(cpu_count)
+    return ThreadPool(cpu_count())
 
 
 def version_compare(ver1, ver2):
