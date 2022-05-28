@@ -2,7 +2,7 @@
 //Одна из функций запускается как параметр другой
 // Добавлен еще один параметры в первую функцию
 
-// #include <stdio.h>
+#include <stdio.h>
 
 long long c = 10ll;
 
@@ -19,10 +19,7 @@ int main() {
     long long a;
     a = func1(c, 10ll);
     a = a + func2(c);
-//     a = func1(c, 10ll) + func2(c);
-
-//     printf("%lld\n", a);
-//     a;
-
+    a = func1(c, 10ll) + func2(c);
+    printf("%lld\n", a);
     return 0;
 }

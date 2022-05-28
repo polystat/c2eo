@@ -26,7 +26,6 @@ struct Variable {
 //  bool isCustomType = false;
   // like g-x
   std::string alias;
-  // TODO value should be EOObject
   EOObject value;
   // address of local memory start in global
   std::string local_pointer;
