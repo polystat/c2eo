@@ -22,7 +22,7 @@ def main(path_to_c2eo_build=None):
         return False
 
     tools.pprint(result.stdout, slowly=True)
-    result = subprocess.run('make', shell=True)
+    result = subprocess.run(f'make -j {tools.cpu_count()}', shell=True)
     os.chdir(original_path)
 
     if result.returncode != 0:
