@@ -29,7 +29,7 @@ class Compiler(object):
         if not build_c2eo.main(self.path_to_c2eo_build):
             exit(-1)
 
-        self.transpilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
+        self.transpilation_units = Transpiler(self.path_to_tests, self.filters, False).transpile()
         if not self.transpilation_units:
             exit(-2)
 
