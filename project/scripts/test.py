@@ -47,6 +47,7 @@ class Tests(object):
             results = threads.map(compare_test_results, self.transpilation_units)
         passed, errors, exceptions = group_comparison_results(results)
         print_tests_result(passed, errors, exceptions)
+        return (len(errors) + len(exceptions)) > 0
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
@@ -191,8 +192,10 @@ def print_tests_result(passed, errors, exceptions):
 if __name__ == '__main__':
     start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
-    Tests(tools.get_or_none(sys.argv, 1), tools.get_or_none(sys.argv, 2)).test()
+    is_failed = Tests(tools.get_or_none(sys.argv, 1), tools.get_or_none(sys.argv, 2)).test()
     end_time = time.time()
     time_span = int(end_time - start_time)
     tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
     tools.pprint(f'{"-" * 60}\n', slowly=True)
+    if is_failed:
+        exit(-4)
