@@ -111,23 +111,19 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [unions](#unions)
 - [functions](#functions)
 - [function call operators](#function-call-operators)
-- [single return at the end of the function](#single-return)
+- [multiple return](#multiple-return)
 - [pointers](#pointers)
 - [external links](#external-links)
 - [if-else](#if-else)
 - [while-do](#while-do)
 - [for](#for)
-- [unary operations with base types, pointers and their and assignment modifications](#operators)
-- [binary operations with base types and assignment modifications](#operators)
+- [operators](#operators)
 
 :hammer: In progress:
-- [initial initialization of global variables](#global-initialization)
-- [calling functions with local variables from other functions](#calling-functions-with-local-variables-from-other-functions)
 - [bit operators (inconsistent implementation in the EO)](#bit-operators)
 - [char, unsigned + short + int, float (not supported by EO)](#basic-types)
 
 :x: [Not implemented](#not-implemented):
-- [multiple return](#multiple-return)
 - [switch case default](#switch-case-default)
 - [const](#const)
 - [enums](#enums)
@@ -135,6 +131,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [continue](#continue)
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
+- [pointers on function](pointers-on-function)
 
 ### :heavy_check_mark: Implemented:
 
@@ -302,21 +299,36 @@ void main() {
     printf "%d\n" a
 ```
 
-### Single return
+### Multiple return
 
-For the simplest non-nested return, we simply generate a record of the result in a separate ram memory object. Further, other functions can read the result from there.
+We generate a record of the result in a separate ram memory object. Further, other functions can read the result from there.
+To solve the multiple return problem, we can use the [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object in eo. By wrapping the entire function in a similar object, we can interrupt its execution at any time. To do this, you just need to generate a g.forward call for each return.
 
 ```c
-... bar(){
-  return result;
-} 
+function {
+  ...
+  return <result_1>;
+  ...
+  return <result_2>;
+  ...
+  return <result_3>;
+}
 ```
 
 ```java
-ram 1024 > return 
-[param-start] > bar
-  seq > @
-    return.write result
+[] > function
+  goto > @
+    [g]
+      seq > @
+        ...
+        return.write <result_1>
+        g.forward TRUE
+        ...
+        return.write <result_2>
+        g.forward TRUE
+        ...
+        return.write <result_3>
+        g.forward TRUE
 ```
 
 ### Pointers
@@ -507,41 +519,17 @@ x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2
 (double)|[as-float64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-float64.eo)
 (long long int)|[as-int64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-int64.eo)
 
-### In progress
-
-### Global initialization
-
-Writing to memory specifying the correct type of variable.
-
 ```c
-int a = 3;
+x += 10;
 ```
+
+For assignment operations, we generate the following constructs
 
 ```java
-address global-ram 0 > a
-a.write-as-int32 3
+x.write (x.add 10)
 ```
 
-### Calling functions with local variables from other functions
-
-For such a call, it is necessary to calculate the free space for local variables and generate them.
-
-```c
-int foo1 () {
-  int b;
-  foo2(a);
-  retun 0;
-}
-
-int foo2 () {
-  int b;
-  return 0;
-}
-
-void main () {
-  foo1()
-}
-```
+### In progress
 
 ### Basic types
 
@@ -569,37 +557,6 @@ C|EO
 \>>|[shift-left](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-left.eo)
 
 ### Not implemented
-
-### Multiple return
-
-To solve the multiple return problem, we can use the [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object in eo. By wrapping the entire function in a similar object, we can interrupt its execution at any time. To do this, you just need to generate a g.forward call for each return.
-
-```c
-function {
-  ...
-  return <result_1>;
-  ...
-  return <result_2>;
-  ...
-  return <result_3>;
-}
-```
-
-```java
-[] > function
-  goto > @
-    [g]
-      seq > @
-        ...
-        return.write <result_1>
-        g.forward
-        ...
-        return.write <result_2>
-        g.forward
-        ...
-        return.write <result_3>
-        g.forward
-```
 
 ### Switch case default
 
@@ -772,4 +729,66 @@ int main() {
 }
 ```
 
-</details>
+### Pointers on function
+
+> Source: https://stackoverflow.com/questions/840501/how-do-function-pointers-in-c-work
+
+Let's start with a basic function which we will be pointing to:
+
+```c
+int addInt(int n, int m) {
+    return n + m;
+}
+```
+
+First thing, let's define a pointer to a function which receives 2 ints and returns an int:
+
+```c
+int (*functionPtr)(int, int);
+```
+
+Now we can safely point to our function:
+
+```c
+functionPtr = &addInt;
+```
+
+Now that we have a pointer to the function, let's use it:
+
+```c
+int sum = (*functionPtr)(2, 3); // sum == 5
+```
+
+Passing the pointer to another function is basically the same:
+
+```c
+int add2to3(int (*functionPtr)(int, int)) {
+    return (*functionPtr)(2, 3);
+}
+```
+
+We can use function pointers in return values as well (try to keep up, it gets messy):
+
+```c
+// this is a function called functionFactory which receives parameter n
+// and returns a pointer to another function which receives two ints
+// and it returns another int
+int (*functionFactory(int n))(int, int) {
+    printf("Got parameter %d", n);
+    int (*functionPtr)(int, int) = &addInt;
+    return functionPtr;
+}
+```
+
+But it's much nicer to use a typedef:
+
+```c
+typedef int (*myFuncDef)(int, int);
+// note that the typedef name is indeed myFuncDef
+
+myFuncDef functionFactory(int n) {
+    printf("Got parameter %d", n);
+    myFuncDef functionPtr = &addInt;
+    return functionPtr;
+}
+```
