@@ -207,6 +207,10 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
 }
 
 EOObject GetStmtEOObject(const Stmt *stmt) {
+  if (!stmt){
+    llvm::errs() << "Warning: Try to construct EOObject for nullptr\n";
+    return EOObject(EOObjectType::EO_PLUG);
+  }
   Stmt::StmtClass stmt_class = stmt->getStmtClass();
   if (stmt_class == Stmt::BinaryOperatorClass) {
     const auto *op = dyn_cast<BinaryOperator>(stmt);
@@ -717,11 +721,14 @@ EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_
 EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   EOObject result{EOObjectType::EO_EMPTY};
   // TODO: Should make write-as-...
-  EOObject ret{"write"};
-  EOObject address{"return"};
-  ret.nested.push_back(address);
-  ret.nested.push_back(GetStmtEOObject(p_stmt->getRetValue()));
-  result.nested.push_back(ret);
+  auto* ret_value =  p_stmt->getRetValue();
+  if (ret_value) {
+    EOObject ret{"write"};
+    EOObject address{"return"};
+    ret.nested.push_back(address);
+    ret.nested.push_back(GetStmtEOObject(ret_value));
+    result.nested.push_back(ret);
+  }
   EOObject label{"goto-return-label.forward TRUE",EOObjectType::EO_LITERAL};
   result.nested.push_back(label);
   return result;
