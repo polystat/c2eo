@@ -36,6 +36,7 @@ std::map<std::string, std::string> known_aliases = {
     {"goto",             "+alias org.eolang.gray.goto"},
     {"greater",          "+alias c2eo.coperators.greater"},
     {"if",               "+alias c2eo.coperators.if"},
+    {"if-else",          "+alias c2eo.coperators.if-else"},
     {"imag",             "+alias c2eo.coperators.imag"},
     {"leq",              "+alias c2eo.coperators.leq"},
     {"less",             "+alias c2eo.coperators.less"},

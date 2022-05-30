@@ -735,17 +735,18 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
 }
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
-  EOObject if_stmt{"if"};
-  if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
   if (p_stmt->hasElseStorage()) {
-    if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
+    EOObject if_else_stmt{"if-else"};
+    if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+    if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
+    if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
+    return if_else_stmt;
   } else {
-    EOObject empty_seq{"seq"};
-    empty_seq.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-    if_stmt.nested.push_back(empty_seq);
+    EOObject if_stmt{"if"};
+    if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+    if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
+    return if_stmt;
   }
-  return if_stmt;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {

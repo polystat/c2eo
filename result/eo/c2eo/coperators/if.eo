@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
-[a b c] > if
-  (a.eq 0).if c b > @
+[a b] > if
+  (a.eq 0).if TRUE b > @
