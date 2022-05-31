@@ -30,6 +30,7 @@ class ClangTidy(object):
 
     def inspect(self):
         tools.pprint('\nInspection start\n')
+        self.generate_compile_commands()
         patterns = settings.get_setting('code_file_patterns')
         code_files = tools.search_files_by_patterns(self.path_to_code_files, patterns,
                                                     recursive=True, print_files=True)
