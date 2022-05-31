@@ -128,11 +128,11 @@ class Transpiler(object):
                         place, _, message = line.partition(f'{level}:')
                         message = message.strip()
                         if message not in data[level]:
-                            data[level][message] = []
+                            data[level][message] = set()
                         if unit['name'] in place:
-                            data[level][message].append(place.split('/')[-1][:-1])
+                            data[level][message].add(place.split('/')[-1][:-2])
                         else:
-                            data[level][message].append(f'{unit["name"]}-eo.c')
+                            data[level][message].add(f'{unit["name"]}-eo.c')
         return data
 
     def move_transpiled_files(self):

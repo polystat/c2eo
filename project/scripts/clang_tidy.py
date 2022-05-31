@@ -69,29 +69,29 @@ class ClangTidy(object):
         print()
         tools.pprint()
         data = self.group_transpilation_results()
-        for level in ['note', 'warning', 'error', 'exception']:
+        for level in ['note', 'warning']:
             for name, places in data[level].items():
                 tools.pprint(name, slowly=True, status=level.upper())
                 tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
     def group_transpilation_results(self):
-        data = {'note': {}, 'warning': {}, 'error': {}, 'exception': {}}
+        data = {'note': {}, 'warning': {}}
         for unit in self.results:
             result = unit['inspection_result']
             for line in result.stdout.split('\n'):
                 if any(warning in line for warning in self.ignored_inspection_warnings):
                     continue
 
-                for level in ['note', 'warning', 'error', 'exception']:
+                for level in ['note', 'warning']:
                     if f'{level}:' in line:
                         place, _, message = line.partition(f'{level}:')
                         message = message.strip()
                         if message not in data[level]:
-                            data[level][message] = []
+                            data[level][message] = set()
                         if unit['name'] in place:
-                            data[level][message].append(place.split('/')[-1][:-1])
+                            data[level][message].add(place.split('/')[-1][:-2])
                         else:
-                            data[level][message].append(unit['file'])
+                            data[level][message].add(unit['file'])
         return data
 
 
