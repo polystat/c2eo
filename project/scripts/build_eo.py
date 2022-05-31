@@ -43,10 +43,10 @@ class EOBuilder(object):
         else:
             tools.pprint('Latest version detected', status='PASS')
 
-        eo_src_files = tools.search_files_by_pattern(self.path_to_eo, '*.eo', recursive=True)
+        eo_src_files = tools.search_files_by_patterns(self.path_to_eo, ['*.eo'], recursive=True)
         eo_src_files = set(map(lambda x: x.replace(self.path_to_eo, '', 1).replace('.eo', '', 1), eo_src_files))
-        project_eo_files = tools.search_files_by_pattern(self.path_to_eo_parse, '*.xmir',
-                                                         recursive=True, filters=['!org/eolang'])
+        project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, ['*.xmir'],
+                                                          recursive=True, filters=['!org/eolang'])
         project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
