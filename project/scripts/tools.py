@@ -24,8 +24,8 @@ def apply_filters_to_files(files, filters=None):
     return list(result)
 
 
-def clear_dir_by_pattern(path, file_pattern, recursive=False, print_files=False):
-    found_files = search_files_by_pattern(path, file_pattern, recursive=recursive, print_files=print_files)
+def clear_dir_by_patterns(path, file_patterns, recursive=False, print_files=False):
+    found_files = search_files_by_patterns(path, file_patterns, recursive=recursive, print_files=print_files)
     for file in found_files:
         os.remove(file)
     pprint('Files removed')
@@ -177,11 +177,13 @@ def remove_empty_dirs(path):
                 is_removed = True
 
 
-def search_files_by_pattern(path, file_pattern, filters=None, recursive=False, print_files=False):
+def search_files_by_patterns(path, file_patterns, filters=None, recursive=False, print_files=False):
     if recursive:
         path = os.path.join(path, '**')
-    pprint(f'\nLooking for "{file_pattern}" files in "{path}"')
-    found_files = glob.glob(os.path.join(path, file_pattern), recursive=recursive)
+    pprint(f'\nLooking for "{file_patterns}" files in "{path}"')
+    found_files = []
+    for pattern in file_patterns:
+        found_files.extend(glob.glob(os.path.join(path, pattern), recursive=recursive))
     pprint(f'Found {len(found_files)} files')
     found_files = apply_filters_to_files(found_files, filters)
     if print_files:

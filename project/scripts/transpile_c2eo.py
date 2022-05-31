@@ -35,13 +35,15 @@ class Transpiler(object):
         self.replaced_path = f'{os.path.split(self.path_to_c_files[:-1])[0]}{os.sep}'
         self.files_handled_count = 0
         self.files_count = 0
-        self.ignored_warnings = settings.get_setting('ignored_warnings')
+        self.ignored_transpilation_warnings = settings.get_setting('ignored_transpilation_warnings')
+        if not self.ignored_transpilation_warnings:
+            self.ignored_transpilation_warnings = []
 
     def transpile(self):
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
-        c_files = tools.search_files_by_pattern(self.path_to_c_files, '*.c',
-                                                filters=self.filters, recursive=True, print_files=True)
+        c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'],
+                                                 filters=self.filters, recursive=True, print_files=True)
         self.files_count = len(c_files)
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_build)
@@ -88,7 +90,7 @@ class Transpiler(object):
 
     def remove_unused_eo_files(self):
         transpiled_eo_names = set(map(lambda x: x['rel_eo_file'], self.transpilation_units))
-        src_eo_names = tools.search_files_by_pattern(self.path_to_eo_src, '*.eo', recursive=True)
+        src_eo_names = tools.search_files_by_patterns(self.path_to_eo_src, ['*.eo'], recursive=True)
         src_eo_names = set(map(lambda x: x.replace(self.path_to_eo_src, ''), src_eo_names))
         for name in src_eo_names - transpiled_eo_names:
             os.remove(f'{self.path_to_eo_src}{name}')
@@ -118,7 +120,7 @@ class Transpiler(object):
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
             for line in result.stderr.split('\n'):
-                if any(warning in line for warning in self.ignored_warnings):
+                if any(warning in line for warning in self.ignored_transpilation_warnings):
                     continue
 
                 for level in ['note', 'warning', 'error', 'exception']:
@@ -126,11 +128,11 @@ class Transpiler(object):
                         place, _, message = line.partition(f'{level}:')
                         message = message.strip()
                         if message not in data[level]:
-                            data[level][message] = []
+                            data[level][message] = set()
                         if unit['name'] in place:
-                            data[level][message].append(place.split('/')[-1][:-1])
+                            data[level][message].add(place.split('/')[-1][:-2])
                         else:
-                            data[level][message].append(f'{unit["name"]}-eo.c')
+                            data[level][message].add(f'{unit["name"]}-eo.c')
         return data
 
     def move_transpiled_files(self):
@@ -153,10 +155,10 @@ class Transpiler(object):
             tools.pprint('\nNot found any changes in src files')
 
     def move_aliases(self):
-        aliases = tools.search_files_by_pattern('.', '*.alias', print_files=True)
+        aliases = tools.search_files_by_patterns('.', ['*.alias'], print_files=True)
         if not os.path.exists(self.path_to_eo_external):
             os.makedirs(self.path_to_eo_external, exist_ok=True)
-        tools.clear_dir_by_pattern(self.path_to_eo_external, '*.eo')
+        tools.clear_dir_by_patterns(self.path_to_eo_external, ['*.eo'])
         for alias in aliases:
             file_name = tools.get_file_name(alias)
             destination_file = os.path.join(self.path_to_eo_external, file_name)
