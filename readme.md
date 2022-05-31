@@ -131,7 +131,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [continue](#continue)
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
-- [pointers on function](pointers-on-function)
+- [pointers on function](#pointers-on-function)
 
 ### :heavy_check_mark: Implemented:
 
