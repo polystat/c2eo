@@ -28,7 +28,10 @@ jobs:
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
           rm -r ./llvm-clang
           mv ~/llvm-clang .
-          
+      
+      - name: Install clang-tidy
+        run: sudo apt install clang-tidy
+      
       - name: Clang-tidy
         run: |
           cd ./project/scripts
