@@ -26,20 +26,14 @@ class Compiler(object):
 
     def compile(self):
         update_eo_version.main()
-        if not build_c2eo.main(self.path_to_c2eo_build):
-            exit(-1)
-
+        build_c2eo.main(self.path_to_c2eo_build)
         self.transpilation_units = Transpiler(self.path_to_tests, self.filters, False).transpile()
-        if not self.transpilation_units:
-            exit(-2)
-
-        if not EOBuilder().build():
-            exit(-3)
-
-        tools.pprint(f'\n{"-" * 60}', slowly=True)
-        tools.pprint('COMPILE RESULTS', slowly=True)
-        tools.pprint(f'{"-" * 60}', slowly=True)
-        tools.pprint(f'{len(self.transpilation_units)} files', slowly=True, status='PASS')
+        if self.transpilation_units:
+            EOBuilder().build()
+            tools.pprint(f'\n{"-" * 60}', slowly=True)
+            tools.pprint('COMPILE RESULTS', slowly=True)
+            tools.pprint(f'{"-" * 60}', slowly=True)
+            tools.pprint(f'{len(self.transpilation_units)} files', slowly=True, status='PASS')
 
 
 if __name__ == '__main__':

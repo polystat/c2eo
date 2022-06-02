@@ -40,11 +40,11 @@ class ClangTidy(object):
         with tools.thread_pool() as threads:
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
         self.print_inspection_results()
-        result = 0
+        result = False
         for unit in self.results:
             if unit['inspection_result'].returncode != 0:
                 tools.pprint_exception(unit['file'], unit['inspection_result'].stderr)
-                result = 1
+                result = True
         return result
 
     def generate_compile_commands(self):
@@ -55,7 +55,7 @@ class ClangTidy(object):
         os.chdir(original_path)
         if result.returncode != 0:
             tools.pprint_exception(cmd, result.stderr)
-            exit(result.returncode)
+            exit('Failed during cmake execution')
         tools.pprint(result.stdout, slowly=True)
 
     def inspect_file(self, file):
@@ -98,9 +98,10 @@ class ClangTidy(object):
 if __name__ == '__main__':
     start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
-    return_code = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
+    is_any_warnings = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
     end_time = time.time()
     time_span = int(end_time - start_time)
     tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
     tools.pprint(f'{"-" * 60}\n', slowly=True)
-    exit(return_code)
+    if is_any_warnings:
+        exit('Clang-tidy has several warnings')
