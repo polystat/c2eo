@@ -50,7 +50,8 @@ class Transpiler(object):
         tools.pprint('\nTranspile files:\n', slowly=True)
         with tools.thread_pool() as threads:
             self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
-        self.print_transpilation_results()
+        print_transpilation_results(self.group_transpilation_results())
+        self.check_c2eo_fails()
         self.remove_unused_eo_files()
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
@@ -106,15 +107,6 @@ class Transpiler(object):
             with open(empty_unit['eo_file'], 'w') as f:
                 f.write(plug)
 
-    def print_transpilation_results(self):
-        print()
-        tools.pprint()
-        data = self.group_transpilation_results()
-        for level in ['note', 'warning', 'error', 'exception']:
-            for name, places in data[level].items():
-                tools.pprint(name, slowly=True, status=level.upper())
-                tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
-
     def group_transpilation_results(self):
         data = {'note': {}, 'warning': {}, 'error': {}, 'exception': {}}
         for unit in self.transpilation_units:
@@ -134,6 +126,17 @@ class Transpiler(object):
                         else:
                             data[level][message].add(f'{unit["name"]}-eo.c')
         return data
+
+    def check_c2eo_fails(self):
+        is_transpilation_failed = False
+        for unit in self.transpilation_units:
+            result = unit['transpilation_result']
+            if result.returncode:
+                exception_message = '\n'.join(result.stderr.split('\n')[-3:-1])
+                tools.pprint_exception('c2eo', exception_message)
+                is_transpilation_failed = True
+        if is_transpilation_failed:
+            exit('c2eo failed on some c files')
 
     def move_transpiled_files(self):
         difference = []
@@ -180,6 +183,15 @@ def prepare_c_code(data):
             if new_line.startswith('printf'):
                 argument = line.rsplit(',', maxsplit=1)[1].replace(');', '').replace(',', '').strip()
                 data[i] += f'{indent}{argument};\n'
+
+
+def print_transpilation_results(data):
+    print()
+    tools.pprint()
+    for level in ['note', 'warning', 'error', 'exception']:
+        for name, places in data[level].items():
+            tools.pprint(name, slowly=True, status=level.upper())
+            tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
 
 if __name__ == '__main__':
