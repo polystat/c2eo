@@ -133,7 +133,7 @@ class Transpiler(object):
             result = unit['transpilation_result']
             if result.returncode:
                 exception_message = '\n'.join(result.stderr.split('\n')[-3:-1])
-                tools.pprint_exception('c2eo', exception_message)
+                tools.pprint_exception(f'c2eo {unit["name"]}', exception_message)
                 is_transpilation_failed = True
         if is_transpilation_failed:
             exit('c2eo failed on some c files')
@@ -197,4 +197,5 @@ def print_transpilation_results(data):
 if __name__ == '__main__':
     path_to_files = os.path.abspath(sys.argv[1])
     tools.move_to_script_dir(sys.argv[0])
-    Transpiler(path_to_files, None).transpile()
+    prepare_code = tools.get_or_none(sys.argv, 2)
+    Transpiler(path_to_files, None, prepare_code != 'f').transpile()
