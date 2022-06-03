@@ -77,7 +77,7 @@ class Transpiler(object):
                 'name': name,  'result_path': result_path, 'prepared_c_file': prepared_c_file}
 
     def prepare_c_file(self, path, file_name, c_file):
-        with open(f'{c_file}', 'r') as f:
+        with open(f'{c_file}', 'r', encoding='ISO-8859-1') as f:
             data = f.readlines()
         if self.need_to_prepare_c_code:
             prepare_c_code(data)
@@ -135,6 +135,7 @@ class Transpiler(object):
                 exception_message = '\n'.join(result.stderr.split('\n')[-3:-1])
                 tools.pprint_exception(f'c2eo {unit["name"]}', exception_message)
                 is_transpilation_failed = True
+                print()
         if is_transpilation_failed:
             exit('c2eo failed on some c files')
 
