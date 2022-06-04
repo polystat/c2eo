@@ -11,6 +11,7 @@
 std::set<std::string> known_types = {
     "memory",
     "seq",
+    "$",
 };
 
 std::map<std::string, std::string> known_aliases = {

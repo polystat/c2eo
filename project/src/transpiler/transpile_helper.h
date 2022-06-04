@@ -16,7 +16,7 @@ std::string GetTypeName(clang::QualType qual_type);
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD);
 
-EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator = false);
+EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator);
 
 EOObject GetStmtEOObject(const clang::Stmt *p_stmt);
 
