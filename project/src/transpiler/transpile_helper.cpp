@@ -57,6 +57,12 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt);
 uint64_t GetTypeSize(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
+
+EOObject GetGotoForWhileEO(const EOObject& while_eo_object);
+
+void ProcessDeclStmt(size_t shift, vector<Variable> &all_local, DeclStmt *decl_stmt);
+
+vector<Variable> ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS);
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -98,11 +104,6 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   return_label.arguments.emplace_back("goto-return-label");
   EOObject body_seq = GetCompoundStmt(func_body, true);
   std::reverse(all_local.begin(), all_local.end());
-  for (const auto &var : all_local) {
-    if (var.is_initialized) {
-      body_seq.nested.insert(body_seq.nested.begin(), var.GetInitializer());
-    }
-  }
   return_label.nested.push_back(body_seq);
   goto_object.nested.push_back(return_label);
   func_body_eo.nested.push_back(goto_object);
@@ -158,13 +159,70 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
       auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
+      ProcessDeclStmt(shift, all_local, decl_stmt);
+    } else if(stmt_class == Stmt::ForStmtClass) {
+      auto *for_stmt = dyn_cast<ForStmt>(stmt);
+      if (for_stmt->getInit()!= nullptr && for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass)
+      {
+        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
+        ProcessDeclStmt(shift, all_local, decl_stmt);
+      }
+      if (for_stmt->getBody()!= nullptr && for_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass)
+      {
+        auto *compound_stmt = dyn_cast<CompoundStmt>(for_stmt->getBody());
+        auto res = ProcessFunctionLocalVariables(compound_stmt,shift);
+        all_local.insert(all_local.end(), res.begin(), res.end());
+      }
+    } else if(stmt_class == Stmt::CompoundStmtClass) {
+      auto *compound_stmt = dyn_cast<CompoundStmt>(stmt);
+      auto res = ProcessFunctionLocalVariables(compound_stmt,shift);
+      all_local.insert(all_local.end(), res.begin(), res.end());
+    } else if(stmt_class == Stmt::WhileStmtClass) {
+      auto *while_stmt = dyn_cast<WhileStmt>(stmt);
+      if (while_stmt->getBody()!= nullptr && while_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass)
+      {
+        auto *compound_stmt = dyn_cast<CompoundStmt>(while_stmt->getBody());
+        auto res = ProcessFunctionLocalVariables(compound_stmt,shift);
+        all_local.insert(all_local.end(), res.begin(), res.end());
+      }
+    } else if(stmt_class == Stmt::DoStmtClass) {
+      auto *do_stmt = dyn_cast<DoStmt>(stmt);
+      if (do_stmt->getBody()!= nullptr && do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass)
+      {
+        auto *compound_stmt = dyn_cast<CompoundStmt>(do_stmt->getBody());
+        auto res = ProcessFunctionLocalVariables(compound_stmt,shift);
+        all_local.insert(all_local.end(), res.begin(), res.end());
+      }
+    }
+
+  }
+  return all_local;
+}
+
+vector<Variable> ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS) {
+  vector<Variable> all_local;
+  for (auto *stmt : CS->body()) {
+    Stmt::StmtClass stmt_class = stmt->getStmtClass();
+    if (stmt_class == Stmt::DeclStmtClass) {
+      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
       for (auto *decl : decl_stmt->decls()) {
-        // TODO if var created in nested statement we don't found it. Fix
-        // TODO duplicate names problem should be resolved
         Decl::Kind decl_kind = decl->getKind();
-        if (decl_kind == Decl::Kind::Var) {
+        if (decl_kind == Decl::Var) {
           auto *var_decl = dyn_cast<VarDecl>(decl);
-          all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
+          all_local.push_back(transpiler.glob_.GetVarById(var_decl));
+        }
+      }
+    } else if(stmt_class == Stmt::ForStmtClass) {
+      auto *for_stmt = dyn_cast<ForStmt>(stmt);
+      if (for_stmt->getInit()!= nullptr && for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass)
+      {
+        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
+        for (auto *decl : decl_stmt->decls()) {
+          Decl::Kind decl_kind = decl->getKind();
+          if (decl_kind == Decl::Var) {
+            auto *var_decl = dyn_cast<VarDecl>(decl);
+            all_local.push_back(transpiler.glob_.GetVarById(var_decl));
+          }
         }
       }
     }
@@ -172,11 +230,29 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
   return all_local;
 }
 
+void ProcessDeclStmt(size_t shift, vector<Variable> &all_local, DeclStmt *decl_stmt) {
+  for (auto *decl : decl_stmt->decls()) {
+    Decl::Kind decl_kind = decl->getKind();
+    if (decl_kind == Decl::Var) {
+      auto *var_decl = dyn_cast<VarDecl>(decl);
+      all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
+    }
+  }
+}
+
 // Function to get eo representation of CompoundStmt
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator = false) {
   EOObject res{"seq"};
   if (is_decorator) {
     res.postfix = "@";
+  }
+  auto all_local_in_block = ProcessCompoundStatementLocalVariables(CS);
+  auto pos_it = res.nested.begin();
+  for (const auto &var : all_local_in_block) {
+    if (var.is_initialized) {
+      pos_it = res.nested.insert(pos_it, var.GetInitializer());
+      pos_it++;
+    }
   }
   for (auto *stmt : CS->body()) {
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
@@ -294,6 +370,12 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<CastExpr>(stmt);
     return GetCastEOObject(op);
   }
+  if (stmt_class == Stmt::BreakStmtClass) {
+    return {"goto-loop-label.forward TRUE",EOObjectType::EO_LITERAL};
+  }
+  if (stmt_class == Stmt::ContinueStmtClass) {
+    return {"goto-loop-label.backward TRUE",EOObjectType::EO_LITERAL};
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName() << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
@@ -334,7 +416,7 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   if (init != nullptr) {
     for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
   }
-  EOObject while_stmt{"while"};
+  EOObject while_stmt{"while","@"};
   if (cond != nullptr) {
     while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   } else {
@@ -346,7 +428,7 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
     seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
   }
   while_stmt.nested.push_back(seq);
-  for_stmt.nested.push_back(while_stmt);
+  for_stmt.nested.push_back(GetGotoForWhileEO(while_stmt));
   return for_stmt;
 }
 
@@ -742,7 +824,7 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     const Variable &var = transpiler.glob_.GetVarById(dyn_cast<VarDecl>(op->getFoundDecl()));
     return EOObject{var.alias};
   } catch (invalid_argument &) {
-    return EOObject{EOObjectType::EO_LITERAL};
+    return EOObject{EOObjectType::EO_PLUG};
   }
 }
 
@@ -789,19 +871,27 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
   return if_stmt;
 
 }
+EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
+  EOObject goto_object{"goto"};
+  EOObject return_label{EOObjectType::EO_ABSTRACT};
+  return_label.arguments.emplace_back("goto-loop-label");
+  return_label.nested.push_back(while_eo_object);
+  goto_object.nested.push_back(return_label);
+  return goto_object;
+}
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
-  EOObject while_stmt{"while"};
+  EOObject while_stmt{"while", "@"};
   while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  return while_stmt;
+  return GetGotoForWhileEO(while_stmt);
 }
 
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
-  EOObject do_while_stmt{"do-while"};
+  EOObject do_while_stmt{"do-while","@"};
   do_while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   do_while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  return do_while_stmt;
+  return GetGotoForWhileEO(do_while_stmt);
 }
 
 EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {

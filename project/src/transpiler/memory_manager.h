@@ -6,6 +6,7 @@ static const int two_kilobytes = 2048;
 #include <string>
 #include <utility>
 #include <vector>
+#include <map>
 #include <memory>
 #include "eo_object.h"
 #include "clang/Frontend/FrontendActions.h"
@@ -88,6 +89,7 @@ class MemoryManager {
   size_t pointer_;
   int mem_size_ = two_kilobytes;
   std::vector<Variable> variables_;
+  std::map<std::string,int> duplicates;
 
 };
 

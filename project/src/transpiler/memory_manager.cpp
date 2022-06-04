@@ -15,7 +15,10 @@ Variable MemoryManager::Add(const VarDecl *id,
                             std::string local_name,
                             size_t shift,
                             bool is_initialized) {
-
+  if (duplicates[alias] > 0){
+    alias+="-"+to_string(duplicates[alias]);
+  }
+  duplicates[alias]++;
   Variable var = {id, pointer_, size, type, std::move(alias), std::move(value),
                   std::move(local_name), shift, type.substr(2), is_initialized};
   // TODO fix this plug (rework for check value == EoObject::PLUG)
