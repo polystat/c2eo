@@ -61,11 +61,13 @@ extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 
-  if (!FD->hasBody())
+  if (!FD->hasBody()) {
     return EOObject(EOObjectType::EO_EMPTY);
-  const auto func_body = dyn_cast<CompoundStmt>(FD->getBody());
-  if (!func_body)
+  }
+  auto *const func_body = dyn_cast<CompoundStmt>(FD->getBody());
+  if (func_body == nullptr) {
     return EOObject(EOObjectType::EO_EMPTY);
+  }
   size_t shift = transpiler.glob_.RealMemorySize();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
@@ -97,8 +99,9 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   EOObject body_seq = GetCompoundStmt(func_body, true);
   std::reverse(all_local.begin(), all_local.end());
   for (const auto &var : all_local) {
-    if (var.is_initialized)
+    if (var.is_initialized) {
       body_seq.nested.insert(body_seq.nested.begin(), var.GetInitializer());
+    }
   }
   return_label.nested.push_back(body_seq);
   goto_object.nested.push_back(return_label);
@@ -111,14 +114,14 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 
 vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
   vector<EOObject> local_type_decls;
-  for (auto stmt: CS->body()) {
+  for (auto *stmt: CS->body()) {
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
-      auto decl_stmt = dyn_cast<DeclStmt>(stmt);
-      for (auto decl : decl_stmt->decls()) {
+      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
+      for (auto *decl : decl_stmt->decls()) {
         Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Kind::Record) {
-          auto record_decl = dyn_cast<RecordDecl>(decl);
+          auto *record_decl = dyn_cast<RecordDecl>(decl);
           auto types = ProcessRecordType(record_decl, true);
           for (auto &type : types) {
             auto eo_objs = type.GetEORecordDecl();
@@ -133,7 +136,7 @@ vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
   size_t res = 0;
-  for (auto VD: params) {
+  for (auto *VD: params) {
     TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
     size_t type_size = type_info.Width / 8;
     res += type_size;
