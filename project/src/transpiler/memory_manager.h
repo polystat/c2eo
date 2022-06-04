@@ -1,6 +1,8 @@
 #ifndef C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_
 #define C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_
 
+static const int some_non_zero_position = 999999;
+static const int two_kilobytes = 2048;
 #include <string>
 #include <utility>
 #include <vector>
@@ -15,10 +17,9 @@
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Decl.h"
 
-
 // Representation of a simple variable stored in RAM
 struct Variable {
-  const clang::VarDecl* id;
+  const clang::VarDecl *id;
   size_t position;
   size_t size;
   // like c-int64
@@ -34,19 +35,19 @@ struct Variable {
   std::string type_postfix;
   bool is_initialized;
 
-  bool operator==(const Variable& var) const;
+  bool operator==(const Variable &var) const;
 
-  EOObject GetInitializer() const;
+  [[nodiscard]] EOObject GetInitializer() const;
 
-  EOObject GetAddress(const std::string& mem_name) const;
+  [[nodiscard]] EOObject GetAddress(const std::string &mem_name) const;
 };
 
 class MemoryManager {
-public:
-  explicit MemoryManager(std::string name, size_t start_pointer = 0) :
+ public:
+  [[maybe_unused]] explicit MemoryManager(std::string name, size_t start_pointer = 0) :
       pointer_(start_pointer), name_(std::move(name)) {}
 
-  Variable Add(const clang::VarDecl* id,
+  Variable Add(const clang::VarDecl *id,
                size_t size,
                const std::string &type,
                std::string alias,
@@ -70,13 +71,13 @@ public:
 
   const Variable &GetVarById(const clang::VarDecl *id) const;
 
-  std::vector<Variable>::const_iterator begin() const;
+  [[nodiscard]] std::vector<Variable>::const_iterator begin() const;
 
-  std::vector<Variable>::const_iterator end() const;
+  [[nodiscard]] std::vector<Variable>::const_iterator end() const;
 
   std::string name_;
 
-  EOObject GetEOObject() const;
+  [[nodiscard]] EOObject GetEOObject() const;
 
   void RemoveAllUsed(const std::vector<Variable> &all_local);
 
@@ -85,7 +86,7 @@ public:
  private:
   // index of first free byte in memory
   size_t pointer_;
-  int mem_size_ = 2048;
+  int mem_size_ = two_kilobytes;
   std::vector<Variable> variables_;
 
 };

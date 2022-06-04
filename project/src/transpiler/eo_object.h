@@ -13,9 +13,8 @@ enum class EOObjectType {
   EO_PLUG,
 };
 
-
 struct EOObject {
-public:
+ public:
   EOObject() = default;
 
   explicit EOObject(EOObjectType type);
@@ -41,9 +40,9 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, const EOObject &obj);
 
-private:
+ private:
   static auto GetSpaceIndent();
-  static int indent;
+  inline static int indent = 0;
 };
 
 #endif // C2EO_SRC_TRANSPILER_EO_OBJECT_H_

@@ -1,5 +1,8 @@
 #include "matchers.h"
 
+using namespace clang;
+using namespace clang::ast_matchers;
+
 void AddFuncDeclMatcher(MatchFinder &finder) {
   static FuncDeclAnalyzer func_decl_analyzer;
   static DeclarationMatcher func_decl_matcher =

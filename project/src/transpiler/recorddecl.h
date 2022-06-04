@@ -5,7 +5,6 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 
-// Declares llvm::cl::extrahelp.
 #include "llvm/Support/CommandLine.h"
 
 #include "clang/ASTMatchers/ASTMatchers.h"
@@ -15,6 +14,6 @@
 #include "clang/AST/Decl.h"
 #include "record_manager.h"
 
-std::vector<RecordType> ProcessRecordType(const clang::RecordDecl* RD, bool is_local=false);
+std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD, bool is_local = false);
 
 #endif // C2EO_SRC_TRANSPILER_RECORDDECL_H_

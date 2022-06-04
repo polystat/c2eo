@@ -23,8 +23,8 @@ struct RecordManager {
                  std::map<std::string, size_t> fields, bool is_local);
   RecordType *GetById(int64_t id);
   __attribute__((unused)) size_t GetShift(int64_t id, const std::string &member);
-  std::vector<RecordType>::const_iterator begin() const;
-  std::vector<RecordType>::const_iterator end() const;
+  [[nodiscard]] std::vector<RecordType>::const_iterator begin() const;
+  [[nodiscard]] std::vector<RecordType>::const_iterator end() const;
 
   bool Empty();
   EOObject GetShiftAlias(int64_t id, const std::string &member);

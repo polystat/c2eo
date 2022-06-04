@@ -7,8 +7,7 @@
 using namespace std;
 using namespace clang;
 
-
-Variable MemoryManager::Add(const VarDecl* id,
+Variable MemoryManager::Add(const VarDecl *id,
                             size_t size,
                             const std::string &type,
                             std::string alias,
@@ -20,8 +19,9 @@ Variable MemoryManager::Add(const VarDecl* id,
   Variable var = {id, pointer_, size, type, std::move(alias), std::move(value),
                   std::move(local_name), shift, type.substr(2), is_initialized};
   // TODO fix this plug (rework for check value == EoObject::PLUG)
-  if (var.value.name.empty())
+  if (var.value.name.empty()) {
     var.value.name = "plug";
+  }
   variables_.push_back(var);
   pointer_ += size;
   return var;
@@ -36,11 +36,12 @@ Variable MemoryManager::AddExternal(const VarDecl *id,
                                     size_t shift,
                                     __attribute__((unused)) bool is_initialized) {
 
-  Variable var = {id, 999999, size, type, std::move(alias), std::move(value),
+  Variable var = {id, some_non_zero_position, size, type, std::move(alias), std::move(value),
                   std::move(local_name), shift, type.substr(2), false};
   // TODO fix this plug (rework for check value == EoObject::PLUG)
-  if (var.value.name.empty())
+  if (var.value.name.empty()) {
     var.value.name = "plug";
+  }
   auto place =
       std::find_if(variables_.begin(), variables_.end(), [var](const Variable &x) { return x.alias == var.alias; });
   if (place == variables_.end()) {
@@ -78,8 +79,11 @@ std::vector<Variable>::const_iterator MemoryManager::end() const {
 const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
-  if (res == variables_.end())
-    throw invalid_argument("exception: element with id " + to_string(reinterpret_cast<uint64_t>(id)) + " not found");
+  if (res == variables_.end()) {
+    throw invalid_argument("exception: element with id "
+                               + to_string(reinterpret_cast<uint64_t>(id)) // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+                               + " not found");
+  }
   return *res;
 }
 
@@ -90,8 +94,8 @@ EOObject MemoryManager::GetEOObject() const {
   return res;
 }
 
-void MemoryManager::RemoveAllUsed(const std::vector<Variable>& all_local) {
-  for (const auto& var: all_local) {
+void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
+  for (const auto &var : all_local) {
     pointer_ -= var.size;
     variables_.erase(find(variables_.begin(), variables_.end(), var));
   }
@@ -111,28 +115,36 @@ void MemoryManager::SetExtEqGlob() {
 }
 
 EOObject Variable::GetInitializer() const {
-  if (!is_initialized)
+  if (!is_initialized) {
     return EOObject(EOObjectType::EO_EMPTY);
+  }
   EOObject res("write");
   if ((type_postfix.length() < 3 ||
-       (type_postfix.substr(0, 3) != "st-" && type_postfix.substr(0, 3) != "un-")) // todo recordDecl check
+      (type_postfix.substr(0, 3) != "st-" && type_postfix.substr(0, 3) != "un-")) // todo recordDecl check
       && type_postfix != "undefinedtype" &&
-      type_postfix != "char") // todo char!?
-    res.name += "-as-" + type_postfix;
+      type_postfix != "char") {
+    {
+      { // todo char!?
+        res.name += "-as-" + type_postfix;
+      }
+    }
+  }
   res.nested.emplace_back(alias);
-  if (value.type == EOObjectType::EO_PLUG)
-      // Probably just emplace value.
+  if (value.type == EOObjectType::EO_PLUG) {
+    // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
-  else
-      // Probably just emplace value.
+  } else {
+    // Probably just emplace value.
     res.nested.emplace_back(value);
+  }
   return res;
 }
 
-EOObject Variable::GetAddress(const string& mem_name) const {
+EOObject Variable::GetAddress(const string &mem_name) const {
   EOObject address("address", alias);
-  if (!mem_name.empty())
+  if (!mem_name.empty()) {
     address.nested.emplace_back(mem_name);
+  }
   if (!local_pointer.empty()) {
     EOObject shift_obj("add");
     shift_obj.nested.emplace_back(local_pointer);
@@ -145,6 +157,6 @@ EOObject Variable::GetAddress(const string& mem_name) const {
   return address;
 }
 
-bool Variable::operator==(const Variable& var) const {
+bool Variable::operator==(const Variable &var) const {
   return this->id == var.id;
 }
