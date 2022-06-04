@@ -32,10 +32,12 @@ __attribute__((unused)) void Text2File(std::vector<std::string> &text, const std
 }
 
 std::string StrJoin(std::vector<std::string> vec) {
-  if (vec.empty())
+  if (vec.empty()) {
     return "";
-  if (vec.size() == 1)
+  }
+  if (vec.size() == 1) {
     return vec[0];
+  }
   string res{vec[0]};
   for (int i = 1; i < vec.size(); ++i) {
     res += " " + vec[i];

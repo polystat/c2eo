@@ -13,12 +13,10 @@ struct FunctionDefinition {
   const clang::FunctionDecl *FD;
   std::string name;
 
-  EOObject GetEoObject() const;
-
+  [[nodiscard]] EOObject GetEoObject() const;
   void TestOut() const;
-
-private:
-  EOObject GetBody() const;
+ private:
+  [[nodiscard]] EOObject GetBody() const;
 };
 
 struct FunctionDeclaration {

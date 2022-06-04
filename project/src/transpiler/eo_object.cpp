@@ -1,43 +1,42 @@
 #include "eo_object.h"
+
 #include "util.h"
 
 using namespace std;
 
-int EOObject::indent = 0;
-
 EOObject::EOObject(EOObjectType type) : type(type) {
   //   nested.reserve(10000);
-  #ifdef TRACEOUT_NEW_EO
+#ifdef TRACEOUT_NEW_EO
   std::cout << *this; // << "\n";
-  #endif
+#endif
 }
 
 // Create simple complete Object
 EOObject::EOObject(std::string name) :
-name(std::move(name)),
-type(EOObjectType::EO_COMPLETE) {
+    name(std::move(name)),
+    type(EOObjectType::EO_COMPLETE) {
   //   nested.reserve(10000);
-  #ifdef TRACEOUT_NEW_EO
+#ifdef TRACEOUT_NEW_EO
   std::cout << *this; // << "\n";
-  #endif
+#endif
 }
 
 // Create simple object, may be used for literal
 EOObject::EOObject(std::string name, EOObjectType type) : name(std::move(name)), type(type) {
-  #ifdef TRACEOUT_NEW_EO
+#ifdef TRACEOUT_NEW_EO
   std::cout << *this; // << "\n";
-  #endif
+#endif
 }
 
 // create complete name_ with body
 EOObject::EOObject(std::string name, std::string postfix) :
-name(std::move(name)),
-postfix(std::move(postfix)),
-type(EOObjectType::EO_COMPLETE) {
+    name(std::move(name)),
+    postfix(std::move(postfix)),
+    type(EOObjectType::EO_COMPLETE) {
   //   nested.reserve(10000);
-  #ifdef TRACEOUT_NEW_EO
+#ifdef TRACEOUT_NEW_EO
   std::cout << *this; // << "\n";
-  #endif
+#endif
 }
 
 __attribute__((unused)) void EOObject::AddNested(const EOObject &obj) {
@@ -45,12 +44,12 @@ __attribute__((unused)) void EOObject::AddNested(const EOObject &obj) {
 }
 
 auto EOObject::GetSpaceIndent() {
-  return string(2 * EOObject::indent, ' ');
+  return string(static_cast<std::basic_string<char>::size_type>(2 * EOObject::indent), ' ');
 }
 
 std::ostream &operator<<(ostream &os, const EOObject &obj) {
   if (obj.type == EOObjectType::EO_EMPTY) {
-    for (const auto &child: obj.nested) {
+    for (const auto &child : obj.nested) {
       os << child;
     }
     return os;
@@ -74,7 +73,7 @@ std::ostream &operator<<(ostream &os, const EOObject &obj) {
   os << "\n";
   if (!obj.nested.empty()) {
     EOObject::indent++;
-    for (const auto &child: obj.nested) {
+    for (const auto &child : obj.nested) {
       os << child;
     }
     EOObject::indent--;

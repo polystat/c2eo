@@ -5,8 +5,9 @@
 #include "aliases.h"
 
 std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
-  if (unit.tmp_.empty())
+  if (unit.tmp_.empty()) {
     unit.GenerateResult();
+  }
   os << unit.tmp_;
   return os;
 }
@@ -31,12 +32,14 @@ void UnitTranspiler::GenerateResult() {
     }
   }
 
-  if (!record_manager_.Empty()) // todo: it isn't global, is it? it should be out of labels
-    for (auto type : record_manager_)
+  if (!record_manager_.Empty()) { // todo: it isn't global, is it? it should be out of labels
+    for (auto type : record_manager_) {
       if (!type.is_local) {
         auto record_fields = type.GetEORecordDecl();
         body.nested.insert(body.nested.end(), record_fields.begin(), record_fields.end());
       }
+    }
+  }
 
   for (const auto &func : func_manager_.GetAllEoDefinitions()) {
     body.nested.push_back(func);

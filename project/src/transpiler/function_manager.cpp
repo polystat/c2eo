@@ -62,7 +62,7 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD, size_t 
   });
   if (res_decl != declarations.end()) {
     EOObject call(res_decl->name);
-    if (res_decl->FD->getDefinition()) {
+    if (res_decl->FD->getDefinition() != nullptr) {
       // TODO may be should count level of object
       call.prefix = "^.^.^";
     }
