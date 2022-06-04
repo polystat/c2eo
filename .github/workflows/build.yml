@@ -9,26 +9,14 @@ on:
     - cron:  '0 23 * * *'
 
 jobs:
-  build:
-    runs-on: ${{ matrix.config.os }}
-
-    strategy:
-      matrix:
-        config:
-          - { name: "Ubuntu", os: ubuntu-latest, cc: "gcc", cxx: "g++", archiver: "7z a" }
-
+  clang-tidy:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          path: c2eo
- 
-      - name: Move c2eo dir
-        run: mv c2eo ~
+      - uses: actions/checkout@v3
 
       - name: Cache LLVM
         id: cache-llvm
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: llvm-clang.tar.gz
           key: ${{ runner.os }}-llvm-clang
@@ -37,10 +25,37 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          rm -r ~/c2eo/llvm-clang
-          mv ~/llvm-clang ~/c2eo
+          rm -r ./llvm-clang
+          mv ~/llvm-clang .
+      
+      - name: Install clang-tidy
+        run: sudo apt install clang-tidy
+      
+      - name: Clang-tidy
+        run: |
+          cd ./project/scripts
+          python3 clang_tidy.py
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
+          rm -r ./llvm-clang
+          mv ~/llvm-clang .
           
       - name: Test c2eo
         run: |
-          cd ~/c2eo/project/scripts
-          python3 ./test.py ../tests/main
+          cd ./project/scripts
+          python3 test.py

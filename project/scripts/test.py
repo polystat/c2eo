@@ -87,12 +87,13 @@ class Tests(object):
         command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
         process = subprocess.Popen(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True)
+        timeout = 60
         try:
-            process.communicate(timeout=10)
+            process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
             with open(unit["result_eo_file"], 'w') as f:
-                f.write('exception: execution time exceeded')
+                f.write(f'exception: execution time exceeded {timeout} seconds')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
