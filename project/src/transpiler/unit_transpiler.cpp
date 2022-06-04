@@ -16,6 +16,7 @@ void UnitTranspiler::GenerateResult() {
   EOObject body(EOObjectType::EO_ABSTRACT);
   body.arguments.emplace_back("args...");
   body.postfix = "global";
+  body.nested.emplace_back("$", "root");
   body.nested.push_back(glob_.GetEOObject());
   body.nested.emplace_back("memory", "empty-global-position");
   body.nested.push_back(ret_.GetEOObject());

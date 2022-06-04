@@ -173,7 +173,7 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
 }
 
 // Function to get eo representation of CompoundStmt
-EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator) {
+EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator = false) {
   EOObject res{"seq"};
   if (is_decorator) {
     res.postfix = "@";
