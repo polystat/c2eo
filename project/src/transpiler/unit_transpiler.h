@@ -29,7 +29,7 @@ class UnitTranspiler {
   std::string package_name_;
   std::string path_name_;
   std::string tmp_;
-  std::vector<EOObject> objects_;
+//  std::vector<EOObject> objects_;
 
   void GenerateResult();
 

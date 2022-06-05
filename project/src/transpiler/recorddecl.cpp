@@ -2,6 +2,7 @@
 #include "unit_transpiler.h"
 #include "transpile_helper.h"
 #include "vardecl.h"
+#include <algorithm>
 
 std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD, bool is_local) {
   extern UnitTranspiler transpiler;
@@ -24,7 +25,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD, bool is_l
     name += std::to_string(reinterpret_cast<uint64_t>(RD)); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
   }
 
-  size_t size = 0;
+  uint64_t size = 0;
 
   std::map<std::string, size_t> fields;
   size_t shift = 0;
