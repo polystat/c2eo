@@ -374,7 +374,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return {"goto-loop-label.forward TRUE",EOObjectType::EO_LITERAL};
   }
   if (stmt_class == Stmt::ContinueStmtClass) {
-    return {"goto-loop-label.backward TRUE",EOObjectType::EO_LITERAL};
+    return {"goto-loop-label.backward",EOObjectType::EO_LITERAL};
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName() << "\n";
 
