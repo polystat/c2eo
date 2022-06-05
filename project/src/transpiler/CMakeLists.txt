@@ -6,7 +6,7 @@ project(c2eo)
 
 # llvm_config
 set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 
 # set(CMAKE_C_COMPILER путь/до/компилятора)
