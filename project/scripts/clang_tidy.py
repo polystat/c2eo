@@ -39,13 +39,16 @@ class ClangTidy(object):
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
-        self.print_inspection_results()
-        result = False
+        data = self.group_transpilation_results()
+        print_inspection_results(data)
+        is_warnings = False
         for unit in self.results:
             if unit['inspection_result'].returncode != 0:
                 tools.pprint_exception(unit['file'], unit['inspection_result'].stderr)
-                result = True
-        return result
+                is_warnings = True
+        if len(data['warning']) > 0:
+            is_warnings = True
+        return is_warnings
 
     def generate_compile_commands(self):
         original_path = os.getcwd()
@@ -64,15 +67,6 @@ class ClangTidy(object):
         self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, self.files_count)
         return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
-
-    def print_inspection_results(self):
-        print()
-        tools.pprint()
-        data = self.group_transpilation_results()
-        for level in ['note', 'warning']:
-            for name, places in data[level].items():
-                tools.pprint(name, slowly=True, status=level.upper())
-                tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
     def group_transpilation_results(self):
         data = {'note': {}, 'warning': {}}
@@ -93,6 +87,15 @@ class ClangTidy(object):
                         else:
                             data[level][message].add(unit['file'])
         return data
+
+
+def print_inspection_results(data):
+    print()
+    tools.pprint()
+    for level in ['note', 'warning']:
+        for name, places in data[level].items():
+            tools.pprint(name, slowly=True, status=level.upper())
+            tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
 
 if __name__ == '__main__':
