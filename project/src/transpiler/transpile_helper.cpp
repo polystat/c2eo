@@ -423,33 +423,37 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
 }
 
 EOObject GetCastEOObject(const CastExpr *op) {
-  if (op != nullptr) {
-    auto cast_kind = op->getCastKind();
-    if (cast_kind == clang::CK_LValueToRValue) {
-      QualType qual_type = op->getType();
-      string type = GetTypeName(qual_type);
-      EOObject read{"read"};
-      read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-      if (!qual_type->isRecordType()) {
-        read.name += "-as-" + type;
-      } else {
-        read.nested.emplace_back(to_string(
-                                     transpiler.record_manager_.GetById(qual_type->getAsRecordDecl()->getID())->size),
-                                 EOObjectType::EO_LITERAL);
-      }
-      return read;
-    }
-    if (cast_kind == clang::CK_FloatingToIntegral || cast_kind == clang::CK_IntegralToFloating) {
-      QualType qual_type = op->getType();
-      string type = GetTypeName(qual_type);
-      EOObject cast{"as-" + type};
-      cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
-      return cast;
-    }
-    // TODO if cast kinds and also split it to another func
-    return GetStmtEOObject(*op->child_begin());
+  if (op == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
   }
-  return EOObject{EOObjectType::EO_PLUG}; // ok?
+
+  auto cast_kind = op->getCastKind();
+  if (cast_kind == clang::CK_LValueToRValue) {
+    QualType qual_type = op->getType();
+    string type = GetTypeName(qual_type);
+    EOObject read{"read"};
+    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    if (!qual_type->isRecordType()) {
+      read.name += "-as-" + type;
+    } else {
+      read.nested.emplace_back(
+          to_string(transpiler.record_manager_
+                        .GetById(qual_type->getAsRecordDecl()->getID())
+                        ->size),
+          EOObjectType::EO_LITERAL);
+    }
+    return read;
+  }
+  if (cast_kind == clang::CK_FloatingToIntegral ||
+      cast_kind == clang::CK_IntegralToFloating) {
+    QualType qual_type = op->getType();
+    string type = GetTypeName(qual_type);
+    EOObject cast{"as-" + type};
+    cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    return cast;
+  }
+  // TODO if cast kinds and also split it to another func
+  return GetStmtEOObject(*op->child_begin());
 }
 
 EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
@@ -461,20 +465,20 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
     const auto *init = p_stmt->getInit();
     const auto *cond = p_stmt->getCond();
     const auto *inc = p_stmt->getInc();
-//  const auto *body = p_stmt->getBody();
+    const auto *body = p_stmt->getBody();
     if (init != nullptr) {
-      for_stmt.nested.push_back(GetStmtEOObject(p_stmt->getInit()));
+      for_stmt.nested.push_back(GetStmtEOObject(init));
     }
 
     if (cond != nullptr) {
-      while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+      while_stmt.nested.push_back(GetStmtEOObject(cond));
     } else {
       while_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
     }
 
-    seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
+    seq.nested.push_back(GetSeqForBodyEOObject(body));
     if (inc != nullptr) {
-      seq.nested.push_back(GetSeqForBodyEOObject(p_stmt->getInc()));
+      seq.nested.push_back(GetSeqForBodyEOObject(inc));
     }
   }
 
