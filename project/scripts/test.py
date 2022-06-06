@@ -10,7 +10,6 @@ import re as regex
 # Our scripts
 import tools
 import settings
-import build_c2eo
 import update_eo_version
 from build_eo import EOBuilder
 from transpile_c2eo import Transpiler
@@ -35,19 +34,14 @@ class Tests(object):
 
     def test(self):
         update_eo_version.main()
-        if not build_c2eo.main(self.path_to_c2eo_build):
-            exit(-1)
-
         self.transpilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
-        if not self.transpilation_units:
-            exit(-2)
-
-        self.get_result_for_tests()
-        with tools.thread_pool() as threads:
-            results = threads.map(compare_test_results, self.transpilation_units)
-        passed, errors, exceptions = group_comparison_results(results)
-        print_tests_result(passed, errors, exceptions)
-        return (len(errors) + len(exceptions)) > 0
+        if self.transpilation_units:
+            self.get_result_for_tests()
+            with tools.thread_pool() as threads:
+                results = threads.map(compare_test_results, self.transpilation_units)
+            passed, errors, exceptions = group_comparison_results(results)
+            print_tests_result(passed, errors, exceptions)
+            return (len(errors) + len(exceptions)) > 0
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
@@ -55,10 +49,7 @@ class Tests(object):
             threads.map(self.get_result_for_c_file, self.transpilation_units)
         print()
         tools.pprint()
-
-        if not EOBuilder().build():
-            exit(-3)
-
+        EOBuilder().build()
         tools.pprint('\nRunning EO tests:\n', slowly=True)
         self.test_handled_count = 0
         original_path = os.getcwd()
@@ -199,4 +190,4 @@ if __name__ == '__main__':
     tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
     tools.pprint(f'{"-" * 60}\n', slowly=True)
     if is_failed:
-        exit(-4)
+        exit('Some tests failed')
