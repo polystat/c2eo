@@ -1,9 +1,10 @@
-#include "matchers.h"
-#include "util.h"
-#include "unit_transpiler.h"
-#include "eo_object.h"
 #include <csignal>
 #include <cstdlib>
+
+#include "eo_object.h"
+#include "matchers.h"
+#include "unit_transpiler.h"
+#include "util.h"
 
 static const int parser_arg_count = 6;
 using namespace clang;
@@ -21,25 +22,28 @@ std::string filename;
 UnitTranspiler transpiler;
 
 void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
-  llvm::errs() << "exception: segfault at address " << si->si_addr << " while tool run\n";
+  llvm::errs() << "exception: segfault at address " << si->si_addr
+               << " while tool run\n";
   ofstream out(filename);
   out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.stdio.printf\n\n";
   out << "[args...] > global\n";
-  out << "  printf \"Segfault exception at address " << si->si_addr << " while tool run\" > @\n";
+  out << "  printf \"Segfault exception at address " << si->si_addr
+      << " while tool run\" > @\n";
   out.close();
   exit(0);
 }
 
 int main(int argc, const char **argv) {
-
   if (argc < 3) {
-    llvm::errs() << "exception: incorrect command line format. Necessary: c2eo <C-file-name_> <EO-file-name_>\n";
+    llvm::errs() << "exception: incorrect command line format. Necessary: c2eo "
+                    "<C-file-name_> <EO-file-name_>\n";
     return -1;
   }
 
   std::string new_in_file_name{std::string(argv[1]) + ".i"};
-  std::string ppc_command{"clang -E " + std::string(argv[1]) + std::string(" > ") + new_in_file_name};
+  std::string ppc_command{"clang -E " + std::string(argv[1]) +
+                          std::string(" > ") + new_in_file_name};
   const char *ppc = ppc_command.c_str();
   system(ppc);
 
@@ -61,8 +65,8 @@ int main(int argc, const char **argv) {
   UnitTranspiler::SetPathName(path_name);
 
   int parser_argc = parser_arg_count;
-  auto expected_parser
-      = CommonOptionsParser::create(parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
+  auto expected_parser = CommonOptionsParser::create(
+      parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
 
   if (!expected_parser) {
     // Fail gracefully for unsupported options.
@@ -78,7 +82,7 @@ int main(int argc, const char **argv) {
   AddMatchers(finder);
   tool.setPrintErrorMessage(false);
 
-  struct sigaction sa{};
+  struct sigaction sa {};
   memset(&sa, 0, sizeof(struct sigaction));
   sigemptyset(&sa.sa_mask);
   sa.sa_sigaction = SegfaultSigaction;

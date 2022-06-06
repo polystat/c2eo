@@ -1,5 +1,7 @@
-#include <iostream>
 #include "function_manager.h"
+
+#include <iostream>
+
 #include "transpile_helper.h"
 
 using namespace clang;
@@ -14,17 +16,11 @@ EOObject FunctionDefinition::GetEoObject() const {
   return func_object;
 }
 
-EOObject FunctionDefinition::GetBody() const {
-  return GetFunctionBody(FD);
-}
+EOObject FunctionDefinition::GetBody() const { return GetFunctionBody(FD); }
 
-void FunctionDefinition::TestOut() const {
-  std::cout << name << "\n";
-}
+void FunctionDefinition::TestOut() const { std::cout << name << "\n"; }
 
-void FunctionDeclaration::TestOut() const {
-  std::cout << name << "\n";
-}
+void FunctionDeclaration::TestOut() const { std::cout << name << "\n"; }
 
 //------------------------------------------------------------------------------
 void FunctionManager::AddDefinition(const FunctionDefinition &func_def) {
@@ -46,27 +42,30 @@ const std::vector<EOObject> &FunctionManager::GetAllEoDefinitions() {
 }
 
 //------------------------------------------------------------------------------
-EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD, size_t param_size) const {
-  auto res_def = std::find_if(definitions.begin(), definitions.end(), [&FD](const FunctionDefinition &decl) {
-    return decl.FD == FD;
-  });
+EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
+                                          size_t param_size) const {
+  auto res_def = std::find_if(
+      definitions.begin(), definitions.end(),
+      [&FD](const FunctionDefinition &decl) { return decl.FD == FD; });
   if (res_def != definitions.end()) {
     EOObject call(res_def->name);
     call.prefix = "root";
     call.nested.emplace_back("empty-local-position");
-    call.nested.emplace_back(std::to_string(param_size), EOObjectType::EO_LITERAL);
+    call.nested.emplace_back(std::to_string(param_size),
+                             EOObjectType::EO_LITERAL);
     return call;
   }
-  auto res_decl = std::find_if(declarations.begin(), declarations.end(), [&FD](const FunctionDeclaration &decl) {
-    return decl.FD == FD;
-  });
+  auto res_decl = std::find_if(
+      declarations.begin(), declarations.end(),
+      [&FD](const FunctionDeclaration &decl) { return decl.FD == FD; });
   if (res_decl != declarations.end()) {
     EOObject call(res_decl->name);
     if (res_decl->FD->getDefinition() != nullptr) {
       call.prefix = "root";
     }
     call.nested.emplace_back("empty-local-position");
-    call.nested.emplace_back(std::to_string(param_size), EOObjectType::EO_LITERAL);
+    call.nested.emplace_back(std::to_string(param_size),
+                             EOObjectType::EO_LITERAL);
     return call;
   }
   return EOObject(EOObjectType::EO_PLUG);
@@ -90,4 +89,3 @@ __attribute__((unused)) void FunctionManager::TestOut() {
     std::cout << "No function definitions\n";
   }
 }
-

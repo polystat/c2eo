@@ -1,7 +1,8 @@
 #include "analyzers.h"
-#include "unit_transpiler.h"
+
 #include "tracer.h"
 #include "transpile_helper.h"
+#include "unit_transpiler.h"
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -17,13 +18,14 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
   }
   const auto *FD = result.Nodes.getNodeAs<FunctionDecl>("funcDecl");
   // We do not want to convert header files!
-  //   if (!FD || !FD->isDefined() || !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
+  //   if (!FD || !FD->isDefined() ||
+  //   !context->getSourceManager().isWrittenInMainFile(FD->getLocation()))
   if (FD == nullptr) {
     return;
   }
 
 #ifdef TRACEOUT_FUNC_DEF
-  TraceOutFunctionDecl(FD);   // Тестовый вывод содержимого функции
+  TraceOutFunctionDecl(FD);  // Тестовый вывод содержимого функции
 #endif
 
   DeclarationNameInfo decl_name_info{FD->getNameInfo()};
@@ -55,13 +57,15 @@ void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
   ProcessRecordType(RD);
 }
 
-void DeclBaseVarGlobalMemoryAnalyzer::run(const MatchFinder::MatchResult &result) {
+void DeclBaseVarGlobalMemoryAnalyzer::run(
+    const MatchFinder::MatchResult &result) {
   if (context == nullptr) {
     context = result.Context;
   }
   const auto *VD = result.Nodes.getNodeAs<VarDecl>("declBaseVarGlobalMemory");
   // We do not want to convert header files!
-  if ((VD == nullptr) || !context->getSourceManager().isWrittenInMainFile(VD->getLocation())) {
+  if ((VD == nullptr) ||
+      !context->getSourceManager().isWrittenInMainFile(VD->getLocation())) {
     return;
   }
   ProcessVariable(VD);

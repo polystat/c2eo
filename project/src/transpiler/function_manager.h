@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <utility>
+
 #include "clang/AST/Decl.h"
 #include "eo_object.h"
 #include "memory_manager.h"
@@ -15,6 +16,7 @@ struct FunctionDefinition {
 
   [[nodiscard]] EOObject GetEoObject() const;
   void TestOut() const;
+
  private:
   [[nodiscard]] EOObject GetBody() const;
 };
@@ -33,7 +35,8 @@ struct FunctionManager {
 
   const std::vector<EOObject> &GetAllEoDefinitions();
 
-  EOObject GetFunctionCall(const clang::FunctionDecl *FD, size_t param_size) const;
+  EOObject GetFunctionCall(const clang::FunctionDecl *FD,
+                           size_t param_size) const;
 
   __attribute__((unused)) void TestOut();
 
@@ -43,4 +46,4 @@ struct FunctionManager {
   std::vector<EOObject> functions;
 };
 
-#endif // C2EO_SRC_TRANSPILER_FUNCTION_MANAGER_H_
+#endif  // C2EO_SRC_TRANSPILER_FUNCTION_MANAGER_H_
