@@ -172,11 +172,11 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
       if (for_stmt == nullptr) {
         continue;
       }
-      if (for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
+      if (for_stmt->getInit() != nullptr && for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
         auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
         ProcessDeclStmt(shift, all_local, decl_stmt);
       }
-      if (for_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
+      if (for_stmt->getBody() != nullptr && for_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
         auto *compound_stmt = dyn_cast<CompoundStmt>(for_stmt->getBody());
         auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
         all_local.insert(all_local.end(), res.begin(), res.end());
@@ -190,7 +190,7 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
       if (while_stmt == nullptr) {
         continue;
       }
-      if (while_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
+      if (while_stmt->getBody() != nullptr && while_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
         auto *compound_stmt = dyn_cast<CompoundStmt>(while_stmt->getBody());
         auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
         all_local.insert(all_local.end(), res.begin(), res.end());
@@ -200,7 +200,7 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS, si
       if (do_stmt == nullptr) {
         continue;
       }
-      if (do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
+      if (do_stmt->getBody() != nullptr && do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
         auto *compound_stmt = dyn_cast<CompoundStmt>(do_stmt->getBody());
         auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
         all_local.insert(all_local.end(), res.begin(), res.end());
