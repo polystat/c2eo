@@ -39,13 +39,16 @@ class ClangTidy(object):
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
-        self.print_inspection_results()
-        result = 0
+        data = self.group_transpilation_results()
+        print_inspection_results(data)
+        is_warnings = False
         for unit in self.results:
             if unit['inspection_result'].returncode != 0:
                 tools.pprint_exception(unit['file'], unit['inspection_result'].stderr)
-                result = 1
-        return result
+                is_warnings = True
+        if len(data['warning']) > 0:
+            is_warnings = True
+        return is_warnings
 
     def generate_compile_commands(self):
         original_path = os.getcwd()
@@ -55,7 +58,7 @@ class ClangTidy(object):
         os.chdir(original_path)
         if result.returncode != 0:
             tools.pprint_exception(cmd, result.stderr)
-            exit(result.returncode)
+            exit('Failed during cmake execution')
         tools.pprint(result.stdout, slowly=True)
 
     def inspect_file(self, file):
@@ -64,15 +67,6 @@ class ClangTidy(object):
         self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, self.files_count)
         return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
-
-    def print_inspection_results(self):
-        print()
-        tools.pprint()
-        data = self.group_transpilation_results()
-        for level in ['note', 'warning']:
-            for name, places in data[level].items():
-                tools.pprint(name, slowly=True, status=level.upper())
-                tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
     def group_transpilation_results(self):
         data = {'note': {}, 'warning': {}}
@@ -95,12 +89,22 @@ class ClangTidy(object):
         return data
 
 
+def print_inspection_results(data):
+    print()
+    tools.pprint()
+    for level in ['note', 'warning']:
+        for name, places in data[level].items():
+            tools.pprint(name, slowly=True, status=level.upper())
+            tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
+
+
 if __name__ == '__main__':
     start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
-    return_code = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
+    is_any_warnings = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
     end_time = time.time()
     time_span = int(end_time - start_time)
     tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
     tools.pprint(f'{"-" * 60}\n', slowly=True)
-    exit(return_code)
+    if is_any_warnings:
+        exit('Clang-tidy has several warnings')
