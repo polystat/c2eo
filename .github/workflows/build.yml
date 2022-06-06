@@ -23,6 +23,7 @@ jobs:
         fallback-style: 'Google'
 
   clang-tidy:
+    needs: clang-format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -50,6 +51,7 @@ jobs:
           python3 clang_tidy.py
 
   test:
+    needs: clang-format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
