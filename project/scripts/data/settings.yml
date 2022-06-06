@@ -1,44 +1,44 @@
 clang_tidy_checks:
-  - -*
-  - misc-misplaced-const
-  - misc-new-delete-overloads
-  - misc-non-copyable-objects
-  - misc-throw-by-value-catch-by-reference
-  - misc-unconventional-assign-operator
-  - misc-uniqueptr-reset-release
-  - mpi-buffer-deref
-  - mpi-type-mismatch
-  - bugprone-*
-  - portability-*
-  - boost-*
-  - cppcoreguidelines-*
-  - performance-*
-  - readability-*
-  - hicpp-*
-  - google-*
-  - modernize-*
-  - clang-analyzer-*
-  - misc-unused-parameters
-  - misc-unused-alias-decls
-  - misc-redundant-expression
-  - misc-static-assert
-  - misc-unused-using-decls
-  - misc-definitions-in-headers
-  - misc-misleading-identifier
-  - misc-misleading-bidirectional
-  - -google-build-using-namespace
-  - -modernize-use-trailing-return-type
-  - -readability-identifier-length
-  - -bugprone-easily-swappable-parameters
-  - -cppcoreguidelines-non-private-member-variables-in-classes
-  - -cppcoreguidelines-avoid-non-const-global-variables
-  - -cppcoreguidelines-pro-bounds-pointer-arithmetic
-  - -cppcoreguidelines-owning-memory
+- -*
+- misc-misplaced-const
+- misc-new-delete-overloads
+- misc-non-copyable-objects
+- misc-throw-by-value-catch-by-reference
+- misc-unconventional-assign-operator
+- misc-uniqueptr-reset-release
+- mpi-buffer-deref
+- mpi-type-mismatch
+- bugprone-*
+- portability-*
+- boost-*
+- cppcoreguidelines-*
+- performance-*
+- readability-*
+- hicpp-*
+- google-*
+- modernize-*
+- clang-analyzer-*
+- misc-unused-parameters
+- misc-unused-alias-decls
+- misc-redundant-expression
+- misc-static-assert
+- misc-unused-using-decls
+- misc-definitions-in-headers
+- misc-misleading-identifier
+- misc-misleading-bidirectional
+- -google-build-using-namespace
+- -modernize-use-trailing-return-type
+- -readability-identifier-length
+- -bugprone-easily-swappable-parameters
+- -cppcoreguidelines-non-private-member-variables-in-classes
+- -cppcoreguidelines-avoid-non-const-global-variables
+- -cppcoreguidelines-pro-bounds-pointer-arithmetic
+- -cppcoreguidelines-owning-memory
 code_file_patterns:
 - '*.cpp'
 - '*.h'
 config: null
-current_eo_version: 0.23.5
+current_eo_version: 0.23.6
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:
 - Wunused-command-line-argument
