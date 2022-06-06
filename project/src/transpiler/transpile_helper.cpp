@@ -19,6 +19,8 @@ EOObject GetAssignmentOperationOperatorEOObject(const CompoundAssignOperator *p_
 
 EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator);
 
+EOObject GetIfElseStmtEOObject(const IfStmt *p_stmt);
+
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt);
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt);
@@ -316,6 +318,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::IfStmtClass) {
     const auto *op = dyn_cast<IfStmt>(stmt);
+    if (op->hasElseStorage()) {
+      return GetIfElseStmtEOObject(op);
+    }
+
     return GetIfStmtEOObject(op);
   }
   if (stmt_class == Stmt::WhileStmtClass) {
@@ -856,21 +862,21 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   return result;
 }
 
-EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
-  if (p_stmt->hasElseStorage()) {
+EOObject GetIfElseStmtEOObject(const IfStmt *p_stmt) {
     EOObject if_else_stmt{"if-else"};
     if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
     if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
     if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
     return if_else_stmt;
-  }
-
-  EOObject if_stmt{"if"};
-  if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
-  return if_stmt;
-
 }
+
+EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
+    EOObject if_stmt{"if"};
+    if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+    if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
+    return if_stmt;
+}
+
 EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
   EOObject goto_object{"goto"};
   EOObject return_label{EOObjectType::EO_ABSTRACT};
