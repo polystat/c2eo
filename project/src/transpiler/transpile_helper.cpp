@@ -351,8 +351,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::IfStmtClass) {
     const auto *op = dyn_cast<IfStmt>(stmt);
-    if (op->hasElseStorage()) {
-      return GetIfElseStmtEOObject(op);
+    if (op != nullptr) {
+      if (op->hasElseStorage()) {
+        return GetIfElseStmtEOObject(op);
+      }
     }
 
     return GetIfStmtEOObject(op);
@@ -960,18 +962,21 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
 }
 
 EOObject GetIfElseStmtEOObject(const IfStmt *p_stmt) {
-    EOObject if_else_stmt{"if-else"};
-    if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-    if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
-    if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
-    return if_else_stmt;
+  EOObject if_else_stmt{"if-else"};
+  if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
+  if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
+  return if_else_stmt;
 }
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
-    EOObject if_stmt{"if"};
+  EOObject if_stmt{"if"};
+  if (p_stmt != nullptr) {
     if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
     if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
     return if_stmt;
+  }
+  return EOObject{EOObjectType::EO_PLUG};
 }
 
 EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
