@@ -10,6 +10,7 @@ import re as regex
 # Our scripts
 import tools
 import settings
+import build_c2eo
 import clean_before_transpilation
 
 
@@ -40,6 +41,7 @@ class Transpiler(object):
             self.ignored_transpilation_warnings = []
 
     def transpile(self):
+        build_c2eo.main(self.path_to_c2eo_build)
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'],

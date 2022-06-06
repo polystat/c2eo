@@ -6,7 +6,6 @@ import time
 # Our scripts
 import tools
 import settings
-import build_c2eo
 import update_eo_version
 from build_eo import EOBuilder
 from transpile_c2eo import Transpiler
@@ -26,7 +25,6 @@ class Compiler(object):
 
     def compile(self):
         update_eo_version.main()
-        build_c2eo.main(self.path_to_c2eo_build)
         self.transpilation_units = Transpiler(self.path_to_tests, self.filters, False).transpile()
         if self.transpilation_units:
             EOBuilder().build()
