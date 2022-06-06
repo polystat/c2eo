@@ -7,35 +7,35 @@ using namespace std;
 EOObject::EOObject(EOObjectType type) : type(type) {
   //   nested.reserve(10000);
 #ifdef TRACEOUT_NEW_EO
-  std::cout << *this; // << "\n";
+  std::cout << *this;  // << "\n";
 #endif
 }
 
 // Create simple complete Object
-EOObject::EOObject(std::string name) :
-    name(std::move(name)),
-    type(EOObjectType::EO_COMPLETE) {
+EOObject::EOObject(std::string name)
+    : name(std::move(name)), type(EOObjectType::EO_COMPLETE) {
   //   nested.reserve(10000);
 #ifdef TRACEOUT_NEW_EO
-  std::cout << *this; // << "\n";
+  std::cout << *this;  // << "\n";
 #endif
 }
 
 // Create simple object, may be used for literal
-EOObject::EOObject(std::string name, EOObjectType type) : name(std::move(name)), type(type) {
+EOObject::EOObject(std::string name, EOObjectType type)
+    : name(std::move(name)), type(type) {
 #ifdef TRACEOUT_NEW_EO
-  std::cout << *this; // << "\n";
+  std::cout << *this;  // << "\n";
 #endif
 }
 
 // create complete name_ with body
-EOObject::EOObject(std::string name, std::string postfix) :
-    name(std::move(name)),
-    postfix(std::move(postfix)),
-    type(EOObjectType::EO_COMPLETE) {
+EOObject::EOObject(std::string name, std::string postfix)
+    : name(std::move(name)),
+      postfix(std::move(postfix)),
+      type(EOObjectType::EO_COMPLETE) {
   //   nested.reserve(10000);
 #ifdef TRACEOUT_NEW_EO
-  std::cout << *this; // << "\n";
+  std::cout << *this;  // << "\n";
 #endif
 }
 
@@ -44,7 +44,9 @@ __attribute__((unused)) void EOObject::AddNested(const EOObject &obj) {
 }
 
 auto EOObject::GetSpaceIndent() {
-  return string(static_cast<std::basic_string<char>::size_type>(2 * EOObject::indent), ' ');
+  return string(
+      static_cast<std::basic_string<char>::size_type>(2 * EOObject::indent),
+      ' ');
 }
 
 std::ostream &operator<<(ostream &os, const EOObject &obj) {
@@ -56,7 +58,8 @@ std::ostream &operator<<(ostream &os, const EOObject &obj) {
   }
   os << EOObject::GetSpaceIndent();
   if (obj.type == EOObjectType::EO_PLUG) {
-    os << "plug" << "\n";
+    os << "plug"
+       << "\n";
     return os;
   }
   if (obj.type == EOObjectType::EO_ABSTRACT) {
@@ -80,5 +83,3 @@ std::ostream &operator<<(ostream &os, const EOObject &obj) {
   }
   return os;
 }
-
-

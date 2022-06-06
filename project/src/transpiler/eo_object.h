@@ -2,8 +2,8 @@
 #define C2EO_SRC_TRANSPILER_EO_OBJECT_H_
 
 #include <ostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 enum class EOObjectType {
   EO_EMPTY,
@@ -45,4 +45,4 @@ struct EOObject {
   inline static int indent = 0;
 };
 
-#endif // C2EO_SRC_TRANSPILER_EO_OBJECT_H_
+#endif  // C2EO_SRC_TRANSPILER_EO_OBJECT_H_
