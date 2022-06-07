@@ -8,6 +8,9 @@
 
 std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
                                           bool is_local) {
+  if (RD == nullptr) {
+    return {};
+  }
   extern UnitTranspiler transpiler;
   std::vector<RecordType> types;
   RecordType *existed = transpiler.record_manager_.GetById(RD->getID());
@@ -42,6 +45,9 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
     } else if (it->getKind() == clang::Decl::Field) {
       auto *field = llvm::dyn_cast<clang::FieldDecl>(*it);
 
+      if (field == nullptr) {
+        return {};
+      }
       std::string field_name;
       if (!field->isUnnamedBitfield()) {
         field_name = /* "f-" + */ field->getNameAsString();
