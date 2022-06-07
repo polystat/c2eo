@@ -25,7 +25,7 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
   }
 
 #ifdef TRACEOUT_FUNC_DEF
-  TraceOutFunctionDecl(FD);  // Тестовый вывод содержимого функции
+  TraceOutFunctionDecl(FD);  // Test output of the function content
 #endif
 
   DeclarationNameInfo decl_name_info{FD->getNameInfo()};
