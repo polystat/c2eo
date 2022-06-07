@@ -52,8 +52,11 @@ class Transpiler(object):
         tools.pprint('\nTranspile files:\n', slowly=True)
         with tools.thread_pool() as threads:
             self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
-        print_transpilation_results(self.group_transpilation_results())
-        self.check_c2eo_fails()
+        data = self.group_transpilation_results()
+        print_transpilation_results(data)
+        if self.check_c2eo_fails() or len(data['exception']) > 0:
+            exit('c2eo failed on some c files')
+
         self.remove_unused_eo_files()
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
@@ -139,8 +142,7 @@ class Transpiler(object):
                 tools.pprint_exception(f'c2eo {unit["name"]}', exception_message)
                 is_transpilation_failed = True
                 print()
-        if is_transpilation_failed:
-            exit('c2eo failed on some c files')
+        return is_transpilation_failed
 
     def move_transpiled_files(self):
         difference = []
