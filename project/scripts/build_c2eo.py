@@ -19,17 +19,14 @@ def main(path_to_c2eo_build=None):
     if result.returncode != 0:
         tools.pprint_exception('cmake ..', result.stderr)
         os.chdir(original_path)
-        return False
+        exit('Failed during cmake execution')
 
     tools.pprint(result.stdout, slowly=True)
     result = subprocess.run(f'make -j {tools.cpu_count()}', shell=True)
     os.chdir(original_path)
-
     if result.returncode != 0:
-        return False
-
+        exit('Failed during make execution')
     tools.pprint()
-    return True
 
 
 if __name__ == '__main__':

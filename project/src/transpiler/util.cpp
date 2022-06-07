@@ -2,7 +2,8 @@
 
 using namespace std;
 
-__attribute__((unused)) void Str2File(const std::string &str, const std::string &file_name) {
+__attribute__((unused)) void Str2File(const std::string &str,
+                                      const std::string &file_name) {
   std::ofstream out;
   out.open(file_name);
   if (out.is_open()) {
@@ -10,7 +11,8 @@ __attribute__((unused)) void Str2File(const std::string &str, const std::string 
   }
 }
 
-__attribute__((unused)) void File2Vector(const std::string &file_name, std::vector<std::string> &text) {
+__attribute__((unused)) void File2Vector(const std::string &file_name,
+                                         std::vector<std::string> &text) {
   std::ifstream in;
   in.open(file_name);
   std::string line;
@@ -21,7 +23,8 @@ __attribute__((unused)) void File2Vector(const std::string &file_name, std::vect
   }
 }
 
-__attribute__((unused)) void Text2File(std::vector<std::string> &text, const std::string &file_name) {
+__attribute__((unused)) void Text2File(std::vector<std::string> &text,
+                                       const std::string &file_name) {
   std::ofstream out;
   out.open(file_name);
   if (out.is_open()) {
@@ -44,4 +47,3 @@ std::string StrJoin(std::vector<std::string> vec) {
   }
   return res;
 }
-

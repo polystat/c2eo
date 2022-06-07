@@ -28,7 +28,8 @@ class EOBuilder(object):
             tools.pprint('Full eo project compilation starts\n')
             result = subprocess.run('mvn clean compile', shell=True)
         os.chdir(original_path)
-        return not result.returncode
+        if result.returncode:
+            exit('Failed during mvn execution')
 
     def is_good_for_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):

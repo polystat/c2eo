@@ -1,8 +1,10 @@
 #include "record_manager.h"
 
 RecordType RecordManager::Add(int64_t id, std::string name, size_t size,
-                              std::map<std::string, size_t> fields, bool is_local = false) {
-  RecordType record_type = {id, std::move(name), size, std::move(fields), is_local};
+                              std::map<std::string, size_t> fields,
+                              bool is_local = false) {
+  RecordType record_type = {id, std::move(name), size, std::move(fields),
+                            is_local};
   record_types.push_back(record_type);
   return record_type;
 }
@@ -16,7 +18,8 @@ RecordType *RecordManager::GetById(int64_t id) {
   return nullptr;
 }
 
-__attribute__((unused)) size_t RecordManager::GetShift(int64_t id, const std::string &member) {
+__attribute__((unused)) size_t RecordManager::GetShift(
+    int64_t id, const std::string &member) {
   RecordType *rt = GetById(id);
   if (rt != nullptr) {
     return rt->fields[member];
@@ -27,7 +30,8 @@ __attribute__((unused)) size_t RecordManager::GetShift(int64_t id, const std::st
 EOObject RecordManager::GetShiftAlias(int64_t id, const std::string &member) {
   RecordType *rt = GetById(id);
   if (rt != nullptr) {
-    return EOObject{rt->name + "-" + member, EOObjectType::EO_LITERAL}; // todo: is it EO_LITERAL?
+    return EOObject{rt->name + "-" + member,
+                    EOObjectType::EO_LITERAL};  // todo: is it EO_LITERAL?
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
@@ -40,9 +44,7 @@ std::vector<RecordType>::const_iterator RecordManager::end() const {
   return record_types.end();
 }
 
-bool RecordManager::Empty() {
-  return record_types.empty();
-}
+bool RecordManager::Empty() { return record_types.empty(); }
 
 std::vector<EOObject> RecordType::GetEORecordDecl() {
   std::vector<EOObject> record_decl;

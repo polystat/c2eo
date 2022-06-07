@@ -7,37 +7,53 @@ using namespace std;
 __attribute__((unused)) void TraceOutASTnode(Stmt::StmtClass stmt_class) {
   std::string message;
   switch (stmt_class) {
-    case Stmt::BinaryOperatorClass: message = "BinaryOperator";
+    case Stmt::BinaryOperatorClass:
+      message = "BinaryOperator";
       break;
-    case Stmt::CallExprClass: message = "CallExpr";
+    case Stmt::CallExprClass:
+      message = "CallExpr";
       break;
-    case Stmt::CompoundAssignOperatorClass: message = "CompoundAssignOperator";
+    case Stmt::CompoundAssignOperatorClass:
+      message = "CompoundAssignOperator";
       break;
-    case Stmt::CompoundStmtClass: message = "CompoundStmt";
+    case Stmt::CompoundStmtClass:
+      message = "CompoundStmt";
       break;
-    case Stmt::DeclRefExprClass: message = "DeclRefExpr";
+    case Stmt::DeclRefExprClass:
+      message = "DeclRefExpr";
       break;
-    case Stmt::DeclStmtClass: message = "DeclStmt";
+    case Stmt::DeclStmtClass:
+      message = "DeclStmt";
       break;
-    case Stmt::DoStmtClass: message = "DoStmt";
+    case Stmt::DoStmtClass:
+      message = "DoStmt";
       break;
-    case Stmt::FloatingLiteralClass: message = "FloatingLiteral";
+    case Stmt::FloatingLiteralClass:
+      message = "FloatingLiteral";
       break;
-    case Stmt::IfStmtClass: message = "IfStmt";
+    case Stmt::IfStmtClass:
+      message = "IfStmt";
       break;
-    case Stmt::ImplicitCastExprClass: message = "ImplicitCastExpr";
+    case Stmt::ImplicitCastExprClass:
+      message = "ImplicitCastExpr";
       break;
-    case Stmt::IntegerLiteralClass: message = "IntegerLiteral";
+    case Stmt::IntegerLiteralClass:
+      message = "IntegerLiteral";
       break;
-    case Stmt::ParenExprClass: message = "ParenExpr";
+    case Stmt::ParenExprClass:
+      message = "ParenExpr";
       break;
-    case Stmt::ReturnStmtClass: message = "ReturnStmt";
+    case Stmt::ReturnStmtClass:
+      message = "ReturnStmt";
       break;
-    case Stmt::UnaryOperatorClass: message = "UnaryOperator";
+    case Stmt::UnaryOperatorClass:
+      message = "UnaryOperator";
       break;
-    case Stmt::WhileStmtClass: message = "WhileStmt";
+    case Stmt::WhileStmtClass:
+      message = "WhileStmt";
       break;
-    default:message = "Unknown Object Class";
+    default:
+      message = "Unknown Object Class";
   }
   std::cout << "AST stmt class = " << message << "\n";
 }
@@ -45,41 +61,59 @@ __attribute__((unused)) void TraceOutASTnode(Stmt::StmtClass stmt_class) {
 __attribute__((unused)) void TraceOutBinaryOperator(BinaryOperatorKind kind) {
   std::string message;
   switch (kind) {
-    case BinaryOperatorKind::BO_Assign: message = "Assign (=)";
+    case BinaryOperatorKind::BO_Assign:
+      message = "Assign (=)";
       break;
-    case BinaryOperatorKind::BO_Add: message = "Add (+)";
+    case BinaryOperatorKind::BO_Add:
+      message = "Add (+)";
       break;
-    case BinaryOperatorKind::BO_Sub: message = "Sub (-)";
+    case BinaryOperatorKind::BO_Sub:
+      message = "Sub (-)";
       break;
-    case BinaryOperatorKind::BO_Mul: message = "Mul (*)";
+    case BinaryOperatorKind::BO_Mul:
+      message = "Mul (*)";
       break;
-    case BinaryOperatorKind::BO_Div: message = "Div (/)";
+    case BinaryOperatorKind::BO_Div:
+      message = "Div (/)";
       break;
-    case BinaryOperatorKind::BO_Rem: message = "Rem (%)";
+    case BinaryOperatorKind::BO_Rem:
+      message = "Rem (%)";
       break;
-    case BinaryOperatorKind::BO_And: message = "And (&)";
+    case BinaryOperatorKind::BO_And:
+      message = "And (&)";
       break;
-    case BinaryOperatorKind::BO_Or: message = "Or (|)";
+    case BinaryOperatorKind::BO_Or:
+      message = "Or (|)";
       break;
-    case BinaryOperatorKind::BO_Xor: message = "Xor (^)";
+    case BinaryOperatorKind::BO_Xor:
+      message = "Xor (^)";
       break;
-    case BinaryOperatorKind::BO_Shl: message = "Shl (<<)";
+    case BinaryOperatorKind::BO_Shl:
+      message = "Shl (<<)";
       break;
-    case BinaryOperatorKind::BO_Shr: message = "Shr (>>)";
+    case BinaryOperatorKind::BO_Shr:
+      message = "Shr (>>)";
       break;
-    case BinaryOperatorKind::BO_EQ: message = "EQ (==)";
+    case BinaryOperatorKind::BO_EQ:
+      message = "EQ (==)";
       break;
-    case BinaryOperatorKind::BO_NE: message = "NE (!=)";
+    case BinaryOperatorKind::BO_NE:
+      message = "NE (!=)";
       break;
-    case BinaryOperatorKind::BO_LT: message = "LT (<)";
+    case BinaryOperatorKind::BO_LT:
+      message = "LT (<)";
       break;
-    case BinaryOperatorKind::BO_LE: message = "LE (<=)";
+    case BinaryOperatorKind::BO_LE:
+      message = "LE (<=)";
       break;
-    case BinaryOperatorKind::BO_GT: message = "GT (>)";
+    case BinaryOperatorKind::BO_GT:
+      message = "GT (>)";
       break;
-    case BinaryOperatorKind::BO_GE: message = "GE (>=)";
+    case BinaryOperatorKind::BO_GE:
+      message = "GE (>=)";
       break;
-    default:message = "Unknown Binary Operation Kind";
+    default:
+      message = "Unknown Binary Operation Kind";
   }
   std::cout << "  AST binary operation = " << message << "\n";
 }
