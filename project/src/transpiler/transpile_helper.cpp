@@ -63,6 +63,9 @@ EOObject GetGotoForWhileEO(const EOObject& while_eo_object);
 void ProcessDeclStmt(size_t shift, vector<Variable> &all_local, DeclStmt *decl_stmt);
 
 vector<Variable> ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS);
+
+EOObject GetInitListEOObject(const InitListExpr *list);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -376,10 +379,23 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::ContinueStmtClass) {
     return {"goto-loop-label.backward TRUE",EOObjectType::EO_LITERAL};
   }
+  if (stmt_class == Stmt::InitListExprClass) {
+    const auto *op = dyn_cast<InitListExpr>(stmt);
+    return GetInitListEOObject(op);
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName() << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
 }
+
+EOObject GetInitListEOObject(const InitListExpr *list) {
+  EOObject eoList{"*"};
+  for (auto element = list->child_begin(); element != list->child_end(); element++) {
+    eoList.nested.push_back(GetStmtEOObject(*element));
+  }
+  return eoList;
+}
+
 EOObject GetCastEOObject(const CastExpr *op) {
   auto cast_kind = op->getCastKind();
   if (cast_kind == clang::CK_LValueToRValue) {
