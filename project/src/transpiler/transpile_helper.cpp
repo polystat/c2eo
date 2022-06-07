@@ -78,6 +78,7 @@ vector<Variable> ProcessCompoundStatementLocalVariables(
     const clang::CompoundStmt *CS);
 
 extern UnitTranspiler transpiler;
+int loop_level = 0;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -437,10 +438,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetCastEOObject(op);
   }
   if (stmt_class == Stmt::BreakStmtClass) {
-    return {"goto-loop-label.forward TRUE", EOObjectType::EO_LITERAL};
+    return {"goto-loop-label"+ to_string(loop_level) + ".forward TRUE", EOObjectType::EO_LITERAL};
   }
   if (stmt_class == Stmt::ContinueStmtClass) {
-    return {"goto-loop-label.backward", EOObjectType::EO_LITERAL};
+    return {"goto-loop-label"+ to_string(loop_level) +".backward", EOObjectType::EO_LITERAL};
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
@@ -486,7 +487,7 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   EOObject for_stmt(EOObjectType::EO_EMPTY);
   EOObject while_stmt{"while", "@"};
   EOObject seq{"seq"};
-
+  loop_level++;
   if (p_stmt != nullptr) {
     const auto *init = p_stmt->getInit();
     const auto *cond = p_stmt->getCond();
@@ -1044,14 +1045,16 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
 EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
   EOObject goto_object{"goto"};
   EOObject return_label{EOObjectType::EO_ABSTRACT};
-  return_label.arguments.emplace_back("goto-loop-label");
+  return_label.arguments.emplace_back("goto-loop-label"+ to_string(loop_level));
   return_label.nested.push_back(while_eo_object);
   goto_object.nested.push_back(return_label);
+  loop_level--;
   return goto_object;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
   EOObject while_stmt{"while", "@"};
+  loop_level++;
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
@@ -1062,6 +1065,7 @@ EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
 
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
   EOObject do_while_stmt{"do-while", "@"};
+  loop_level++;
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
