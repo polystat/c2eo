@@ -120,3 +120,5 @@ project/bin/c2eo
 
 # python
 *venv*/
+
+*.alias
