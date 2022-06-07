@@ -84,7 +84,7 @@ class Transpiler(object):
         if self.need_to_prepare_c_code:
             prepare_c_code(data)
         result_path = os.path.join(path, self.result_dir_name)
-        prepared_c_file = os.path.join(result_path, f'{file_name}-eo.c')
+        prepared_c_file = os.path.join(path, f'{file_name}-eo.c')
         if not os.path.exists(result_path):
             os.makedirs(result_path, exist_ok=True)
         with open(prepared_c_file, 'w') as f:
@@ -114,6 +114,7 @@ class Transpiler(object):
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
             for line in result.stderr.split('\n'):
+                line = line.lower()
                 if any(warning in line for warning in self.ignored_transpilation_warnings):
                     continue
 
@@ -145,6 +146,8 @@ class Transpiler(object):
         difference = []
         for unit in self.transpilation_units:
             shutil.copy(unit['eo_file'], os.path.join(unit['result_path'], f'{unit["name"]}.eo'))
+            shutil.move(unit['prepared_c_file'], unit['result_path'])
+            shutil.move(f'{unit["prepared_c_file"]}.i', unit['result_path'])
             if not tools.compare_files(unit['eo_file'], unit['src_eo_file']):
                 if not os.path.exists(unit['src_eo_path']):
                     os.makedirs(unit['src_eo_path'], exist_ok=True)
