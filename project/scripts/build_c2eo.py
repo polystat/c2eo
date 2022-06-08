@@ -14,6 +14,8 @@ def main(path_to_c2eo_build=None):
         path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
     tools.pprint()
     original_path = os.getcwd()
+    if not os.path.exists(path_to_c2eo_build):
+        os.mkdir(path_to_c2eo_build)
     os.chdir(path_to_c2eo_build)
     result = subprocess.run('cmake ..', shell=True, capture_output=True, text=True)
     if result.returncode != 0:
