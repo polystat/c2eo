@@ -78,6 +78,7 @@ vector<Variable> ProcessCompoundStatementLocalVariables(
     const clang::CompoundStmt *CS);
 
 extern UnitTranspiler transpiler;
+int loop_level = 0;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -437,10 +438,12 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetCastEOObject(op);
   }
   if (stmt_class == Stmt::BreakStmtClass) {
-    return {"goto-loop-label.forward TRUE", EOObjectType::EO_LITERAL};
+    return {"goto-loop-label" + to_string(loop_level) + ".forward TRUE",
+            EOObjectType::EO_LITERAL};
   }
   if (stmt_class == Stmt::ContinueStmtClass) {
-    return {"goto-loop-label.backward", EOObjectType::EO_LITERAL};
+    return {"goto-loop-label" + to_string(loop_level) + ".backward",
+            EOObjectType::EO_LITERAL};
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
@@ -486,7 +489,7 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   EOObject for_stmt(EOObjectType::EO_EMPTY);
   EOObject while_stmt{"while", "@"};
   EOObject seq{"seq"};
-
+  loop_level++;
   if (p_stmt != nullptr) {
     const auto *init = p_stmt->getInit();
     const auto *cond = p_stmt->getCond();
@@ -588,7 +591,7 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       EOObject arr_name = GetStmtEOObject(op->getBase());
       size_t sz =
           decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
-          byte_size;
+              byte_size;
       return std::make_pair(sz, arr_name);
     }
     if (stmt_class == Stmt::ArraySubscriptExprClass) {
@@ -618,8 +621,8 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       QualType qual_type = child->getType();
       EOObject arr_name = GetStmtEOObject(op->getBase());
       size_t sz = transpiler.record_manager_
-                      .GetById(qual_type->getAsRecordDecl()->getID())
-                      ->size;
+          .GetById(qual_type->getAsRecordDecl()->getID())
+          ->size;
       return std::make_pair(sz, arr_name);
     }
     cerr << base_ch->getStmtClassName() << "\n\n";
@@ -640,7 +643,7 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   if (qual_type->isPointerType()) {
     EOObject record{"address"};
     qual_type = dyn_cast<clang::PointerType>(qual_type.getCanonicalType())
-                    ->getPointeeType();
+        ->getPointeeType();
     record.nested.emplace_back("global-ram");
     record.nested.push_back(GetStmtEOObject(child));
     member.nested.push_back(record);
@@ -919,30 +922,30 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   if (op_code == UnaryOperatorKind::UO_Plus) {  // UNARY_OPERATION(Plus, "+")
     operation = "plus";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus, "-")
+      UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus, "-")
     operation = "neg";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Not) {  // UNARY_OPERATION(Not, "~")
+      UnaryOperatorKind::UO_Not) {  // UNARY_OPERATION(Not, "~")
     operation = "bit-not";
   } else if (op_code ==
-             UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot, "!")
+      UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot, "!")
     operation = "not";
     // "__real expr"/"__imag expr" Extension.
   } else if (op_code ==
-             UnaryOperatorKind::UO_Real) {  // UNARY_OPERATION(Real, "__real")
+      UnaryOperatorKind::UO_Real) {  // UNARY_OPERATION(Real, "__real")
     operation = "real";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Imag) {  // UNARY_OPERATION(Imag, "__imag")
+      UnaryOperatorKind::UO_Imag) {  // UNARY_OPERATION(Imag, "__imag")
     operation = "imag";
     // __extension__ marker.
   } else if (op_code ==
-             UnaryOperatorKind::UO_Extension) {  // UNARY_OPERATION(Extension,
-                                                 // "__extension__")
+      UnaryOperatorKind::UO_Extension) {  // UNARY_OPERATION(Extension,
+    // "__extension__")
     operation = "extension";
     // [C++ Coroutines] co_await operator
   } else if (op_code ==
-             UnaryOperatorKind::UO_Coawait) {  // UNARY_OPERATION(Coawait,
-                                               // "co_await")
+      UnaryOperatorKind::UO_Coawait) {  // UNARY_OPERATION(Coawait,
+    // "co_await")
     operation = "coawait";
     // Incorrect unary operator
   } else {
@@ -1044,14 +1047,16 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
 EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
   EOObject goto_object{"goto"};
   EOObject return_label{EOObjectType::EO_ABSTRACT};
-  return_label.arguments.emplace_back("goto-loop-label");
+  return_label.arguments.emplace_back("goto-loop-label" + to_string(loop_level));
   return_label.nested.push_back(while_eo_object);
   goto_object.nested.push_back(return_label);
+  loop_level--;
   return goto_object;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
   EOObject while_stmt{"while", "@"};
+  loop_level++;
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
@@ -1062,6 +1067,7 @@ EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
 
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
   EOObject do_while_stmt{"do-while", "@"};
+  loop_level++;
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
@@ -1143,7 +1149,7 @@ std::string GetTypeName(QualType qual_type) {
       str += RD->getNameAsString();
     } else {
       str += std::to_string(reinterpret_cast<uint64_t>(
-          RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+                                RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     }
     return str;
   }
@@ -1164,21 +1170,18 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
     EOObject cur = not_visited.front();
     not_visited.pop();
     switch (cur.type) {
-      case EOObjectType::EO_ABSTRACT:
-        all_known.insert(cur.postfix);
+      case EOObjectType::EO_ABSTRACT:all_known.insert(cur.postfix);
         for (const auto &arg : cur.arguments) {
           all_known.insert(arg);
         }
         break;
-      case EOObjectType::EO_COMPLETE:
-        all_known.insert(cur.postfix);
+      case EOObjectType::EO_COMPLETE:all_known.insert(cur.postfix);
         if (all_known.find(cur.name) == all_known.end()) {
           unknown.insert(cur.name);
         }
         break;
       case EOObjectType::EO_EMPTY:
-      case EOObjectType::EO_LITERAL:
-        break;
+      case EOObjectType::EO_LITERAL:break;
       case EOObjectType::EO_PLUG:
         if (cur.nested.empty()) {
           unknown.insert("plug");
