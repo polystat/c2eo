@@ -95,7 +95,7 @@ jobs:
           rm -r ./llvm-clang
           mv ~/llvm-clang .
           
-      - name: Test
+      - name: Testing
         run: |
           cd ./project/scripts
           python3 test.py
