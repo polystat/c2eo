@@ -70,7 +70,7 @@ jobs:
           rm -r ./llvm-clang
           mv ~/llvm-clang .
           
-      - name: Test c2eo
+      - name: Parsing
         run: |
           cd ./project/scripts
           python3 transpile_c2eo.py ../tests/parsing f
@@ -95,7 +95,7 @@ jobs:
           rm -r ./llvm-clang
           mv ~/llvm-clang .
           
-      - name: Test c2eo
+      - name: Test
         run: |
           cd ./project/scripts
           python3 test.py
