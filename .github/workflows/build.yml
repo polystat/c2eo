@@ -39,7 +39,6 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          rm -r ./llvm-clang
           mv ~/llvm-clang .
       
       - name: Install clang-tidy
@@ -67,7 +66,6 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          rm -r ./llvm-clang
           mv ~/llvm-clang .
           
       - name: Parsing
@@ -92,7 +90,6 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          rm -r ./llvm-clang
           mv ~/llvm-clang .
           
       - name: Testing
