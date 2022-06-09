@@ -15,7 +15,7 @@
 
 #include "eo_object.h"
 
-__attribute__((unused)) void TraceOutASTnode(clang::Stmt::StmtClass stmt_class);
+__attribute__((unused)) void TraceOutASTNode(clang::Stmt::StmtClass stmt_class);
 
 __attribute__((unused)) void TraceOutBinaryOperator(
     clang::BinaryOperatorKind kind);
