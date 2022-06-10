@@ -4,5 +4,5 @@
 
 [a b] > write-as-int16
   seq > @
-    a.write (b.as-bytes.part (b.as-bytes.size.sub 2) 2)
+    a.write (b.as-bytes.slice (b.as-bytes.size.sub 2) 2)
     read-as-int16 a
