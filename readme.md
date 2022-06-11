@@ -498,7 +498,7 @@ goto
 
 ### Break
 
-With [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object we can transofrm any number of breaks in cycle to g.forward call.
+With [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object we can transofrm any number of breaks in cycle to g.forward TRUE call.
 
 ```c
 while (condition) {
@@ -618,36 +618,77 @@ C|EO
 
 ### Switch case default
 
-We can convert such simple switch statement to the nested [if](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/if.eo) object.
+We can convert such simple switch statement to [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object.
 
 ```c
-switch (expression) {
-  case const1:
-    break;
-  case const2: case const3:
-    break;
-  default:
-    break;
+switch (x): {
+ case 1:
+  op1;
+  break;
+ case 2:
+ case 3:
+  op2;
+  break;
+ case 4:
+  op3;
+ case 5:
+  op4;
+  break;
+ case 6:
+ default:
+  op6:
+  break;
 }
 ```
 
 ```java
-if
-  expression.eq const1
-  seq
-    ...
-    True
-  if
-    or
-      expression.eq const2
-      expression.eq const3
-    seq
-      ...
-      True
-    seq // default
-      ...
-      True
-}
+  memory > flag
+  goto > @
+    [end]
+      seq > @
+        write flag 0
+        if
+          or (eq x 1) flag
+          seq
+            write flag 1
+            op1
+            end.forward TRUE
+            TRUE
+        if
+          or (eq x 2) flag
+          seq
+            write flag 1
+            TRUE
+        if
+          or (eq x 3) flag
+          seq
+            write flag 1
+            op2
+            end.forward TRUE
+            TRUE
+          TRUE
+        if
+          or (eq x 4) flag
+          seq
+            write flag 1
+            op3
+            TRUE
+        if
+          or (eq x 5) flag
+          seq
+            write flag 1
+            op4
+            end.forward TRUE
+            TRUE
+        if
+          or (eq x 6) flag
+          seq
+            write flag 1
+            TRUE
+          TRUE
+        op6
+        end.forward TRUE
+        TRUE
 ```
 
 ### Const
