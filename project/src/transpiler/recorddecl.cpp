@@ -31,7 +31,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
 
   uint64_t size = 0;
 
-  std::map<std::string, size_t> fields;
+  std::map<std::string, std::pair<clang::QualType, size_t>> fields;
   size_t shift = 0;
 
   for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
@@ -48,7 +48,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
       } else {
         field_name = "field" + std::to_string(fields.size());
       }
-      fields[field_name] = shift;
+      fields[field_name] = {field->getType(), shift};
 
       clang::QualType qual_type = field->getType();
       clang::TypeInfo type_info = field->getASTContext().getTypeInfo(qual_type);

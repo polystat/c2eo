@@ -14,14 +14,14 @@ struct RecordType {
   int64_t id;
   std::string name;
   size_t size;
-  std::map<std::string, size_t> fields;  // field.name_ -> field.shift
+  std::map<std::string, std::pair<clang::QualType, size_t>> fields;  // field.name_ -> field.shift
   std::vector<EOObject> GetEORecordDecl();
   bool is_local;
 };
 
 struct RecordManager {
   RecordType Add(int64_t id, std::string name, size_t size,
-                 std::map<std::string, size_t> fields, bool is_local);
+                 std::map<std::string, std::pair<clang::QualType, size_t>> fields, bool is_local);
   RecordType *GetById(int64_t id);
   __attribute__((unused)) size_t GetShift(int64_t id,
                                           const std::string &member);

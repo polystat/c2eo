@@ -136,7 +136,7 @@ std::vector<EOObject> Variable::GetInitializer() const {
     return {EOObject(EOObjectType::EO_EMPTY)};
   }
   if (value.name == "*") {
-    return GetListInitializer(EOObject{alias}, value);
+    return GetListInitializer(EOObject{alias}, value, id->getType());
   }
   EOObject res("write");
   if ((type_postfix.length() < 3 ||
@@ -183,17 +183,19 @@ bool Variable::operator==(const Variable &var) const {
   return this->id == var.id;
 }
 
-vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listValue) const {
+vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listValue, clang::QualType qualType) const {
   std::vector<EOObject> inits;
-  clang::QualType qualType = id->getType();
   extern UnitTranspiler transpiler;
-  auto* recordType = transpiler.record_manager_.GetById(id->getID());
+  auto* recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
   std::string elementTypeName = "";
+  std::map<std::string, std::pair<clang::QualType, size_t>>::iterator recElement;
   size_t elementSize = 0;
   if (qualType->isArrayType()) {
     clang::QualType elementQualType = llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
     elementTypeName = GetTypeName(elementQualType);
     elementSize = id->getASTContext().getTypeInfo(elementQualType).Align / byte_size;
+  } else if (qualType->isRecordType()) {
+    recElement = recordType->fields.begin();
   }
   for (int i = 0; i < value.nested.size(); i++) {
     EOObject shiftedAlias{"add"};
@@ -203,9 +205,14 @@ vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listV
       shift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
       shift.nested.emplace_back(to_string(elementSize), EOObjectType::EO_LITERAL);
       shiftedAlias.nested.push_back(shift);
+    } else if (qualType->isRecordType()) {
+      shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
+          qualType->getAsRecordDecl()->getID(), recElement->first));
+      elementTypeName = GetTypeName(recElement->second.first);
+      recElement++;
     }
     if (value.nested[i].name == "*") {
-      auto subInits = GetListInitializer(shiftedAlias, value.nested[i]);
+      auto subInits = GetListInitializer(shiftedAlias, value.nested[i], qualType);
       inits.insert(inits.end(), subInits.begin(), subInits.end());
     } else {
       EOObject res("write");
