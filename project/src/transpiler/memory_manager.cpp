@@ -194,7 +194,7 @@ vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listV
     elementTypeName = GetTypeName(elementQualType);
     elementSize = id->getASTContext().getTypeInfo(elementQualType).Align / byte_size;
   } else if (qualType->isRecordType()) {
-    auto* recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
+    auto *recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
     recElement = recordType->fields.begin();
   }
   for (int i = 0; i < value.nested.size(); i++) {
@@ -209,10 +209,17 @@ vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listV
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           qualType->getAsRecordDecl()->getID(), recElement->first));
       elementTypeName = GetTypeName(recElement->second.first);
-      recElement++;
     }
     if (value.nested[i].name == "*") {
-      auto subInits = GetListInitializer(shiftedAlias, value.nested[i], qualType);
+      clang::QualType elementQualType;
+      if (qualType->isArrayType()) {
+        elementQualType = llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
+      }
+      if (qualType->isRecordType()) {
+        elementQualType = recElement->second.first;
+      }
+      auto subInits = GetListInitializer(shiftedAlias,
+                                         value.nested[i], elementQualType);
       inits.insert(inits.end(), subInits.begin(), subInits.end());
     } else {
       EOObject res("write");
@@ -222,6 +229,9 @@ vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listV
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value.nested[i]);
       inits.push_back(res);
+      if (qualType->isRecordType()) {
+        recElement++;
+      }
     }
   }
   return inits;
