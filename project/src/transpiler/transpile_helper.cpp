@@ -80,6 +80,7 @@ vector<Variable> ProcessCompoundStatementLocalVariables(
 EOObject GetInitListEOObject(const InitListExpr *list);
 
 extern UnitTranspiler transpiler;
+int loop_level = 0;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -440,10 +441,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetCastEOObject(op);
   }
   if (stmt_class == Stmt::BreakStmtClass) {
-    return {"goto-loop-label.forward TRUE", EOObjectType::EO_LITERAL};
+    return EOObject{"break"};
   }
   if (stmt_class == Stmt::ContinueStmtClass) {
-    return {"goto-loop-label.backward", EOObjectType::EO_LITERAL};
+    return EOObject{"continue"};
   }
   if (stmt_class == Stmt::InitListExprClass) {
     const auto *op = dyn_cast<InitListExpr>(stmt);
@@ -498,33 +499,49 @@ EOObject GetCastEOObject(const CastExpr *op) {
 }
 
 EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
-  EOObject for_stmt(EOObjectType::EO_EMPTY);
-  EOObject while_stmt{"while", "@"};
-  EOObject seq{"seq"};
-
-  if (p_stmt != nullptr) {
-    const auto *init = p_stmt->getInit();
-    const auto *cond = p_stmt->getCond();
-    const auto *inc = p_stmt->getInc();
-    const auto *body = p_stmt->getBody();
-    if (init != nullptr) {
-      for_stmt.nested.push_back(GetStmtEOObject(init));
-    }
-
-    if (cond != nullptr) {
-      while_stmt.nested.push_back(GetStmtEOObject(cond));
-    } else {
-      while_stmt.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-    }
-
-    seq.nested.push_back(GetSeqForBodyEOObject(body));
-    if (inc != nullptr) {
-      seq.nested.push_back(GetSeqForBodyEOObject(inc));
-    }
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
   }
-
-  while_stmt.nested.push_back(seq);
-  for_stmt.nested.push_back(GetGotoForWhileEO(while_stmt));
+  EOObject for_stmt(EOObjectType::EO_EMPTY);
+  const auto *init = p_stmt->getInit();
+  if (init != nullptr) {
+    for_stmt.nested.push_back(GetStmtEOObject(init));
+  }
+  EOObject goto_object_1{"goto"};
+  EOObject return_label_1{EOObjectType::EO_ABSTRACT};
+  return_label_1.arguments.emplace_back("for-loop-label-1");
+  EOObject break_obj{"for-loop-label-1.forward TRUE", "break"};
+  EOObject if_object{"if", "@"};
+  const auto *cond = p_stmt->getCond();
+  if (cond != nullptr) {
+    if_object.nested.push_back(GetStmtEOObject(cond));
+  } else {
+    if_object.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  }
+  EOObject seq_object_1{"seq"};
+  EOObject goto_object_2{"goto"};
+  EOObject return_label_2{EOObjectType::EO_ABSTRACT};
+  return_label_2.arguments.emplace_back("for-loop-label-2");
+  EOObject continue_obj{"for-loop-label-2.forward TRUE", "continue"};
+  EOObject seq_object_2{"seq", "@"};
+  seq_object_2.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  seq_object_2.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  return_label_2.nested.push_back(continue_obj);
+  return_label_2.nested.push_back(seq_object_2);
+  goto_object_2.nested.push_back(return_label_2);
+  seq_object_1.nested.push_back(goto_object_2);
+  const auto *inc = p_stmt->getInc();
+  if (inc != nullptr) {
+    seq_object_1.nested.push_back(GetSeqForBodyEOObject(inc));
+  }
+  seq_object_1.nested.emplace_back("for-loop-label-1.backward",
+                                   EOObjectType::EO_LITERAL);
+  seq_object_1.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  if_object.nested.push_back(seq_object_1);
+  return_label_1.nested.push_back(break_obj);
+  return_label_1.nested.push_back(if_object);
+  goto_object_1.nested.push_back(return_label_1);
+  for_stmt.nested.push_back(goto_object_1);
   return for_stmt;
 }
 
@@ -952,12 +969,12 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     // __extension__ marker.
   } else if (op_code ==
              UnaryOperatorKind::UO_Extension) {  // UNARY_OPERATION(Extension,
-                                                 // "__extension__")
+    // "__extension__")
     operation = "extension";
     // [C++ Coroutines] co_await operator
   } else if (op_code ==
              UnaryOperatorKind::UO_Coawait) {  // UNARY_OPERATION(Coawait,
-                                               // "co_await")
+    // "co_await")
     operation = "coawait";
     // Incorrect unary operator
   } else {
@@ -1059,30 +1076,74 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
 EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
   EOObject goto_object{"goto"};
   EOObject return_label{EOObjectType::EO_ABSTRACT};
-  return_label.arguments.emplace_back("goto-loop-label");
+  return_label.arguments.emplace_back("goto-loop-label" +
+                                      to_string(loop_level));
   return_label.nested.push_back(while_eo_object);
   goto_object.nested.push_back(return_label);
+  loop_level--;
   return goto_object;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
-  EOObject while_stmt{"while", "@"};
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-  while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  return GetGotoForWhileEO(while_stmt);
+  EOObject goto_object{"goto"};
+  EOObject return_label{EOObjectType::EO_ABSTRACT};
+  string label_name = "while-loop-label";
+  return_label.arguments.emplace_back(label_name);
+  EOObject continue_obj{label_name + ".backward", "continue"};
+  EOObject break_obj{label_name + ".forward TRUE", "break"};
+  EOObject if_obj{"if", "@"};
+  if_obj.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  EOObject seq_obj{"seq"};
+  seq_obj.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
+  seq_obj.nested.emplace_back("continue");
+  seq_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  if_obj.nested.push_back(seq_obj);
+  return_label.nested.push_back(continue_obj);
+  return_label.nested.push_back(break_obj);
+  return_label.nested.push_back(if_obj);
+  goto_object.nested.push_back(return_label);
+  return goto_object;
 }
 
 EOObject GetDoWhileStmtEOObject(const DoStmt *p_stmt) {
-  EOObject do_while_stmt{"do-while", "@"};
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-  do_while_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-  do_while_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getBody()));
-  return GetGotoForWhileEO(do_while_stmt);
+  EOObject goto_object_1{"goto"};
+  EOObject return_label_1{EOObjectType::EO_ABSTRACT};
+  return_label_1.arguments.emplace_back("do-while-loop-label-1");
+  EOObject break_obj{"do-while-loop-label-1.forward TRUE", "break"};
+
+  EOObject seq_object_1{"seq", "@"};
+
+  EOObject goto_object_2{"goto"};
+  EOObject return_label_2{EOObjectType::EO_ABSTRACT};
+  return_label_2.arguments.emplace_back("do-while-loop-label-2");
+  EOObject continue_obj{"do-while-loop-label-2.forward TRUE", "continue"};
+  EOObject seq_object_2{"seq", "@"};
+  seq_object_2.nested.push_back(GetStmtEOObject(p_stmt->getBody()));
+  seq_object_2.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  return_label_2.nested.push_back(continue_obj);
+  return_label_2.nested.push_back(seq_object_2);
+  goto_object_2.nested.push_back(return_label_2);
+
+  EOObject if_obj{"if"};
+  if_obj.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  if_obj.nested.emplace_back("do-while-loop-label-1.backward",
+                             EOObjectType::EO_LITERAL);
+
+  seq_object_1.nested.push_back(goto_object_2);
+  seq_object_1.nested.push_back(if_obj);
+  seq_object_1.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+  return_label_1.nested.push_back(break_obj);
+  return_label_1.nested.push_back(seq_object_1);
+
+  goto_object_1.nested.push_back(return_label_1);
+
+  return goto_object_1;
 }
 
 EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {

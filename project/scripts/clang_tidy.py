@@ -22,6 +22,8 @@ class ClangTidy(object):
         self.files_handled_count = 0
         self.files_count = 0
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
+        if not os.path.exists(self.path_to_c2eo_build):
+            os.mkdir(self.path_to_c2eo_build)
         self.ignored_inspection_warnings = settings.get_setting('ignored_inspection_warnings')
         if not self.ignored_inspection_warnings:
             self.ignored_inspection_warnings = []

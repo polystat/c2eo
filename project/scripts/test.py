@@ -33,7 +33,6 @@ class Tests(object):
         self.test_handled_count = 0
 
     def test(self):
-        update_eo_version.main()
         self.transpilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
         if self.transpilation_units:
             self.get_result_for_tests()

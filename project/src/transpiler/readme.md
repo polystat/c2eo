@@ -1,4 +1,3 @@
-# c2eo
+# C2EO
 
-Попытка сформировать основу транспилятора C2EO, используя libtooling и libmatcher
-
+C2EO source files using libtooling and libmatcher

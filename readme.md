@@ -64,13 +64,17 @@ $ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA
 $ tar -xvf llvm-clang.tar.gz
 ```
 
-It is assumed that the `llvm-clang` is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7).
+It is assumed that the `llvm-clang` dir is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7).
 
 Formally speaking, this is where the preparation can be completed. However, in order to fully work with the project, testing and executing the translated code, you need to study the [EO compiler project](https://github.com/objectionary/eo) and fulfill its necessary requirements. After that, it will be possible to proceed with further steps.
 
 ### Making changes
 
-All sources files of transpiler are located in `project/src/transpiler`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project/build` dir and run the following commands:
+All sources files of transpiler are located in `project/src/transpiler`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project` dir. For the first time, create the `build` folder:
+```bash
+$ mkdir build
+```
+then go to the `build` folder and run the following commands:
 
 ```bash
 $ cmake ..
@@ -115,8 +119,11 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [pointers](#pointers)
 - [external links](#external-links)
 - [if-else](#if-else)
-- [while-do](#while-do)
+- [while](#while)
+- [do-while](#do-while)
 - [for](#for)
+- [break](#break)
+- [continue](#continue)
 - [operators](#operators)
 
 :hammer: In progress:
@@ -127,8 +134,6 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [switch case default](#switch-case-default)
 - [const](#const)
 - [enums](#enums)
-- [break](#break)
-- [continue](#continue)
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
 - [pointers on function](#pointers-on-function)
@@ -392,7 +397,7 @@ strncpy str2 st1 8
   TRUE > @
 ```
 
-### if-else
+### If-else
 
 In EO, we have an analog of an [if-else](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/if.eo) object, so we just convert without any significant changes.
 
@@ -416,9 +421,9 @@ if
     TRUE
 ```
 
-### while-do
+### While
 
-In EO, we have an analog of the [while](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/while.eo) object, so we just convert without any significant changes.
+We can generate of C while on the EO by using [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo), conditional operator and analogs for break and continue.
 
 ```c
 while (condition) {
@@ -427,67 +432,120 @@ while (condition) {
 ```
 
 ```java
-while
-  condition
-  seq
-    ...
-    TRUE
+goto
+  [while-loop-label]
+    while-loop-label.backward > continue
+    while-loop-label.forward TRUE > break
+    if > @
+      condition
+      seq
+        body
+        continue
+        TRUE
 ```
 
-For do-while, we need to create the [do-while](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/do-while.eo) object.
+### Do-while
+
+We can generate an analog of C do-while on EO by using nested [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) for further checking by a conditional operator and analogs for break and continue.
 
 ```c
 do {
-  ...
+  body
 } while (condition)
 ```
 
 ```java
-do-while
-  condition
-  seq
-    ...
-    TRUE
+goto
+  [do-while-loop-label-1]
+    do-while-loop-label-1.forward TRUE > break
+    seq > @
+      goto
+        [do-while-loop-label-2]
+          do-while-loop-label-2.forward TRUE > continue
+          body > @
+      if
+        condition
+        do-while-loop-label-1.backward
+      TRUE
 ```
 
-### for
+### For
 
-For "for" we can also use the while objecе by placing the "for" expression blocks in different places:
+We can generate an analog of C for on EO using the nested [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo ) to execute loop-expression after executing the body of the loop, conditional operator and analogs for break and continue.
 
 ```c
-for (initialization, condition, modification) {
+for(init;condition;loop-expression) {
   body
 }
 ```
 
 ```java
-seq // initialization
-  ...
-  TRUE
-while
-  condition
-  seq 
-    body // first
-    modification // last
-    TRUE
+init
+goto
+  [for-loop-label-1]
+    for-loop-label-1.forward TRUE > break
+    if > @
+      condition
+      seq
+        goto
+          [for-loop-label-2]
+            for-loop-label-2.forward TRUE > continue
+            body > @
+        loop-expression
+        for-loop-label-1.backward
+        TRUE
 ```
 
-example:
+### Break
+
+With [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object we can transofrm any number of breaks in cycle to g.forward TRUE call.
 
 ```c
-for (i=0; i<x; i++) {
-  printf("%d\n",i);
+while (condition) {
+  ...
+  break;
+  ...
 }
 ```
 
 ```java
-i.write 0
-while
-  i.less < x
-  seq 
-    printf "%d\n" i
-    i.write (i.add 1)
-    TRUE
+goto
+  [while-loop-label]
+    while-loop-label.backward > continue
+    while-loop-label.forward TRUE > break
+    if > @
+      condition
+      seq
+        ...
+        break
+        ...
+        TRUE
+```
+
+### Continue
+
+With [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object we can transofrm any number of continue in cycle to g.backward call.
+
+```c
+while (condition) {
+  ...
+  continue;
+  ...
+}
+```
+
+```java
+goto
+  [while-loop-label]
+    while-loop-label.backward > continue
+    while-loop-label.forward TRUE > break
+    if > @
+      condition
+      seq
+        ...
+        break
+        ...
+        TRUE
 ```
 
 ### Operators
@@ -560,36 +618,77 @@ C|EO
 
 ### Switch case default
 
-We can convert such simple switch statement to the nested [if](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/if.eo) object.
+We can convert such simple switch statement to [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object.
 
 ```c
-switch (expression) {
-  case const1:
-    break;
-  case const2: case const3:
-    break;
-  default:
-    break;
+switch (x): {
+ case 1:
+  op1;
+  break;
+ case 2:
+ case 3:
+  op2;
+  break;
+ case 4:
+  op3;
+ case 5:
+  op4;
+  break;
+ case 6:
+ default:
+  op6:
+  break;
 }
 ```
 
 ```java
-if
-  expression.eq const1
-  seq
-    ...
-    True
-  if
-    or
-      expression.eq const2
-      expression.eq const3
-    seq
-      ...
-      True
-    seq // default
-      ...
-      True
-}
+  memory > flag
+  goto > @
+    [end]
+      seq > @
+        write flag 0
+        if
+          or (eq x 1) flag
+          seq
+            write flag 1
+            op1
+            end.forward TRUE
+            TRUE
+        if
+          or (eq x 2) flag
+          seq
+            write flag 1
+            TRUE
+        if
+          or (eq x 3) flag
+          seq
+            write flag 1
+            op2
+            end.forward TRUE
+            TRUE
+          TRUE
+        if
+          or (eq x 4) flag
+          seq
+            write flag 1
+            op3
+            TRUE
+        if
+          or (eq x 5) flag
+          seq
+            write flag 1
+            op4
+            end.forward TRUE
+            TRUE
+        if
+          or (eq x 6) flag
+          seq
+            write flag 1
+            TRUE
+          TRUE
+        op6
+        end.forward TRUE
+        TRUE
 ```
 
 ### Const
@@ -632,53 +731,6 @@ if
     True
   seq
     True
-```
-
-### Break
----
-
-With [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object we can transofrm any number of breaks in cycle to g.forward call.
-
-```c
-while (condition) {
-  ...
-  break;
-  ...
-}
-```
-
-```java
-goto
-  [g]
-    while > @
-      condition
-      seq
-        ...
-        g.forward
-        ...
-```
-
-### Continue
-
-With [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object we can transofrm any number of continue in cycle to g.backward call.
-
-```c
-while (condition) {
-  ...
-  continue;
-  ...
-}
-```
-
-```java
-goto
-  [g]
-    while > @
-      condition
-      seq
-        ...
-        g.backward
-        ...
 ```
 
 ### Goto and labels

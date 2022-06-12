@@ -11,7 +11,7 @@ on:
 jobs:
 
   clang-format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
     
@@ -23,7 +23,8 @@ jobs:
         fallback-style: 'Google'
 
   clang-tidy:
-    runs-on: ubuntu-latest
+    needs: clang-format
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
@@ -38,7 +39,6 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          rm -r ./llvm-clang
           mv ~/llvm-clang .
       
       - name: Install clang-tidy
@@ -49,8 +49,9 @@ jobs:
           cd ./project/scripts
           python3 clang_tidy.py
 
-  test:
-    runs-on: ubuntu-latest
+  parsing:
+    needs: clang-format
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
 
@@ -65,10 +66,33 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          rm -r ./llvm-clang
           mv ~/llvm-clang .
           
-      - name: Test c2eo
+      - name: Parsing
+        run: |
+          cd ./project/scripts
+          python3 transpile_c2eo.py ../tests/parsing f
+
+  test:
+    needs: clang-format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
+          mv ~/llvm-clang .
+          
+      - name: Testing
         run: |
           cd ./project/scripts
           python3 test.py

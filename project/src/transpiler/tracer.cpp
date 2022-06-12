@@ -4,7 +4,7 @@ using namespace clang;
 using namespace llvm;
 using namespace std;
 
-__attribute__((unused)) void TraceOutASTnode(Stmt::StmtClass stmt_class) {
+__attribute__((unused)) void TraceOutASTNode(Stmt::StmtClass stmt_class) {
   std::string message;
   switch (stmt_class) {
     case Stmt::BinaryOperatorClass:

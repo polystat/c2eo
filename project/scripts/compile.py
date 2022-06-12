@@ -24,7 +24,6 @@ class Compiler(object):
         self.transpilation_units = []
 
     def compile(self):
-        update_eo_version.main()
         self.transpilation_units = Transpiler(self.path_to_tests, self.filters, False).transpile()
         if self.transpilation_units:
             EOBuilder().build()

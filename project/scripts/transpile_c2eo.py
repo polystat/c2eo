@@ -52,8 +52,11 @@ class Transpiler(object):
         tools.pprint('\nTranspile files:\n', slowly=True)
         with tools.thread_pool() as threads:
             self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
-        print_transpilation_results(self.group_transpilation_results())
-        self.check_c2eo_fails()
+        data = self.group_transpilation_results()
+        print_transpilation_results(data)
+        if self.check_c2eo_fails() or len(data['exception']) > 0:
+            exit('c2eo failed on some c files')
+
         self.remove_unused_eo_files()
         self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
@@ -84,7 +87,7 @@ class Transpiler(object):
         if self.need_to_prepare_c_code:
             prepare_c_code(data)
         result_path = os.path.join(path, self.result_dir_name)
-        prepared_c_file = os.path.join(result_path, f'{file_name}-eo.c')
+        prepared_c_file = os.path.join(path, f'{file_name}-eo.c')
         if not os.path.exists(result_path):
             os.makedirs(result_path, exist_ok=True)
         with open(prepared_c_file, 'w') as f:
@@ -114,6 +117,7 @@ class Transpiler(object):
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
             for line in result.stderr.split('\n'):
+                line = line.lower()
                 if any(warning in line for warning in self.ignored_transpilation_warnings):
                     continue
 
@@ -138,13 +142,14 @@ class Transpiler(object):
                 tools.pprint_exception(f'c2eo {unit["name"]}', exception_message)
                 is_transpilation_failed = True
                 print()
-        if is_transpilation_failed:
-            exit('c2eo failed on some c files')
+        return is_transpilation_failed
 
     def move_transpiled_files(self):
         difference = []
         for unit in self.transpilation_units:
             shutil.copy(unit['eo_file'], os.path.join(unit['result_path'], f'{unit["name"]}.eo'))
+            shutil.move(unit['prepared_c_file'], unit['result_path'])
+            shutil.move(f'{unit["prepared_c_file"]}.i', unit['result_path'])
             if not tools.compare_files(unit['eo_file'], unit['src_eo_file']):
                 if not os.path.exists(unit['src_eo_path']):
                     os.makedirs(unit['src_eo_path'], exist_ok=True)

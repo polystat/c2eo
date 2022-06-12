@@ -23,6 +23,11 @@ clang_tidy_checks:
 - -google-readability-todo
 - modernize-*
 - -modernize-use-trailing-return-type
+- -readability-function-cognitive-complexity
+- -cppcoreguidelines-pro-type-reinterpret-cast
+- -cppcoreguidelines-pro-type-union-access
+- -cppcoreguidelines-avoid-magic-numbers
+- -readability-magic-numbers
 - clang-analyzer-*
 code_file_patterns:
 - '*.cpp'
