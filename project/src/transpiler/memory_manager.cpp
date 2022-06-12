@@ -186,7 +186,6 @@ bool Variable::operator==(const Variable &var) const {
 vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listValue, clang::QualType qualType) const {
   std::vector<EOObject> inits;
   extern UnitTranspiler transpiler;
-  auto* recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
   std::string elementTypeName = "";
   std::map<std::string, std::pair<clang::QualType, size_t>>::iterator recElement;
   size_t elementSize = 0;
@@ -195,6 +194,7 @@ vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listV
     elementTypeName = GetTypeName(elementQualType);
     elementSize = id->getASTContext().getTypeInfo(elementQualType).Align / byte_size;
   } else if (qualType->isRecordType()) {
+    auto* recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
     recElement = recordType->fields.begin();
   }
   for (int i = 0; i < value.nested.size(); i++) {
