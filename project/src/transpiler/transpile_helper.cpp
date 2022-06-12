@@ -301,7 +301,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   auto pos_it = res.nested.begin();
   for (const auto &var : all_local_in_block) {
     if (var.is_initialized) {
-      pos_it = res.nested.insert(pos_it, var.GetInitializer());
+      auto inits = var.GetInitializer();
+      pos_it = res.nested.insert(pos_it, inits.begin(), inits.end());
       pos_it++;
     }
   }

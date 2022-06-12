@@ -52,7 +52,8 @@ void UnitTranspiler::GenerateResult() {
 
   EOObject init_seq("seq", "@");
   for (const auto &var : glob_) {
-    init_seq.nested.push_back(var.GetInitializer());
+    auto inits = var.GetInitializer();
+    init_seq.nested.insert(init_seq.nested.end(), inits.begin(), inits.end());
   }
   if (std::find_if(body.nested.begin(), body.nested.end(),
                    [](const EOObject &x) { return x.postfix == "main"; }) !=

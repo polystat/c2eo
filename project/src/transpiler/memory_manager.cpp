@@ -1,4 +1,7 @@
 #include "memory_manager.h"
+#include "unit_transpiler.h"
+#include "transpile_helper.h"
+#include "vardecl.h"
 
 #include <algorithm>
 #include <exception>
@@ -70,7 +73,7 @@ bool MemoryManager::Empty() { return variables_.empty(); }
 
 size_t MemoryManager::RealMemorySize() {
   size_t result = 0;
-  for (const auto &v : variables_) {
+  for (const auto &v: variables_) {
     if (v.alias.substr(0, 2) != "e-") {
       result += v.size;
     }
@@ -93,7 +96,7 @@ const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
     throw invalid_argument(
         "exception: element with id " +
         to_string(reinterpret_cast<uint64_t>(
-            id))  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+                      id))  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         + " not found");
   }
   return *res;
@@ -107,14 +110,14 @@ EOObject MemoryManager::GetEOObject() const {
 }
 
 void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
-  for (const auto &var : all_local) {
+  for (const auto &var: all_local) {
     pointer_ -= var.size;
     variables_.erase(find(variables_.begin(), variables_.end(), var));
   }
 }
 
 void MemoryManager::SetExtEqGlob() {
-  for (auto &var : variables_) {
+  for (auto &var: variables_) {
     if (var.alias.substr(0, 2) == "e-") {
       std::string real_name = var.alias.substr(2, var.alias.size());
       auto place = std::find_if(variables_.begin(), variables_.end(),
@@ -128,9 +131,12 @@ void MemoryManager::SetExtEqGlob() {
   }
 }
 
-EOObject Variable::GetInitializer() const {
+std::vector<EOObject> Variable::GetInitializer() const {
   if (!is_initialized) {
-    return EOObject(EOObjectType::EO_EMPTY);
+    return {EOObject(EOObjectType::EO_EMPTY)};
+  }
+  if (value.name == "*") {
+    return GetListInitializer(EOObject{alias}, value);
   }
   EOObject res("write");
   if ((type_postfix.length() < 3 ||
@@ -151,7 +157,7 @@ EOObject Variable::GetInitializer() const {
     // Probably just emplace value.
     res.nested.emplace_back(value);
   }
-  return res;
+  return {res};
 }
 
 EOObject Variable::GetAddress(const string &mem_name) const {
@@ -175,4 +181,41 @@ EOObject Variable::GetAddress(const string &mem_name) const {
 
 bool Variable::operator==(const Variable &var) const {
   return this->id == var.id;
+}
+
+vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listValue) const {
+  std::vector<EOObject> inits;
+  clang::QualType qualType = id->getType();
+  extern UnitTranspiler transpiler;
+  auto* recordType = transpiler.record_manager_.GetById(id->getID());
+  std::string elementTypeName = "";
+  size_t elementSize = 0;
+  if (qualType->isArrayType()) {
+    clang::QualType elementQualType = llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
+    elementTypeName = GetTypeName(elementQualType);
+    elementSize = id->getASTContext().getTypeInfo(elementQualType).Align / byte_size;
+  }
+  for (int i = 0; i < value.nested.size(); i++) {
+    EOObject shiftedAlias{"add"};
+    shiftedAlias.nested.emplace_back(alias);
+    if (qualType->isArrayType()) {
+      EOObject shift{"mul"};
+      shift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
+      shift.nested.emplace_back(to_string(elementSize), EOObjectType::EO_LITERAL);
+      shiftedAlias.nested.push_back(shift);
+    }
+    if (value.nested[i].name == "*") {
+      auto subInits = GetListInitializer(shiftedAlias, value.nested[i]);
+      inits.insert(inits.end(), subInits.begin(), subInits.end());
+    } else {
+      EOObject res("write");
+      if (!elementTypeName.empty()) {
+        res.name += "-as-" + elementTypeName;
+      }
+      res.nested.emplace_back(shiftedAlias);
+      res.nested.emplace_back(value.nested[i]);
+      inits.push_back(res);
+    }
+  }
+  return inits;
 }

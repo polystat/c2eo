@@ -39,9 +39,11 @@ struct Variable {
 
   bool operator==(const Variable &var) const;
 
-  [[nodiscard]] EOObject GetInitializer() const;
+  [[nodiscard]] std::vector<EOObject> GetInitializer() const;
 
   [[nodiscard]] EOObject GetAddress(const std::string &mem_name) const;
+
+  std::vector<EOObject> GetListInitializer(EOObject rootAlias, EOObject listValue) const;
 };
 
 class MemoryManager {
