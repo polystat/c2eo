@@ -77,6 +77,9 @@ void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
 vector<Variable> ProcessCompoundStatementLocalVariables(
     const clang::CompoundStmt *CS);
 
+EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
+EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
+                             const EOObject &switch_exp, size_t i);
 extern UnitTranspiler transpiler;
 int loop_level = 0;
 
@@ -443,10 +446,116 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::ContinueStmtClass) {
     return EOObject{"continue"};
   }
+  if (stmt_class == Stmt::SwitchStmtClass) {
+    const auto *op = dyn_cast<SwitchStmt>(stmt);
+    return GetSwitchEOObject(op);
+  }
+  if (stmt_class == Stmt::ConstantExprClass) {
+    const auto *op = dyn_cast<ConstantExpr>(stmt);
+    return GetStmtEOObject(op->getSubExpr());
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
+}
+
+EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
+  EOObject goto_object{"goto"};
+  EOObject return_label{EOObjectType::EO_ABSTRACT};
+  return_label.arguments.emplace_back("end");
+
+  return_label.nested.emplace_back("end.forward TRUE", "break");
+  return_label.nested.emplace_back("memory", "flag");
+
+  EOObject seq_object{"seq", "@"};
+  EOObject init_flag_object{"write"};
+  init_flag_object.nested.emplace_back("flag");
+  init_flag_object.nested.emplace_back("0", EOObjectType::EO_LITERAL);
+  EOObject set_flag_object{"write"};
+  set_flag_object.nested.emplace_back("flag");
+  set_flag_object.nested.emplace_back("1", EOObjectType::EO_LITERAL);
+  seq_object.nested.push_back(init_flag_object);
+  const auto *switch_init = p_stmt->getInit();
+  if (switch_init != nullptr) {
+    seq_object.nested.push_back(GetStmtEOObject(switch_init));
+  }
+
+  EOObject switch_expr_object = GetStmtEOObject(p_stmt->getCond());
+
+  // TODO if get body return null...
+  auto end = p_stmt->getBody()->child_end();
+  for (auto stmt = p_stmt->getBody()->child_begin(); stmt != end; ++stmt) {
+    if ((*stmt)->getStmtClass() == Stmt::CaseStmtClass) {
+      const auto *case_stmt = dyn_cast<CaseStmt>(*stmt);
+      EOObject if_obj{"if"};
+      vector<const Expr *> all_cases{case_stmt->getLHS()};
+      const auto *nested = case_stmt->getSubStmt();
+      while (nested != nullptr &&
+             nested->getStmtClass() == Stmt::CaseStmtClass) {
+        const auto *nested_case = dyn_cast<CaseStmt>(nested);
+        all_cases.push_back(nested_case->getLHS());
+        nested = nested_case->getSubStmt();
+      }
+      EOObject cond_obj{"or"};
+      EOObject eq_obj{"eq"};
+      cond_obj.nested.emplace_back("flag");
+      eq_obj.nested.push_back(switch_expr_object);
+      eq_obj.nested.push_back(GetStmtEOObject(case_stmt->getLHS()));
+      cond_obj.nested.push_back(
+          GetCaseCondEOObject(all_cases, switch_expr_object, 0));
+      if_obj.nested.push_back(cond_obj);
+      EOObject buffer_obj{"seq"};
+      if (nested != nullptr) {
+        buffer_obj.nested.push_back(GetStmtEOObject(nested));
+      }
+      auto tmp = stmt;
+      tmp++;
+      while (tmp != end && (*tmp)->getStmtClass() != Stmt::CaseStmtClass &&
+             (*tmp)->getStmtClass() != Stmt::DefaultStmtClass) {
+        buffer_obj.nested.push_back(GetStmtEOObject(*tmp));
+        tmp++;
+      }
+      buffer_obj.nested.push_back(set_flag_object);
+      buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+      if_obj.nested.push_back(buffer_obj);
+      seq_object.nested.push_back(if_obj);
+    } else if ((*stmt)->getStmtClass() == Stmt::DefaultStmtClass) {
+      const auto *default_stmt = dyn_cast<DefaultStmt>(*stmt);
+      EOObject buffer_obj{"seq"};
+      if (default_stmt->getSubStmt() != nullptr) {
+        buffer_obj.nested.push_back(
+            GetStmtEOObject(default_stmt->getSubStmt()));
+      }
+      auto tmp = stmt;
+      tmp++;
+      while (tmp != end && (*tmp)->getStmtClass() != Stmt::CaseStmtClass &&
+             (*tmp)->getStmtClass() != Stmt::DefaultStmtClass) {
+        buffer_obj.nested.push_back(GetStmtEOObject(*tmp));
+        tmp++;
+      }
+      buffer_obj.nested.push_back(set_flag_object);
+      buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+      seq_object.nested.push_back(buffer_obj);
+    }
+  }
+  return_label.nested.push_back(seq_object);
+  goto_object.nested.push_back(return_label);
+
+  return goto_object;
+}
+EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
+                             const EOObject &switch_exp, size_t i) {
+  EOObject eq_object{"eq"};
+  eq_object.nested.push_back(switch_exp);
+  eq_object.nested.push_back(GetStmtEOObject(all_cases[i]));
+  if (i + 1 == all_cases.size()) {
+    return eq_object;
+  }
+  EOObject or_object{"or"};
+  or_object.nested.push_back(eq_object);
+  or_object.nested.push_back(GetCaseCondEOObject(all_cases, switch_exp, i + 1));
+  return or_object;
 }
 
 EOObject GetCastEOObject(const CastExpr *op) {

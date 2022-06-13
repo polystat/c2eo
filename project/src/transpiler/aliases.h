@@ -12,12 +12,13 @@ std::set<std::string> known_types = {
     "memory",
     "seq",
     "$",
-    "while-loop-label.backward",
-    "while-loop-label.forward TRUE",
     "do-while-loop-label-1.forward TRUE",
     "do-while-loop-label-2.forward TRUE",
+    "end.forward TRUE",
     "for-loop-label-1.forward TRUE",
     "for-loop-label-2.forward TRUE",
+    "while-loop-label.backward",
+    "while-loop-label.forward TRUE",
 };
 
 std::map<std::string, std::string> known_aliases = {
