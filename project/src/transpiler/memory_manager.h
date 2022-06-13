@@ -44,9 +44,9 @@ struct Variable {
 
   [[nodiscard]] EOObject GetAddress(const std::string &mem_name) const;
 
-  std::vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
-                                                     const EOObject &listValue,
-                                                     clang::QualType qualType) const;
+  std::vector<EOObject> GetListInitializer(const EOObject &rootAlias,
+                                           const EOObject &listValue,
+                                           clang::QualType qualType) const;
 };
 
 class MemoryManager {
