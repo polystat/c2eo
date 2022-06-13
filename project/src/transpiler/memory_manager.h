@@ -3,6 +3,7 @@
 
 static const int some_non_zero_position = 999999;
 static const int two_kilobytes = 2048;
+
 #include <map>
 #include <memory>
 #include <string>
@@ -43,11 +44,13 @@ struct Variable {
 
   [[nodiscard]] EOObject GetAddress(const std::string &mem_name) const;
 
-  std::vector<EOObject> GetListInitializer(EOObject rootAlias, EOObject listValue, clang::QualType qualType) const;
+  std::vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
+                                                     const EOObject &listValue,
+                                                     clang::QualType qualType) const;
 };
 
 class MemoryManager {
- public:
+public:
   [[maybe_unused]] explicit MemoryManager(std::string name,
                                           size_t start_pointer = 0)
       : pointer_(start_pointer), name_(std::move(name)) {}
@@ -80,7 +83,7 @@ class MemoryManager {
 
   void SetExtEqGlob();
 
- private:
+private:
   // index of first free byte in memory
   size_t pointer_;
   int mem_size_ = two_kilobytes;

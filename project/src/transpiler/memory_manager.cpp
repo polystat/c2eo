@@ -183,10 +183,12 @@ bool Variable::operator==(const Variable &var) const {
   return this->id == var.id;
 }
 
-vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listValue, clang::QualType qualType) const {
+vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
+                                              const EOObject &listValue,
+                                              clang::QualType qualType) const {
   std::vector<EOObject> inits;
   extern UnitTranspiler transpiler;
-  std::string elementTypeName = "";
+  std::string elementTypeName;
   std::map<std::string, std::pair<clang::QualType, size_t>>::iterator recElement;
   size_t elementSize = 0;
   if (qualType->isArrayType()) {
@@ -201,10 +203,10 @@ vector<EOObject> Variable::GetListInitializer(EOObject rootAlias, EOObject listV
     EOObject shiftedAlias{"add"};
     shiftedAlias.nested.emplace_back(alias);
     if (qualType->isArrayType()) {
-      EOObject shift{"mul"};
-      shift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
-      shift.nested.emplace_back(to_string(elementSize), EOObjectType::EO_LITERAL);
-      shiftedAlias.nested.push_back(shift);
+      EOObject newShift{"mul"};
+      newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
+      newShift.nested.emplace_back(to_string(elementSize), EOObjectType::EO_LITERAL);
+      shiftedAlias.nested.push_back(newShift);
     } else if (qualType->isRecordType()) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           qualType->getAsRecordDecl()->getID(), recElement->first));

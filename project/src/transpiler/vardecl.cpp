@@ -12,6 +12,7 @@ EOObject InitValueAnalysis(const VarDecl *VD);
 EOObject InitZeroValueAnalysis(const VarDecl *VD);
 
 EOObject InitValueEOObj(const VarDecl *VD, bool is_init);
+
 Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
                          size_t shift) {
   auto var_name = VD->getNameAsString();
@@ -56,6 +57,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   return transpiler.glob_.Add(VD, type_size, str_type, "l-" + var_name,
                               initial_value, local_name, shift, VD->hasInit());
 }
+
 EOObject InitValueEOObj(const VarDecl *VD, bool is_init) {
   if (is_init) {
     return InitValueAnalysis(VD);
