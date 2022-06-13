@@ -104,6 +104,162 @@ $ python3 compile.py ../tests/main
 
 The main tests are in the folder `/project/tests/main`, if they pass, then everything is ok. [Here](./project/scripts/readme.md) you can find more information about scripts.
 
+## How to release
+
+From `/project/scripts/`:
+
+```bash
+(venv) $ python3 update-release.py -h
+usage: update-release.py [-h] [--branch BRANCH] [--version VERSION]
+
+Release maker
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --version VERSION  specify the new version
+```
+Example
+```bash
+(venv) $ python3 update-release.py --version=0.1.1
+```
+
+To use this script, make sure you have the following packages installed:
+```bash
+(venv) $ pip3 install git_config pgpy s3cmd
+$ sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
+# for the latest version of the cmake package, try:
+$ sudo pip3 install cmake
+```
+
+Notes:
+
+* Use `.` as a version delimiter.
+* This script uses the current date, time, and time zone. Make sure they are configured correctly.
+* This script extracts your name and email from `git config`. Make sure you have them.
+
+This script will write automatically generated merges to the changelog file.
+You can view an approximate list of changes by running the following command in the terminal:
+
+```bash
+$ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format="  * %h %s by %an <%aE>"
+```
+
+### Algorithm:
+
+* Build the executable file.
+* Create a deb file (basic: [HABR](https://habr.com/ru/post/78094/))
+* Create a repository (basic: [UNIXFORUM](https://unixforum.org/viewtopic.php?t=79513))
+* Upload a repository tree into the bucket's virtual 'directory'.
+
+<details>
+<summary>The following files will be generated</summary>
+
+    $ tree
+    .
+    ├── c2eo-X.X.X
+    │   ├── DEBIAN
+    │   │   ├── changelog
+    │   │   ├── control
+    │   │   ├── copyright
+    │   │   └── md5sums
+    │   └── usr
+    │       ├── bin
+    │       │   └── c2eo
+    │       └── lib
+    │           ├── libclangAnalysis.so
+    │           ├── libclangAnalysis.so.12
+    │           ├── ...
+    │           └── libLLVMTransformUtils.so.12
+    ├── c2eo-X.X.X.deb
+    ├── readme.md
+    ├── repository
+    │   ├── conf
+    │   │   └── distributions
+    │   ├── db
+    │   │   ├── checksums.db
+    │   │   ├── contents.cache.db
+    │   │   ├── packages.db
+    │   │   ├── references.db
+    │   │   ├── release.caches.db
+    │   │   └── version
+    │   ├── dists
+    │   │   └── c2eo-rep
+    │   │       ├── contrib
+    │   │       │   ├── binary-amd64
+    │   │       │   │   ├── Packages
+    │   │       │   │   ├── Packages.gz
+    │   │       │   │   └── Release
+    │   │       │   ├── binary-i386
+    │   │       │   │   ├── Packages
+    │   │       │   │   ├── Packages.gz
+    │   │       │   │   └── Release
+    │   │       │   ├── debian-installer
+    │   │       │   │   ├── binary-amd64
+    │   │       │   │   │   ├── Packages
+    │   │       │   │   │   └── Packages.gz
+    │   │       │   │   └── binary-i386
+    │   │       │   │       ├── Packages
+    │   │       │   │       └── Packages.gz
+    │   │       │   └── source
+    │   │       │       ├── Release
+    │   │       │       └── Sources.gz
+    │   │       ├── InRelease
+    │   │       ├── main
+    │   │       │   ├── binary-amd64
+    │   │       │   │   ├── Packages
+    │   │       │   │   ├── Packages.gz
+    │   │       │   │   └── Release
+    │   │       │   ├── binary-i386
+    │   │       │   │   ├── Packages
+    │   │       │   │   ├── Packages.gz
+    │   │       │   │   └── Release
+    │   │       │   ├── debian-installer
+    │   │       │   │   ├── binary-amd64
+    │   │       │   │   │   ├── Packages
+    │   │       │   │   │   └── Packages.gz
+    │   │       │   │   └── binary-i386
+    │   │       │   │       ├── Packages
+    │   │       │   │       └── Packages.gz
+    │   │       │   └── source
+    │   │       │       ├── Release
+    │   │       │       └── Sources.gz
+    │   │       ├── non-free
+    │   │       │   ├── binary-amd64
+    │   │       │   │   ├── Packages
+    │   │       │   │   ├── Packages.gz
+    │   │       │   │   └── Release
+    │   │       │   ├── binary-i386
+    │   │       │   │   ├── Packages
+    │   │       │   │   ├── Packages.gz
+    │   │       │   │   └── Release
+    │   │       │   ├── debian-installer
+    │   │       │   │   ├── binary-amd64
+    │   │       │   │   │   ├── Packages
+    │   │       │   │   │   └── Packages.gz
+    │   │       │   │   └── binary-i386
+    │   │       │   │       ├── Packages
+    │   │       │   │       └── Packages.gz
+    │   │       │   └── source
+    │   │       │       ├── Release
+    │   │       │       └── Sources.gz
+    │   │       ├── Release
+    │   │       └── Release.gpg
+    │   └── pool
+    │       └── main
+    │           └── c
+    │               └── c2eo
+    │                   └── c2eo_X.X.X_all.deb
+    ├── todo.sh
+    └── update-release.py
+    
+    35 directories, 120 files
+</details>
+
+Then you have to upload `./repository/dists` and `./repository/pool` to [c2eo.polystat.org/](http://c2eo.polystat.org)debian/.
+
+
+
+
 ## Principles of Transpilation from C to EO
 
 C is a _system-level procedural_ programming language with direct access to the underlying hardware architecture elements, such as memory and registers. EO, on the other hand is a _high-level object-oriented_ language. There are a number of non-trivial mechanisms of translating constructs from the former to the latter, which are explained below:
@@ -666,7 +822,6 @@ switch (x): {
             op2
             end.forward TRUE
             TRUE
-          TRUE
         if
           or (eq x 4) flag
           seq
@@ -685,7 +840,6 @@ switch (x): {
           seq
             write flag 1
             TRUE
-          TRUE
         op6
         end.forward TRUE
         TRUE
@@ -737,24 +891,59 @@ if
 
 Current [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object can replace continue and break, but goto in C can jump anywhere in function body.
 
-```c
-int program() {
-  _0:
-    if(lc==KWBEGIN) {nxl(); goto _1;}
-    return 0;
-  _1:
-    if(decl()) {goto _2;}
-    if(oper()) {goto _2;}
-    er(4); return 0;
-  _2:
-    if(lc==PCL) {nxl(); goto _1;}
-    if(lc==KWEND) {nxl(); goto _end;}
-    er(4); return 0;
-  _end:
-    return 1;
+```C
+if (a) {
+  A;
+  goto L3;
 }
+B;
+L1:
+if (b) {
+L2:
+  C;
+L3:
+  D;
+  goto L1;
+}
+else if (c) {
+  E;
+  goto L2;
+}
+F;
 ```
 
+```mermaid
+stateDiagram-v2
+    state "if (a)" as if_1
+    state "if (b)" as if_2
+    state "else if (c)" as if_3
+    state "L1:" as L1
+    state "L2:" as L2
+    state "L3:" as L3
+    state "A;" as A
+    state "B;" as B
+    state "C;" as C
+    state "D;" as D
+    state "E;" as E
+    state "F;" as F
+    [*] --> if_1
+    if_1 --> A: True
+    A --> L3
+    if_1 --> B: False
+    B --> L1
+    L1 --> if_2
+    if_2 --> L2: True
+    L2 --> C
+    C --> L3
+    L3 --> D
+    D --> L1
+    if_2 --> if_3: False
+    if_3 --> E: True
+    E --> L2
+    if_3 --> F: False
+    F --> [*]
+```
+ 
 ### Calling functions with variable number of arguments
 
 Also in C it is possible to call a function with a variable number of arguments.
@@ -789,7 +978,7 @@ Let's start with a basic function which we will be pointing to:
 
 ```c
 int addInt(int n, int m) {
-    return n + m;
+  return n + m;
 }
 ```
 
@@ -815,7 +1004,7 @@ Passing the pointer to another function is basically the same:
 
 ```c
 int add2to3(int (*functionPtr)(int, int)) {
-    return (*functionPtr)(2, 3);
+  return (*functionPtr)(2, 3);
 }
 ```
 
@@ -826,9 +1015,9 @@ We can use function pointers in return values as well (try to keep up, it gets m
 // and returns a pointer to another function which receives two ints
 // and it returns another int
 int (*functionFactory(int n))(int, int) {
-    printf("Got parameter %d", n);
-    int (*functionPtr)(int, int) = &addInt;
-    return functionPtr;
+  printf("Got parameter %d", n);
+  int (*functionPtr)(int, int) = &addInt;
+  return functionPtr;
 }
 ```
 
@@ -839,8 +1028,8 @@ typedef int (*myFuncDef)(int, int);
 // note that the typedef name is indeed myFuncDef
 
 myFuncDef functionFactory(int n) {
-    printf("Got parameter %d", n);
-    myFuncDef functionPtr = &addInt;
-    return functionPtr;
+  printf("Got parameter %d", n);
+  myFuncDef functionPtr = &addInt;
+  return functionPtr;
 }
 ```
