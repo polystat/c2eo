@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <exception>
+#include <iomanip>
 #include <stdexcept>
 #include <utility>
 
@@ -86,13 +87,21 @@ std::vector<Variable>::const_iterator MemoryManager::end() const {
   return variables_.end();
 }
 
+template <typename T>
+std::string int_to_hex(T i) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(sizeof(T) * 2) << std::hex
+         << i;
+  return stream.str();
+}
+
 const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
     throw invalid_argument(
         "exception: element with id " +
-        to_string(reinterpret_cast<uint64_t>(
+        int_to_hex(reinterpret_cast<uint64_t>(
             id))  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         + " not found");
   }
