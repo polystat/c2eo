@@ -227,6 +227,17 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
         auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
         all_local.insert(all_local.end(), res.begin(), res.end());
       }
+    } else if (stmt_class == Stmt::DoStmtClass) {
+      auto *do_stmt = dyn_cast<DoStmt>(stmt);
+      if (do_stmt == nullptr) {
+        continue;
+      }
+      if (do_stmt->getBody() != nullptr &&
+          do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
+        auto *compound_stmt = dyn_cast<CompoundStmt>(do_stmt->getBody());
+        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
+        all_local.insert(all_local.end(), res.begin(), res.end());
+      }
     } else if (stmt_class == Stmt::CaseStmtClass) {
       auto *case_stmt = dyn_cast<CaseStmt>(stmt);
       if (case_stmt == nullptr) {
