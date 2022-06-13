@@ -69,8 +69,6 @@ uint64_t GetTypeSize(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
 
-EOObject GetGotoForWhileEO(const EOObject &while_eo_object);
-
 void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
                      DeclStmt *decl_stmt);
 
@@ -1165,17 +1163,6 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
     return if_stmt;
   }
   return EOObject{EOObjectType::EO_PLUG};
-}
-
-EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
-  EOObject goto_object{"goto"};
-  EOObject return_label{EOObjectType::EO_ABSTRACT};
-  return_label.arguments.emplace_back("goto-loop-label" +
-                                      to_string(loop_level));
-  return_label.nested.push_back(while_eo_object);
-  goto_object.nested.push_back(return_label);
-  loop_level--;
-  return goto_object;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
