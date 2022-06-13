@@ -735,7 +735,7 @@ if
 
 Current [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object can replace continue and break, but goto in C can jump anywhere in function body.
 
-```c
+```C
 if (a) {
   A;
   goto L3;
@@ -756,6 +756,38 @@ else if (c) {
 F;
 ```
 
+```mermaid
+stateDiagram-v2
+    state "if (a)" as if_1
+    state "if (b)" as if_2
+    state "else if (c)" as if_3
+    state "L1:" as L1
+    state "L2:" as L2
+    state "L3:" as L3
+    state "A;" as A
+    state "B;" as B
+    state "C;" as C
+    state "D;" as D
+    state "E;" as E
+    state "F;" as F
+    [*] --> if_1
+    if_1 --> A: True
+    A --> L3
+    if_1 --> B: False
+    B --> L1
+    L1 --> if_2
+    if_2 --> L2: True
+    L2 --> C
+    C --> L3
+    L3 --> D
+    D --> L1
+    if_2 --> if_3: False
+    if_3 --> E: True
+    E --> L2
+    if_3 --> F: False
+    F --> [*]
+```
+ 
 ### Calling functions with variable number of arguments
 
 Also in C it is possible to call a function with a variable number of arguments.
