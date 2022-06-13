@@ -194,9 +194,10 @@ if __name__ == '__main__':
     control['c2eo']['Maintainer'] = user
     control['llvm-libs']['Maintainer'] = user
 
-    os.chdir('../project')
+    os.chdir('../')
     os.makedirs('build', exist_ok=True)
     os.chdir('build')
+    os.makedirs('../../release/', exist_ok=True)
     make_bin()
 
     try_shell('ldd ../bin/c2eo > ../../llvm-clang/libs.txt')
