@@ -1,12 +1,13 @@
 #include "memory_manager.h"
-#include "transpile_helper.h"
-#include "unit_transpiler.h"
-#include "vardecl.h"
 
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
 #include <utility>
+
+#include "transpile_helper.h"
+#include "unit_transpiler.h"
+#include "vardecl.h"
 
 using namespace std;
 using namespace clang;
@@ -73,7 +74,7 @@ bool MemoryManager::Empty() { return variables_.empty(); }
 
 size_t MemoryManager::RealMemorySize() {
   size_t result = 0;
-  for (const auto &v: variables_) {
+  for (const auto &v : variables_) {
     if (v.alias.substr(0, 2) != "e-") {
       result += v.size;
     }
@@ -96,7 +97,7 @@ const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
     throw invalid_argument(
         "exception: element with id " +
         to_string(reinterpret_cast<uint64_t>(
-            id))// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+            id))  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         + " not found");
   }
   return *res;
@@ -110,14 +111,14 @@ EOObject MemoryManager::GetEOObject() const {
 }
 
 void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
-  for (const auto &var: all_local) {
+  for (const auto &var : all_local) {
     pointer_ -= var.size;
     variables_.erase(find(variables_.begin(), variables_.end(), var));
   }
 }
 
 void MemoryManager::SetExtEqGlob() {
-  for (auto &var: variables_) {
+  for (auto &var : variables_) {
     if (var.alias.substr(0, 2) == "e-") {
       std::string real_name = var.alias.substr(2, var.alias.size());
       auto place = std::find_if(variables_.begin(), variables_.end(),
@@ -141,10 +142,10 @@ std::vector<EOObject> Variable::GetInitializer() const {
   EOObject res("write");
   if ((type_postfix.length() < 3 ||
        (type_postfix.substr(0, 3) != "st-" &&
-        type_postfix.substr(0, 3) != "un-"))// todo recordDecl check
+        type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
       && type_postfix != "undefinedtype" && type_postfix != "char") {
     {
-      {// todo char!?
+      {  // todo char!?
         res.name += "-as-" + type_postfix;
       }
     }
@@ -189,14 +190,18 @@ vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
   std::vector<EOObject> inits;
   extern UnitTranspiler transpiler;
   std::string elementTypeName;
-  std::map<std::string, std::pair<clang::QualType, size_t>>::iterator recElement;
+  std::map<std::string, std::pair<clang::QualType, size_t>>::iterator
+      recElement;
   size_t elementSize = 0;
   if (qualType->isArrayType()) {
-    clang::QualType elementQualType = llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
+    clang::QualType elementQualType =
+        llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
     elementTypeName = GetTypeName(elementQualType);
-    elementSize = id->getASTContext().getTypeInfo(elementQualType).Align / byte_size;
+    elementSize =
+        id->getASTContext().getTypeInfo(elementQualType).Align / byte_size;
   } else if (qualType->isRecordType()) {
-    auto *recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
+    auto *recordType = transpiler.record_manager_.GetById(
+        qualType->getAsRecordDecl()->getID());
     recElement = recordType->fields.begin();
   }
   for (int i = 0; i < listValue.nested.size(); i++) {
@@ -205,7 +210,8 @@ vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
     if (qualType->isArrayType()) {
       EOObject newShift{"mul"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
-      newShift.nested.emplace_back(to_string(elementSize), EOObjectType::EO_LITERAL);
+      newShift.nested.emplace_back(to_string(elementSize),
+                                   EOObjectType::EO_LITERAL);
       shiftedAlias.nested.push_back(newShift);
     } else if (qualType->isRecordType()) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
@@ -215,13 +221,14 @@ vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
     if (listValue.nested[i].name == "*") {
       clang::QualType elementQualType;
       if (qualType->isArrayType()) {
-        elementQualType = llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
+        elementQualType =
+            llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();
       }
       if (qualType->isRecordType()) {
         elementQualType = recElement->second.first;
       }
-      auto subInits = GetListInitializer(shiftedAlias,
-                                         value.nested[i], elementQualType);
+      auto subInits =
+          GetListInitializer(shiftedAlias, value.nested[i], elementQualType);
       inits.insert(inits.end(), subInits.begin(), subInits.end());
     } else {
       EOObject res("write");

@@ -108,13 +108,13 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
       to_string(free_pointer - shift - param_memory_size),
       EOObjectType::EO_LITERAL);
   func_body_eo.nested.push_back(local_empty_position);
-  for (const auto &param: all_param) {
+  for (const auto &param : all_param) {
     func_body_eo.nested.push_back(param.GetAddress(transpiler.glob_.name_));
   }
-  for (const auto &var: all_types) {
+  for (const auto &var : all_types) {
     func_body_eo.nested.push_back(var);
   }
-  for (const auto &var: all_local) {
+  for (const auto &var : all_local) {
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob_.name_));
   }
   EOObject goto_object{"goto", "@"};
@@ -133,17 +133,17 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 
 vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
   vector<EOObject> local_type_decls;
-  for (auto *stmt: CS->body()) {
+  for (auto *stmt : CS->body()) {
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
       auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
       if (decl_stmt != nullptr) {
-        for (auto *decl: decl_stmt->decls()) {
+        for (auto *decl : decl_stmt->decls()) {
           Decl::Kind decl_kind = decl->getKind();
           if (decl_kind == Decl::Kind::Record) {
             auto *record_decl = dyn_cast<RecordDecl>(decl);
             auto types = ProcessRecordType(record_decl, true);
-            for (auto &type: types) {
+            for (auto &type : types) {
               auto eo_objs = type.GetEORecordDecl();
               local_type_decls.insert(local_type_decls.end(), eo_objs.begin(),
                                       eo_objs.end());
@@ -158,7 +158,7 @@ vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
   size_t res = 0;
-  for (auto *VD: params) {
+  for (auto *VD : params) {
     TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
     size_t type_size = type_info.Width / byte_size;
     res += type_size;
@@ -169,7 +169,7 @@ size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
                                        size_t shift) {
   vector<Variable> all_params;
-  for (auto *param: params) {
+  for (auto *param : params) {
     all_params.push_back(ProcessVariable(param, "param-start", shift));
   }
   return all_params;
@@ -181,7 +181,7 @@ vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
   if (CS == nullptr) {
     return all_local;
   }
-  for (auto *stmt: CS->body()) {
+  for (auto *stmt : CS->body()) {
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
       auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
@@ -239,14 +239,14 @@ vector<Variable> ProcessCompoundStatementLocalVariables(
   if (CS == nullptr) {
     return all_local;
   }
-  for (auto *stmt: CS->body()) {
+  for (auto *stmt : CS->body()) {
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
       auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
       if (decl_stmt == nullptr) {
         continue;
       }
-      for (auto *decl: decl_stmt->decls()) {
+      for (auto *decl : decl_stmt->decls()) {
         Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Var) {
           auto *var_decl = dyn_cast<VarDecl>(decl);
@@ -264,7 +264,7 @@ vector<Variable> ProcessCompoundStatementLocalVariables(
         if (decl_stmt == nullptr) {
           continue;
         }
-        for (auto *decl: decl_stmt->decls()) {
+        for (auto *decl : decl_stmt->decls()) {
           Decl::Kind decl_kind = decl->getKind();
           if (decl_kind == Decl::Var) {
             auto *var_decl = dyn_cast<VarDecl>(decl);
@@ -282,7 +282,7 @@ void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
   if (decl_stmt == nullptr) {
     return;
   }
-  for (auto *decl: decl_stmt->decls()) {
+  for (auto *decl : decl_stmt->decls()) {
     Decl::Kind decl_kind = decl->getKind();
     if (decl_kind == Decl::Var) {
       auto *var_decl = dyn_cast<VarDecl>(decl);
@@ -300,7 +300,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   }
   auto all_local_in_block = ProcessCompoundStatementLocalVariables(CS);
   auto pos_it = res.nested.begin();
-  for (const auto &var: all_local_in_block) {
+  for (const auto &var : all_local_in_block) {
     if (var.is_initialized) {
       auto inits = var.GetInitializer();
       pos_it = res.nested.insert(pos_it, inits.begin(), inits.end());
@@ -308,7 +308,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
     }
   }
   if (CS != nullptr) {
-    for (auto *stmt: CS->body()) {
+    for (auto *stmt : CS->body()) {
       Stmt::StmtClass stmt_class = stmt->getStmtClass();
       if (stmt_class == Stmt::ImplicitCastExprClass) {
         auto *ref = dyn_cast<Expr>(*stmt->child_begin());
@@ -317,7 +317,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
         }
         QualType qual_type = ref->getType();
         string type = GetTypeName(qual_type);
-        string formatter = "?";// todo
+        string formatter = "?";  // todo
         if (type == "float32" || type == "float64") {
           formatter = "f";
         } else {
@@ -458,7 +458,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
 
 EOObject GetInitListEOObject(const InitListExpr *list) {
   EOObject eoList{"*"};
-  for (auto element = list->child_begin(); element != list->child_end(); element++) {
+  for (auto element = list->child_begin(); element != list->child_end();
+       element++) {
     eoList.nested.push_back(GetStmtEOObject(*element));
   }
   return eoList;
@@ -553,14 +554,14 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   if (tmp_dims.size() > dims->size()) {
     dims = &tmp_dims;
   }
-  uint64_t dim_size = decl_info.first;// current dimension size.
+  uint64_t dim_size = decl_info.first;  // current dimension size.
   for (int i = 0; i < depth && i < dims->size();
-       ++i) {// NOLINT(altera-id-dependent-backward-branch)
+       ++i) {  // NOLINT(altera-id-dependent-backward-branch)
     dim_size *= dims->at(i);
   }
 
   if (op != nullptr) {
-    for (const auto *base_ch: op->getBase()->children()) {
+    for (const auto *base_ch : op->getBase()->children()) {
       auto index_name = GetStmtEOObject(op->getIdx());
 
       EOObject curr_shift{"mul"};
@@ -609,7 +610,7 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
   if (op == nullptr) {
     return std::make_pair(0, EOObject{EOObjectType::EO_PLUG});
   }
-  for (const auto *base_ch: op->getBase()->children()) {
+  for (const auto *base_ch : op->getBase()->children()) {
     auto stmt_class = base_ch->getStmtClass();
     if (stmt_class == Stmt::DeclRefExprClass) {
       const auto *decl_ref_expr = dyn_cast<DeclRefExpr>(base_ch);
@@ -689,7 +690,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   EOObject call("seq");
   vector<std::size_t> var_sizes;
   if (op != nullptr) {
-    for (auto *VD: op->getDirectCallee()->parameters()) {
+    for (auto *VD : op->getDirectCallee()->parameters()) {
       TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
       size_t type_size = type_info.Width / byte_size;
       var_sizes.push_back(type_size);
@@ -698,7 +699,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   size_t shift = 0;
   int i = 0;
   if (op != nullptr) {
-    for (const auto *arg: op->arguments()) {
+    for (const auto *arg : op->arguments()) {
       EOObject param{"write"};
       EOObject address{"address"};
       address.nested.emplace_back("global-ram");
@@ -877,7 +878,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 
   // [C99 6.5.2.4] Postfix increment and decrement
   if (op_code ==
-      UnaryOperatorKind::UO_PostInc) {// UNARY_OPERATION(PostInc, "++")
+      UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -891,7 +892,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
   }
   if (op_code ==
-      UnaryOperatorKind::UO_PostDec) {// UNARY_OPERATION(PostDec, "--")
+      UnaryOperatorKind::UO_PostDec) {  // UNARY_OPERATION(PostDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -906,7 +907,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     // [C99 6.5.3.1] Prefix increment and decrement
   }
   if (op_code ==
-      UnaryOperatorKind::UO_PreInc) {// UNARY_OPERATION(PreInc, "++")
+      UnaryOperatorKind::UO_PreInc) {  // UNARY_OPERATION(PreInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -920,7 +921,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
   }
   if (op_code ==
-      UnaryOperatorKind::UO_PreDec) {// UNARY_OPERATION(PreDec, "--")
+      UnaryOperatorKind::UO_PreDec) {  // UNARY_OPERATION(PreDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -935,12 +936,12 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     // [C99 6.5.3.2] Address and indirection
   }
   if (op_code ==
-      UnaryOperatorKind::UO_AddrOf) {// UNARY_OPERATION(AddrOf, "&")
+      UnaryOperatorKind::UO_AddrOf) {  // UNARY_OPERATION(AddrOf, "&")
     EOObject variable{"addr-of"};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     return variable;
   }
-  if (op_code == UnaryOperatorKind::UO_Deref) {// UNARY_OPERATION(Deref, "*")
+  if (op_code == UnaryOperatorKind::UO_Deref) {  // UNARY_OPERATION(Deref, "*")
     EOObject variable{"address"};
     EOObject ram{"global-ram"};
     variable.nested.push_back(ram);
@@ -948,32 +949,32 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
     // [C99 6.5.3.3] Unary arithmetic
   }
-  if (op_code == UnaryOperatorKind::UO_Plus) {// UNARY_OPERATION(Plus, "+")
+  if (op_code == UnaryOperatorKind::UO_Plus) {  // UNARY_OPERATION(Plus, "+")
     operation = "plus";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Minus) {// UNARY_OPERATION(Minus, "-")
+             UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus, "-")
     operation = "neg";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Not) {// UNARY_OPERATION(Not, "~")
+             UnaryOperatorKind::UO_Not) {  // UNARY_OPERATION(Not, "~")
     operation = "bit-not";
   } else if (op_code ==
-             UnaryOperatorKind::UO_LNot) {// UNARY_OPERATION(LNot, "!")
+             UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot, "!")
     operation = "not";
     // "__real expr"/"__imag expr" Extension.
   } else if (op_code ==
-             UnaryOperatorKind::UO_Real) {// UNARY_OPERATION(Real, "__real")
+             UnaryOperatorKind::UO_Real) {  // UNARY_OPERATION(Real, "__real")
     operation = "real";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Imag) {// UNARY_OPERATION(Imag, "__imag")
+             UnaryOperatorKind::UO_Imag) {  // UNARY_OPERATION(Imag, "__imag")
     operation = "imag";
     // __extension__ marker.
   } else if (op_code ==
-             UnaryOperatorKind::UO_Extension) {// UNARY_OPERATION(Extension,
+             UnaryOperatorKind::UO_Extension) {  // UNARY_OPERATION(Extension,
     // "__extension__")
     operation = "extension";
     // [C++ Coroutines] co_await operator
   } else if (op_code ==
-             UnaryOperatorKind::UO_Coawait) {// UNARY_OPERATION(Coawait,
+             UnaryOperatorKind::UO_Coawait) {  // UNARY_OPERATION(Coawait,
     // "co_await")
     operation = "coawait";
     // Incorrect unary operator
@@ -1173,7 +1174,7 @@ uint64_t GetTypeSize(QualType qual_type) {
 }
 
 std::string GetTypeName(QualType qual_type) {
-  extern ASTContext *context;// NOLINT(readability-redundant-declaration)
+  extern ASTContext *context;  // NOLINT(readability-redundant-declaration)
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
@@ -1219,7 +1220,7 @@ std::string GetTypeName(QualType qual_type) {
       str += RD->getNameAsString();
     } else {
       str += std::to_string(reinterpret_cast<uint64_t>(
-          RD));// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+          RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     }
     return str;
   }
@@ -1233,7 +1234,7 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
   // TODO maybe should use pointers or copy constructor to avoid unnecessary
   // copying of objects_
   std::queue<EOObject> not_visited;
-  for (auto child: obj.nested) {
+  for (auto child : obj.nested) {
     not_visited.push(std::move(child));
   }
   while (!not_visited.empty()) {
@@ -1242,7 +1243,7 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
     switch (cur.type) {
       case EOObjectType::EO_ABSTRACT:
         all_known.insert(cur.postfix);
-        for (const auto &arg: cur.arguments) {
+        for (const auto &arg : cur.arguments) {
           all_known.insert(arg);
         }
         break;
@@ -1261,11 +1262,11 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
         }
         break;
     }
-    for (auto child: cur.nested) {
+    for (auto child : cur.nested) {
       not_visited.push(std::move(child));
     }
   }
-  for (const auto &known_obj: all_known) {
+  for (const auto &known_obj : all_known) {
     unknown.erase(known_obj);
   }
 
