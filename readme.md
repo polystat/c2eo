@@ -822,7 +822,6 @@ switch (x): {
             op2
             end.forward TRUE
             TRUE
-          TRUE
         if
           or (eq x 4) flag
           seq
@@ -841,7 +840,6 @@ switch (x): {
           seq
             write flag 1
             TRUE
-          TRUE
         op6
         end.forward TRUE
         TRUE
@@ -893,24 +891,59 @@ if
 
 Current [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object can replace continue and break, but goto in C can jump anywhere in function body.
 
-```c
-int program() {
-  _0:
-    if(lc==KWBEGIN) {nxl(); goto _1;}
-    return 0;
-  _1:
-    if(decl()) {goto _2;}
-    if(oper()) {goto _2;}
-    er(4); return 0;
-  _2:
-    if(lc==PCL) {nxl(); goto _1;}
-    if(lc==KWEND) {nxl(); goto _end;}
-    er(4); return 0;
-  _end:
-    return 1;
+```C
+if (a) {
+  A;
+  goto L3;
 }
+B;
+L1:
+if (b) {
+L2:
+  C;
+L3:
+  D;
+  goto L1;
+}
+else if (c) {
+  E;
+  goto L2;
+}
+F;
 ```
 
+```mermaid
+stateDiagram-v2
+    state "if (a)" as if_1
+    state "if (b)" as if_2
+    state "else if (c)" as if_3
+    state "L1:" as L1
+    state "L2:" as L2
+    state "L3:" as L3
+    state "A;" as A
+    state "B;" as B
+    state "C;" as C
+    state "D;" as D
+    state "E;" as E
+    state "F;" as F
+    [*] --> if_1
+    if_1 --> A: True
+    A --> L3
+    if_1 --> B: False
+    B --> L1
+    L1 --> if_2
+    if_2 --> L2: True
+    L2 --> C
+    C --> L3
+    L3 --> D
+    D --> L1
+    if_2 --> if_3: False
+    if_3 --> E: True
+    E --> L2
+    if_3 --> F: False
+    F --> [*]
+```
+ 
 ### Calling functions with variable number of arguments
 
 Also in C it is possible to call a function with a variable number of arguments.
@@ -945,7 +978,7 @@ Let's start with a basic function which we will be pointing to:
 
 ```c
 int addInt(int n, int m) {
-    return n + m;
+  return n + m;
 }
 ```
 
@@ -971,7 +1004,7 @@ Passing the pointer to another function is basically the same:
 
 ```c
 int add2to3(int (*functionPtr)(int, int)) {
-    return (*functionPtr)(2, 3);
+  return (*functionPtr)(2, 3);
 }
 ```
 
@@ -982,9 +1015,9 @@ We can use function pointers in return values as well (try to keep up, it gets m
 // and returns a pointer to another function which receives two ints
 // and it returns another int
 int (*functionFactory(int n))(int, int) {
-    printf("Got parameter %d", n);
-    int (*functionPtr)(int, int) = &addInt;
-    return functionPtr;
+  printf("Got parameter %d", n);
+  int (*functionPtr)(int, int) = &addInt;
+  return functionPtr;
 }
 ```
 
@@ -995,8 +1028,8 @@ typedef int (*myFuncDef)(int, int);
 // note that the typedef name is indeed myFuncDef
 
 myFuncDef functionFactory(int n) {
-    printf("Got parameter %d", n);
-    myFuncDef functionPtr = &addInt;
-    return functionPtr;
+  printf("Got parameter %d", n);
+  myFuncDef functionPtr = &addInt;
+  return functionPtr;
 }
 ```
