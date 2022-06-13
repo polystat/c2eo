@@ -1,6 +1,6 @@
 #include "memory_manager.h"
-#include "unit_transpiler.h"
 #include "transpile_helper.h"
+#include "unit_transpiler.h"
 #include "vardecl.h"
 
 #include <algorithm>
@@ -96,7 +96,7 @@ const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
     throw invalid_argument(
         "exception: element with id " +
         to_string(reinterpret_cast<uint64_t>(
-                      id))  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+            id))// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
         + " not found");
   }
   return *res;
@@ -141,10 +141,10 @@ std::vector<EOObject> Variable::GetInitializer() const {
   EOObject res("write");
   if ((type_postfix.length() < 3 ||
        (type_postfix.substr(0, 3) != "st-" &&
-        type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
+        type_postfix.substr(0, 3) != "un-"))// todo recordDecl check
       && type_postfix != "undefinedtype" && type_postfix != "char") {
     {
-      {  // todo char!?
+      {// todo char!?
         res.name += "-as-" + type_postfix;
       }
     }
@@ -199,9 +199,9 @@ vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
     auto *recordType = transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
     recElement = recordType->fields.begin();
   }
-  for (int i = 0; i < value.nested.size(); i++) {
+  for (int i = 0; i < listValue.nested.size(); i++) {
     EOObject shiftedAlias{"add"};
-    shiftedAlias.nested.emplace_back(alias);
+    shiftedAlias.nested.emplace_back(rootAlias);
     if (qualType->isArrayType()) {
       EOObject newShift{"mul"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
@@ -212,7 +212,7 @@ vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
           qualType->getAsRecordDecl()->getID(), recElement->first));
       elementTypeName = GetTypeName(recElement->second.first);
     }
-    if (value.nested[i].name == "*") {
+    if (listValue.nested[i].name == "*") {
       clang::QualType elementQualType;
       if (qualType->isArrayType()) {
         elementQualType = llvm::dyn_cast<ConstantArrayType>(qualType)->getElementType();

@@ -10,6 +10,7 @@ static const int two_kilobytes = 2048;
 #include <utility>
 #include <vector>
 
+#include "eo_object.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Decl.h"
 #include "clang/ASTMatchers/ASTMatchFinder.h"
@@ -17,7 +18,6 @@ static const int two_kilobytes = 2048;
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
-#include "eo_object.h"
 #include "llvm/Support/CommandLine.h"
 
 // Representation of a simple variable stored in RAM
@@ -44,9 +44,9 @@ struct Variable {
 
   [[nodiscard]] EOObject GetAddress(const std::string &mem_name) const;
 
-  std::vector<EOObject> GetListInitializer(const EOObject &rootAlias,
-                                           const EOObject &listValue,
-                                           clang::QualType qualType) const;
+  [[nodiscard]] std::vector<EOObject> GetListInitializer(const EOObject &rootAlias,
+                                                         const EOObject &listValue,
+                                                         clang::QualType qualType) const;
 };
 
 class MemoryManager {
@@ -91,4 +91,4 @@ private:
   std::map<std::string, int> duplicates;
 };
 
-#endif  // C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_
+#endif// C2EO_SRC_TRANSPILER_MEMORY_MANAGER_H_

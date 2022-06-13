@@ -317,7 +317,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
         }
         QualType qual_type = ref->getType();
         string type = GetTypeName(qual_type);
-        string formatter = "?";  // todo
+        string formatter = "?";// todo
         if (type == "float32" || type == "float64") {
           formatter = "f";
         } else {
@@ -553,9 +553,9 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   if (tmp_dims.size() > dims->size()) {
     dims = &tmp_dims;
   }
-  uint64_t dim_size = decl_info.first;  // current dimension size.
+  uint64_t dim_size = decl_info.first;// current dimension size.
   for (int i = 0; i < depth && i < dims->size();
-       ++i) {  // NOLINT(altera-id-dependent-backward-branch)
+       ++i) {// NOLINT(altera-id-dependent-backward-branch)
     dim_size *= dims->at(i);
   }
 
@@ -650,8 +650,8 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       QualType qual_type = child->getType();
       EOObject arr_name = GetStmtEOObject(op->getBase());
       size_t sz = transpiler.record_manager_
-          .GetById(qual_type->getAsRecordDecl()->getID())
-          ->size;
+                      .GetById(qual_type->getAsRecordDecl()->getID())
+                      ->size;
       return std::make_pair(sz, arr_name);
     }
     cerr << base_ch->getStmtClassName() << "\n\n";
@@ -672,7 +672,7 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   if (qual_type->isPointerType()) {
     EOObject record{"address"};
     qual_type = dyn_cast<clang::PointerType>(qual_type.getCanonicalType())
-        ->getPointeeType();
+                    ->getPointeeType();
     record.nested.emplace_back("global-ram");
     record.nested.push_back(GetStmtEOObject(child));
     member.nested.push_back(record);
@@ -877,7 +877,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 
   // [C99 6.5.2.4] Postfix increment and decrement
   if (op_code ==
-      UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc, "++")
+      UnaryOperatorKind::UO_PostInc) {// UNARY_OPERATION(PostInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -891,7 +891,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
   }
   if (op_code ==
-      UnaryOperatorKind::UO_PostDec) {  // UNARY_OPERATION(PostDec, "--")
+      UnaryOperatorKind::UO_PostDec) {// UNARY_OPERATION(PostDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -906,7 +906,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     // [C99 6.5.3.1] Prefix increment and decrement
   }
   if (op_code ==
-      UnaryOperatorKind::UO_PreInc) {  // UNARY_OPERATION(PreInc, "++")
+      UnaryOperatorKind::UO_PreInc) {// UNARY_OPERATION(PreInc, "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -920,7 +920,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
   }
   if (op_code ==
-      UnaryOperatorKind::UO_PreDec) {  // UNARY_OPERATION(PreDec, "--")
+      UnaryOperatorKind::UO_PreDec) {// UNARY_OPERATION(PreDec, "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"pre-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -935,12 +935,12 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     // [C99 6.5.3.2] Address and indirection
   }
   if (op_code ==
-      UnaryOperatorKind::UO_AddrOf) {  // UNARY_OPERATION(AddrOf, "&")
+      UnaryOperatorKind::UO_AddrOf) {// UNARY_OPERATION(AddrOf, "&")
     EOObject variable{"addr-of"};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     return variable;
   }
-  if (op_code == UnaryOperatorKind::UO_Deref) {  // UNARY_OPERATION(Deref, "*")
+  if (op_code == UnaryOperatorKind::UO_Deref) {// UNARY_OPERATION(Deref, "*")
     EOObject variable{"address"};
     EOObject ram{"global-ram"};
     variable.nested.push_back(ram);
@@ -948,32 +948,32 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
     // [C99 6.5.3.3] Unary arithmetic
   }
-  if (op_code == UnaryOperatorKind::UO_Plus) {  // UNARY_OPERATION(Plus, "+")
+  if (op_code == UnaryOperatorKind::UO_Plus) {// UNARY_OPERATION(Plus, "+")
     operation = "plus";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus, "-")
+             UnaryOperatorKind::UO_Minus) {// UNARY_OPERATION(Minus, "-")
     operation = "neg";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Not) {  // UNARY_OPERATION(Not, "~")
+             UnaryOperatorKind::UO_Not) {// UNARY_OPERATION(Not, "~")
     operation = "bit-not";
   } else if (op_code ==
-             UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot, "!")
+             UnaryOperatorKind::UO_LNot) {// UNARY_OPERATION(LNot, "!")
     operation = "not";
     // "__real expr"/"__imag expr" Extension.
   } else if (op_code ==
-             UnaryOperatorKind::UO_Real) {  // UNARY_OPERATION(Real, "__real")
+             UnaryOperatorKind::UO_Real) {// UNARY_OPERATION(Real, "__real")
     operation = "real";
   } else if (op_code ==
-             UnaryOperatorKind::UO_Imag) {  // UNARY_OPERATION(Imag, "__imag")
+             UnaryOperatorKind::UO_Imag) {// UNARY_OPERATION(Imag, "__imag")
     operation = "imag";
     // __extension__ marker.
   } else if (op_code ==
-             UnaryOperatorKind::UO_Extension) {  // UNARY_OPERATION(Extension,
+             UnaryOperatorKind::UO_Extension) {// UNARY_OPERATION(Extension,
     // "__extension__")
     operation = "extension";
     // [C++ Coroutines] co_await operator
   } else if (op_code ==
-             UnaryOperatorKind::UO_Coawait) {  // UNARY_OPERATION(Coawait,
+             UnaryOperatorKind::UO_Coawait) {// UNARY_OPERATION(Coawait,
     // "co_await")
     operation = "coawait";
     // Incorrect unary operator
@@ -1173,7 +1173,7 @@ uint64_t GetTypeSize(QualType qual_type) {
 }
 
 std::string GetTypeName(QualType qual_type) {
-  extern ASTContext *context;  // NOLINT(readability-redundant-declaration)
+  extern ASTContext *context;// NOLINT(readability-redundant-declaration)
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
@@ -1219,7 +1219,7 @@ std::string GetTypeName(QualType qual_type) {
       str += RD->getNameAsString();
     } else {
       str += std::to_string(reinterpret_cast<uint64_t>(
-                                RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+          RD));// NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     }
     return str;
   }
