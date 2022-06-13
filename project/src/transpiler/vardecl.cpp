@@ -95,7 +95,7 @@ EOObject InitValueAnalysis(const VarDecl *VD) {
     auto float_value = init_val->getFloat().convertToFloat();
     str = std::to_string(float_value);
   }
-  if(str.empty()){
+  if (str.empty()) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   return {str, EOObjectType::EO_LITERAL};
