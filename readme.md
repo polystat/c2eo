@@ -666,7 +666,6 @@ switch (x): {
             op2
             end.forward TRUE
             TRUE
-          TRUE
         if
           or (eq x 4) flag
           seq
@@ -685,7 +684,6 @@ switch (x): {
           seq
             write flag 1
             TRUE
-          TRUE
         op6
         end.forward TRUE
         TRUE
