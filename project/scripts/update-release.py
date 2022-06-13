@@ -224,4 +224,4 @@ if __name__ == '__main__':
     os.chdir('..')
     sign()
 
-    # s3put()
+    s3put()
