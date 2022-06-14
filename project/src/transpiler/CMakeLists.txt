@@ -54,7 +54,7 @@ set(SOURCE_FILES
   record_manager.cpp
   tracer.cpp
 
-    )
+        process_variables.cpp process_variables.h)
 
 # add_executable(recvisitor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})

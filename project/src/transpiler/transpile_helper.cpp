@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "memory_manager.h"
+#include "process_variables.h"
 #include "recorddecl.h"
 #include "unit_transpiler.h"
 #include "vardecl.h"
@@ -12,9 +13,6 @@
 using namespace clang;
 using namespace llvm;
 using namespace std;
-
-vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
-                                               size_t shift);
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
@@ -69,16 +67,10 @@ uint64_t GetTypeSize(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
 
-EOObject GetGotoForWhileEO(const EOObject &while_eo_object);
-
-void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
-                     DeclStmt *decl_stmt);
-
-vector<Variable> ProcessCompoundStatementLocalVariables(
-    const clang::CompoundStmt *CS);
-
+EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
+EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
+                             const EOObject &switch_exp, size_t i);
 extern UnitTranspiler transpiler;
-int loop_level = 0;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -92,8 +84,9 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
   vector<EOObject> all_types = PrecessRecordTypes(func_body);
-  vector<Variable> all_local =
-      ProcessFunctionLocalVariables(func_body, shift + param_memory_size);
+  vector<Variable> all_local;
+  ProcessFunctionLocalVariables(func_body, all_local,
+                                shift + param_memory_size);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("add", "local-start");
   local_start.nested.emplace_back("param-start");
@@ -173,122 +166,6 @@ vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
   return all_params;
 }
 
-vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
-                                               size_t shift) {
-  vector<Variable> all_local;
-  if (CS == nullptr) {
-    return all_local;
-  }
-  for (auto *stmt : CS->body()) {
-    Stmt::StmtClass stmt_class = stmt->getStmtClass();
-    if (stmt_class == Stmt::DeclStmtClass) {
-      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
-      ProcessDeclStmt(shift, all_local, decl_stmt);
-    } else if (stmt_class == Stmt::ForStmtClass) {
-      auto *for_stmt = dyn_cast<ForStmt>(stmt);
-      if (for_stmt == nullptr) {
-        continue;
-      }
-      if (for_stmt->getInit() != nullptr &&
-          for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
-        ProcessDeclStmt(shift, all_local, decl_stmt);
-      }
-      if (for_stmt->getBody() != nullptr &&
-          for_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(for_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    } else if (stmt_class == Stmt::CompoundStmtClass) {
-      auto *compound_stmt = dyn_cast<CompoundStmt>(stmt);
-      auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-      all_local.insert(all_local.end(), res.begin(), res.end());
-    } else if (stmt_class == Stmt::WhileStmtClass) {
-      auto *while_stmt = dyn_cast<WhileStmt>(stmt);
-      if (while_stmt == nullptr) {
-        continue;
-      }
-      if (while_stmt->getBody() != nullptr &&
-          while_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(while_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    } else if (stmt_class == Stmt::DoStmtClass) {
-      auto *do_stmt = dyn_cast<DoStmt>(stmt);
-      if (do_stmt == nullptr) {
-        continue;
-      }
-      if (do_stmt->getBody() != nullptr &&
-          do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(do_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    }
-  }
-  return all_local;
-}
-
-vector<Variable> ProcessCompoundStatementLocalVariables(
-    const clang::CompoundStmt *CS) {
-  vector<Variable> all_local;
-  if (CS == nullptr) {
-    return all_local;
-  }
-  for (auto *stmt : CS->body()) {
-    Stmt::StmtClass stmt_class = stmt->getStmtClass();
-    if (stmt_class == Stmt::DeclStmtClass) {
-      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
-      if (decl_stmt == nullptr) {
-        continue;
-      }
-      for (auto *decl : decl_stmt->decls()) {
-        Decl::Kind decl_kind = decl->getKind();
-        if (decl_kind == Decl::Var) {
-          auto *var_decl = dyn_cast<VarDecl>(decl);
-          all_local.push_back(transpiler.glob_.GetVarById(var_decl));
-        }
-      }
-    } else if (stmt_class == Stmt::ForStmtClass) {
-      auto *for_stmt = dyn_cast<ForStmt>(stmt);
-      if (for_stmt == nullptr) {
-        continue;
-      }
-      if (for_stmt->getInit() != nullptr &&
-          for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
-        if (decl_stmt == nullptr) {
-          continue;
-        }
-        for (auto *decl : decl_stmt->decls()) {
-          Decl::Kind decl_kind = decl->getKind();
-          if (decl_kind == Decl::Var) {
-            auto *var_decl = dyn_cast<VarDecl>(decl);
-            all_local.push_back(transpiler.glob_.GetVarById(var_decl));
-          }
-        }
-      }
-    }
-  }
-  return all_local;
-}
-
-void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
-                     DeclStmt *decl_stmt) {
-  if (decl_stmt == nullptr) {
-    return;
-  }
-  for (auto *decl : decl_stmt->decls()) {
-    Decl::Kind decl_kind = decl->getKind();
-    if (decl_kind == Decl::Var) {
-      auto *var_decl = dyn_cast<VarDecl>(decl);
-      all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
-    }
-  }
-}
-
 // Function to get eo representation of CompoundStmt
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
                          bool is_decorator = false) {
@@ -296,7 +173,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   if (is_decorator) {
     res.postfix = "@";
   }
-  auto all_local_in_block = ProcessCompoundStatementLocalVariables(CS);
+  vector<Variable> all_local_in_block;
+  ProcessCompoundStatementLocalVariables(CS, all_local_in_block);
   auto pos_it = res.nested.begin();
   for (const auto &var : all_local_in_block) {
     if (var.is_initialized) {
@@ -443,10 +321,116 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::ContinueStmtClass) {
     return EOObject{"continue"};
   }
+  if (stmt_class == Stmt::SwitchStmtClass) {
+    const auto *op = dyn_cast<SwitchStmt>(stmt);
+    return GetSwitchEOObject(op);
+  }
+  if (stmt_class == Stmt::ConstantExprClass) {
+    const auto *op = dyn_cast<ConstantExpr>(stmt);
+    return GetStmtEOObject(op->getSubExpr());
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
+}
+
+EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
+  EOObject goto_object{"goto"};
+  EOObject return_label{EOObjectType::EO_ABSTRACT};
+  return_label.arguments.emplace_back("end");
+
+  return_label.nested.emplace_back("end.forward TRUE", "break");
+  return_label.nested.emplace_back("memory", "flag");
+
+  EOObject seq_object{"seq", "@"};
+  EOObject init_flag_object{"write"};
+  init_flag_object.nested.emplace_back("flag");
+  init_flag_object.nested.emplace_back("0", EOObjectType::EO_LITERAL);
+  EOObject set_flag_object{"write"};
+  set_flag_object.nested.emplace_back("flag");
+  set_flag_object.nested.emplace_back("1", EOObjectType::EO_LITERAL);
+  seq_object.nested.push_back(init_flag_object);
+  const auto *switch_init = p_stmt->getInit();
+  if (switch_init != nullptr) {
+    seq_object.nested.push_back(GetStmtEOObject(switch_init));
+  }
+
+  EOObject switch_expr_object = GetStmtEOObject(p_stmt->getCond());
+
+  // TODO if get body return null...
+  auto end = p_stmt->getBody()->child_end();
+  for (auto stmt = p_stmt->getBody()->child_begin(); stmt != end; ++stmt) {
+    if ((*stmt)->getStmtClass() == Stmt::CaseStmtClass) {
+      const auto *case_stmt = dyn_cast<CaseStmt>(*stmt);
+      EOObject if_obj{"if"};
+      vector<const Expr *> all_cases{case_stmt->getLHS()};
+      const auto *nested = case_stmt->getSubStmt();
+      while (nested != nullptr &&
+             nested->getStmtClass() == Stmt::CaseStmtClass) {
+        const auto *nested_case = dyn_cast<CaseStmt>(nested);
+        all_cases.push_back(nested_case->getLHS());
+        nested = nested_case->getSubStmt();
+      }
+      EOObject cond_obj{"or"};
+      EOObject eq_obj{"eq"};
+      cond_obj.nested.emplace_back("flag");
+      eq_obj.nested.push_back(switch_expr_object);
+      eq_obj.nested.push_back(GetStmtEOObject(case_stmt->getLHS()));
+      cond_obj.nested.push_back(
+          GetCaseCondEOObject(all_cases, switch_expr_object, 0));
+      if_obj.nested.push_back(cond_obj);
+      EOObject buffer_obj{"seq"};
+      if (nested != nullptr) {
+        buffer_obj.nested.push_back(GetStmtEOObject(nested));
+      }
+      auto tmp = stmt;
+      tmp++;
+      while (tmp != end && (*tmp)->getStmtClass() != Stmt::CaseStmtClass &&
+             (*tmp)->getStmtClass() != Stmt::DefaultStmtClass) {
+        buffer_obj.nested.push_back(GetStmtEOObject(*tmp));
+        tmp++;
+      }
+      buffer_obj.nested.push_back(set_flag_object);
+      buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+      if_obj.nested.push_back(buffer_obj);
+      seq_object.nested.push_back(if_obj);
+    } else if ((*stmt)->getStmtClass() == Stmt::DefaultStmtClass) {
+      const auto *default_stmt = dyn_cast<DefaultStmt>(*stmt);
+      EOObject buffer_obj{"seq"};
+      if (default_stmt->getSubStmt() != nullptr) {
+        buffer_obj.nested.push_back(
+            GetStmtEOObject(default_stmt->getSubStmt()));
+      }
+      auto tmp = stmt;
+      tmp++;
+      while (tmp != end && (*tmp)->getStmtClass() != Stmt::CaseStmtClass &&
+             (*tmp)->getStmtClass() != Stmt::DefaultStmtClass) {
+        buffer_obj.nested.push_back(GetStmtEOObject(*tmp));
+        tmp++;
+      }
+      buffer_obj.nested.push_back(set_flag_object);
+      buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+      seq_object.nested.push_back(buffer_obj);
+    }
+  }
+  return_label.nested.push_back(seq_object);
+  goto_object.nested.push_back(return_label);
+
+  return goto_object;
+}
+EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
+                             const EOObject &switch_exp, size_t i) {
+  EOObject eq_object{"eq"};
+  eq_object.nested.push_back(switch_exp);
+  eq_object.nested.push_back(GetStmtEOObject(all_cases[i]));
+  if (i + 1 == all_cases.size()) {
+    return eq_object;
+  }
+  EOObject or_object{"or"};
+  or_object.nested.push_back(eq_object);
+  or_object.nested.push_back(GetCaseCondEOObject(all_cases, switch_exp, i + 1));
+  return or_object;
 }
 
 EOObject GetCastEOObject(const CastExpr *op) {
@@ -673,7 +657,11 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
   EOObject call("seq");
   vector<std::size_t> var_sizes;
-  if (op != nullptr) {
+  if (op->getDirectCallee()->isCXXClassMember() ||
+      op->getDirectCallee()->isCXXInstanceMember()) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
+  if (op != nullptr && op->getDirectCallee() != nullptr) {
     for (auto *VD : op->getDirectCallee()->parameters()) {
       TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
       size_t type_size = type_info.Width / byte_size;
@@ -682,7 +670,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   }
   size_t shift = 0;
   int i = 0;
-  if (op != nullptr) {
+  if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
     for (const auto *arg : op->arguments()) {
       EOObject param{"write"};
       EOObject address{"address"};
@@ -1056,17 +1044,6 @@ EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
     return if_stmt;
   }
   return EOObject{EOObjectType::EO_PLUG};
-}
-
-EOObject GetGotoForWhileEO(const EOObject &while_eo_object) {
-  EOObject goto_object{"goto"};
-  EOObject return_label{EOObjectType::EO_ABSTRACT};
-  return_label.arguments.emplace_back("goto-loop-label" +
-                                      to_string(loop_level));
-  return_label.nested.push_back(while_eo_object);
-  goto_object.nested.push_back(return_label);
-  loop_level--;
-  return goto_object;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
