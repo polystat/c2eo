@@ -14,7 +14,6 @@ using namespace clang;
 using namespace llvm;
 using namespace std;
 
-
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
 EOObject GetAssignmentOperationOperatorEOObject(
@@ -67,7 +66,6 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt);
 uint64_t GetTypeSize(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
-
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
@@ -168,7 +166,6 @@ vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
   return all_params;
 }
 
-
 // Function to get eo representation of CompoundStmt
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
                          bool is_decorator = false) {
@@ -177,7 +174,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
     res.postfix = "@";
   }
   vector<Variable> all_local_in_block;
-  ProcessCompoundStatementLocalVariables(CS,all_local_in_block);
+  ProcessCompoundStatementLocalVariables(CS, all_local_in_block);
   auto pos_it = res.nested.begin();
   for (const auto &var : all_local_in_block) {
     if (var.is_initialized) {

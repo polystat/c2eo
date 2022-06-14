@@ -58,7 +58,6 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
   }
 }
 
-
 void ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
                                    std::vector<Variable> &all_local,
                                    size_t shift) {
@@ -124,14 +123,14 @@ void ProcessCaseStmtLocalVariables(vector<Variable> &all_local, size_t shift,
   if (case_stmt == nullptr || case_stmt->getSubStmt() == nullptr) {
     return;
   }
-  ProcessStmtLocalVariables(all_local,shift,case_stmt->getSubStmt());
+  ProcessStmtLocalVariables(all_local, shift, case_stmt->getSubStmt());
 }
 void ProcessWhileStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                     WhileStmt *while_stmt) {
   if (while_stmt == nullptr || while_stmt->getBody() == nullptr) {
     return;
   }
-  ProcessStmtLocalVariables(all_local,shift,while_stmt->getBody());
+  ProcessStmtLocalVariables(all_local, shift, while_stmt->getBody());
 }
 void ProcessForStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                   ForStmt *for_stmt) {
@@ -144,7 +143,7 @@ void ProcessForStmtLocalVariables(vector<Variable> &all_local, size_t shift,
     ProcessDeclStmt(shift, all_local, decl_stmt);
   }
   if (for_stmt->getBody() != nullptr) {
-    ProcessStmtLocalVariables(all_local,shift,for_stmt->getBody());
+    ProcessStmtLocalVariables(all_local, shift, for_stmt->getBody());
   }
 }
 

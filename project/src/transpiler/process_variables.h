@@ -7,6 +7,6 @@ void ProcessFunctionLocalVariables(const clang::CompoundStmt* CS,
                                    std::vector<Variable>& all_local,
                                    size_t shift);
 
-void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS,
-                                            std::vector<Variable> &all_local);
+void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt* CS,
+                                            std::vector<Variable>& all_local);
 #endif  // C2EO__PROCESS_VARIABLES_H_
