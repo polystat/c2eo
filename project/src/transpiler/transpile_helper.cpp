@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "memory_manager.h"
+#include "process_variables.h"
 #include "recorddecl.h"
 #include "unit_transpiler.h"
 #include "vardecl.h"
@@ -13,8 +14,6 @@ using namespace clang;
 using namespace llvm;
 using namespace std;
 
-vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
-                                               size_t shift);
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
@@ -69,17 +68,11 @@ uint64_t GetTypeSize(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
 
-void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
-                     DeclStmt *decl_stmt);
-
-vector<Variable> ProcessCompoundStatementLocalVariables(
-    const clang::CompoundStmt *CS);
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
 extern UnitTranspiler transpiler;
-int loop_level = 0;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -93,8 +86,9 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
   vector<EOObject> all_types = PrecessRecordTypes(func_body);
-  vector<Variable> all_local =
-      ProcessFunctionLocalVariables(func_body, shift + param_memory_size);
+  vector<Variable> all_local;
+  ProcessFunctionLocalVariables(func_body, all_local,
+                                shift + param_memory_size);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("add", "local-start");
   local_start.nested.emplace_back("param-start");
@@ -174,211 +168,6 @@ vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
   return all_params;
 }
 
-vector<Variable> ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
-                                               size_t shift) {
-  vector<Variable> all_local;
-  if (CS == nullptr) {
-    return all_local;
-  }
-  for (auto *stmt : CS->body()) {
-    Stmt::StmtClass stmt_class = stmt->getStmtClass();
-    if (stmt_class == Stmt::DeclStmtClass) {
-      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
-      ProcessDeclStmt(shift, all_local, decl_stmt);
-    } else if (stmt_class == Stmt::ForStmtClass) {
-      auto *for_stmt = dyn_cast<ForStmt>(stmt);
-      if (for_stmt == nullptr) {
-        continue;
-      }
-      if (for_stmt->getInit() != nullptr &&
-          for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
-        ProcessDeclStmt(shift, all_local, decl_stmt);
-      }
-      if (for_stmt->getBody() != nullptr &&
-          for_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(for_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    } else if (stmt_class == Stmt::CompoundStmtClass) {
-      auto *compound_stmt = dyn_cast<CompoundStmt>(stmt);
-      auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-      all_local.insert(all_local.end(), res.begin(), res.end());
-    } else if (stmt_class == Stmt::WhileStmtClass) {
-      auto *while_stmt = dyn_cast<WhileStmt>(stmt);
-      if (while_stmt == nullptr) {
-        continue;
-      }
-      if (while_stmt->getBody() != nullptr &&
-          while_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(while_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    } else if (stmt_class == Stmt::SwitchStmtClass) {
-      auto *switch_stmt = dyn_cast<SwitchStmt>(stmt);
-      if (switch_stmt == nullptr) {
-        continue;
-      }
-      if (switch_stmt->getBody() != nullptr &&
-          switch_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(switch_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    } else if (stmt_class == Stmt::DoStmtClass) {
-      auto *do_stmt = dyn_cast<DoStmt>(stmt);
-      if (do_stmt == nullptr) {
-        continue;
-      }
-      if (do_stmt->getBody() != nullptr &&
-          do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(do_stmt->getBody());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    } else if (stmt_class == Stmt::CaseStmtClass) {
-      auto *case_stmt = dyn_cast<CaseStmt>(stmt);
-      if (case_stmt == nullptr) {
-        continue;
-      }
-      while (case_stmt->getSubStmt() != nullptr &&
-             dyn_cast<CaseStmt>(case_stmt->getSubStmt()) != nullptr) {
-        case_stmt = dyn_cast<CaseStmt>(case_stmt->getSubStmt());
-      }
-      if (case_stmt->getSubStmt() != nullptr &&
-          case_stmt->getSubStmt()->getStmtClass() == Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(case_stmt->getSubStmt());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      } else if (case_stmt->getSubStmt() != nullptr &&
-                 case_stmt->getSubStmt()->getStmtClass() ==
-                     Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(case_stmt);
-        ProcessDeclStmt(shift, all_local, decl_stmt);
-      } else if (case_stmt->getSubStmt() != nullptr &&
-                 case_stmt->getSubStmt()->getStmtClass() ==
-                     Stmt::DefaultStmtClass) {
-        auto *default_stmt = dyn_cast<DefaultStmt>(case_stmt->getSubStmt());
-        if (default_stmt->getSubStmt() != nullptr &&
-            default_stmt->getSubStmt()->getStmtClass() ==
-                Stmt::CompoundStmtClass) {
-          auto *compound_stmt =
-              dyn_cast<CompoundStmt>(default_stmt->getSubStmt());
-          auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-          all_local.insert(all_local.end(), res.begin(), res.end());
-        } else if (default_stmt->getSubStmt() != nullptr &&
-                   default_stmt->getSubStmt()->getStmtClass() ==
-                       Stmt::DeclStmtClass) {
-          auto *decl_stmt = dyn_cast<DeclStmt>(default_stmt->getSubStmt());
-          ProcessDeclStmt(shift, all_local, decl_stmt);
-        }
-      }
-    } else if (stmt_class == Stmt::DefaultStmtClass) {
-      auto *default_stmt = dyn_cast<DefaultStmt>(stmt);
-      if (default_stmt->getSubStmt() != nullptr &&
-          default_stmt->getSubStmt()->getStmtClass() ==
-              Stmt::CompoundStmtClass) {
-        auto *compound_stmt =
-            dyn_cast<CompoundStmt>(default_stmt->getSubStmt());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      } else if (default_stmt->getSubStmt() != nullptr &&
-                 default_stmt->getSubStmt()->getStmtClass() ==
-                     Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(default_stmt->getSubStmt());
-        ProcessDeclStmt(shift, all_local, decl_stmt);
-      }
-    } else if (stmt_class == Stmt::IfStmtClass) {
-      auto *if_stmt = dyn_cast<IfStmt>(stmt);
-      if (if_stmt == nullptr) {
-        continue;
-      }
-      if (if_stmt->getThen() != nullptr &&
-          if_stmt->getThen()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(if_stmt->getThen());
-        ProcessDeclStmt(shift, all_local, decl_stmt);
-      } else if (if_stmt->getThen() != nullptr &&
-                 if_stmt->getThen()->getStmtClass() ==
-                     Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(if_stmt->getThen());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-      if (if_stmt->getElse() != nullptr &&
-          if_stmt->getElse()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(if_stmt->getElse());
-        ProcessDeclStmt(shift, all_local, decl_stmt);
-      } else if (if_stmt->getElse() != nullptr &&
-                 if_stmt->getElse()->getStmtClass() ==
-                     Stmt::CompoundStmtClass) {
-        auto *compound_stmt = dyn_cast<CompoundStmt>(if_stmt->getElse());
-        auto res = ProcessFunctionLocalVariables(compound_stmt, shift);
-        all_local.insert(all_local.end(), res.begin(), res.end());
-      }
-    }
-  }
-  return all_local;
-}
-
-vector<Variable> ProcessCompoundStatementLocalVariables(
-    const clang::CompoundStmt *CS) {
-  vector<Variable> all_local;
-  if (CS == nullptr) {
-    return all_local;
-  }
-  for (auto *stmt : CS->body()) {
-    Stmt::StmtClass stmt_class = stmt->getStmtClass();
-    if (stmt_class == Stmt::DeclStmtClass) {
-      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
-      if (decl_stmt == nullptr) {
-        continue;
-      }
-      for (auto *decl : decl_stmt->decls()) {
-        Decl::Kind decl_kind = decl->getKind();
-        if (decl_kind == Decl::Var) {
-          auto *var_decl = dyn_cast<VarDecl>(decl);
-          all_local.push_back(transpiler.glob_.GetVarById(var_decl));
-        }
-      }
-    } else if (stmt_class == Stmt::ForStmtClass) {
-      auto *for_stmt = dyn_cast<ForStmt>(stmt);
-      if (for_stmt == nullptr) {
-        continue;
-      }
-      if (for_stmt->getInit() != nullptr &&
-          for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
-        if (decl_stmt == nullptr) {
-          continue;
-        }
-        for (auto *decl : decl_stmt->decls()) {
-          Decl::Kind decl_kind = decl->getKind();
-          if (decl_kind == Decl::Var) {
-            auto *var_decl = dyn_cast<VarDecl>(decl);
-            all_local.push_back(transpiler.glob_.GetVarById(var_decl));
-          }
-        }
-      }
-    }
-  }
-  return all_local;
-}
-
-void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
-                     DeclStmt *decl_stmt) {
-  if (decl_stmt == nullptr) {
-    return;
-  }
-  for (auto *decl : decl_stmt->decls()) {
-    Decl::Kind decl_kind = decl->getKind();
-    if (decl_kind == Decl::Var) {
-      auto *var_decl = dyn_cast<VarDecl>(decl);
-      all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
-    }
-  }
-}
 
 // Function to get eo representation of CompoundStmt
 EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
@@ -387,7 +176,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   if (is_decorator) {
     res.postfix = "@";
   }
-  auto all_local_in_block = ProcessCompoundStatementLocalVariables(CS);
+  vector<Variable> all_local_in_block;
+  ProcessCompoundStatementLocalVariables(CS,all_local_in_block);
   auto pos_it = res.nested.begin();
   for (const auto &var : all_local_in_block) {
     if (var.is_initialized) {
@@ -883,7 +673,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   }
   size_t shift = 0;
   int i = 0;
-  if (op != nullptr) {
+  if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
     for (const auto *arg : op->arguments()) {
       EOObject param{"write"};
       EOObject address{"address"};
