@@ -1,4 +1,7 @@
 +package c2eo.coperators
 
 [a] > read-as-int32
-  (a.read 4).as-int > @
+  if. > @
+    (a.read 1).as-int.geq 0
+    (00-00-00-00.concat (a.read 4)).as-int
+    (FF-FF-FF-FF.concat (a.read 4)).as-int
