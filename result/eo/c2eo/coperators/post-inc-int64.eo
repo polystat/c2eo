@@ -3,5 +3,5 @@
 [a] > post-inc-int64
   seq > @
     (a.read 8).as-int > value!
-    a.write ((a.read 8).as-int.add 1)
+    a.write ((a.read 8).as-int.plus 1)
     value

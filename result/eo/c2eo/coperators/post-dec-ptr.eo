@@ -3,5 +3,5 @@
 [a b] > post-dec-ptr
   seq > @
     (a.read 8).as-int > value!
-    a.write ((a.read 8).as-int.sub b)
+    a.write ((a.read 8).as-int.minus b)
     value

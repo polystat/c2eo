@@ -88,12 +88,12 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   ProcessFunctionLocalVariables(func_body, all_local,
                                 shift + param_memory_size);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
-  EOObject local_start("add", "local-start");
+  EOObject local_start("plus", "local-start");
   local_start.nested.emplace_back("param-start");
   local_start.nested.emplace_back("param-size");
   func_body_eo.nested.push_back(local_start);
   size_t free_pointer = transpiler.glob_.RealMemorySize();
-  EOObject local_empty_position("add", "empty-local-position");
+  EOObject local_empty_position("plus", "empty-local-position");
   local_empty_position.nested.emplace_back("local-start");
   local_empty_position.nested.emplace_back(
       to_string(free_pointer - shift - param_memory_size),
@@ -532,7 +532,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
     for (const auto *base_ch : op->getBase()->children()) {
       auto index_name = GetStmtEOObject(op->getIdx());
 
-      EOObject curr_shift{"mul"};
+      EOObject curr_shift{"times"};
       EOObject type_size_obj{std::to_string(dim_size),
                              EOObjectType::EO_LITERAL};
       curr_shift.nested.emplace_back(index_name);
@@ -540,7 +540,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
 
       auto stmt_class = base_ch->getStmtClass();
       if (stmt_class == Stmt::ArraySubscriptExprClass) {
-        EOObject add_shift{"add"};
+        EOObject add_shift{"plus"};
 
         const auto *arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
         EOObject next_shift =
@@ -550,7 +550,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
         add_shift.nested.emplace_back(next_shift);
 
         if (depth == 0) {
-          EOObject final_write{"add"};
+          EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(add_shift);
           return final_write;
@@ -560,7 +560,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
       if (stmt_class == Stmt::DeclRefExprClass ||
           stmt_class == Stmt::MemberExprClass) {
         if (depth == 0) {
-          EOObject final_write{"add"};
+          EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(curr_shift);
           return final_write;
@@ -629,7 +629,7 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
-  EOObject member{"add"};
+  EOObject member{"plus"};
   if (op == nullptr) {
     return member;
   }
@@ -675,7 +675,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
       EOObject param{"write"};
       EOObject address{"address"};
       address.nested.emplace_back("global-ram");
-      EOObject add{"add"};
+      EOObject add{"plus"};
       add.nested.emplace_back("empty-local-position");
       add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
       address.nested.push_back(add);
@@ -741,11 +741,11 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   std::string operation;
 
   if (op_code == BinaryOperatorKind::BO_AddAssign) {
-    operation = "add";
+    operation = "plus";
   } else if (op_code == BinaryOperatorKind::BO_SubAssign) {
-    operation = "sub";
+    operation = "minus";
   } else if (op_code == BinaryOperatorKind::BO_MulAssign) {
-    operation = "mul";
+    operation = "times";
   } else if (op_code == BinaryOperatorKind::BO_DivAssign) {
     operation = "div";
   } else if (op_code == BinaryOperatorKind::BO_RemAssign) {
@@ -794,11 +794,11 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     return GetAssignmentOperatorEOObject(p_operator);
   }
   if (op_code == BinaryOperatorKind::BO_Add) {
-    operation = "add";
+    operation = "plus";
   } else if (op_code == BinaryOperatorKind::BO_Sub) {
-    operation = "sub";
+    operation = "minus";
   } else if (op_code == BinaryOperatorKind::BO_Mul) {
-    operation = "mul";
+    operation = "times";
   } else if (op_code == BinaryOperatorKind::BO_Div) {
     operation = "div";
   } else if (op_code == BinaryOperatorKind::BO_Rem) {
@@ -818,13 +818,13 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   } else if (op_code == BinaryOperatorKind::BO_NE) {
     operation = "neq";
   } else if (op_code == BinaryOperatorKind::BO_LT) {
-    operation = "less";
+    operation = "lt";
   } else if (op_code == BinaryOperatorKind::BO_LE) {
-    operation = "leq";
+    operation = "lte";
   } else if (op_code == BinaryOperatorKind::BO_GT) {
-    operation = "greater";
+    operation = "gt";
   } else if (op_code == BinaryOperatorKind::BO_GE) {
-    operation = "geq";
+    operation = "gte";
   } else {
     operation = "undefined";
     llvm::errs() << "Warning: Unknown operator " << p_operator->getOpcodeStr()
@@ -922,7 +922,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     // [C99 6.5.3.3] Unary arithmetic
   }
   if (op_code == UnaryOperatorKind::UO_Plus) {  // UNARY_OPERATION(Plus, "+")
-    operation = "plus";
+    operation = "pos";
   } else if (op_code ==
              UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus, "-")
     operation = "neg";

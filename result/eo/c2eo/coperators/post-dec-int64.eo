@@ -3,5 +3,5 @@
 [a] > post-dec-int64
   seq > @
     (a.read 8).as-int > value!
-    a.write ((a.read 8).as-int.sub 1)
+    a.write ((a.read 8).as-int.minus 1)
     value
