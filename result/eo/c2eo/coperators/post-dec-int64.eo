@@ -1,9 +1,10 @@
 +package c2eo.coperators
 
 +alias c2eo.coperators.read-as-int64
++alias c2eo.coperators.write-as-int64
 
 [a] > post-dec-int64
   seq > @
     read-as-int64 a > value!
-    a.write ((read-as-int64 a).minus 1)
+    write-as-int64 a ((read-as-int64 a).minus 1)
     value

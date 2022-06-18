@@ -1,7 +1,10 @@
 +package c2eo.coperators
 
++alias c2eo.coperators.read-as-ptr
++alias c2eo.coperators.write-as-ptr
+
 [a b] > post-dec-ptr
   seq > @
-    (a.read 8).as-int > value!
-    a.write ((a.read 8).as-int.minus b)
+    read-as-ptr a > value!
+    write-as-ptr a ((read-as-ptr a).minus b)
     value

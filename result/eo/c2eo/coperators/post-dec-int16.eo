@@ -1,0 +1,10 @@
++package c2eo.coperators
+
++alias c2eo.coperators.read-as-int16
++alias c2eo.coperators.write-as-int16
+
+[a] > post-dec-int16
+  seq > @
+    read-as-int16 a > value!
+    write-as-int16 a ((read-as-int16 a).minus 1)
+    value

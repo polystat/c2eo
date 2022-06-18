@@ -4,6 +4,4 @@
 +alias c2eo.coperators.read-as-int64
 
 [a] > pre-dec-int64
-  write-as-int64 > @
-    a
-    (read-as-int64 a).minus 1
+  write-as-int64 a ((read-as-int64 a).minus 1) > @

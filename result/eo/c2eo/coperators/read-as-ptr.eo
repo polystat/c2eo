@@ -1,4 +1,6 @@
 +package c2eo.coperators
 
++alias c2eo.coperators.read-as-int64
+
 [a] > read-as-ptr
-  (a.read 8).as-int > @
+  read-as-int64 a > @
