@@ -169,7 +169,7 @@ EOObject Variable::GetAddress(const string &mem_name) const {
     address.nested.emplace_back(mem_name);
   }
   if (!local_pointer.empty()) {
-    EOObject shift_obj("add");
+    EOObject shift_obj("plus");
     shift_obj.nested.emplace_back(local_pointer);
     // TODO may be, this doesn't work with dynamic memory allocation, but
     // probably also should work

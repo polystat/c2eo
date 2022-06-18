@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a b] > minus
+  a.minus b > @

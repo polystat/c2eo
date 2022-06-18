@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
-[a b] > add
-  a.add b > @
+[a] > pos
+  a > @

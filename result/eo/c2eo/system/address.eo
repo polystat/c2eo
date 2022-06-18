@@ -8,8 +8,8 @@
   [value] > write
     mem.write addr (value.as-bytes) > @
 
-  [value] > add
-    address mem (addr.add value) > @
+  [value] > plus
+    address mem (addr.plus value) > @
 
-  [value] > sub
-    address mem (addr.sub value) > @
+  [value] > minus
+    address mem (addr.minus value) > @

@@ -2,6 +2,6 @@
 
 [a] > read-as-int32
   if. > @
-    (a.read 1).as-int.geq 0
+    (a.read 1).as-int.gte 0
     (00-00-00-00.concat (a.read 4)).as-int
     (FF-FF-FF-FF.concat (a.read 4)).as-int

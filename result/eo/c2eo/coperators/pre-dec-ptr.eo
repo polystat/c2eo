@@ -2,5 +2,5 @@
 
 [a b] > pre-dec-ptr
   seq > @
-    a.write ((a.read 8).as-int.sub b)
+    a.write ((a.read 8).as-int.minus b)
     (a.read 8).as-int

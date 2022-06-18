@@ -1,6 +1,6 @@
 +package c2eo.system
 
-+alias eoram org.eolang.gray.ram
++alias eoram org.eolang.ram
 
 [size] > ram
 
