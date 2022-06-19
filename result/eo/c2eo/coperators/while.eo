@@ -1,7 +1,0 @@
-+package c2eo.coperators
-
-[a b] > while
-  while. > @
-    a.neq 0
-    [i]
-      b > @

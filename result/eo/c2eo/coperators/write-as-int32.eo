@@ -4,5 +4,5 @@
 
 [a b] > write-as-int32
   seq > @
-    a.write (b.as-bytes.slice (b.as-bytes.size.sub 4) 4)
+    a.write (b.as-bytes.slice 4 4)
     read-as-int32 a

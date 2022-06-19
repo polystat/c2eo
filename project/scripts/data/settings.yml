@@ -33,7 +33,7 @@ code_file_patterns:
 - '*.cpp'
 - '*.h'
 config: null
-current_eo_version: 0.23.10
+current_eo_version: 0.23.11
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:
 - Wunused-command-line-argument

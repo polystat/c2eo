@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a b] > lte
+  (a.lte b).if 1 0 > @

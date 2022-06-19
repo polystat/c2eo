@@ -15,7 +15,7 @@
 void q19_func (long i)
 {
   switch (i) {
-    LIM5 (case 1)
+    LIM3 (case 1)
       break;
   }
 }

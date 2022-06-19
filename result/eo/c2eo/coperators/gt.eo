@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a b] > gt
+  (a.gt b).if 1 0 > @
