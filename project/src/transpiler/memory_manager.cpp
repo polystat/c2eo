@@ -214,10 +214,10 @@ vector<EOObject> Variable::GetListInitializer(const EOObject &rootAlias,
     recElement = recordType->fields.begin();
   }
   for (int i = 0; i < listValue.nested.size(); i++) {
-    EOObject shiftedAlias{"add"};
+    EOObject shiftedAlias{"plus"};
     shiftedAlias.nested.emplace_back(rootAlias);
     if (qualType->isArrayType()) {
-      EOObject newShift{"mul"};
+      EOObject newShift{"times"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
       newShift.nested.emplace_back(to_string(elementSize),
                                    EOObjectType::EO_LITERAL);
