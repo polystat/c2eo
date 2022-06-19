@@ -1,8 +1,9 @@
 #include "record_manager.h"
 
-RecordType RecordManager::Add(int64_t id, std::string name, size_t size,
-                              std::map<std::string, std::pair<clang::QualType, size_t>> fields,
-                              bool is_local = false) {
+RecordType RecordManager::Add(
+    int64_t id, std::string name, size_t size,
+    std::map<std::string, std::pair<clang::QualType, size_t>> fields,
+    bool is_local = false) {
   RecordType record_type = {id, std::move(name), size, std::move(fields),
                             is_local};
   record_types.push_back(record_type);
