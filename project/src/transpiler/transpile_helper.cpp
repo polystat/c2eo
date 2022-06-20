@@ -672,7 +672,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   int i = 0;
   if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
     for (const auto *arg : op->arguments()) {
-      EOObject param{"write"};
+      EOObject param{"write-as-" + GetTypeName(arg->getType())};
       EOObject address{"address"};
       address.nested.emplace_back("global-ram");
       EOObject add{"plus"};
@@ -1011,13 +1011,12 @@ EOObject GetAssignmentOperationOperatorEOObject(
 
 EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   EOObject result{EOObjectType::EO_EMPTY};
-  // TODO: Should make write-as-...
   if (p_stmt == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   const auto *ret_value = p_stmt->getRetValue();
   if (ret_value != nullptr) {
-    EOObject ret{"write"};
+    EOObject ret{"write-as-" + GetTypeName(ret_value->getType())};
     EOObject address{"return"};
     ret.nested.push_back(address);
     ret.nested.push_back(GetStmtEOObject(ret_value));
