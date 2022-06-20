@@ -17,6 +17,14 @@ Variable MemoryManager::Add(const VarDecl *id, size_t size,
     alias += "-" + to_string(duplicates[alias]);
   }
   duplicates[alias]++;
+  string type_postfix = type.substr(2);
+  // todo char!?
+  if (!((type_postfix.length() < 3 ||
+         (type_postfix.substr(0, 3) != "st-" &&
+          type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
+        && type_postfix != "undefinedtype" && type_postfix != "char")) {
+    type_postfix = "";
+  }
   Variable var = {id,
                   pointer_,
                   size,
@@ -25,7 +33,7 @@ Variable MemoryManager::Add(const VarDecl *id, size_t size,
                   std::move(value),
                   std::move(local_name),
                   shift,
-                  type.substr(2),
+                  type_postfix,
                   is_initialized};
   // TODO fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
@@ -40,6 +48,14 @@ Variable MemoryManager::AddExternal(
     const VarDecl *id, size_t size, const std::string &type, std::string alias,
     EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
+  string type_postfix = type.substr(2);
+  // todo char!?
+  if (!((type_postfix.length() < 3 ||
+         (type_postfix.substr(0, 3) != "st-" &&
+          type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
+        && type_postfix != "undefinedtype" && type_postfix != "char")) {
+    type_postfix = "";
+  }
   Variable var = {id,
                   some_non_zero_position,
                   size,
@@ -48,7 +64,7 @@ Variable MemoryManager::AddExternal(
                   std::move(value),
                   std::move(local_name),
                   shift,
-                  type.substr(2),
+                  type_postfix,
                   false};
   // TODO fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
@@ -69,15 +85,7 @@ Variable MemoryManager::AddExternal(
 
 bool MemoryManager::Empty() { return variables_.empty(); }
 
-size_t MemoryManager::RealMemorySize() {
-  size_t result = 0;
-  for (const auto &v : variables_) {
-    if (v.alias.substr(0, 2) != "e-") {
-      result += v.size;
-    }
-  }
-  return result;
-}
+size_t MemoryManager::GetFreeSpacePointer() const { return pointer_; }
 
 std::vector<Variable>::const_iterator MemoryManager::begin() const {
   return variables_.begin();
@@ -142,15 +150,8 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   EOObject res("write");
-  if ((type_postfix.length() < 3 ||
-       (type_postfix.substr(0, 3) != "st-" &&
-        type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
-      && type_postfix != "undefinedtype" && type_postfix != "char") {
-    {
-      {  // todo char!?
-        res.name += "-as-" + type_postfix;
-      }
-    }
+  if (!type_postfix.empty()) {
+    res.name += "-as-" + type_postfix;
   }
   res.nested.emplace_back(alias);
   if (value.type == EOObjectType::EO_PLUG) {

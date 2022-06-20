@@ -47,7 +47,7 @@ struct Variable {
 class MemoryManager {
  public:
   [[maybe_unused]] explicit MemoryManager(std::string name,
-                                          size_t start_pointer = 0)
+                                          size_t start_pointer = 8)
       : pointer_(start_pointer), name_(std::move(name)) {}
 
   Variable Add(const clang::VarDecl *id, size_t size, const std::string &type,
@@ -62,7 +62,7 @@ class MemoryManager {
 
   bool Empty();
 
-  size_t RealMemorySize();
+  [[nodiscard]] size_t GetFreeSpacePointer() const;
 
   const Variable &GetVarById(const clang::VarDecl *id) const;
 

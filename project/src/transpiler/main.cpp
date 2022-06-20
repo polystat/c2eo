@@ -34,6 +34,19 @@ void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   exit(0);
 }
 
+void SiAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
+  llvm::errs() << "exception: SIGABRT with code " << si->si_code
+               << " while tool run\n";
+  ofstream out(filename);
+  out << "+package c2eo.src." << package_name << "\n\n";
+  out << "+alias c2eo.stdio.printf\n\n";
+  out << "[args...] > global\n";
+  out << "  printf \"SIGABRT at address " << si->si_addr
+      << " while tool run\" > @\n";
+  out.close();
+  exit(0);
+}
+
 int main(int argc, const char **argv) {
   if (argc < 3) {
     llvm::errs() << "exception: incorrect command line format. Necessary: c2eo "
@@ -87,8 +100,15 @@ int main(int argc, const char **argv) {
   sigemptyset(&sa.sa_mask);
   sa.sa_sigaction = SegfaultSigaction;
   sa.sa_flags = SA_SIGINFO;
-
   sigaction(SIGSEGV, &sa, nullptr);
+
+  struct sigaction sab {};
+  memset(&sab, 0, sizeof(struct sigaction));
+  sigemptyset(&sab.sa_mask);
+  sab.sa_sigaction = SiAbrtSigaction;
+  sab.sa_flags = SA_SIGINFO;
+  sigaction(SIGABRT, &sab, nullptr);
+
   auto result = tool.run(newFrontendActionFactory(&finder).get());
   if (result != 0) {
     cerr << "An error in clang occurred\n";
