@@ -85,7 +85,7 @@ Variable MemoryManager::AddExternal(
 
 bool MemoryManager::Empty() { return variables_.empty(); }
 
-size_t MemoryManager::GetFreeSpacePointer() { return pointer_; }
+size_t MemoryManager::GetFreeSpacePointer() const { return pointer_; }
 
 std::vector<Variable>::const_iterator MemoryManager::begin() const {
   return variables_.begin();
