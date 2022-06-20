@@ -62,7 +62,7 @@ class MemoryManager {
 
   bool Empty();
 
-  size_t GetFreeSpacePointer() const;
+  [[nodiscard]] size_t GetFreeSpacePointer() const;
 
   const Variable &GetVarById(const clang::VarDecl *id) const;
 
