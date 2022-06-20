@@ -80,7 +80,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (func_body == nullptr) {
     return EOObject(EOObjectType::EO_EMPTY);
   }
-  size_t shift = transpiler.glob_.RealMemorySize();
+  size_t shift = transpiler.glob_.GetFreeSpacePointer();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
   vector<EOObject> all_types = PrecessRecordTypes(func_body);
@@ -92,7 +92,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   local_start.nested.emplace_back("param-start");
   local_start.nested.emplace_back("param-size");
   func_body_eo.nested.push_back(local_start);
-  size_t free_pointer = transpiler.glob_.RealMemorySize();
+  size_t free_pointer = transpiler.glob_.GetFreeSpacePointer();
   EOObject local_empty_position("plus", "empty-local-position");
   local_empty_position.nested.emplace_back("local-start");
   local_empty_position.nested.emplace_back(
@@ -672,7 +672,11 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   int i = 0;
   if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
     for (const auto *arg : op->arguments()) {
-      EOObject param{"write-as-" + GetTypeName(arg->getType())};
+      EOObject param{"write"};
+      string postfix = GetPostfix(arg->getType());
+      if (!postfix.empty()) {
+        param.name += "-as-" + postfix;
+      }
       EOObject address{"address"};
       address.nested.emplace_back("global-ram");
       EOObject add{"plus"};
@@ -1016,7 +1020,11 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   }
   const auto *ret_value = p_stmt->getRetValue();
   if (ret_value != nullptr) {
-    EOObject ret{"write-as-" + GetTypeName(ret_value->getType())};
+    EOObject ret{"write"};
+    string postfix = GetPostfix(ret_value->getType());
+    if (!postfix.empty()) {
+      ret.name += "-as-" + postfix;
+    }
     EOObject address{"return"};
     ret.nested.push_back(address);
     ret.nested.push_back(GetStmtEOObject(ret_value));
@@ -1133,6 +1141,42 @@ uint64_t GetTypeSize(QualType qual_type) {
   return type_size / byte_size;
 }
 
+std::string GetPostfix(QualType qual_type) {
+  extern ASTContext *context;  // NOLINT(readability-redundant-declaration)
+  const clang::Type *type_ptr = qual_type.getTypePtr();
+  TypeInfo type_info = context->getTypeInfo(type_ptr);
+  uint64_t type_size = type_info.Width;
+  std::string str;
+
+  if (type_ptr->isBooleanType()) {
+    str += "bool";
+    return str;
+  }
+
+  if (type_ptr->isPointerType()) {
+    str += "ptr";
+    return str;
+  }
+
+  if (type_ptr->isFloatingType()) {
+    str += "float" + std::to_string(type_size);
+    return str;
+  }
+
+  if (!type_ptr->isSignedIntegerType()) {
+    str += "u";
+  }
+  if (type_ptr->isCharType()) {
+    str += "char";
+    return str;
+  }
+  if (type_ptr->isIntegerType()) {
+    str += "int" + std::to_string(type_size);
+    return str;
+  }
+  return "";
+}
+
 std::string GetTypeName(QualType qual_type) {
   extern ASTContext *context;  // NOLINT(readability-redundant-declaration)
   const clang::Type *type_ptr = qual_type.getTypePtr();
@@ -1146,7 +1190,6 @@ std::string GetTypeName(QualType qual_type) {
   }
 
   if (type_ptr->isPointerType()) {
-    // str += "int64";
     str += "ptr";
     return str;
   }

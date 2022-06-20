@@ -60,7 +60,7 @@ void UnitTranspiler::GenerateResult() {
     EOObject main_call("main");
     extern UnitTranspiler transpiler;
     main_call.nested.emplace_back(
-        std::to_string(transpiler.glob_.RealMemorySize()),
+        std::to_string(transpiler.glob_.GetFreeSpacePointer()),
         EOObjectType::EO_LITERAL);
     main_call.nested.emplace_back("0", EOObjectType::EO_LITERAL);
     init_seq.nested.push_back(main_call);
