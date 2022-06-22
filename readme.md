@@ -23,7 +23,7 @@ $ apt-get install -y c2eo
 Then, just run:
 
 ```bash
-$ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
+$ c2eo <path-to-c-file-name> <eo-file-name>.eo
 ```
 
 We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk.
