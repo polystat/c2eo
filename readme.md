@@ -17,6 +17,7 @@ $ apt update
 $ apt install -y software-properties-common
 $ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F7C91591CC543ECA
 $ add-apt-repository 'deb http://c2eo.polystat.org/debian/ c2eo-rep non-free main contrib'
+$ apt-get install -y clang
 $ apt-get install -y c2eo
 ```
 
