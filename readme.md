@@ -26,7 +26,16 @@ Then, just run:
 $ c2eo <path-to-c-file-name> <eo-file-name>.eo
 ```
 
-We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk.
+You can also use it via [Docker](https://docs.docker.com/get-docker/):
+
+```bash
+$ docker run -v $(pwd):/eo yegor256/c2eo hello.c hello.eo
+```
+
+Assuming you have `hello.c` in the current directory, the `hello.eo` will be created next to it.
+
+We do not support the utility for other distributions and operating systems yet.
+However, you can try to build the project from source at your own risk.
 
 ## How to Contribute
 
