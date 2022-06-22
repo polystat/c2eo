@@ -39,6 +39,7 @@ ENV LANGUAGE en_US.UTF-8
 RUN apt install -y software-properties-common
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F7C91591CC543ECA
 RUN add-apt-repository 'deb http://c2eo.polystat.org/debian/ c2eo-rep non-free main contrib'
+RUN apt-get install -y clang
 RUN apt-get install -y c2eo
 
 ENTRYPOINT ["/usr/bin/c2eo"]

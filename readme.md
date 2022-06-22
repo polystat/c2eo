@@ -26,7 +26,8 @@ Then, just run:
 $ c2eo <path-to-c-file-name> <eo-file-name>.eo
 ```
 
-You can also use it via [Docker](https://docs.docker.com/get-docker/):
+You can also use [yegor256/c2eo](https://hub.docker.com/r/yegor256/c2eo)
+image via [Docker](https://docs.docker.com/get-docker/):
 
 ```bash
 $ docker run -v $(pwd):/eo yegor256/c2eo hello.c hello.eo
