@@ -13,23 +13,22 @@ This is a experimental translator of [C](https://en.wikipedia.org/wiki/C_(progra
 Assuming, you are on [Ubuntu 20+](https://ubuntu.com/download):
 
 ```bash
-$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F7C91591CC543ECA
-$ sudo add-apt-repository 'deb http://c2eo.polystat.org/debian/ c2eo-rep non-free main contrib'
-$ sudo apt install c2eo
+$ apt update
+$ apt install -y software-properties-common
+$ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys F7C91591CC543ECA
+$ add-apt-repository 'deb http://c2eo.polystat.org/debian/ c2eo-rep non-free main contrib'
+$ apt-get install -y c2eo
 ```
 
 Then, just run:
 
 ```bash
 $ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
-# ./c2eo ../some_dir/example.c example.eo
 ```
 
- We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk. 
+We do not support the utility for other distributions and operating systems yet. However, you can try to build the project from source at your own risk.
 
 ## How to Contribute
-
-### Preparations
 
 Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
 [wget 1.21+](https://www.tecmint.com/install-wget-in-linux/), 
@@ -59,7 +58,7 @@ $ cd ../..
 You may also try our own [pre-packaged archive](https://mega.nz/file/cZ9WQCqB#z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA):
 
 ```bash
-$ sudo apt install megatools
+$ apt install megatools
 $ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA'
 $ tar -xvf llvm-clang.tar.gz
 ```
@@ -71,21 +70,25 @@ Formally speaking, this is where the preparation can be completed. However, in o
 ### Making changes
 
 All sources files of transpiler are located in `project/src/transpiler`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project` dir. For the first time, create the `build` folder:
+
 ```bash
 $ mkdir build
 ```
+
 then go to the `build` folder and run the following commands:
 
 ```bash
 $ cmake ..
 $ make
 ``` 
+
 As you have already noticed, the project is being built in the `project/build` folder. The result of this build is the `c2eo` file in `project/bin`. Now you have a transpiler and you can convert programs from C to EO. Just run:
 
 ```bash
 $ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
 # ./c2eo ../some_dir/example.c example.eo
 ```
+
 Ok, it works, but you're not going to manually broadcast each file and check if everything is OK. To do this, there are a couple of scripts that will simplify your life:
 
 ```bash
@@ -106,10 +109,10 @@ The main tests are in the folder `/project/tests/main`, if they pass, then every
 
 ## How to release
 
-From `/project/scripts/`:
+From `project/scripts/` directory:
 
 ```bash
-(venv) $ python3 update-release.py -h
+$ python3 update-release.py -h
 usage: update-release.py [-h] [--branch BRANCH] [--version VERSION]
 
 Release maker
@@ -118,17 +121,20 @@ optional arguments:
   -h, --help         show this help message and exit
   --version VERSION  specify the new version
 ```
+
 Example
+
 ```bash
-(venv) $ python3 update-release.py --version=0.1.1
+$ python3 update-release.py --version=0.1.1
 ```
 
 To use this script, make sure you have the following packages installed:
+
 ```bash
-(venv) $ pip3 install git_config pgpy s3cmd
-$ sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
+$ pip3 install git_config pgpy s3cmd
+$ apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
 # for the latest version of the cmake package, try:
-$ sudo pip3 install cmake
+$ pip3 install cmake
 ```
 
 Notes:
@@ -256,9 +262,6 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
 </details>
 
 Then you have to upload `./repository/dists` and `./repository/pool` to [c2eo.polystat.org/](http://c2eo.polystat.org)debian/.
-
-
-
 
 ## Principles of Transpilation from C to EO
 
