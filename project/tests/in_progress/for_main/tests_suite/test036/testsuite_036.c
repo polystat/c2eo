@@ -41,7 +41,13 @@ int f5 (fptr5 fp, fptr1 i)
   return fp(i);
 }
 int f8 (int ([4]), int);
-int main () { return 0; }
+// int main () { return 0; }
+
+int test() {
+  int x;
+  x =
+}
+
 int main () {
   int x;
   x = test();
