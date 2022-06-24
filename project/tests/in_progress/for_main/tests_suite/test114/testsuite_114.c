@@ -5,12 +5,6 @@ int x;
 
 int test();
 
-void *
-foo()
-{
-	return &main;
-}
-
 int
 test()
 {
@@ -27,3 +21,10 @@ int main () {
   printf("%d\n", x);
   return 0;
 }
+
+void *
+foo()
+{
+	return &main;
+}
+
