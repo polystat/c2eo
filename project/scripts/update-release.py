@@ -5,7 +5,6 @@ import subprocess
 import sys
 
 import argparse
-# from git_config import get_config
 
 import pgpy
 
@@ -32,22 +31,20 @@ control = {
         'Section': 'misc',
         'Description': 'The translator of C to EOLANG.\n'
                        ' This is a translator of C/C++ to EOLANG for Debian and Ubuntu.',
-        'Depends': 'llvm-libs(>=1)',  # 'dpkg, gcc',
-        # 'Build-Depends': 'debhelper (>=9)',
+        'Depends': 'llvm-libs(>=1)',
         'Origin': 'https://github.com/polystat/c2eo',
         'Multi-Arch': 'foreign'
     },
     'llvm-libs': {
         'Package': 'llvm-libs',
-        'Version': '1.0.0',
+        'Version': '1.0.1',
         'Provides': 'llvm-libs',
         'Maintainer': 'Anonymous <anonymous@noreply.com>',
         'Architecture': 'all',
         'Section': 'misc',
         'Description': 'LLVM&CLANG libraries.\n'
                        ' A set of necessary precompiled libraries of the LLVM 12.0.1.',
-        'Depends': 'gcc(>=11)',  # 'dpkg, gcc',
-        # 'Build-Depends': 'debhelper (>=9)',
+        'Depends': 'gcc(>=11), clang(>=12)',
         'Origin': 'https://github.com/llvm/llvm-project/releases/',
         'Multi-Arch': 'foreign'
     }
@@ -61,18 +58,12 @@ distributions = {
     'Architectures': 'i386 amd64 source',
     'Components': 'main contrib non-free',
     'UDebComponents': 'main contrib non-free',
-    'Description': 'repository for c2eo releases',
-    # 'SignWith': 'yes'  # 'F7C91591CC543ECA'
+    'Description': 'repository for c2eo releases'
 }
 
 
 def get_user() -> str:
-    # config = get_config()
-    # try:
-    #     return "{} <{}>".format(config["user"]["name"], config["user"]["email"])
-    # except:
-    #     print(config)
-    return "Yaroslav Ryabtsev <yairyabtsev@edu.hse.ru"
+    return "Yaroslav Riabtsev <yairyabtsev@edu.hse.ru"
 
 
 def try_shell(param, fatal=True, private=False):
@@ -102,14 +93,6 @@ def make_deb(date, deb_name):
     with open('DEBIAN/changelog', 'w') as changelog:
         print(deb_name + ' ({}.{}-{}) unstable; urgency=medium\n'.format(*control[deb_name]['Version'].split('.')),
               file=changelog)
-        # while True:
-        #     changes = input('describe the new feature: ')
-        #     if not changes:
-        #         break
-        #     print('  *', changes, file=changelog)
-
-        # with datetime try_shell('git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format="  * %h
-        # %s by %an <%aE>   %cd" >> DEBIAN/changelog')
     if try_shell("git describe --tags --abbrev=0", fatal=False):
         last_commit = "git describe --tags --abbrev=0"
     else:
@@ -217,7 +200,6 @@ if __name__ == '__main__':
         make_deb(date, deb)
         os.chdir('..')
         try_shell(f'fakeroot dpkg-deb --build {deb}-{control[deb]["Version"]}')
-        # try_shell(f'lintian {deb}-{version}.deb') ---> checker
 
     os.chdir('repository')
     make_repo()
