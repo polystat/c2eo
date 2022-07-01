@@ -329,6 +329,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<ConstantExpr>(stmt);
     return GetStmtEOObject(op->getSubExpr());
   }
+  if (stmt_class == Stmt::NullStmtClass) {
+    // The empty statement
+    return EOObject(EOObjectType::EO_EMPTY);
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
 
@@ -813,6 +817,10 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     operation = "bit-or";
   } else if (op_code == BinaryOperatorKind::BO_Xor) {
     operation = "bit-xor";
+  } else if (op_code == BinaryOperatorKind::BO_LAnd) {
+    operation = "and";
+  } else if (op_code == BinaryOperatorKind::BO_LOr) {
+    operation = "or";
   } else if (op_code == BinaryOperatorKind::BO_Shl) {
     operation = "shift-left";
   } else if (op_code == BinaryOperatorKind::BO_Shr) {
