@@ -1,8 +1,32 @@
-#include "tracer.h"
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021-2022 c2eo team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-using namespace clang;
-using namespace llvm;
-using namespace std;
+#include "src/transpiler/tracer.h"
+
+#include <string>
+using clang::BinaryOperatorKind;
+using clang::Stmt;
 
 __attribute__((unused)) void TraceOutASTNode(Stmt::StmtClass stmt_class) {
   std::string message;
@@ -118,7 +142,8 @@ __attribute__((unused)) void TraceOutBinaryOperator(BinaryOperatorKind kind) {
   std::cout << "  AST binary operation = " << message << "\n";
 }
 
-__attribute__((unused)) void TraceOutIntegerLiteral(APInt &v, bool is_signed) {
+__attribute__((unused)) void TraceOutIntegerLiteral(llvm::APInt &v,
+                                                    bool is_signed) {
   if (is_signed) {
     std::cout << "    APInt Literal = " << v.getSExtValue() << "\n";
   } else {
@@ -127,14 +152,14 @@ __attribute__((unused)) void TraceOutIntegerLiteral(APInt &v, bool is_signed) {
 }
 
 __attribute__((unused)) void TraceOutEOObject(EOObject &eo_object) {
-  cout << eo_object;
+  std::cout << eo_object;
 }
 
 void TraceOutFunctionDecl(const clang::FunctionDecl *FD) {
   if (FD == nullptr) {
     std::cout << "  Incorrect pointer_ to definition\n";
   } else {
-    DeclarationNameInfo decl_name_info{FD->getNameInfo()};
+    clang::DeclarationNameInfo decl_name_info{FD->getNameInfo()};
     std::string func_name{decl_name_info.getAsString()};
     std::cout << func_name << ": ";
     std::cout.flush();
@@ -148,7 +173,7 @@ void TraceOutFunctionDecl(const clang::FunctionDecl *FD) {
     if (FD->hasBody()) {
       std::cout << "  Has body!\n";
       Stmt *body = FD->getBody();
-      auto *func_body = dyn_cast<CompoundStmt>(body);
+      auto *func_body = dyn_cast<clang::CompoundStmt>(body);
       if (func_body != nullptr) {
         std::cout << "  Has body! Body pointer_ =  " << body << "\n";
         if (func_body->size() > 0) {

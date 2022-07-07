@@ -1,17 +1,42 @@
-#include "vardecl.h"
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021-2022 c2eo team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-#include <sstream>
+#include "src/transpiler/vardecl.h"
 
-#include "transpile_helper.h"
-#include "unit_transpiler.h"
+#include <string>
 
-using namespace clang;
+#include "src/transpiler/transpile_helper.h"
+#include "src/transpiler/unit_transpiler.h"
+
+using clang::VarDecl;
 
 EOObject InitValueAnalysis(const VarDecl *VD);
 
 EOObject InitZeroValueAnalysis(const VarDecl *VD);
 
-__attribute__((unused)) void ArrayToBytes(__attribute__((unused)) Stmt *stmt,
+__attribute__((unused)) void ArrayToBytes(__attribute__((unused))
+                                          clang::Stmt *stmt,
                                           size_t size, const VarDecl *p_decl,
                                           std::string &string);
 
@@ -19,8 +44,8 @@ EOObject InitValueEOObj(const VarDecl *VD, bool is_init);
 Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
                          size_t shift) {
   auto var_name = VD->getNameAsString();
-  QualType qual_type = VD->getType();
-  TypeInfo type_info = VD->getASTContext().getTypeInfo(qual_type);
+  clang::QualType qual_type = VD->getType();
+  clang::TypeInfo type_info = VD->getASTContext().getTypeInfo(qual_type);
   auto type_size = type_info.Width / byte_size;
 
   std::string str_type{"c_" + GetTypeName(VD->getType())};
@@ -34,7 +59,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   extern UnitTranspiler transpiler;
 
   if (global_storage && !ext_storage && !static_local &&
-      (storage_class != SC_Static)) {
+      (storage_class != clang::SC_Static)) {
     return transpiler.glob_.Add(VD, type_size, str_type, "g-" + var_name,
                                 initial_value);
   }
@@ -51,7 +76,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   if (local_name.empty()) {
     return {};
   }
-  const auto *PD = llvm::dyn_cast<ParmVarDecl>(VD);
+  const auto *PD = llvm::dyn_cast<clang::ParmVarDecl>(VD);
   if (PD != nullptr) {
     return transpiler.glob_.Add(VD, type_size, str_type, "p-" + var_name,
                                 initial_value, local_name, shift,
@@ -73,7 +98,7 @@ EOObject InitValueAnalysis(const VarDecl *VD) {
 
   auto type_info = VD->getASTContext().getTypeInfo(qual_type);
   auto size = type_info.Width;
-  APValue *init_val = VD->evaluateValue();
+  clang::APValue *init_val = VD->evaluateValue();
   if (init_val == nullptr) {
     return GetStmtEOObject(VD->getInit());
   }
