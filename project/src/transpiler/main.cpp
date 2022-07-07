@@ -115,7 +115,7 @@ int main(int argc, const char **argv) {
   ClangTool tool(options_parser.getCompilations(),
                  options_parser.getSourcePathList());
 
-  clang::ast_matchers::MatchFinder *finder;
+  clang::ast_matchers::MatchFinder finder;
   AddMatchers(finder);
   tool.setPrintErrorMessage(false);
 
@@ -133,7 +133,7 @@ int main(int argc, const char **argv) {
   sab.sa_flags = SA_SIGINFO;
   sigaction(SIGABRT, &sab, nullptr);
 
-  auto result = tool.run(newFrontendActionFactory(finder).get());
+  auto result = tool.run(newFrontendActionFactory(&finder).get());
   if (result != 0) {
     std::cerr << "An error in clang occurred\n";
   }

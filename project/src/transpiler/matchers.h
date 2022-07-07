@@ -27,6 +27,6 @@
 
 #include "src/transpiler/analyzers.h"
 
-void AddMatchers(clang::ast_matchers::MatchFinder* finder);
+void AddMatchers(clang::ast_matchers::MatchFinder &finder);
 
 #endif  // PROJECT_SRC_TRANSPILER_MATCHERS_H_

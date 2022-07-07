@@ -40,7 +40,7 @@ using clang::Stmt;
 using clang::SwitchStmt;
 using clang::VarDecl;
 using clang::WhileStmt;
-
+using llvm::dyn_cast;
 using std::vector;
 
 extern UnitTranspiler transpiler;

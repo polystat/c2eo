@@ -35,7 +35,6 @@
 #include "src/transpiler/unit_transpiler.h"
 #include "src/transpiler/vardecl.h"
 
-// using namespace clang;
 using clang::ArrayRef;
 using clang::ArraySubscriptExpr;
 using clang::ASTContext;
@@ -70,6 +69,7 @@ using clang::UnaryOperator;
 using clang::UnaryOperatorKind;
 using clang::VarDecl;
 using clang::WhileStmt;
+using llvm::dyn_cast;
 using std::string;
 using std::to_string;
 using std::vector;

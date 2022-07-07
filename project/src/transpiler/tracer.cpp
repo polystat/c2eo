@@ -25,6 +25,7 @@
 #include "src/transpiler/tracer.h"
 
 #include <string>
+
 using clang::BinaryOperatorKind;
 using clang::Stmt;
 
@@ -173,7 +174,7 @@ void TraceOutFunctionDecl(const clang::FunctionDecl *FD) {
     if (FD->hasBody()) {
       std::cout << "  Has body!\n";
       Stmt *body = FD->getBody();
-      auto *func_body = dyn_cast<clang::CompoundStmt>(body);
+      auto *func_body = llvm::dyn_cast<clang::CompoundStmt>(body);
       if (func_body != nullptr) {
         std::cout << "  Has body! Body pointer_ =  " << body << "\n";
         if (func_body->size() > 0) {
