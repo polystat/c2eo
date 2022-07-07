@@ -82,6 +82,7 @@ std::map<std::string, std::string> known_aliases = {
     {"read-as-int32", "+alias c2eo.coperators.read-as-int32"},
     {"read-as-int64", "+alias c2eo.coperators.read-as-int64"},
     {"read-as-ptr", "+alias c2eo.coperators.read-as-ptr"},
+    {"read-as-string", "+alias c2eo.coperators.read-as-string"},
     {"shift-left", "+alias c2eo.coperators.shift-left"},
     {"shift-right", "+alias c2eo.coperators.shift-right"},
     {"times", "+alias c2eo.coperators.times"},
@@ -93,6 +94,7 @@ std::map<std::string, std::string> known_aliases = {
     {"write-as-int32", "+alias c2eo.coperators.write-as-int32"},
     {"write-as-int64", "+alias c2eo.coperators.write-as-int64"},
     {"write-as-ptr", "+alias c2eo.coperators.write-as-ptr"},
+    {"write-as-string", "+alias c2eo.coperators.write-as-string"},
 };
 
 #endif
