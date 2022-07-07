@@ -1,17 +1,10 @@
 cmake_minimum_required(VERSION 3.18)
 
-
 project(c2eo)
-
 
 # llvm_config
 set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
 set(CMAKE_CXX_STANDARD 17)
-
-
-# set(CMAKE_C_COMPILER путь/до/компилятора)
-# set(CMAKE_CXX_COMPILER "../${PATH_TO_LLVM_SOURCE}/build/bin/clang++")
-
 
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
 include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
@@ -24,56 +17,51 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
 
 # Source files list
 set(SOURCE_FILES
-        # Headers
-        vardecl.h
-        analyzers.h
-        matchers.h
-        util.h
-        memory_manager.h
-        unit_transpiler.h
-        eo_object.h
-        function_manager.h
-        transpile_helper.h
-        recorddecl.h
-        record_manager.h
-        aliases.h
-        tracer.h
-        enumdecl.h
-        enum_manager.h
+    # Headers
+    vardecl.h
+    analyzers.h
+    matchers.h
+    util.h
+    memory_manager.h
+    unit_transpiler.h
+    eo_object.h
+    function_manager.h
+    transpile_helper.h
+    recorddecl.h
+    record_manager.h
+    aliases.h
+    tracer.h
+    process_variables.h
 
-        # Sources
-        main.cpp
-        vardecl.cpp
-        analyzers.cpp
-        matchers.cpp
-        util.cpp
-        memory_manager.cpp
-        unit_transpiler.cpp
-        eo_object.cpp
-        function_manager.cpp
-        transpile_helper.cpp
-        recorddecl.cpp
-        record_manager.cpp
-        tracer.cpp
-        enumdecl.cpp
-        enum_manager.cpp
-
-        process_variables.cpp process_variables.h)
+    # Sources
+    main.cpp
+    vardecl.cpp
+    analyzers.cpp
+    matchers.cpp
+    util.cpp
+    memory_manager.cpp
+    unit_transpiler.cpp
+    eo_object.cpp
+    function_manager.cpp
+    transpile_helper.cpp
+    recorddecl.cpp
+    record_manager.cpp
+    tracer.cpp
+    process_variables.cpp)
 
 # add_executable(recvisitor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})
 
-
 # llvm libraries
 target_link_libraries(c2eo
-        clangAST
-        clangASTMatchers
-        clangBasic
-        clangFrontend
-        clangSerialization
-        clangTooling
-        LLVMSupport
-        LLVMFrontendOpenMP)
+                      clangAST
+                      clangASTMatchers
+                      clangBasic
+                      clangFrontend
+                      clangSerialization
+                      clangTooling
+                      LLVMSupport
+                      LLVMFrontendOpenMP)
 
 set(LLVM_LINK_COMPONENTS
         Support)
