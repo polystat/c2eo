@@ -5,6 +5,7 @@
 #include "iostream"
 #include "memory_manager.h"
 #include "record_manager.h"
+#include "enum_manager.h"
 #include "set"
 #include "string"
 
@@ -16,6 +17,7 @@ class UnitTranspiler {
   MemoryManager glob_{"global-ram"}, ret_{"return-ram"};
   FunctionManager func_manager_;
   RecordManager record_manager_;
+  EnumManager enum_manager_;
   friend std::ostream &operator<<(std::ostream &os, UnitTranspiler unit);
 
   std::string name_;
