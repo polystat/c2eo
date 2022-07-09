@@ -1,5 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only test07.c
-
 #include "stdio.h"
 int main() {
     long long a;

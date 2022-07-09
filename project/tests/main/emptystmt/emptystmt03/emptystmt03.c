@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only main.c
 #include <stdio.h>
 
 void test() {

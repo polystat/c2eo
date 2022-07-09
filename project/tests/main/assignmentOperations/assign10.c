@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only *.c
 #include <stdio.h>
 
 long long a = 10;

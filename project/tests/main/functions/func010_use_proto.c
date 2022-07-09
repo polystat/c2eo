@@ -1,5 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only func01.c
-
 #include <stdio.h>
 
 long long c = 10;

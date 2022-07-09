@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only func01.c
 //Одна из функций запускается как параметр другой
 
 #include <stdio.h>

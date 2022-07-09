@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only test07.c
 #include "stdio.h"
 long long n = 4;
 int main() {
