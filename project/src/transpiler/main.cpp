@@ -30,7 +30,7 @@
 #include "src/transpiler/unit_transpiler.h"
 #include "src/transpiler/util.h"
 
-static const int parser_arg_count = 6;
+static const int parser_arg_count = 4;
 
 using clang::tooling::ClangTool;
 using clang::tooling::CommonOptionsParser;
@@ -148,9 +148,7 @@ const char **TransformArgv(const char *const *argv) {
   parser_argv[0] = argv[0];
   parser_argv[1] = argv[1];
   parser_argv[2] = "--";
-  parser_argv[3] = "-I/usr/include/linux";
-  parser_argv[4] = "-I/usr/include/c++/11.2.0/tr1";
-  parser_argv[5] = "-I/usr/include/c++/11.2.0";
+  parser_argv[3] = "-Wno-unused-value";
   return parser_argv;
 }
 #pragma clang diagnostic pop
