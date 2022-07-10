@@ -1,11 +1,11 @@
 #ifndef C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_
 #define C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_
 
+#include "enum_manager.h"
 #include "function_manager.h"
 #include "iostream"
 #include "memory_manager.h"
 #include "record_manager.h"
-#include "enum_manager.h"
 #include "set"
 #include "string"
 
