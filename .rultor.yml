@@ -6,6 +6,7 @@ assets:
   gitconfig: yairyabtsev/private#assets/.gitconfig
   passpharase: yairyabtsev/private#assets/passpharase
   config: yairyabtsev/private#assets/config
+  docker-password: yegor256/polystat-secrets#docker-password
 install: |-
   sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
   pip3 install git_config pgpy s3cmd
@@ -23,3 +24,8 @@ release:
     cd ../..
     echo "release"
     python3 project/scripts/update-release.py --version="${tag}"
+
+    image=yegor256/c2eo
+    sudo docker build "$(pwd)" --tag "${image}:${tag}"
+    cat ../docker-password | sudo docker login --password-stdin --username yegor256
+    sudo docker push "${image}:${tag}"

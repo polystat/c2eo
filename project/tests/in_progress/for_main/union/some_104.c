@@ -21,14 +21,10 @@ int main () {
   v.d = 4;
 
   printf("%d\n", v.a);
-  v.a;
   printf("%d\n", v.b1);
-  v.b1;
   printf("%d\n", v.b2);
-  v.b2;
   printf("%d\n", v.c);
-  v.c;
   printf("%d\n", v.d);
-  v.d;
+
   return 0;
 }
