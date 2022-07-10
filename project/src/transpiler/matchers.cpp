@@ -28,12 +28,10 @@ void AddDeclBaseVarGlobalMemoryMatcher(MatchFinder &finder) {
 }
 
 void AddEnumDeclMatcher(MatchFinder &finder) {
-    static EnumDeclAnalyzer enum_decl_analyzer;
-    static DeclarationMatcher enum_decl_matcher =
-            enumDecl().bind("enumDecl");
+  static EnumDeclAnalyzer enum_decl_analyzer;
+  static DeclarationMatcher enum_decl_matcher = enumDecl().bind("enumDecl");
 
-    finder.addMatcher(enum_decl_matcher,
-                      &enum_decl_analyzer);
+  finder.addMatcher(enum_decl_matcher, &enum_decl_analyzer);
 }
 
 //==============================================================================

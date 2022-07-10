@@ -1,7 +1,3 @@
-//
-// Created by Андрей on 09.07.2022.
-//
-
 #ifndef C2EO_ENUMDECL_H
 #define C2EO_ENUMDECL_H
 
@@ -12,8 +8,8 @@
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
-#include "llvm/Support/CommandLine.h"
 #include "enum_manager.h"
+#include "llvm/Support/CommandLine.h"
 
 EnumType ProcessEnumDecl(const clang::EnumDecl *ED);
 

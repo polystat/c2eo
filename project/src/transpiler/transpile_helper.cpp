@@ -3,11 +3,11 @@
 
 #include <queue>
 #include <sstream>
-#include "string.h"
 
 #include "memory_manager.h"
 #include "process_variables.h"
 #include "recorddecl.h"
+#include "string.h"
 #include "unit_transpiler.h"
 #include "vardecl.h"
 
@@ -102,13 +102,13 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
       to_string(free_pointer - shift - param_memory_size),
       EOObjectType::EO_LITERAL);
   func_body_eo.nested.push_back(local_empty_position);
-  for (const auto &param: all_param) {
+  for (const auto &param : all_param) {
     func_body_eo.nested.push_back(param.GetAddress(transpiler.glob_.name_));
   }
-  for (const auto &var: all_types) {
+  for (const auto &var : all_types) {
     func_body_eo.nested.push_back(var);
   }
-  for (const auto &var: all_local) {
+  for (const auto &var : all_local) {
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob_.name_));
   }
   EOObject goto_object{"goto", "@"};
@@ -127,17 +127,17 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
 
 vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
   vector<EOObject> local_type_decls;
-  for (auto *stmt: CS->body()) {
+  for (auto *stmt : CS->body()) {
     Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
       auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
       if (decl_stmt != nullptr) {
-        for (auto *decl: decl_stmt->decls()) {
+        for (auto *decl : decl_stmt->decls()) {
           Decl::Kind decl_kind = decl->getKind();
           if (decl_kind == Decl::Kind::Record) {
             auto *record_decl = dyn_cast<RecordDecl>(decl);
             auto types = ProcessRecordType(record_decl, true);
-            for (auto &type: types) {
+            for (auto &type : types) {
               auto eo_objs = type.GetEORecordDecl();
               local_type_decls.insert(local_type_decls.end(), eo_objs.begin(),
                                       eo_objs.end());
@@ -152,7 +152,7 @@ vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
   size_t res = 0;
-  for (auto *VD: params) {
+  for (auto *VD : params) {
     TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
     size_t type_size = type_info.Width / byte_size;
     res += type_size;
@@ -163,7 +163,7 @@ size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
                                        size_t shift) {
   vector<Variable> all_params;
-  for (auto *param: params) {
+  for (auto *param : params) {
     all_params.push_back(ProcessVariable(param, "param-start", shift));
   }
   return all_params;
@@ -179,14 +179,14 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   vector<Variable> all_local_in_block;
   ProcessCompoundStatementLocalVariables(CS, all_local_in_block);
   auto pos_it = res.nested.begin();
-  for (const auto &var: all_local_in_block) {
+  for (const auto &var : all_local_in_block) {
     if (var.is_initialized) {
       pos_it = res.nested.insert(pos_it, var.GetInitializer());
       pos_it++;
     }
   }
   if (CS != nullptr) {
-    for (auto *stmt: CS->body()) {
+    for (auto *stmt : CS->body()) {
       Stmt::StmtClass stmt_class = stmt->getStmtClass();
       if (stmt_class == Stmt::ImplicitCastExprClass) {
         auto *ref = dyn_cast<Expr>(*stmt->child_begin());
@@ -537,7 +537,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   }
 
   if (op != nullptr) {
-    for (const auto *base_ch: op->getBase()->children()) {
+    for (const auto *base_ch : op->getBase()->children()) {
       auto index_name = GetStmtEOObject(op->getIdx());
 
       EOObject curr_shift{"times"};
@@ -586,7 +586,7 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
   if (op == nullptr) {
     return std::make_pair(0, EOObject{EOObjectType::EO_PLUG});
   }
-  for (const auto *base_ch: op->getBase()->children()) {
+  for (const auto *base_ch : op->getBase()->children()) {
     auto stmt_class = base_ch->getStmtClass();
     if (stmt_class == Stmt::DeclRefExprClass) {
       const auto *decl_ref_expr = dyn_cast<DeclRefExpr>(base_ch);
@@ -627,8 +627,8 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       QualType qual_type = child->getType();
       EOObject arr_name = GetStmtEOObject(op->getBase());
       size_t sz = transpiler.record_manager_
-          .GetById(qual_type->getAsRecordDecl()->getID())
-          ->size;
+                      .GetById(qual_type->getAsRecordDecl()->getID())
+                      ->size;
       return std::make_pair(sz, arr_name);
     }
     cerr << base_ch->getStmtClassName() << "\n\n";
@@ -649,7 +649,7 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   if (qual_type->isPointerType()) {
     EOObject record{"address"};
     qual_type = dyn_cast<clang::PointerType>(qual_type.getCanonicalType())
-        ->getPointeeType();
+                    ->getPointeeType();
     record.nested.emplace_back("global-ram");
     record.nested.push_back(GetStmtEOObject(child));
     member.nested.push_back(record);
@@ -670,7 +670,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   if (op != nullptr && op->getDirectCallee() != nullptr) {
-    for (auto *VD: op->getDirectCallee()->parameters()) {
+    for (auto *VD : op->getDirectCallee()->parameters()) {
       TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
       size_t type_size = type_info.Width / byte_size;
       var_sizes.push_back(type_size);
@@ -679,7 +679,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   size_t shift = 0;
   int i = 0;
   if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
-    for (const auto *arg: op->arguments()) {
+    for (const auto *arg : op->arguments()) {
       EOObject param{"write"};
       string postfix = GetPostfix(arg->getType());
       if (!postfix.empty()) {
@@ -1243,7 +1243,7 @@ std::string GetTypeName(QualType qual_type) {
       str += RD->getNameAsString();
     } else {
       str += std::to_string(reinterpret_cast<uint64_t>(
-                                RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+          RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
     }
     return str;
   }
@@ -1257,7 +1257,7 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
   // TODO maybe should use pointers or copy constructor to avoid unnecessary
   // copying of objects_
   std::queue<EOObject> not_visited;
-  for (auto child: obj.nested) {
+  for (auto child : obj.nested) {
     not_visited.push(std::move(child));
   }
   while (!not_visited.empty()) {
@@ -1266,7 +1266,7 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
     switch (cur.type) {
       case EOObjectType::EO_ABSTRACT:
         all_known.insert(cur.postfix);
-        for (const auto &arg: cur.arguments) {
+        for (const auto &arg : cur.arguments) {
           all_known.insert(arg);
         }
         break;
@@ -1285,11 +1285,11 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
         }
         break;
     }
-    for (auto child: cur.nested) {
+    for (auto child : cur.nested) {
       not_visited.push(std::move(child));
     }
   }
-  for (const auto &known_obj: all_known) {
+  for (const auto &known_obj : all_known) {
     unknown.erase(known_obj);
   }
 
