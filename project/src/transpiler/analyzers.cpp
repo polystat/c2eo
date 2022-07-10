@@ -70,3 +70,14 @@ void DeclBaseVarGlobalMemoryAnalyzer::run(
   }
   ProcessVariable(VD);
 }
+
+void EnumDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
+  if (context == nullptr) {
+    context = result.Context;
+  }
+  const auto *ED = result.Nodes.getNodeAs<EnumDecl>("enumDecl");
+  if (ED == nullptr) {
+    return;
+  }
+  ProcessEnumDecl(ED);
+}

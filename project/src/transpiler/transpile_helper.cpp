@@ -68,8 +68,10 @@ uint64_t GetTypeSize(QualType qual_type);
 EOObject GetCastEOObject(const CastExpr *op);
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
+
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
+
 extern UnitTranspiler transpiler;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
@@ -423,6 +425,7 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
 
   return goto_object;
 }
+
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i) {
   EOObject eq_object{"eq"};
@@ -994,12 +997,19 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     return EOObject{EOObjectType::EO_EMPTY};
   }
   try {
-    const Variable &var =
-        transpiler.glob_.GetVarById(dyn_cast<VarDecl>(op->getFoundDecl()));
+    const auto *val = op->getFoundDecl();
+    if (val->getKind() == clang::Decl::EnumConstant) {
+      const auto *id = dyn_cast<EnumConstantDecl>(val);
+      const auto &var = transpiler.enum_manager_.GetConstantById(id);
+      return EOObject{std::to_string(var->value), EOObjectType::EO_LITERAL};
+    }
+    const auto *id = dyn_cast<VarDecl>(val);
+    const auto &var = transpiler.glob_.GetVarById(id);
     return EOObject{var.alias};
   } catch (invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
   }
+  return EOObject{EOObjectType::EO_PLUG};
 }
 
 EOObject GetAssignmentOperationOperatorEOObject(

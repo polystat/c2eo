@@ -1,6 +1,7 @@
 #ifndef C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_
 #define C2EO_SRC_TRANSPILER_UNIT_TRANSPILER_H_
 
+#include "enum_manager.h"
 #include "function_manager.h"
 #include "iostream"
 #include "memory_manager.h"
@@ -16,6 +17,7 @@ class UnitTranspiler {
   MemoryManager glob_{"global-ram"}, ret_{"return-ram"};
   FunctionManager func_manager_;
   RecordManager record_manager_;
+  EnumManager enum_manager_;
   friend std::ostream &operator<<(std::ostream &os, UnitTranspiler unit);
 
   std::string name_;
