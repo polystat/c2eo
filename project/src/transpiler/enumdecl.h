@@ -17,4 +17,4 @@
 
 EnumType ProcessEnumDecl(const clang::EnumDecl *ED);
 
-#endif //C2EO_ENUMDECL_H
+#endif  // C2EO_ENUMDECL_H

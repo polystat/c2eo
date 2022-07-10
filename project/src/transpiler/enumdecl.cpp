@@ -7,31 +7,31 @@
 #include "vardecl.h"
 
 EnumType ProcessEnumDecl(const clang::EnumDecl *ED) {
-    if (ED == nullptr) {
-        return {};
-    }
+  if (ED == nullptr) {
+    return {};
+  }
 
-    extern UnitTranspiler transpiler;
+  extern UnitTranspiler transpiler;
 //    if (transpiler.enum_manager_.GetById(ED)) {
 //        return {};
 //    }
 
-    std::vector<EnumConstantType> constants;
-    std::string enum_name = "en-" + ED->getNameAsString();
-    uint64_t size = 0;
-    int64_t value = -666;
-    for (auto decl = ED->decls_begin(); decl != ED->decls_end(); decl++) {
-        if (decl->getKind() == clang::Decl::EnumConstant) {
-            const auto enum_const_decl = llvm::dyn_cast<clang::EnumConstantDecl>(*decl);
-            clang::QualType qual_type = enum_const_decl->getType();
-            clang::TypeInfo type_info = enum_const_decl->getASTContext().getTypeInfo(qual_type);
-            size = type_info.Width / byte_size;
-            std::string name = "c-" + enum_const_decl->getNameAsString();
-            value = enum_const_decl->getInitVal().getExtValue();
-            constants.push_back(EnumConstantType {enum_const_decl, name, value});
-        }
+  std::vector<EnumConstantType> constants;
+  std::string enum_name = "en-" + ED->getNameAsString();
+  uint64_t size = 0;
+  int64_t value = -666;
+  for (auto decl = ED->decls_begin(); decl != ED->decls_end(); decl++) {
+    if (decl->getKind() == clang::Decl::EnumConstant) {
+      const auto enum_const_decl = llvm::dyn_cast<clang::EnumConstantDecl>(*decl);
+      clang::QualType qual_type = enum_const_decl->getType();
+      clang::TypeInfo type_info = enum_const_decl->getASTContext().getTypeInfo(qual_type);
+      size = type_info.Width / byte_size;
+      std::string name = "c-" + enum_const_decl->getNameAsString();
+      value = enum_const_decl->getInitVal().getExtValue();
+      constants.push_back(EnumConstantType{enum_const_decl, name, value});
     }
-    return transpiler.enum_manager_.Add(ED, enum_name, size, constants);
+  }
+  return transpiler.enum_manager_.Add(ED, enum_name, size, constants);
 }
 
 #include "enumdecl.h"
