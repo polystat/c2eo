@@ -7,7 +7,5 @@ int main(void) {
     tmp = arr[i];
     printf("%d\n", tmp);
   } // 10 20 ?
-//   printf("\n");
-
   return 0;
 }

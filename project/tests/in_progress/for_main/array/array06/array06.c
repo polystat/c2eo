@@ -3,11 +3,12 @@
 // int arr[] = {10, 20};
 
 int main(void) {
+  int tmp;
   int arr[] = {10, 20};
   for (int i = 0; i < 2; ++i) {
-    printf("%d\n", arr[i]);
+    tmp = arr[i];
+    printf("%d\n", tmp);
   } // 10 20 ?
-//   printf("\n");
 
   return 0;
 }
