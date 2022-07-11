@@ -1,5 +1,4 @@
 #include "stdio.h"
-//clang -Xclang -ast-dump -fsyntax-only func01.c
 
 long long a[5][4][3];
 int main() {

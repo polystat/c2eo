@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only func01.c
 #include "stdio.h"
 
 long long a[5][4][3];

@@ -1,5 +1,4 @@
 // doubleVarDecl.c
-//clang -Xclang -ast-dump -fsyntax-only main.cpp
 #include <stdio.h>
 
 double d01 = 0.0;

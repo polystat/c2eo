@@ -1,5 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only main.cpp
-
 #include <stdio.h>
 
 typedef long long int64;

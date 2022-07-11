@@ -1,16 +1,40 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021-2022 c2eo team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include <csignal>
 #include <cstdlib>
 
-#include "eo_object.h"
-#include "matchers.h"
-#include "unit_transpiler.h"
-#include "util.h"
+#include "src/transpiler/eo_object.h"
+#include "src/transpiler/matchers.h"
+#include "src/transpiler/unit_transpiler.h"
+#include "src/transpiler/util.h"
 
-static const int parser_arg_count = 6;
-using namespace clang;
-using namespace clang::tooling;
-using namespace llvm;
-using namespace std;
+static const int parser_arg_count = 4;
+
+using clang::tooling::ClangTool;
+using clang::tooling::CommonOptionsParser;
+using clang::tooling::newFrontendActionFactory;
 
 static llvm::cl::OptionCategory MyToolCategory("c2eo options");
 
@@ -24,7 +48,7 @@ UnitTranspiler transpiler;
 void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: segfault at address " << si->si_addr
                << " while tool run\n";
-  ofstream out(filename);
+  std::ofstream out(filename);
   out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.stdio.printf\n\n";
   out << "[args...] > global\n";
@@ -37,7 +61,7 @@ void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
 void SiAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: SIGABRT with code " << si->si_code
                << " while tool run\n";
-  ofstream out(filename);
+  std::ofstream out(filename);
   out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.stdio.printf\n\n";
   out << "[args...] > global\n";
@@ -111,7 +135,7 @@ int main(int argc, const char **argv) {
 
   auto result = tool.run(newFrontendActionFactory(&finder).get());
   if (result != 0) {
-    cerr << "An error in clang occurred\n";
+    std::cerr << "An error in clang occurred\n";
   }
   std::ofstream out(filename);
   out << transpiler;
@@ -124,9 +148,7 @@ const char **TransformArgv(const char *const *argv) {
   parser_argv[0] = argv[0];
   parser_argv[1] = argv[1];
   parser_argv[2] = "--";
-  parser_argv[3] = "-I/usr/include/linux";
-  parser_argv[4] = "-I/usr/include/c++/11.2.0/tr1";
-  parser_argv[5] = "-I/usr/include/c++/11.2.0";
+  parser_argv[3] = "-Wno-unused-value";
   return parser_argv;
 }
 #pragma clang diagnostic pop

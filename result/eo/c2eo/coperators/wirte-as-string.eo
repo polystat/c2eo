@@ -1,0 +1,10 @@
++package c2eo.coperators
+
+[a b] > write-as-string
+  memory 1 > len
+  seq > @
+    while.
+      (((a.read len).slice (len.sub 1) 1).eq 00-).not
+      [i]
+        len.write (len.add 1) > @
+    a.read (len.sub 1)

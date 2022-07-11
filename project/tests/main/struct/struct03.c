@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only main.cpp
 #include <stdio.h>
 struct st{
   int a;

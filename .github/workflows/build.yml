@@ -10,20 +10,33 @@ on:
 
 jobs:
 
+  cpp-lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install clang-tidy
+        run: sudo pip install cpplint
+
+      - name: Cpp-lint
+        run: cpplint --filter=-runtime/references,-runtime/string project/src/transpiler/** 
+
   clang-format:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Clang-format
-      uses: jidicula/clang-format-action@v4.6.2
-      with:
-        clang-format-version: '13'
-        check-path: 'project/src/transpiler'
-        fallback-style: 'Google'
+      - uses: actions/checkout@v3
+      
+      - name: Clang-format
+        uses: jidicula/clang-format-action@v4.6.2
+        with:
+          clang-format-version: '13'
+          check-path: 'project/src/transpiler'
+          fallback-style: 'Google'
 
   clang-tidy:
-    needs: clang-format
+    needs:
+      - cpp-lint
+      - clang-format
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -50,7 +63,9 @@ jobs:
           python3 clang_tidy.py
 
   parsing:
-    needs: clang-format
+    needs:
+      - cpp-lint
+      - clang-format
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -74,7 +89,9 @@ jobs:
           python3 transpile_c2eo.py ../tests/parsing f
 
   test:
-    needs: clang-format
+    needs:
+      - cpp-lint
+      - clang-format
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
