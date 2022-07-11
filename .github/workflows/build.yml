@@ -1,7 +1,7 @@
 name: Build C2EO
 
 on:
-  push:
+  pull_request:
     branches:
       - master
 
@@ -15,14 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install clang-tidy
+        run: sudo pip install cpplint
+
       - name: Cpp-lint
-        uses: github/super-linter/slim@v4
-        env:
-          VALIDATE_ALL_CODEBASE: true
-          DEFAULT_BRANCH: master
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_CPP: true
-          FILTER_REGEX_INCLUDE: /project/src/transpiler/.*
+        run: cpplint --filter=-runtime/references,-runtime/string project/src/transpiler/** 
 
   clang-format:
     runs-on: ubuntu-22.04
