@@ -51,6 +51,7 @@ using clang::DeclRefExpr;
 using clang::DeclStmt;
 using clang::DefaultStmt;
 using clang::DoStmt;
+using clang::EnumConstantDecl;
 using clang::Expr;
 using clang::FloatingLiteral;
 using clang::ForStmt;
@@ -133,6 +134,7 @@ EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
 
 extern UnitTranspiler transpiler;
+extern ASTContext *context;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -1203,7 +1205,6 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
 }
 
 uint64_t GetTypeSize(QualType qual_type) {
-  extern ASTContext *context;
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
@@ -1219,7 +1220,6 @@ uint64_t GetTypeSize(QualType qual_type) {
 }
 
 std::string GetPostfix(QualType qual_type) {
-  extern ASTContext *context;
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
@@ -1255,7 +1255,6 @@ std::string GetPostfix(QualType qual_type) {
 }
 
 std::string GetTypeName(QualType qual_type) {
-  extern ASTContext *context;
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;

@@ -100,7 +100,7 @@ void EnumDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
   if (context == nullptr) {
     context = result.Context;
   }
-  const auto *ED = result.Nodes.getNodeAs<EnumDecl>("enumDecl");
+  const auto *ED = result.Nodes.getNodeAs<clang::EnumDecl>("enumDecl");
   if (ED == nullptr) {
     return;
   }

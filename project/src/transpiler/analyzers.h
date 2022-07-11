@@ -71,7 +71,6 @@ class DeclBaseVarGlobalMemoryAnalyzer
       const clang::ast_matchers::MatchFinder::MatchResult &result) override;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_ANALYZERS_H_
 class EnumDeclAnalyzer
     : public clang::ast_matchers::MatchFinder::MatchCallback {
  public:
@@ -85,4 +84,4 @@ class EnumDeclAnalyzer
       const clang::ast_matchers::MatchFinder::MatchResult &result) override;
 };
 
-#endif  // C2EO_SRC_TRANSPILER_ANALYZERS_H_
+#endif  // PROJECT_SRC_TRANSPILER_ANALYZERS_H_

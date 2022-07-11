@@ -25,6 +25,7 @@
 #include "src/transpiler/matchers.h"
 
 using clang::ast_matchers::DeclarationMatcher;
+using clang::ast_matchers::enumDecl;
 using clang::ast_matchers::functionDecl;
 using clang::ast_matchers::MatchFinder;
 using clang::ast_matchers::recordDecl;
