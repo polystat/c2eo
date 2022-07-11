@@ -1,18 +1,79 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021-2022 c2eo team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-#include "transpile_helper.h"
+#include "src/transpiler/transpile_helper.h"
 
 #include <queue>
 #include <sstream>
+#include <utility>
+#include <vector>
 
-#include "memory_manager.h"
-#include "process_variables.h"
-#include "recorddecl.h"
-#include "unit_transpiler.h"
-#include "vardecl.h"
+#include "src/transpiler/memory_manager.h"
+#include "src/transpiler/process_variables.h"
+#include "src/transpiler/recorddecl.h"
+#include "src/transpiler/unit_transpiler.h"
+#include "src/transpiler/vardecl.h"
 
-using namespace clang;
-using namespace llvm;
-using namespace std;
+using clang::ArrayRef;
+using clang::ArraySubscriptExpr;
+using clang::ASTContext;
+using clang::BinaryOperator;
+using clang::BinaryOperatorKind;
+using clang::CallExpr;
+using clang::CaseStmt;
+using clang::CastExpr;
+using clang::CompoundAssignOperator;
+using clang::CompoundStmt;
+using clang::ConstantExpr;
+using clang::Decl;
+using clang::DeclRefExpr;
+using clang::DeclStmt;
+using clang::DefaultStmt;
+using clang::DoStmt;
+using clang::EnumConstantDecl;
+using clang::Expr;
+using clang::FloatingLiteral;
+using clang::ForStmt;
+using clang::IfStmt;
+using clang::IntegerLiteral;
+using clang::MemberExpr;
+using clang::ParenExpr;
+using clang::ParmVarDecl;
+using clang::QualType;
+using clang::RecordDecl;
+using clang::ReturnStmt;
+using clang::Stmt;
+using clang::SwitchStmt;
+using clang::TypeInfo;
+using clang::UnaryOperator;
+using clang::UnaryOperatorKind;
+using clang::VarDecl;
+using clang::WhileStmt;
+using llvm::dyn_cast;
+using std::string;
+using std::to_string;
+using std::vector;
 
 EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator);
 
@@ -73,6 +134,7 @@ EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
 
 extern UnitTranspiler transpiler;
+extern ASTContext *context;
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -194,7 +256,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
         }
         QualType qual_type = ref->getType();
         string type = GetTypeName(qual_type);
-        string formatter = "?";  // todo
+        string formatter = "?";  // TODO(nkchuykin)
         if (type == "float32" || type == "float64") {
           formatter = "f";
         } else {
@@ -364,7 +426,7 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
 
   EOObject switch_expr_object = GetStmtEOObject(p_stmt->getCond());
 
-  // TODO if get body return null...
+  // TODO(nkchuykin) if get body return null...
   auto end = p_stmt->getBody()->child_end();
   for (auto stmt = p_stmt->getBody()->child_begin(); stmt != end; ++stmt) {
     if ((*stmt)->getStmtClass() == Stmt::CaseStmtClass) {
@@ -470,7 +532,7 @@ EOObject GetCastEOObject(const CastExpr *op) {
     cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
     return cast;
   }
-  // TODO if cast kinds and also split it to another func
+  // TODO(nkchuykin) if cast kinds and also split it to another func
   return GetStmtEOObject(*op->child_begin());
 }
 
@@ -530,8 +592,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
     dims = &tmp_dims;
   }
   uint64_t dim_size = decl_info.first;  // current dimension size.
-  for (int i = 0; i < depth && i < dims->size();
-       ++i) {  // NOLINT(altera-id-dependent-backward-branch)
+  for (int i = 0; i < depth && i < dims->size(); ++i) {
     dim_size *= dims->at(i);
   }
 
@@ -630,7 +691,7 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
                       ->size;
       return std::make_pair(sz, arr_name);
     }
-    cerr << base_ch->getStmtClassName() << "\n\n";
+    std::cerr << base_ch->getStmtClassName() << "\n\n";
   }
   return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
 }
@@ -723,10 +784,10 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
 }
 
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
-  ostringstream ss{};
+  std::ostringstream ss{};
   if (p_literal != nullptr) {
-    APFloat an_float = p_literal->getValue();
-    ss << fixed << an_float.convertToDouble();
+    llvm::APFloat an_float = p_literal->getValue();
+    ss << std::fixed << an_float.convertToDouble();
   }
   return {ss.str(), EOObjectType::EO_LITERAL};
 }
@@ -734,7 +795,7 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   if (p_literal != nullptr) {
     bool is_signed = p_literal->getType()->isSignedIntegerType();
-    APInt an_int = p_literal->getValue();
+    llvm::APInt an_int = p_literal->getValue();
     if (is_signed) {
       int64_t val = an_int.getSExtValue();
       std::string str_val{std::to_string(val)};
@@ -1006,7 +1067,7 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     const auto *id = dyn_cast<VarDecl>(val);
     const auto &var = transpiler.glob_.GetVarById(id);
     return EOObject{var.alias};
-  } catch (invalid_argument &) {
+  } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   return EOObject{EOObjectType::EO_PLUG};
@@ -1144,23 +1205,21 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
 }
 
 uint64_t GetTypeSize(QualType qual_type) {
-  extern ASTContext *context;
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
 
   if (type_ptr->isPointerType()) {
-    const clang::Type *pointee_type = type_ptr->getPointeeType().getTypePtr();
-    TypeInfo pointee_type_info = context->getTypeInfo(pointee_type);
-    uint64_t pointee_type_size = pointee_type_info.Width;
-    return pointee_type_size / byte_size;
+    const clang::Type *pointer_type = type_ptr->getPointeeType().getTypePtr();
+    TypeInfo pointer_type_info = context->getTypeInfo(pointer_type);
+    uint64_t pointer_type_size = pointer_type_info.Width;
+    return pointer_type_size / byte_size;
   }
 
   return type_size / byte_size;
 }
 
 std::string GetPostfix(QualType qual_type) {
-  extern ASTContext *context;  // NOLINT(readability-redundant-declaration)
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
@@ -1196,7 +1255,6 @@ std::string GetPostfix(QualType qual_type) {
 }
 
 std::string GetTypeName(QualType qual_type) {
-  extern ASTContext *context;  // NOLINT(readability-redundant-declaration)
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
@@ -1240,8 +1298,7 @@ std::string GetTypeName(QualType qual_type) {
     if (RD->hasNameForLinkage()) {
       str += RD->getNameAsString();
     } else {
-      str += std::to_string(reinterpret_cast<uint64_t>(
-          RD));  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+      str += std::to_string(reinterpret_cast<uint64_t>(RD));
     }
     return str;
   }
@@ -1252,8 +1309,8 @@ std::string GetTypeName(QualType qual_type) {
 std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
   std::set<std::string> all_known = {obj.postfix};
   std::set<std::string> unknown{};
-  // TODO maybe should use pointers or copy constructor to avoid unnecessary
-  // copying of objects_
+  // TODO(nkchuykin) maybe should use pointers or copy constructor to avoid
+  // unnecessary copying of objects_
   std::queue<EOObject> not_visited;
   for (auto child : obj.nested) {
     not_visited.push(std::move(child));

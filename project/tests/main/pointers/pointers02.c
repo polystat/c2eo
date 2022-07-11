@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only main.c
 // 1) Assigment the address of the variable to pointer
 // 2) Assigment the address of the pointer to the pointer on a pointer
 // 2) Assigment the value to the variable across the pointer on a pointer

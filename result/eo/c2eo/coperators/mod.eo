@@ -1,4 +1,6 @@
 +package c2eo.coperators
 
++alias org.eolang.math.number
+
 [a b] > mod
-  a.mod b > @
+  (number a).mod b > @

@@ -1,4 +1,3 @@
-//clang -Xclang -ast-dump -fsyntax-only main.cpp
 #include <stdio.h>
 const long long a;
 const long long b = 5;

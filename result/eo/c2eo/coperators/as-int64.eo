@@ -1,4 +1,6 @@
 +package c2eo.coperators
 
++alias org.eolang.math.number
+
 [a] > as-int64
-  a.as-int > @
+  (number a).as-int > @

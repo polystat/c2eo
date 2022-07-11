@@ -1,4 +1,28 @@
-#include "memory_manager.h"
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021-2022 c2eo team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "src/transpiler/memory_manager.h"
 
 #include <algorithm>
 #include <exception>
@@ -6,22 +30,20 @@
 #include <stdexcept>
 #include <utility>
 
-using namespace std;
-using namespace clang;
-
-Variable MemoryManager::Add(const VarDecl *id, size_t size,
+Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
                             const std::string &type, std::string alias,
                             EOObject value, std::string local_name,
                             size_t shift, bool is_initialized) {
   if (duplicates[alias] > 0) {
-    alias += "-" + to_string(duplicates[alias]);
+    alias += "-" + std::to_string(duplicates[alias]);
   }
   duplicates[alias]++;
-  string type_postfix = type.substr(2);
-  // todo char!?
+  std::string type_postfix = type.substr(2);
+  // TODO(nkchuykin) char!?
   if (!((type_postfix.length() < 3 ||
          (type_postfix.substr(0, 3) != "st-" &&
-          type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
+          type_postfix.substr(0, 3) !=
+              "un-"))  // TODO(nkchuykin) recordDecl check
         && type_postfix != "undefinedtype" && type_postfix != "char")) {
     type_postfix = "";
   }
@@ -35,7 +57,7 @@ Variable MemoryManager::Add(const VarDecl *id, size_t size,
                   shift,
                   type_postfix,
                   is_initialized};
-  // TODO fix this plug (rework for check value == EoObject::PLUG)
+  // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
     var.value.name = "plug";
   }
@@ -45,14 +67,15 @@ Variable MemoryManager::Add(const VarDecl *id, size_t size,
 }
 
 Variable MemoryManager::AddExternal(
-    const VarDecl *id, size_t size, const std::string &type, std::string alias,
-    EOObject value, std::string local_name, size_t shift,
+    const clang::VarDecl *id, size_t size, const std::string &type,
+    std::string alias, EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
-  string type_postfix = type.substr(2);
-  // todo char!?
+  std::string type_postfix = type.substr(2);
+  // TODO(nkchuykin) char!?
   if (!((type_postfix.length() < 3 ||
          (type_postfix.substr(0, 3) != "st-" &&
-          type_postfix.substr(0, 3) != "un-"))  // todo recordDecl check
+          type_postfix.substr(0, 3) !=
+              "un-"))  // TODO(nkchuykin) recordDecl check
         && type_postfix != "undefinedtype" && type_postfix != "char")) {
     type_postfix = "";
   }
@@ -66,7 +89,7 @@ Variable MemoryManager::AddExternal(
                   shift,
                   type_postfix,
                   false};
-  // TODO fix this plug (rework for check value == EoObject::PLUG)
+  // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
     var.value.name = "plug";
   }
@@ -103,15 +126,13 @@ std::string int_to_hex(T i) {
   return stream.str();
 }
 
-const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
+const Variable &MemoryManager::GetVarById(const clang::VarDecl *id) const {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
-    throw invalid_argument(
-        "exception: element with id " +
-        int_to_hex(reinterpret_cast<uint64_t>(
-            id))  // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
-        + " not found");
+    throw std::invalid_argument("exception: element with id " +
+                                int_to_hex(reinterpret_cast<uint64_t>(id)) +
+                                " not found");
   }
   return *res;
 }
@@ -119,7 +140,7 @@ const Variable &MemoryManager::GetVarById(const VarDecl *id) const {
 EOObject MemoryManager::GetEOObject() const {
   EOObject res{"ram"};
   res.postfix = name_;
-  res.nested.emplace_back(to_string(mem_size_), EOObjectType::EO_LITERAL);
+  res.nested.emplace_back(std::to_string(mem_size_), EOObjectType::EO_LITERAL);
   return res;
 }
 
@@ -164,7 +185,7 @@ EOObject Variable::GetInitializer() const {
   return res;
 }
 
-EOObject Variable::GetAddress(const string &mem_name) const {
+EOObject Variable::GetAddress(const std::string &mem_name) const {
   EOObject address("address", alias);
   if (!mem_name.empty()) {
     address.nested.emplace_back(mem_name);
@@ -172,13 +193,14 @@ EOObject Variable::GetAddress(const string &mem_name) const {
   if (!local_pointer.empty()) {
     EOObject shift_obj("plus");
     shift_obj.nested.emplace_back(local_pointer);
-    // TODO may be, this doesn't work with dynamic memory allocation, but
-    // probably also should work
-    shift_obj.nested.emplace_back(to_string(position - shift),
+    // TODO(nkchuykin) may be, this doesn't work with dynamic memory allocation,
+    // but probably also should work
+    shift_obj.nested.emplace_back(std::to_string(position - shift),
                                   EOObjectType::EO_LITERAL);
     address.nested.push_back(shift_obj);
   } else {
-    address.nested.emplace_back(to_string(position), EOObjectType::EO_LITERAL);
+    address.nested.emplace_back(std::to_string(position),
+                                EOObjectType::EO_LITERAL);
   }
   return address;
 }
