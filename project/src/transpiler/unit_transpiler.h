@@ -27,12 +27,11 @@
 
 #include "iostream"
 #include "set"
-#include "string"
-
 #include "src/transpiler/enum_manager.h"
 #include "src/transpiler/function_manager.h"
 #include "src/transpiler/memory_manager.h"
 #include "src/transpiler/record_manager.h"
+#include "string"
 
 class UnitTranspiler {
  public:
