@@ -29,7 +29,7 @@
 #include "src/transpiler/util.h"
 
 EOObject::EOObject(EOObjectType type) : type(type) {
-  // nested.reserve(10000);
+    // nested.reserve(10000);
 #ifdef TRACEOUT_NEW_EO
   std::cout << *this;  // << "\n";
 #endif
@@ -38,7 +38,7 @@ EOObject::EOObject(EOObjectType type) : type(type) {
 // Create simple complete Object
 EOObject::EOObject(std::string name)
     : name(std::move(name)), type(EOObjectType::EO_COMPLETE) {
-  // nested.reserve(10000);
+    // nested.reserve(10000);
 #ifdef TRACEOUT_NEW_EO
   std::cout << *this;  // << "\n";
 #endif
@@ -57,7 +57,7 @@ EOObject::EOObject(std::string name, std::string postfix)
     : name(std::move(name)),
       postfix(std::move(postfix)),
       type(EOObjectType::EO_COMPLETE) {
-  //   nested.reserve(10000);
+    // nested.reserve(10000);
 #ifdef TRACEOUT_NEW_EO
   std::cout << *this;  // << "\n";
 #endif
