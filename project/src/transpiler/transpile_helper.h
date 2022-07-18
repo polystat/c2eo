@@ -48,6 +48,8 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator);
 
 EOObject GetStmtEOObject(const clang::Stmt *p_stmt);
 
+EOObject ReplaceEmpty(const EOObject& eoObject, const EOObject& alias);
+
 std::set<std::string> FindAllExternalObjects(const EOObject &obj);
 
 #endif  // PROJECT_SRC_TRANSPILER_TRANSPILE_HELPER_H_

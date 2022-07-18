@@ -30,6 +30,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "src/transpiler/transpile_helper.h"
+
 Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
                             const std::string &type, std::string alias,
                             EOObject value, std::string local_name,
@@ -167,6 +169,8 @@ void MemoryManager::SetExtEqGlob() {
 }
 
 EOObject Variable::GetInitializer() const {
+  if (value.type == EOObjectType::EO_EMPTY)
+    return ReplaceEmpty(value, {alias, EOObjectType::EO_LITERAL});
   if (!is_initialized) {
     return EOObject(EOObjectType::EO_EMPTY);
   }
