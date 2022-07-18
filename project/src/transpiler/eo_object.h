@@ -35,6 +35,7 @@ enum class EOObjectType {
   EO_LITERAL,
   EO_ABSTRACT,
   EO_PLUG,
+  EO_TEMPLATE,
 };
 
 struct EOObject {
