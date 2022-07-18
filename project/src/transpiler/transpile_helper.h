@@ -48,7 +48,7 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS, bool is_decorator);
 
 EOObject GetStmtEOObject(const clang::Stmt *p_stmt);
 
-EOObject ReplaceEmpty(const EOObject& eoObject, const EOObject& alias);
+EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias);
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj);
 

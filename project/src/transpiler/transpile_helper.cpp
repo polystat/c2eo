@@ -428,11 +428,9 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       elementQualType =
           llvm::dyn_cast<clang::ConstantArrayType>(elementQualType)
               ->getElementType();
-      std::cerr << elementSize << ' ';
     }
     elementTypeName = GetTypeName(elementQualType);
     elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
-    std::cerr << elementSize << '\n';
   } else if (qualType->isRecordType()) {
     auto *recordType = transpiler.record_manager_.GetById(
         qualType->getAsRecordDecl()->getID());
