@@ -25,7 +25,6 @@
 #include "src/transpiler/vardecl.h"
 
 #include <string>
-#include <utility>
 
 #include "src/transpiler/transpile_helper.h"
 #include "src/transpiler/unit_transpiler.h"
