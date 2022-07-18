@@ -169,8 +169,9 @@ void MemoryManager::SetExtEqGlob() {
 }
 
 EOObject Variable::GetInitializer() const {
-  if (value.type == EOObjectType::EO_EMPTY)
+  if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
     return ReplaceEmpty(value, {alias, EOObjectType::EO_LITERAL});
+  }
   if (!is_initialized) {
     return EOObject(EOObjectType::EO_EMPTY);
   }
