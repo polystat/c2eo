@@ -28,6 +28,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <map>
 
 #include "src/transpiler/memory_manager.h"
 #include "src/transpiler/process_variables.h"
