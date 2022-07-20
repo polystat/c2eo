@@ -10,7 +10,6 @@ import re as regex
 # Our scripts
 import tools
 import settings
-import update_eo_version
 from build_eo import EOBuilder
 from transpile_c2eo import Transpiler
 
@@ -63,10 +62,14 @@ class Tests(object):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
         unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
         compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null 2>>{unit["result_c_file"]}'
+        process = subprocess.Popen(compile_cmd, shell=True)
+        timeout = 10
         try:
-            subprocess.run(compile_cmd, shell=True, check=True)
-        except subprocess.CalledProcessError as exc:
-            return exc
+            process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
+            with open(unit["result_c_file"], 'w') as f:
+                f.write(f'exception: execution time exceeded {timeout} seconds')
         else:
             subprocess.run(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
         finally:
