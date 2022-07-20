@@ -97,7 +97,7 @@ def compare_test_results(unit):
         c_data = f.readlines()
     with open(unit['result_eo_file'], 'r') as f:
         eo_data = f.readlines()
-    is_except, (is_equal, log_data) = compare_files(c_data, eo_data)
+    is_except, is_equal, log_data = compare_files(c_data, eo_data)
     with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
         f.writelines(log_data)
     return unit, is_except, is_equal, log_data
@@ -105,19 +105,20 @@ def compare_test_results(unit):
 
 def compare_files(c_data, eo_data):
     if is_exception(c_data):
-        return True, (False, c_data)
+        return True, False, c_data
 
     if is_exception(eo_data):
-        return True, (False, eo_data)
+        return True, False, eo_data
 
     if len(c_data) != len(eo_data):
         log_data = ['Results have different length!\n', '\nC result:\n']
         log_data.extend(c_data)
         log_data.append('\nEO result:\n')
         log_data.extend(eo_data)
-        return False, (False, log_data)
+        return False, False, log_data
 
-    return False, compare_lines(c_data, eo_data)
+    is_equal, log_data = compare_lines(c_data, eo_data)
+    return False, is_equal, log_data
 
 
 def is_exception(lines):
