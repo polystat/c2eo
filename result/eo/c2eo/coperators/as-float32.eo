@@ -2,7 +2,7 @@
 
 +alias c2eo.coperators.printf
 
-[a] > read-as-float32
+[a] > as-float32
   seq > @
-    printf "TODO read-as-float32"
+    printf "TODO as-float32"
     0

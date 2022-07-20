@@ -1,0 +1,10 @@
++package c2eo.coperators
+
++alias c2eo.coperators.read-as-float64
++alias c2eo.coperators.write-as-float64
+
+[a] > post-dec-float64
+  seq > @
+    read-as-float64 a > value!
+    write-as-float64 a ((read-as-float64 a).minus 1)
+    value

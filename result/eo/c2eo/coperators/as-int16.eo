@@ -1,0 +1,7 @@
++package c2eo.coperators
+
+[a] > as-int32
+  if. > @
+    (a.as-bytes.slice 6 1).as-int.gte 0
+    (00-00-00-00-00-00.concat (a.as-bytes.slice 6 2)).as-int
+    (FF-FF-FF-FF-FF-FF.concat (a.as-bytes.slice 6 2)).as-int

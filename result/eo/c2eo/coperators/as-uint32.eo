@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > as-uint32
+  (00-00-00-00.concat (a.as-bytes.slice 4 4)).as-int > @

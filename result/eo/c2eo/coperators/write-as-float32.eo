@@ -1,8 +1,9 @@
 +package c2eo.coperators
 
++alias c2eo.coperators.printf
 +alias c2eo.coperators.read-as-float32
 
 [a b] > write-as-float32
   seq > @
-    a.write b
-    read-as-float32 a
+    printf "TODO write-as-float32"
+    0

@@ -1,0 +1,7 @@
++package c2eo.coperators
+
++alias c2eo.coperators.write-as-int32
++alias c2eo.coperators.read-as-int32
+
+[a] > pre-dec-int32
+  write-as-int32 a ((read-as-int32 a).minus 1) > @

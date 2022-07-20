@@ -1,0 +1,8 @@
++package c2eo.coperators
+
++alias c2eo.coperators.read-as-uint32
+
+[a b] > write-as-uint32
+  seq > @
+    a.write (b.as-bytes.slice 4 4)
+    read-as-uint32 a
