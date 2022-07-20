@@ -62,16 +62,19 @@ class Tests(object):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
         unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
         compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null 2>>{unit["result_c_file"]}'
-        process = subprocess.Popen(compile_cmd, shell=True)
-        timeout = 10
         try:
-            process.communicate(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
-            with open(unit["result_c_file"], 'w') as f:
-                f.write(f'exception: execution time exceeded {timeout} seconds')
+            subprocess.run(compile_cmd, shell=True, check=True)
+        except subprocess.CalledProcessError as exc:
+            return exc
         else:
-            subprocess.run(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+            process = subprocess.Popen(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+            timeout = 10
+            try:
+                process.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
+                with open(unit['result_c_file'], 'w') as f:
+                    f.write(f'exception: execution time exceeded {timeout} seconds')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
@@ -85,7 +88,7 @@ class Tests(object):
             process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
-            with open(unit["result_eo_file"], 'w') as f:
+            with open(unit['result_eo_file'], 'w') as f:
                 f.write(f'exception: execution time exceeded {timeout} seconds')
         finally:
             self.test_handled_count += 1
