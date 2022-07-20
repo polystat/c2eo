@@ -43,14 +43,13 @@ class ClangTidy(object):
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
         data = self.group_transpilation_results()
         print_inspection_results(data)
-        is_warnings = False
+        warnings_count = 0
         for unit in self.results:
             if unit['inspection_result'].returncode != 0:
                 tools.pprint_exception(unit['file'], unit['inspection_result'].stderr)
-                is_warnings = True
-        if len(data['warning']) > 0:
-            is_warnings = True
-        return is_warnings
+                warnings_count += 1
+        warnings_count += len(data['warning'])
+        return warnings_count
 
     def generate_compile_commands(self):
         original_path = os.getcwd()
@@ -103,10 +102,10 @@ def print_inspection_results(data):
 if __name__ == '__main__':
     start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
-    is_any_warnings = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
+    warnings_count = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
     end_time = time.time()
     time_span = int(end_time - start_time)
     tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
     tools.pprint(f'{"-" * 60}\n', slowly=True)
-    if is_any_warnings:
-        exit('Clang-tidy has several warnings')
+    if warnings_count:
+        exit(f'Clang-tidy has {warnings_count} warnings')
