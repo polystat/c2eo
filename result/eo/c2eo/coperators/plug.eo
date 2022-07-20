@@ -1,6 +1,6 @@
 +package c2eo.coperators
 
-+alias c2eo.stdio.printf
++alias c2eo.coperators.printf
 
 [args...] > plug
   printf "exception: it is plug\n" > @

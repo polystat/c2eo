@@ -1,4 +1,4 @@
-+package c2eo.system
++package c2eo.coperators
 
 +alias eoram org.eolang.ram
 

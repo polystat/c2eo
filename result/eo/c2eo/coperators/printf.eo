@@ -1,4 +1,4 @@
-+package c2eo.stdio
++package c2eo.coperators
 
 +alias org.eolang.txt.sprintf
 +alias org.eolang.io.stdout
