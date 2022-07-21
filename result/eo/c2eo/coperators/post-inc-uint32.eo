@@ -1,10 +1,10 @@
 +package c2eo.coperators
 
-+alias c2eo.coperators.read-as-int32
-+alias c2eo.coperators.write-as-int32
++alias c2eo.coperators.read-as-uint32
++alias c2eo.coperators.write-as-uint32
 
-[a] > post-inc-int32
+[a] > post-inc-uint32
   seq > @
-    read-as-int32 a > value!
-    write-as-int32 a ((read-as-int32 a).plus 1)
+    read-as-uint32 a > value!
+    write-as-uint32 a ((read-as-uint32 a).plus 1)
     value
