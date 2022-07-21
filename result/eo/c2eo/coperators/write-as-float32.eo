@@ -5,5 +5,6 @@
 
 [a b] > write-as-float32
   seq > @
-    printf "TODO write-as-float32"
-    0
+  printf "TODO write-as-float32"
+    a.write b
+    read-as-float32 a
