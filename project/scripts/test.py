@@ -74,7 +74,7 @@ class Tests(object):
             except subprocess.TimeoutExpired:
                 subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
                 with open(unit['result_c_file'], 'w') as f:
-                    f.write(f'exception: execution time exceeded {timeout} seconds')
+                    f.write(f'exception: execution time of C file exceeded {timeout} seconds')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
@@ -89,7 +89,7 @@ class Tests(object):
         except subprocess.TimeoutExpired:
             subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
             with open(unit['result_eo_file'], 'w') as f:
-                f.write(f'exception: execution time exceeded {timeout} seconds')
+                f.write(f'exception: execution time EO file exceeded {timeout} seconds')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
@@ -176,7 +176,7 @@ def print_tests_result(passed, errors, exceptions):
     tools.pprint(', '.join(sorted(passed, key=str.casefold)), slowly=True, status='PASS')
     for test_name, log_data in sorted(errors, key=lambda x: x[0].casefold()):
         print()
-        tools.pprint_error(test_name, log_data, max_lines=30)
+        tools.pprint_error(test_name, log_data)
     for log_data, test_names in sorted(exceptions.items(), key=lambda x: x[0].casefold()):
         print()
         tools.pprint_exception(', '.join(sorted(test_names, key=str.casefold)), log_data, max_lines=10)
