@@ -188,10 +188,11 @@ def prepare_c_code(data):
             new_line = line.lstrip()
             whitespace_count = len(line) - len(new_line)
             indent = ' ' * whitespace_count
-            data[i] = f'{indent}// {new_line}'
             if new_line.startswith('printf'):
                 argument = line.rsplit(',', maxsplit=1)[1].replace(');', '').replace(',', '').strip()
-                data[i] += f'{indent}{argument};\n'
+                data[i] = f'{indent}{argument}; // {new_line}'
+            else:
+                data[i] = data[i] = f'{indent}// {new_line}'
 
 
 def print_transpilation_results(data):
