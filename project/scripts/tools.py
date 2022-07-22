@@ -90,15 +90,17 @@ def move_to_script_dir(path_to_script):
         os.chdir(path_to_script)
 
 
-def pprint(*lines, slowly=False, status='INFO', end='\n'):
-    if not lines:
-        lines = ['']
-    for line in lines:
-        for token in str(line).split('\n'):
+def pprint(*data, slowly=False, status='INFO', end='\n'):
+    if not data:
+        data = ['']
+    for token in data:
+        if type(token) == list:
+            token = ''.join(list(map(str, token)))
+        for line in str(token).split('\n'):
             if status:
-                print(f'[{get_status(status)}] {token}', end=end)
+                print(f'[{get_status(status)}] {line}', end=end)
             else:
-                print(token, end=end)
+                print(line, end=end)
 
             if slowly:
                 time.sleep(0.01)
@@ -106,7 +108,7 @@ def pprint(*lines, slowly=False, status='INFO', end='\n'):
 
 def print_only_file_names(files):
     names = list(map(lambda x: get_file_name(x), files))
-    pprint(sorted(names, key=str.casefold))
+    pprint(', '.join(sorted(names, key=str.casefold)))
     pprint()
 
 
@@ -142,11 +144,8 @@ def print_progress_bar(i, n):
 
 def print_truncated_data(data, max_lines):
     if type(data) == str:
-        symbols_count = min(max_lines * 20, len(data))
-        log_data = data[:symbols_count]
-    else:
-        lines_count = min(max_lines, len(data))
-        log_data = ''.join(data[:lines_count])
+        data = data.split('\n')
+    log_data = data[:max_lines]
     pprint(log_data, slowly=True, status='')
 
 
@@ -184,7 +183,7 @@ def search_files_by_patterns(path, file_patterns, filters=None, recursive=False,
     found_files = []
     for pattern in file_patterns:
         found_files.extend(glob.glob(os.path.join(path, pattern), recursive=recursive))
-    pprint(f'Found {len(found_files)} files')
+    pprint(f'Found {len(found_files)} files:')
     found_files = apply_filters_to_files(found_files, filters)
     if print_files:
         print_only_file_names(found_files)
