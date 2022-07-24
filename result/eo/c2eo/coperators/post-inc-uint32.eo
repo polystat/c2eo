@@ -5,6 +5,5 @@
 
 [a] > post-inc-uint32
   seq > @
-    read-as-uint32 a > value!
     write-as-uint32 a ((read-as-uint32 a).plus 1)
-    value
+    (read-as-uint32 a).minus 1

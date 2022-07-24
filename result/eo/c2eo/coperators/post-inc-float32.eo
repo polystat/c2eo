@@ -7,6 +7,5 @@
 [a] > post-inc-float32
   seq > @
     printf "TODO post-inc-float32"
-    read-as-float32 a > value!
     write-as-float32 a ((read-as-float32 a).plus 1)
-    value
+    (read-as-float32 a).minus 1

@@ -5,6 +5,5 @@
 
 [a] > post-inc-uint16
   seq > @
-    read-as-uint16 a > value!
     write-as-uint16 a ((read-as-uint16 a).plus 1)
-    value
+    (read-as-uint16 a).minus 1
