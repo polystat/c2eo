@@ -52,7 +52,7 @@ class Transpiler(object):
             self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
         data = self.group_transpilation_results()
         print_transpilation_results(data)
-        fails_count = self.check_c2eo_fails() + len(data[tools.EXCEPTION])
+        fails_count = self.check_c2eo_fails() + sum(map(len, data[tools.EXCEPTION].values()))
         if fails_count:
             exit(f'c2eo failed on {fails_count} c files')
 
