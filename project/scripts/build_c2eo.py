@@ -19,7 +19,7 @@ def main(path_to_c2eo_build=None):
     os.chdir(path_to_c2eo_build)
     result = subprocess.run('cmake ..', shell=True, capture_output=True, text=True)
     if result.returncode != 0:
-        tools.pprint_exception('cmake ..', result.stderr)
+        tools.pprint_status_result('cmake ..', tools.EXCEPTION, result.stderr)
         os.chdir(original_path)
         exit('Failed during cmake execution')
 

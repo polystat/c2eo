@@ -16,11 +16,10 @@ import clean_before_transpilation
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files, filters, need_to_prepare_c_code=True):
+    def __init__(self, path_to_c_files, need_to_prepare_c_code=True):
         if os.path.isfile(path_to_c_files):
             path_to_c_files = os.path.dirname(path_to_c_files)
         self.need_to_prepare_c_code = need_to_prepare_c_code
-        self.filters = filters
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
         self.path_to_c_files = os.path.join(os.path.abspath(path_to_c_files), '')
@@ -44,8 +43,7 @@ class Transpiler(object):
         build_c2eo.main(self.path_to_c2eo_build)
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
-        c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'],
-                                                 filters=self.filters, recursive=True, print_files=True)
+        c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'], recursive=True, print_files=True)
         self.files_count = len(c_files)
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_build)
@@ -54,7 +52,7 @@ class Transpiler(object):
             self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
         data = self.group_transpilation_results()
         print_transpilation_results(data)
-        fails_count = self.check_c2eo_fails() + len(data['exception'])
+        fails_count = self.check_c2eo_fails() + len(data[tools.EXCEPTION])
         if fails_count:
             exit(f'c2eo failed on {fails_count} c files')
 
@@ -70,7 +68,7 @@ class Transpiler(object):
 
     def start_transpilation(self, c_file):
         path, name, _ = tools.split_path(c_file, with_end_sep=True)
-        rel_c_path = path.replace(self.replaced_path, "")
+        rel_c_path = path.replace(self.replaced_path, '')
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
         prepared_c_file, result_path = self.prepare_c_file(path, name, c_file)
         transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {full_name}.eo'
@@ -80,7 +78,7 @@ class Transpiler(object):
         tools.print_progress_bar(self.files_handled_count, self.files_count)
         return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name, 'transpilation_result': result,
                 'eo_file': os.path.abspath(eo_file), 'rel_eo_file': os.path.join(rel_c_path, f'{name}.eo'),
-                'name': name,  'result_path': result_path, 'prepared_c_file': prepared_c_file}
+                'name': name, 'result_path': result_path, 'prepared_c_file': prepared_c_file}
 
     def prepare_c_file(self, path, file_name, c_file):
         with open(f'{c_file}', 'r', encoding='ISO-8859-1') as f:
@@ -114,7 +112,7 @@ class Transpiler(object):
                 f.write(plug)
 
     def group_transpilation_results(self):
-        data = {'note': {}, 'warning': {}, 'error': {}, 'exception': {}}
+        data = {tools.NOTE: {}, tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}}
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
             for line in result.stderr.split('\n'):
@@ -122,16 +120,16 @@ class Transpiler(object):
                 if any(warning in line for warning in self.ignored_transpilation_warnings):
                     continue
 
-                for level in ['note', 'warning', 'error', 'exception']:
-                    if f'{level}:' in line:
-                        place, _, message = line.partition(f'{level}:')
+                for status in [tools.NOTE, tools.WARNING, tools.ERROR, tools.EXCEPTION]:
+                    if f'{status.lower()}:' in line:
+                        place, _, message = line.partition(f'{status.lower()}:')
                         message = message.strip()
-                        if message not in data[level]:
-                            data[level][message] = set()
+                        if message not in data[status]:
+                            data[status][message] = set()
                         if unit['name'] in place:
-                            data[level][message].add(place.split('/')[-1][:-2])
+                            data[status][message].add(place.split('/')[-1][:-2])
                         else:
-                            data[level][message].add(f'{unit["name"]}-eo.c')
+                            data[status][message].add(f'{unit["name"]}-eo.c')
         return data
 
     def check_c2eo_fails(self):
@@ -140,7 +138,7 @@ class Transpiler(object):
             result = unit['transpilation_result']
             if result.returncode:
                 exception_message = '\n'.join(result.stderr.split('\n')[-3:-1])
-                tools.pprint_exception(f'c2eo {unit["name"]}', exception_message)
+                tools.pprint_status_result(f'c2eo {unit["name"]}', tools.EXCEPTION, exception_message)
                 fails_count += 1
                 print()
         return fails_count
@@ -161,7 +159,7 @@ class Transpiler(object):
         difference = list(filter(lambda x: x, difference))  # Filter None values
         if difference:
             tools.pprint(f'\nDetected changes in src files:')
-            tools.print_only_file_names(difference)
+            tools.pprint_only_file_names(difference)
             tools.pprint('Move these files to src dir\n')
         else:
             tools.pprint('\nNot found any changes in src files')
@@ -198,9 +196,9 @@ def prepare_c_code(data):
 def print_transpilation_results(data):
     print()
     tools.pprint()
-    for level in ['note', 'warning', 'error', 'exception']:
-        for name, places in data[level].items():
-            tools.pprint(name, slowly=True, status=level.upper())
+    for status in [tools.NOTE, tools.WARNING, tools.ERROR, tools.EXCEPTION]:
+        for name, places in data[status].items():
+            tools.pprint(name, slowly=True, status=status)
             tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
 
@@ -208,4 +206,4 @@ if __name__ == '__main__':
     path_to_files = os.path.abspath(sys.argv[1])
     tools.move_to_script_dir(sys.argv[0])
     prepare_code = tools.get_or_none(sys.argv, 2)
-    Transpiler(path_to_files, None, prepare_code != 'f').transpile()
+    Transpiler(path_to_files, prepare_code != 'f').transpile()

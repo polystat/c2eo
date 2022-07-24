@@ -6,7 +6,6 @@ from yaml.loader import SafeLoader
 # Our scripts
 import tools
 
-
 settings_file = 'data/settings.yml'
 
 
@@ -49,11 +48,18 @@ def get_meta_code(name, read_as_lines=False):
             return f.read()
 
 
-def get_config(name):
-    path = get_setting('path_to_config')
+def get_skips(name):
+    path = get_setting('path_to_skips')
     file = os.path.join(path, f'{name}.txt')
-    if os.path.isfile(file):
-        with open(file, 'r') as f:
-            return set(map(lambda line: line.strip(), f.readlines()))
-    else:
+    if not os.path.isfile(file):
         return None
+
+    with open(file, 'r') as f:
+        data = f.readlines()
+    skips = {}
+    for row in data:
+        row = row.rstrip()
+        if row:
+            _filter, comment = row.split(':', maxsplit=1)
+            skips[_filter] = comment.strip()
+    return skips

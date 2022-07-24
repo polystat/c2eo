@@ -8,6 +8,46 @@ import time
 import re as regex
 from multiprocessing.dummy import Pool as ThreadPool
 
+# Reset
+Color_Off = '\033[0m'
+
+# Bold
+BBlack = '\033[1;30m'
+BRed = '\033[1;31m'
+BGreen = '\033[1;32m'
+BYellow = '\033[1;33m'
+BBlue = '\033[1;34m'
+BPurple = '\033[1;35m'
+BCyan = '\033[1;36m'
+BWhite = '\033[1;37m'
+
+# High Intensity
+IBlack = '\033[0;90m'
+IRed = '\033[0;91m'
+IGreen = '\033[0;92m'
+IYellow = '\033[0;93m'
+IBlue = '\033[0;94m'
+IPurple = '\033[0;95m'
+ICyan = '\033[0;96m'
+IWhite = '\033[0;97m'
+
+# Bold High Intensity
+BIWhite = '\033[1;97m'
+
+INFO = 'INFO'
+WARNING = 'WARNING'
+ERROR = 'ERROR'
+EXCEPTION = 'EXCEPTION'
+PASS = 'PASS'
+NOTE = 'NOTE'
+SKIP = 'SKIP'
+
+statuses = {INFO: f'{BBlue}{INFO}{IWhite}', WARNING: f'{BPurple}{WARNING}{IWhite}', ERROR: f'{BRed}{ERROR}{IWhite}',
+            EXCEPTION: f'{BRed}{EXCEPTION}{IWhite}', PASS: f'{BGreen}{PASS}{IWhite}', NOTE: f'{BYellow}{NOTE}{IWhite}',
+            SKIP: f'{BCyan}{SKIP}{IWhite}'}
+
+separation_line = f'{BIWhite}{"-" * 72}{IWhite}'
+
 
 def apply_filters_to_files(files, filters=None):
     if filters is None:
@@ -29,13 +69,6 @@ def clear_dir_by_patterns(path, file_patterns, recursive=False, print_files=Fals
     for file in found_files:
         os.remove(file)
     pprint('Files removed')
-
-
-def colorize_text(text, color):
-    colors = {'blue': '\033[1;36m', 'white': '\033[0;37m',
-              'red': '\033[1;31m', 'green': '\033[1;32m',
-              'yellow': '\033[1;33m', 'purple': '\033[1;35m'}
-    return f'{colors[color]}{text}{colors["white"]}'
 
 
 def compare_files(file1, file2):
@@ -60,10 +93,7 @@ def get_or_none(array, index):
 
 
 def get_status(status):
-    statuses = {'INFO': '\033[1;34mINFO\033[0;37m', 'WARNING': '\033[1;35mWARN\033[0;37m',
-                'ERROR': '\033[1;31mERROR\033[0;37m', 'EXCEPTION': '\033[1;31mEXCEPTION\033[0;37m',
-                'PASS': '\033[1;32mPASS\033[0;37m', 'NOTE': '\033[1;33mNOTE\033[0;37m'}
-    return statuses.get(status)
+    return statuses[status]
 
 
 def get_file_name(path):
@@ -90,7 +120,7 @@ def move_to_script_dir(path_to_script):
         os.chdir(path_to_script)
 
 
-def pprint(*data, slowly=False, status='INFO', end='\n'):
+def pprint(*data, slowly=False, status=INFO, end='\n'):
     if not data:
         data = ['']
     for token in data:
@@ -98,34 +128,47 @@ def pprint(*data, slowly=False, status='INFO', end='\n'):
             token = ''.join(list(map(str, token)))
         for line in str(token).split('\n'):
             if status:
-                print(f'[{get_status(status)}] {line}', end=end)
+                print(f'{IWhite}[{get_status(status)}] {line}', end=end)
             else:
-                print(line, end=end)
+                print(f'{IWhite}{line}', end=end)
 
             if slowly:
                 time.sleep(0.01)
 
 
-def print_only_file_names(files):
+def pprint_header(header):
+    pprint_separation_line()
+    pprint(header, slowly=True)
+    pprint_separation_line()
+
+
+def pprint_status_result(name, status, log_data, max_lines=None):
+    pprint(name, slowly=True, status=status)
+    print()
+    if max_lines:
+        pprint_truncated_data(log_data, max_lines)
+    else:
+        pprint(log_data, slowly=True, status='')
+
+
+def pprint_only_file_names(files):
     names = list(map(lambda x: get_file_name(x), files))
     pprint(', '.join(sorted(names, key=str.casefold)))
     pprint()
 
 
-def pprint_error(name, log_data, max_lines=None):
-    pprint(name, slowly=True, status='ERROR')
-    if max_lines:
-        print_truncated_data(log_data, max_lines)
-    else:
-        pprint(log_data, slowly=True, status='')
+def pprint_separation_line():
+    pprint(separation_line, slowly=True)
 
 
-def pprint_exception(name, log_data, max_lines=None):
-    pprint(name, slowly=True, status='EXCEPTION')
-    if max_lines:
-        print_truncated_data(log_data, max_lines)
+def pprint_truncated_data(data, max_lines):
+    if type(data) == str:
+        data = data.split('\n')
+        data = data[:max_lines]
+        data = '\n'.join(data)
     else:
-        pprint(log_data, slowly=True, status='')
+        data = data[:max_lines]
+    pprint(data, slowly=True, status='')
 
 
 def print_progress_bar(i, n):
@@ -139,14 +182,7 @@ def print_progress_bar(i, n):
         current_cell = indicator[int(i % cell_size / cell_size * last)]
     bar = f'{indicator[last] * full_cell_count}{current_cell}{" " * (cell_count - full_cell_count - 1)}'
     percentage = f'{round(i / n * 100.0, 2):5.2f}%'
-    print(f'\r[{get_status("INFO")}] {percentage}|{bar}| {i}/{n}', end='')
-
-
-def print_truncated_data(data, max_lines):
-    if type(data) == str:
-        data = data.split('\n')
-    log_data = data[:max_lines]
-    pprint(log_data, slowly=True, status='')
+    print(f'\r[{get_status(INFO)}] {percentage}|{bar}| {i}/{n}', end='')
 
 
 def read_file_as_dictionary(path):
@@ -161,7 +197,7 @@ def read_file_as_dictionary(path):
         with open(path) as f:
             data = json.load(f)
     else:
-        pprint('unsupported file extension', status='EXCEPTION')
+        pprint('unsupported file extension', status=EXCEPTION)
     return data
 
 
@@ -186,7 +222,7 @@ def search_files_by_patterns(path, file_patterns, filters=None, recursive=False,
     pprint(f'Found {len(found_files)} files:')
     found_files = apply_filters_to_files(found_files, filters)
     if print_files:
-        print_only_file_names(found_files)
+        pprint_only_file_names(found_files)
     return found_files
 
 

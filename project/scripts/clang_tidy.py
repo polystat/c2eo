@@ -43,13 +43,13 @@ class ClangTidy(object):
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
         data = self.group_transpilation_results()
         print_inspection_results(data)
-        warnings_count = 0
+        _warnings_count = 0
         for unit in self.results:
             if unit['inspection_result'].returncode != 0:
-                tools.pprint_exception(unit['file'], unit['inspection_result'].stderr)
-                warnings_count += 1
-        warnings_count += len(data['warning'])
-        return warnings_count
+                tools.pprint_status_result(unit['file'], tools.EXCEPTION, unit['inspection_result'].stderr)
+                _warnings_count += 1
+        _warnings_count += len(data['warning'])
+        return _warnings_count
 
     def generate_compile_commands(self):
         original_path = os.getcwd()
@@ -58,7 +58,7 @@ class ClangTidy(object):
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         os.chdir(original_path)
         if result.returncode != 0:
-            tools.pprint_exception(cmd, result.stderr)
+            tools.pprint_status_result(cmd, tools.EXCEPTION, result.stderr)
             exit('Failed during cmake execution')
         tools.pprint(result.stdout, slowly=True)
 
@@ -70,32 +70,32 @@ class ClangTidy(object):
         return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
 
     def group_transpilation_results(self):
-        data = {'note': {}, 'warning': {}}
+        data = {tools.NOTE: {}, tools.WARNING: {}}
         for unit in self.results:
             result = unit['inspection_result']
             for line in result.stdout.split('\n'):
                 if any(warning in line for warning in self.ignored_inspection_warnings):
                     continue
 
-                for level in ['note', 'warning']:
-                    if f'{level}:' in line:
-                        place, _, message = line.partition(f'{level}:')
+                for status in [tools.NOTE, tools.WARNING]:
+                    if f'{status}:' in line:
+                        place, _, message = line.partition(f'{status}:')
                         message = message.strip()
-                        if message not in data[level]:
-                            data[level][message] = set()
+                        if message not in data[status]:
+                            data[status][message] = set()
                         if unit['name'] in place:
-                            data[level][message].add(place.split('/')[-1][:-2])
+                            data[status][message].add(place.split('/')[-1][:-2])
                         else:
-                            data[level][message].add(unit['file'])
+                            data[status][message].add(unit['file'])
         return data
 
 
 def print_inspection_results(data):
     print()
     tools.pprint()
-    for level in ['note', 'warning']:
-        for name, places in data[level].items():
-            tools.pprint(name, slowly=True, status=level.upper())
+    for status in [tools.NOTE, tools.WARNING]:
+        for name, places in data[status].items():
+            tools.pprint(name, slowly=True, status=status)
             tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
 
