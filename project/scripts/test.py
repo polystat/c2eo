@@ -28,6 +28,7 @@ import os
 import sys
 import time
 import math
+import argparse
 import subprocess
 import re as regex
 
@@ -40,11 +41,7 @@ from transpile_c2eo import Transpiler
 
 class Tests(object):
 
-    def __init__(self, path_to_tests=None, skips_file_name=None):
-        if path_to_tests is None:
-            path_to_tests = settings.get_setting('path_to_tests')
-        if skips_file_name is None:
-            skips_file_name = settings.get_setting('skips_for_test')
+    def __init__(self, path_to_tests, skips_file_name):
         self.skips = settings.get_skips(skips_file_name)
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
@@ -57,7 +54,7 @@ class Tests(object):
 
     def test(self):
         start_time = time.time()
-        self.transpilation_units = Transpiler(self.path_to_tests).transpile()
+        self.transpilation_units = Transpiler(self.path_to_tests, '').transpile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
@@ -200,8 +197,22 @@ def group_comparison_results(results):
     return result
 
 
+def create_parser():
+    _parser = argparse.ArgumentParser(description='the script for testing the correctness of the execution of '
+                                                  'translated files from C to EO')
+
+    _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
+                         help='the relative path from the scripts folder to the tests folder')
+
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default=settings.get_setting('skips_for_test'),
+                         help='the name of the file with a set of skips for tests')
+    return _parser
+
+
 if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
-    fails_count = Tests(tools.get_or_none(sys.argv, 1), tools.get_or_none(sys.argv, 2)).test()
+    parser = create_parser()
+    namespace = parser.parse_args()
+    fails_count = Tests(namespace.path_to_tests, namespace.skips_file_name).test()
     if fails_count:
         exit(f'{fails_count} tests failed')

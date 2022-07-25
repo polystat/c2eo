@@ -28,6 +28,7 @@ import os
 import sys
 import time
 import shutil
+import argparse
 import subprocess
 import re as regex
 
@@ -40,9 +41,10 @@ import clean_before_transpilation
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files, skips_file_name=None, need_to_prepare_c_code=True):
+    def __init__(self, path_to_c_files, skips_file_name, need_to_prepare_c_code=True):
         if os.path.isfile(path_to_c_files):
             path_to_c_files = os.path.dirname(path_to_c_files)
+        self.skips = settings.get_skips(skips_file_name)
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
@@ -220,8 +222,24 @@ def prepare_c_code(data):
                 data[i] = data[i] = f'{indent}// {new_line}'
 
 
+def create_parser():
+    _parser = argparse.ArgumentParser(description='the script for translating C files to the EO files')
+
+    _parser.add_argument('path_to_c_files', metavar='PATH',
+                         help='the relative path from the scripts folder to the folder with c files')
+
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME',
+                         default=settings.get_setting('skips_for_transpile'),
+                         help='the name of the file with a set of skips for transpile')
+
+    _parser.add_argument('-n', '--not_prepare_c_code', action='store_const', const=True, default=False,
+                         help='the script will not change the c code in the input files')
+    return _parser
+
+
 if __name__ == '__main__':
-    path_to_files = os.path.abspath(sys.argv[1])
     tools.move_to_script_dir(sys.argv[0])
-    prepare_code = tools.get_or_none(sys.argv, 2)
-    Transpiler(path_to_files, prepare_code != 'f').transpile()
+    parser = create_parser()
+    namespace = parser.parse_args()
+    Transpiler(os.path.abspath(namespace.path_to_c_files), namespace.skips_file_name,
+               not namespace.not_prepare_c_code).transpile()

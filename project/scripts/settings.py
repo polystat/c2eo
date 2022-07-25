@@ -76,7 +76,7 @@ def get_skips(name):
     path = get_setting('path_to_skips')
     file = os.path.join(path, f'{name}.txt')
     if not os.path.isfile(file):
-        return None
+        return {}
 
     with open(file, 'r') as f:
         data = f.readlines()
