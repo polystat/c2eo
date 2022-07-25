@@ -31,24 +31,20 @@ class ClangTidy(object):
         self.results = []
 
     def inspect(self):
+        start_time = time.time()
         tools.pprint('\nInspection start\n')
         self.generate_compile_commands()
         patterns = settings.get_setting('code_file_patterns')
-        code_files = tools.search_files_by_patterns(self.path_to_code_files, patterns,
-                                                    recursive=True, print_files=True)
+        code_files = tools.search_files_by_patterns(self.path_to_code_files, patterns, recursive=True, print_files=True)
         self.files_count = len(code_files)
         tools.pprint('\nInspect files:\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
-        data = self.group_transpilation_results()
-        print_inspection_results(data)
+        result = self.group_inspection_results()
         _warnings_count = 0
-        for unit in self.results:
-            if unit['inspection_result'].returncode != 0:
-                tools.pprint_status_result(unit['file'], tools.EXCEPTION, unit['inspection_result'].stderr)
-                _warnings_count += 1
-        _warnings_count += len(data['warning'])
+        _warnings_count = len(result[tools.WARNING]) + len(result[tools.EXCEPTION])
+        tools.pprint_result('INSPECTION', self.files_count, int(time.time() - start_time), result, _warnings_count)
         return _warnings_count
 
     def generate_compile_commands(self):
@@ -69,43 +65,36 @@ class ClangTidy(object):
         tools.print_progress_bar(self.files_handled_count, self.files_count)
         return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
 
-    def group_transpilation_results(self):
-        data = {tools.NOTE: {}, tools.WARNING: {}}
+    def group_inspection_results(self):
+        result = {tools.NOTE: {}, tools.WARNING: {}, tools.EXCEPTION: {}}
+        tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.results:
-            result = unit['inspection_result']
-            for line in result.stdout.split('\n'):
+            if unit['inspection_result'].returncode != 0:
+                log_data = ''.join(unit['inspection_result'].stderr)
+                if log_data not in result[tools.EXCEPTION]:
+                    result[tools.EXCEPTION][log_data] = []
+                result[tools.EXCEPTION][log_data].append(unit['name'])
+                continue
+
+            for line in unit['inspection_result'].stdout.split('\n'):
                 if any(warning in line for warning in self.ignored_inspection_warnings):
                     continue
 
                 for status in [tools.NOTE, tools.WARNING]:
-                    if f'{status}:' in line:
-                        place, _, message = line.partition(f'{status}:')
+                    if f'{status.lower()}:' in line:
+                        place, _, message = line.partition(f'{status.lower()}:')
                         message = message.strip()
-                        if message not in data[status]:
-                            data[status][message] = set()
+                        if message not in result[status]:
+                            result[status][message] = set()
                         if unit['name'] in place:
-                            data[status][message].add(place.split('/')[-1][:-2])
+                            result[status][message].add(place.split('/')[-1][:-2])
                         else:
-                            data[status][message].add(unit['file'])
-        return data
-
-
-def print_inspection_results(data):
-    print()
-    tools.pprint()
-    for status in [tools.NOTE, tools.WARNING]:
-        for name, places in data[status].items():
-            tools.pprint(name, slowly=True, status=status)
-            tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
+                            result[status][message].add(unit['file'])
+        return result
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
     warnings_count = ClangTidy(tools.get_or_none(sys.argv, 1)).inspect()
-    end_time = time.time()
-    time_span = int(end_time - start_time)
-    tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
-    tools.pprint(f'{"-" * 60}\n', slowly=True)
     if warnings_count:
         exit(f'Clang-tidy has {warnings_count} warnings')

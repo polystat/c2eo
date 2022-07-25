@@ -32,7 +32,9 @@ clang_tidy_checks:
 code_file_patterns:
 - '*.cpp'
 - '*.h'
-skips: main
+skips_for_test: test
+skips_for_compile: compile
+skips_for_transpile: transpile
 current_eo_version: 0.23.17
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:

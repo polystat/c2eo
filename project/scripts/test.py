@@ -20,7 +20,7 @@ class Tests(object):
         if path_to_tests is None:
             path_to_tests = settings.get_setting('path_to_tests')
         if skips_file_name is None:
-            skips_file_name = settings.get_setting('skips')
+            skips_file_name = settings.get_setting('skips_for_test')
         self.skips = settings.get_skips(skips_file_name)
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
@@ -32,21 +32,23 @@ class Tests(object):
         self.test_handled_count = 0
 
     def test(self):
+        start_time = time.time()
         self.transpilation_units = Transpiler(self.path_to_tests).transpile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
                 results = threads.map(self.compare_test_results, self.transpilation_units)
-            passed, errors, exceptions, skips = group_comparison_results(results)
-            print_tests_result(passed, errors, exceptions, skips)
-            return len(errors) + sum(map(len, exceptions.values()))
+            result = group_comparison_results(results)
+            _fails_count = len(result[tools.ERROR]) + sum(map(len, result[tools.EXCEPTION].values()))
+            tools.pprint_result('TEST', len(self.transpilation_units), int(time.time() - start_time), result,
+                                _fails_count)
+            return _fails_count
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
         with tools.thread_pool() as threads:
             threads.map(self.get_result_for_c_file, self.transpilation_units)
-        print()
-        tools.pprint()
+        tools.pprint(on_the_next_line=True)
         EOBuilder().build()
         tools.pprint('\nRunning EO tests:\n', slowly=True)
         self.test_handled_count = 0
@@ -55,8 +57,7 @@ class Tests(object):
         with tools.thread_pool() as threads:
             threads.map(self.get_result_for_eo_file, self.transpilation_units)
         os.chdir(original_path)
-        print()
-        tools.pprint()
+        tools.pprint(on_the_next_line=True)
 
     def get_result_for_c_file(self, unit):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
@@ -156,59 +157,27 @@ def compare_lines(c_data, eo_data):
 
 
 def group_comparison_results(results):
-    passed = []
-    exceptions = {}
-    errors = []
-    skips = {}
-    tools.pprint('\nGetting results', slowly=True)
+    result = {tools.PASS: [], tools.ERROR: [], tools.EXCEPTION: {}, tools.SKIP: {}}
+    tools.pprint('Getting results\n', slowly=True)
     for unit, is_skip, is_except, is_equal, log_data in results:
         if is_skip:
-            if log_data not in skips:
-                skips[log_data] = []
-            skips[log_data].append(unit['name'])
+            if log_data not in result[tools.SKIP]:
+                result[tools.SKIP][log_data] = []
+            result[tools.SKIP][log_data].append(unit['name'])
         elif is_except:
             log_data = ''.join(log_data)
-            if log_data not in exceptions:
-                exceptions[log_data] = []
-            exceptions[log_data].append(unit['name'])
+            if log_data not in result[tools.EXCEPTION]:
+                result[tools.EXCEPTION][log_data] = []
+            result[tools.EXCEPTION][log_data].append(unit['name'])
         elif is_equal:
-            passed.append(unit['name'])
+            result[tools.PASS].append(unit['name'])
         else:
-            errors.append((unit['name'], log_data))
-    return passed, errors, exceptions, skips
-
-
-def print_tests_result(passed, errors, exceptions, skips):
-    tools.pprint_header('TEST RESULTS')
-    tools.pprint(', '.join(sorted(passed, key=str.casefold)), slowly=True, status=tools.PASS)
-    for test_name, log_data in sorted(errors, key=lambda x: x[0].casefold()):
-        print()
-        tools.pprint_status_result(test_name, tools.ERROR, log_data)
-    for log_data, test_names in sorted(exceptions.items(), key=lambda x: x[0].casefold()):
-        print()
-        all_tests_name = ', '.join(sorted(test_names, key=str.casefold))
-        tools.pprint_status_result(all_tests_name, tools.EXCEPTION, log_data, max_lines=10)
-    for log_data, test_names in sorted(skips.items(), key=lambda x: x[0].casefold()):
-        print()
-        all_tests_name = ', '.join(sorted(test_names, key=str.casefold))
-        tools.pprint_status_result(all_tests_name, tools.SKIP, log_data)
-    print()
-    tools.pprint_separation_line()
-    len_exceptions = sum(map(len, exceptions.values()))
-    len_skips = sum(map(len, skips.values()))
-    tests_count = len(passed) + len(errors) + len_exceptions + len_skips
-    tools.pprint(f'Total tests: {tests_count}, Passed: {len(passed)}, '
-                 f'Errors: {len(errors)}, Exceptions: {len_exceptions}, '
-                 f'Skipped: {len_skips}', slowly=True)
+            result[tools.ERROR].append((unit['name'], log_data))
+    return result
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
     fails_count = Tests(tools.get_or_none(sys.argv, 1), tools.get_or_none(sys.argv, 2)).test()
-    end_time = time.time()
-    time_span = int(end_time - start_time)
-    tools.pprint('Total time: {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
-    tools.pprint_separation_line()
     if fails_count:
         exit(f'{fails_count} tests failed')

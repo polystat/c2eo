@@ -3,6 +3,7 @@
 
 import os
 import sys
+import time
 import shutil
 import subprocess
 import re as regex
@@ -16,7 +17,7 @@ import clean_before_transpilation
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files, need_to_prepare_c_code=True):
+    def __init__(self, path_to_c_files, skips_file_name=None, need_to_prepare_c_code=True):
         if os.path.isfile(path_to_c_files):
             path_to_c_files = os.path.dirname(path_to_c_files)
         self.need_to_prepare_c_code = need_to_prepare_c_code
@@ -40,6 +41,7 @@ class Transpiler(object):
             self.ignored_transpilation_warnings = []
 
     def transpile(self):
+        start_time = time.time()
         build_c2eo.main(self.path_to_c2eo_build)
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
@@ -50,9 +52,10 @@ class Transpiler(object):
         tools.pprint('\nTranspile files:\n', slowly=True)
         with tools.thread_pool() as threads:
             self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
-        data = self.group_transpilation_results()
-        print_transpilation_results(data)
-        fails_count = self.check_c2eo_fails() + sum(map(len, data[tools.EXCEPTION].values()))
+        result = self.group_transpilation_results()
+        fails_count = self.check_c2eo_fails() + sum(map(len, result[tools.EXCEPTION].values()))
+        tools.pprint_result('TRANSPILE', len(self.transpilation_units), int(time.time() - start_time), result,
+                            fails_count)
         if fails_count:
             exit(f'c2eo failed on {fails_count} c files')
 
@@ -113,6 +116,7 @@ class Transpiler(object):
 
     def group_transpilation_results(self):
         data = {tools.NOTE: {}, tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}}
+        tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.transpilation_units:
             result = unit['transpilation_result']
             for line in result.stderr.split('\n'):
@@ -191,15 +195,6 @@ def prepare_c_code(data):
                 data[i] = f'{indent}{argument}; // {new_line}'
             else:
                 data[i] = data[i] = f'{indent}// {new_line}'
-
-
-def print_transpilation_results(data):
-    print()
-    tools.pprint()
-    for status in [tools.NOTE, tools.WARNING, tools.ERROR, tools.EXCEPTION]:
-        for name, places in data[status].items():
-            tools.pprint(name, slowly=True, status=status)
-            tools.pprint(f'{", ".join(sorted(places, key=str.casefold))}\n', slowly=True, status='')
 
 
 if __name__ == '__main__':

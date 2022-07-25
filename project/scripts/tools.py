@@ -120,7 +120,9 @@ def move_to_script_dir(path_to_script):
         os.chdir(path_to_script)
 
 
-def pprint(*data, slowly=False, status=INFO, end='\n'):
+def pprint(*data, slowly=False, status=INFO, end='\n', on_the_next_line=False):
+    if on_the_next_line:
+        print()
     if not data:
         data = ['']
     for token in data:
@@ -144,7 +146,6 @@ def pprint_header(header):
 
 def pprint_status_result(name, status, log_data, max_lines=None):
     pprint(name, slowly=True, status=status)
-    print()
     if max_lines:
         pprint_truncated_data(log_data, max_lines)
     else:
@@ -155,6 +156,40 @@ def pprint_only_file_names(files):
     names = list(map(lambda x: get_file_name(x), files))
     pprint(', '.join(sorted(names, key=str.casefold)))
     pprint()
+
+
+def pprint_result(header, total_tests, total_time, result, is_failed):
+    pprint_header(f'{header} RESULTS')
+    summary = [f'Total tests: {total_tests}']
+    for status in result:
+        if status == PASS:
+            summary.append(f'Passed: {len(result[status])}')
+            pprint_status_result(', '.join(sorted(result[status], key=str.casefold)), status, '')
+        elif status in [NOTE, WARNING, SKIP]:
+            count = 0
+            for name, places in sorted(result[status].items(), key=lambda x: x[0].casefold()):
+                count += len(places)
+                pprint_status_result(name, status, ', '.join(sorted(places, key=str.casefold)))
+                print()
+            summary.append(f'{str(status).capitalize()}s: {count}')
+        elif status == ERROR:
+            for test_name, log_data in sorted(result[status], key=lambda x: x[0].casefold()):
+                pprint_status_result(test_name, ERROR, log_data)
+                print()
+            summary.append(f'{str(status).capitalize()}s: {len(result[status])}')
+        elif status == EXCEPTION:
+            for log_data, test_names in sorted(sorted(result[status].items(), key=lambda x: x[0].casefold())):
+                all_tests_name = ', '.join(sorted(test_names, key=str.casefold))
+                pprint_status_result(all_tests_name, status, log_data, max_lines=10)
+                print()
+            summary.append(f'{str(status).capitalize()}s: {len(result[status])}')
+
+    pprint()
+    pprint_separation_line()
+    pprint(f'{BRed}{header} FAILED{IWhite}') if is_failed else pprint(f'{BGreen}{header} SUCCESS{IWhite}')
+    summary = ', '.join(summary)
+    time_header = 'Total time: {:02}:{:02} min'.format(total_time // 60, total_time % 60)
+    pprint_header(f'{summary}\n{time_header}')
 
 
 def pprint_separation_line():
