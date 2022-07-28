@@ -68,12 +68,13 @@ statuses = {INFO: f'{BBlue}{INFO}{IWhite}', WARNING: f'{BPurple}{WARNING}{IWhite
             EXCEPTION: f'{BRed}{EXCEPTION}{IWhite}', PASS: f'{BGreen}{PASS}{IWhite}', NOTE: f'{BYellow}{NOTE}{IWhite}',
             SKIP: f'{BCyan}{SKIP}{IWhite}'}
 
-separation_line = f'{BIWhite}{"-" * 72}{IWhite}'
+separation_line = f'{BIWhite}{"-" * 108}{IWhite}'
 
 
-def apply_filters_to_files(files, filters=None):
+def apply_filters_to_files(files, filters=None, print_files=False):
     if filters is None:
         return files
+
     pprint(f'Apply filters: {filters} to found files')
     inclusion_filters = set(filter(lambda f: f[0] != '!', filters))
     result = set() if inclusion_filters else set(files)
@@ -82,8 +83,11 @@ def apply_filters_to_files(files, filters=None):
     exclusion_filters = set(filter(lambda f: f[0] == '!', filters))
     for exclusion_filter in exclusion_filters:
         result = set(filter(lambda file: exclusion_filter[1:] not in file, result))
-    pprint(f'{len(result)} files left\n')
-    return list(result)
+    result = list(result)
+    pprint(f'{len(result)} files left')
+    if print_files:
+        pprint_only_file_names(result)
+    return result
 
 
 def clear_dir_by_patterns(path, file_patterns, recursive=False, print_files=False):
@@ -185,13 +189,25 @@ def pprint_result(header, total_tests, total_time, result, is_failed):
     summary = [f'Total tests: {total_tests}']
     for status in result:
         if status == PASS:
+            if result[status]:
+                pprint_status_result(', '.join(sorted(result[status], key=str.casefold)), status, '')
             summary.append(f'Passed: {len(result[status])}')
-            pprint_status_result(', '.join(sorted(result[status], key=str.casefold)), status, '')
-        elif status in [NOTE, WARNING, SKIP]:
+        elif status in [NOTE, WARNING, EXCEPTION, SKIP] or (status == ERROR and type(result[status]) == dict):
             count = 0
-            for name, places in sorted(result[status].items(), key=lambda x: x[0].casefold()):
-                count += len(places)
-                pprint_status_result(name, status, ', '.join(sorted(places, key=str.casefold)))
+            for message, files in sorted(result[status].items(), key=lambda x: x[0].casefold()):
+                file_places = []
+                for file, places in sorted(files.items(), key=lambda x: x[0].casefold()):
+                    if len(places):
+                        count += len(places)
+                        file_places.append(f'{file}: [{", ".join(sorted(places))}]')
+                    else:
+                        file_places.append(f'{file}')
+                        count += 1
+                file_places = ', '.join(file_places)
+                if status == EXCEPTION and message.count('\n') > 2:
+                    pprint_status_result(file_places, status, message.rstrip(), max_lines=10)
+                else:
+                    pprint_status_result(message.rstrip(), status, file_places)
                 print()
             summary.append(f'{str(status).capitalize()}s: {count}')
         elif status == ERROR:
@@ -199,18 +215,11 @@ def pprint_result(header, total_tests, total_time, result, is_failed):
                 pprint_status_result(test_name, ERROR, log_data)
                 print()
             summary.append(f'{str(status).capitalize()}s: {len(result[status])}')
-        elif status == EXCEPTION:
-            for log_data, test_names in sorted(sorted(result[status].items(), key=lambda x: x[0].casefold())):
-                all_tests_name = ', '.join(sorted(test_names, key=str.casefold))
-                pprint_status_result(all_tests_name, status, log_data, max_lines=10)
-                print()
-            summary.append(f'{str(status).capitalize()}s: {len(result[status])}')
-
     pprint()
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}') if is_failed else pprint(f'{BGreen}{header} SUCCESS{IWhite}')
     summary = ', '.join(summary)
-    time_header = 'Total time: {:02}:{:02} min'.format(total_time // 60, total_time % 60)
+    time_header = f'Total time: {total_time // 60:02}:{ total_time % 60:02} min'
     pprint_header(f'{summary}\n{time_header}')
 
 
@@ -231,14 +240,14 @@ def pprint_truncated_data(data, max_lines):
 def print_progress_bar(i, n):
     cell_count = 20
     cell_size = n / cell_count
-    full_cell_count = int(i / (float(n) / cell_count))
+    filled_cell_count = int(i / (float(n) / cell_count)) if n > 0 else cell_count
     indicator = ' ▏▎▍▌▋▊▉█'
     last = len(indicator) - 1
     current_cell = ''
-    if cell_count != full_cell_count:
+    if cell_count != filled_cell_count:
         current_cell = indicator[int(i % cell_size / cell_size * last)]
-    bar = f'{indicator[last] * full_cell_count}{current_cell}{" " * (cell_count - full_cell_count - 1)}'
-    percentage = f'{round(i / n * 100.0, 2):5.2f}%'
+    bar = f'{indicator[last] * filled_cell_count}{current_cell}{" " * (cell_count - filled_cell_count - 1)}'
+    percentage = f'{round(i / n * 100.0, 2) if n > 0 else 100.0:5.2f}%'
     print(f'\r[{get_status(INFO)}] {percentage}|{bar}| {i}/{n}', end='')
 
 
@@ -276,10 +285,10 @@ def search_files_by_patterns(path, file_patterns, filters=None, recursive=False,
     found_files = []
     for pattern in file_patterns:
         found_files.extend(glob.glob(os.path.join(path, pattern), recursive=recursive))
-    pprint(f'Found {len(found_files)} files:')
-    found_files = apply_filters_to_files(found_files, filters)
+    pprint(f'Found {len(found_files)} files')
     if print_files:
         pprint_only_file_names(found_files)
+    found_files = apply_filters_to_files(found_files, filters, print_files=print_files)
     return found_files
 
 

@@ -35,8 +35,7 @@ import re as regex
 # Our scripts
 import tools
 import settings
-from build_eo import EOBuilder
-from transpile_c2eo import Transpiler
+from compile import Compiler
 
 
 class Tests(object):
@@ -54,27 +53,28 @@ class Tests(object):
 
     def test(self):
         start_time = time.time()
-        self.transpilation_units = Transpiler(self.path_to_tests, '').transpile()
+        self.transpilation_units = Compiler(self.path_to_tests, '').compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
                 results = threads.map(self.compare_test_results, self.transpilation_units)
             result = group_comparison_results(results)
-            _fails_count = len(result[tools.ERROR]) + sum(map(len, result[tools.EXCEPTION].values()))
+            _is_failed = len(result[tools.ERROR]) + len(result[tools.EXCEPTION])
             tools.pprint_result('TEST', len(self.transpilation_units), int(time.time() - start_time), result,
-                                _fails_count)
-            return _fails_count
+                                _is_failed)
+            return _is_failed
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
+        tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             threads.map(self.get_result_for_c_file, self.transpilation_units)
         tools.pprint(on_the_next_line=True)
-        EOBuilder().build()
         tools.pprint('\nRunning EO tests:\n', slowly=True)
         self.test_handled_count = 0
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
+        tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             threads.map(self.get_result_for_eo_file, self.transpilation_units)
         os.chdir(original_path)
@@ -183,13 +183,13 @@ def group_comparison_results(results):
     for unit, is_skip, is_except, is_equal, log_data in results:
         if is_skip:
             if log_data not in result[tools.SKIP]:
-                result[tools.SKIP][log_data] = []
-            result[tools.SKIP][log_data].append(unit['name'])
+                result[tools.SKIP][log_data] = {}
+            result[tools.SKIP][log_data][unit['name']] = set()
         elif is_except:
             log_data = ''.join(log_data)
             if log_data not in result[tools.EXCEPTION]:
-                result[tools.EXCEPTION][log_data] = []
-            result[tools.EXCEPTION][log_data].append(unit['name'])
+                result[tools.EXCEPTION][log_data] = {}
+            result[tools.EXCEPTION][log_data][unit['name']] = set()
         elif is_equal:
             result[tools.PASS].append(unit['name'])
         else:
@@ -213,6 +213,6 @@ if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
     parser = create_parser()
     namespace = parser.parse_args()
-    fails_count = Tests(namespace.path_to_tests, namespace.skips_file_name).test()
-    if fails_count:
-        exit(f'{fails_count} tests failed')
+    is_failed = Tests(namespace.path_to_tests, namespace.skips_file_name).test()
+    if is_failed:
+        exit(f'Testing failed')

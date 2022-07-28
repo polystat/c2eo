@@ -43,17 +43,18 @@ class EOBuilder(object):
         self.path_to_eo_parse = settings.get_setting('path_to_eo_parse')
 
     def build(self):
+        tools.pprint('Compilation start\n')
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         if self.is_good_for_recompilation():
             tools.pprint('\nRecompilation eo project starts\n')
             result = subprocess.run('mvn compile', shell=True)
         else:
-            tools.pprint('Full eo project compilation starts\n')
+            tools.pprint('\nFull eo project compilation starts\n')
             result = subprocess.run('mvn clean compile', shell=True)
         os.chdir(original_path)
         if result.returncode:
-            exit('Failed during mvn execution')
+            exit('compilation failed')
 
     def is_good_for_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):
@@ -75,6 +76,7 @@ class EOBuilder(object):
         project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
+        tools.pprint()
         if difference:
             tools.pprint('EO project files are incompatible', status=tools.WARNING)
             tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
@@ -85,7 +87,7 @@ class EOBuilder(object):
         return True
 
     def is_actual_object_version(self):
-        tools.pprint('\nCheck version of compiled eo objects')
+        tools.pprint('\nCheck version of compiled eo objects\n')
         data = tools.read_file_as_dictionary(self.path_to_foreign_objects)
         for package in data:
             if package['version'] not in ['*.*.*', '0.0.0']:

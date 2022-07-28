@@ -42,7 +42,9 @@ import clean_before_transpilation
 class Transpiler(object):
 
     def __init__(self, path_to_c_files, skips_file_name, need_to_prepare_c_code=True):
+        self.filters = None
         if os.path.isfile(path_to_c_files):
+            self.filters = [os.path.split(path_to_c_files)[1]]
             path_to_c_files = os.path.dirname(path_to_c_files)
         self.skips = settings.get_skips(skips_file_name)
         self.need_to_prepare_c_code = need_to_prepare_c_code
@@ -53,7 +55,6 @@ class Transpiler(object):
         self.path_to_eo_src = os.path.join(os.path.abspath(settings.get_setting('path_to_eo_src')), '')
         self.path_to_eo_external = os.path.join(os.path.abspath(settings.get_setting('path_to_eo_external')), '')
         self.plug_code = settings.get_meta_code('plug')
-        self.plug_replace = settings.get_setting('plug_replace')
         self.result_dir_name = settings.get_setting('result_dir_name')
         self.run_sh_code = settings.get_meta_code('run.sh')
         self.run_sh_replace = settings.get_setting('run_sh_replace')
@@ -70,27 +71,28 @@ class Transpiler(object):
         build_c2eo.main(self.path_to_c2eo_build)
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
-        c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'], recursive=True, print_files=True)
+        c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'], filters=self.filters, recursive=True,
+                                                 print_files=True)
         self.files_count = len(c_files)
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_build)
         tools.pprint('\nTranspile files:\n', slowly=True)
+        tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
-            self.transpilation_units = [unit for unit in threads.map(self.start_transpilation, c_files)]
+            self.transpilation_units = list(threads.map(self.start_transpilation, c_files))
         result = self.group_transpilation_results()
-        fails_count = self.check_c2eo_fails() + sum(map(len, result[tools.EXCEPTION].values()))
+        is_failed = sum(map(len, result[tools.EXCEPTION].values()))
         tools.pprint_result('TRANSPILE', len(self.transpilation_units), int(time.time() - start_time), result,
-                            fails_count)
-        if fails_count:
-            exit(f'c2eo failed on {fails_count} c files')
+                            is_failed)
+        if is_failed:
+            exit(f'transpilation failed')
 
         self.remove_unused_eo_files()
-        self.generate_plug_for_empty_eo_file()
         self.move_transpiled_files()
         self.move_aliases()
         if len(c_files) == 1:
             self.generate_run_sh(self.transpilation_units[0]['full_name'])
-        tools.pprint('Transpilation done\n')
+        tools.pprint('\nTranspilation done\n')
         os.chdir(original_path)
         return self.transpilation_units
 
@@ -99,8 +101,8 @@ class Transpiler(object):
         rel_c_path = path.replace(self.replaced_path, '')
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
         prepared_c_file, result_path = self.prepare_c_file(path, name, c_file)
-        transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {full_name}.eo'
         eo_file = f'{full_name}.eo'
+        transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, self.files_count)
@@ -132,45 +134,41 @@ class Transpiler(object):
             unit['src_eo_file'] = os.path.join(unit['src_eo_path'], f'{unit["name"]}.eo')
         tools.remove_empty_dirs(self.path_to_eo_src)
 
-    def generate_plug_for_empty_eo_file(self):
-        empty_units = list(filter(lambda x: os.stat(x['eo_file']).st_size == 0, self.transpilation_units))
-        for empty_unit in empty_units:
-            plug = regex.sub(self.plug_replace, empty_unit['full_name'], self.plug_code)
-            with open(empty_unit['eo_file'], 'w') as f:
-                f.write(plug)
+    def create_plug_file(self, unit, message):
+        plug = regex.sub('<file_name>', unit['full_name'], self.plug_code)
+        plug = regex.sub('<exception_message>', message, plug)
+        with open(unit['eo_file'], 'w') as f:
+            f.write(plug)
 
     def group_transpilation_results(self):
-        data = {tools.NOTE: {}, tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}}
+        result = {tools.PASS: set([unit['name'] for unit in self.transpilation_units]), tools.NOTE: {},
+                  tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}, tools.SKIP: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.transpilation_units:
-            result = unit['transpilation_result']
-            for line in result.stderr.split('\n'):
+            exception_message = check_unit_exception(unit)
+            if exception_message:
+                if exception_message not in [tools.EXCEPTION]:
+                    result[tools.EXCEPTION][exception_message] = {}
+                if unit['name'] not in result[tools.EXCEPTION][exception_message]:
+                    result[tools.EXCEPTION][exception_message][unit['name']] = set()
+
+            for line in unit['transpilation_result'].stderr.split('\n'):
                 line = line.lower()
                 if any(warning in line for warning in self.ignored_transpilation_warnings):
                     continue
 
-                for status in [tools.NOTE, tools.WARNING, tools.ERROR, tools.EXCEPTION]:
+                for status in [tools.NOTE, tools.WARNING, tools.ERROR]:
                     if f'{status.lower()}:' in line:
                         place, _, message = line.partition(f'{status.lower()}:')
                         message = message.strip()
-                        if message not in data[status]:
-                            data[status][message] = set()
+                        if message not in result[status]:
+                            result[status][message] = {}
+                        if unit['name'] not in result[status][message]:
+                            result[status][message][unit['name']] = set()
                         if unit['name'] in place:
-                            data[status][message].add(place.split('/')[-1][:-2])
-                        else:
-                            data[status][message].add(f'{unit["name"]}-eo.c')
-        return data
-
-    def check_c2eo_fails(self):
-        fails_count = 0
-        for unit in self.transpilation_units:
-            result = unit['transpilation_result']
-            if result.returncode:
-                exception_message = '\n'.join(result.stderr.split('\n')[-3:-1])
-                tools.pprint_status_result(f'c2eo {unit["name"]}', tools.EXCEPTION, exception_message)
-                fails_count += 1
-                print()
-        return fails_count
+                            result[status][message][unit['name']].add(place.split(':', 1)[1][:-2])
+        result[tools.PASS] -= set(file for value in result[tools.EXCEPTION].values() for file in value.keys())
+        return result
 
     def move_transpiled_files(self):
         difference = []
@@ -209,6 +207,16 @@ class Transpiler(object):
             f.write(code)
 
 
+def check_unit_exception(unit):
+    if unit['transpilation_result'].returncode:
+        return '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
+    elif not os.path.isfile(unit['eo_file']):
+        return 'exception: was generated empty EO file'
+    elif os.stat(unit['eo_file']).st_size == 0:
+        return 'exception: the EO file was not generated'
+    return ''
+
+
 def prepare_c_code(data):
     for i, line in enumerate(data):
         if ('#include' in line) or ('printf' in line):
@@ -228,8 +236,7 @@ def create_parser():
     _parser.add_argument('path_to_c_files', metavar='PATH',
                          help='the relative path from the scripts folder to the folder with c files')
 
-    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME',
-                         default=settings.get_setting('skips_for_transpile'),
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default='',
                          help='the name of the file with a set of skips for transpile')
 
     _parser.add_argument('-n', '--not_prepare_c_code', action='store_const', const=True, default=False,

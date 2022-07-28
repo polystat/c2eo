@@ -35,7 +35,7 @@ code_file_patterns:
 skips_for_test: test
 skips_for_compile: compile
 skips_for_transpile: transpile
-current_eo_version: 0.25.4
+current_eo_version: 0.25.5
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:
 - Wunused-command-line-argument
@@ -60,6 +60,5 @@ patterns_for_cleaning:
 - '*.log'
 - '*.txt'
 - '*.i'
-plug_replace: <file_name>
 result_dir_name: c2eo-result
 run_sh_replace: <object_name>

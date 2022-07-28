@@ -26,6 +26,7 @@ SOFTWARE.
 
 import os
 import sys
+import argparse
 import subprocess
 
 # Our scripts
@@ -33,9 +34,7 @@ import tools
 import settings
 
 
-def main(path_to_c2eo_build=None):
-    if path_to_c2eo_build is None:
-        path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
+def main(path_to_c2eo_build):
     tools.pprint()
     original_path = os.getcwd()
     if not os.path.exists(path_to_c2eo_build):
@@ -55,6 +54,16 @@ def main(path_to_c2eo_build=None):
     tools.pprint()
 
 
+def create_parser():
+    _parser = argparse.ArgumentParser(description='the script for building c2eo in the specified directory')
+
+    _parser.add_argument('-p', '--path_to_c2eo_build', default=settings.get_setting('path_to_c2eo_build'),
+                         metavar='PATH', help='the relative path from the scripts folder to the build folder')
+    return _parser
+
+
 if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
-    main(tools.get_or_none(sys.argv, 1))
+    parser = create_parser()
+    namespace = parser.parse_args()
+    main(namespace.path_to_c2eo_build)
