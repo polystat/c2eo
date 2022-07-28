@@ -1,0 +1,9 @@
++package c2eo.coperators
+
++alias c2eo.coperators.read-as-float64
++alias c2eo.coperators.write-as-float64
+
+[a] > post-inc-float64
+  seq > @
+    write-as-float64 a ((read-as-float64 a).plus 1)
+    (read-as-float64 a).minus 1

@@ -45,7 +45,7 @@ EnumType ProcessEnumDecl(const clang::EnumDecl *ED) {
   std::vector<EnumConstantType> constants;
   std::string enum_name = "en-" + ED->getNameAsString();
   uint64_t size = 0;
-  //
+
   for (auto decl = ED->decls_begin(); decl != ED->decls_end(); decl++) {
     if (decl->getKind() == clang::Decl::EnumConstant) {
       auto *const enum_const_decl =

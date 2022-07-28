@@ -1,0 +1,10 @@
++package c2eo.coperators
+
++alias org.eolang.math.number
+
+[a] > as-int16
+  (number a).as-int > value!
+  if. > @
+    (value.as-bytes.slice 6 1).as-int.gte 0
+    (00-00-00-00-00-00.concat (value.as-bytes.slice 6 2)).as-int
+    (FF-FF-FF-FF-FF-FF.concat (value.as-bytes.slice 6 2)).as-int

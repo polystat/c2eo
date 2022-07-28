@@ -5,6 +5,5 @@
 
 [a] > post-inc-int32
   seq > @
-    read-as-int32 a > value!
     write-as-int32 a ((read-as-int32 a).plus 1)
-    value
+    (read-as-int32 a).minus 1
