@@ -26,7 +26,7 @@
 #define PROJECT_SRC_TRANSPILER_MEMORY_MANAGER_H_
 
 static const int some_non_zero_position = 999999;
-static const int two_kilobytes = 2048;
+static const int eight_kilobytes = 8192;
 #include <map>
 #include <memory>
 #include <string>
@@ -105,7 +105,7 @@ class MemoryManager {
  private:
   // index of first free byte in memory
   size_t pointer_;
-  int mem_size_ = two_kilobytes;
+  int mem_size_ = eight_kilobytes;
   std::vector<Variable> variables_;
   std::map<std::string, int> duplicates;
 };

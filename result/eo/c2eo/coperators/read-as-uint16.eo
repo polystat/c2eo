@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > read-as-uint16
+  (00-00-00-00-00-00.concat (a.read 2)).as-int > @

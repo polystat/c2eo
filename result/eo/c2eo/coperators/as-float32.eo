@@ -1,0 +1,8 @@
++package c2eo.coperators
+
++alias c2eo.coperators.printf
+
+[a] > as-float32
+  seq > @
+    printf "TODO as-float32"
+    0
