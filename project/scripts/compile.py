@@ -32,7 +32,7 @@ import argparse
 import tools
 import settings
 from build_eo import EOBuilder
-from transpile_c2eo import Transpiler
+from transpile import Transpiler
 
 
 class Compiler(object):
