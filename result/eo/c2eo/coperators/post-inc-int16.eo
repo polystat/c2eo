@@ -5,6 +5,5 @@
 
 [a] > post-inc-int16
   seq > @
-    read-as-int16 a > value!
     write-as-int16 a ((read-as-int16 a).plus 1)
-    value
+    (read-as-int16 a).minus 1

@@ -1,28 +1,47 @@
 #! /usr/bin/python3
 
+"""
+The MIT License (MIT)
+
+Copyright (c) 2021-2022 c2eo team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 import os
 import sys
 import time
 import math
+import argparse
 import subprocess
 import re as regex
 
 # Our scripts
 import tools
 import settings
-import update_eo_version
-from build_eo import EOBuilder
-from transpile_c2eo import Transpiler
+from compile import Compiler
 
 
 class Tests(object):
 
-    def __init__(self, path_to_tests=None, config=None):
-        if path_to_tests is None:
-            path_to_tests = settings.get_setting('path_to_tests')
-        if config is None:
-            config = settings.get_setting('config')
-        self.filters = settings.get_config(config)
+    def __init__(self, path_to_tests, skips_file_name):
+        self.skips = settings.get_skips(skips_file_name)
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
@@ -33,42 +52,52 @@ class Tests(object):
         self.test_handled_count = 0
 
     def test(self):
-        self.transpilation_units = Transpiler(self.path_to_tests, self.filters).transpile()
+        start_time = time.time()
+        self.transpilation_units = Compiler(self.path_to_tests, '').compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
-                results = threads.map(compare_test_results, self.transpilation_units)
-            passed, errors, exceptions = group_comparison_results(results)
-            print_tests_result(passed, errors, exceptions)
-            return (len(errors) + len(exceptions)) > 0
+                results = threads.map(self.compare_test_results, self.transpilation_units)
+            result = group_comparison_results(results)
+            _is_failed = len(result[tools.ERROR]) + len(result[tools.EXCEPTION])
+            tools.pprint_result('TEST', len(self.transpilation_units), int(time.time() - start_time), result,
+                                _is_failed)
+            return _is_failed
 
     def get_result_for_tests(self):
         tools.pprint('\nRunning C tests:\n', slowly=True)
+        tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             threads.map(self.get_result_for_c_file, self.transpilation_units)
-        print()
-        tools.pprint()
-        EOBuilder().build()
+        tools.pprint(on_the_next_line=True)
         tools.pprint('\nRunning EO tests:\n', slowly=True)
         self.test_handled_count = 0
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
+        tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             threads.map(self.get_result_for_eo_file, self.transpilation_units)
         os.chdir(original_path)
-        print()
-        tools.pprint()
+        tools.pprint(on_the_next_line=True)
 
     def get_result_for_c_file(self, unit):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
         unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
-        compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null 2>>{unit["result_c_file"]}'
+        compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null' \
+                      f' 2>>{unit["result_c_file"]}'
         try:
             subprocess.run(compile_cmd, shell=True, check=True)
         except subprocess.CalledProcessError as exc:
             return exc
         else:
-            subprocess.run(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+            process = subprocess.Popen(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+            timeout = 10
+            try:
+                process.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
+                with open(unit['result_c_file'], 'w') as f:
+                    f.write(f'exception: execution time of C file exceeded {timeout} seconds\n')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
@@ -82,39 +111,43 @@ class Tests(object):
             process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
-            with open(unit["result_eo_file"], 'w') as f:
-                f.write(f'exception: execution time exceeded {timeout} seconds')
+            with open(unit['result_eo_file'], 'w') as f:
+                f.write(f'exception: execution time EO file exceeded {timeout} seconds\n')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
+    def compare_test_results(self, unit):
+        for _filter, comment in self.skips.items():
+            if _filter in unit['name']:
+                return unit, True, False, False, comment
 
-def compare_test_results(unit):
-    with open(unit['result_c_file'], 'r') as f:
-        c_data = f.readlines()
-    with open(unit['result_eo_file'], 'r') as f:
-        eo_data = f.readlines()
-    is_except, (is_equal, log_data) = compare_files(c_data, eo_data)
-    with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
-        f.writelines(log_data)
-    return unit, is_except, is_equal, log_data
+        with open(unit['result_c_file'], 'r') as f:
+            c_data = f.readlines()
+        with open(unit['result_eo_file'], 'r') as f:
+            eo_data = f.readlines()
+        is_except, is_equal, log_data = compare_files(c_data, eo_data)
+        with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
+            f.writelines(log_data)
+        return unit, False, is_except, is_equal, log_data
 
 
 def compare_files(c_data, eo_data):
     if is_exception(c_data):
-        return True, (False, c_data)
+        return True, False, c_data
 
     if is_exception(eo_data):
-        return True, (False, eo_data)
+        return True, False, eo_data
 
     if len(c_data) != len(eo_data):
         log_data = ['Results have different length!\n', '\nC result:\n']
         log_data.extend(c_data)
         log_data.append('\nEO result:\n')
         log_data.extend(eo_data)
-        return False, (False, log_data)
+        return False, False, log_data
 
-    return False, compare_lines(c_data, eo_data)
+    is_equal, log_data = compare_lines(c_data, eo_data)
+    return False, is_equal, log_data
 
 
 def is_exception(lines):
@@ -127,7 +160,7 @@ def compare_lines(c_data, eo_data):
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
         c_line = c_line.rstrip()
         eo_line = eo_line.rstrip()
-        ok_line = tools.colorize_text(f'\tLine {i}: {c_line} == {eo_line}', 'green') + '\n'
+        ok_line = f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n'
         if c_line == eo_line:
             log_data.append(ok_line)
             continue
@@ -139,54 +172,47 @@ def compare_lines(c_data, eo_data):
             log_data.append(ok_line)
         else:
             is_equal = False
-            error_line = tools.colorize_text(f'\tLine {i}: {c_line} != {eo_line}', 'red') + '\n'
+            error_line = f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n'
             log_data.append(error_line)
     return is_equal, log_data
 
 
 def group_comparison_results(results):
-    passed = []
-    exceptions = {}
-    errors = []
-    tools.pprint('\nGetting results', slowly=True)
-    for unit, is_except, is_equal, log_data in results:
-        if is_except:
+    result = {tools.PASS: [], tools.ERROR: [], tools.EXCEPTION: {}, tools.SKIP: {}}
+    tools.pprint('Getting results\n', slowly=True)
+    for unit, is_skip, is_except, is_equal, log_data in results:
+        if is_skip:
+            if log_data not in result[tools.SKIP]:
+                result[tools.SKIP][log_data] = {}
+            result[tools.SKIP][log_data][unit['name']] = set()
+        elif is_except:
             log_data = ''.join(log_data)
-            if log_data not in exceptions:
-                exceptions[log_data] = []
-            exceptions[log_data].append(unit['name'])
+            if log_data not in result[tools.EXCEPTION]:
+                result[tools.EXCEPTION][log_data] = {}
+            result[tools.EXCEPTION][log_data][unit['name']] = set()
         elif is_equal:
-            passed.append(unit['name'])
+            result[tools.PASS].append(unit['name'])
         else:
-            errors.append((unit['name'], log_data))
-    return passed, errors, exceptions
+            result[tools.ERROR].append((unit['name'], log_data))
+    return result
 
 
-def print_tests_result(passed, errors, exceptions):
-    tools.pprint(f'\n{"-" * 60}', slowly=True)
-    tools.pprint('TEST RESULTS', slowly=True)
-    tools.pprint(f'{"-" * 60}', slowly=True)
-    tools.pprint(', '.join(sorted(passed, key=str.casefold)), slowly=True, status='PASS')
-    for test_name, log_data in sorted(errors, key=lambda x: x[0].casefold()):
-        print()
-        tools.pprint_error(test_name, log_data, max_lines=30)
-    for log_data, test_names in sorted(exceptions.items(), key=lambda x: x[0].casefold()):
-        print()
-        tools.pprint_exception(', '.join(sorted(test_names, key=str.casefold)), log_data, max_lines=10)
-    tools.pprint(f'\n{"-" * 60}', slowly=True)
-    len_exceptions = sum(len(value) for value in exceptions.values())
-    tests_count = len(passed) + len(errors) + len_exceptions
-    tools.pprint(f'Tests run: {tests_count}, Passed: {len(passed)},'
-                 f' Errors: {len(errors)}, Exceptions: {len_exceptions}', slowly=True)
+def create_parser():
+    _parser = argparse.ArgumentParser(description='the script for testing the correctness of the execution of '
+                                                  'translated files from C to EO')
+
+    _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
+                         help='the relative path from the scripts folder to the tests folder')
+
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default=settings.get_setting('skips_for_test'),
+                         help='the name of the file with a set of skips for tests')
+    return _parser
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     tools.move_to_script_dir(sys.argv[0])
-    is_failed = Tests(tools.get_or_none(sys.argv, 1), tools.get_or_none(sys.argv, 2)).test()
-    end_time = time.time()
-    time_span = int(end_time - start_time)
-    tools.pprint('Total time:  {:02}:{:02} min.'.format(time_span // 60, time_span % 60), slowly=True)
-    tools.pprint(f'{"-" * 60}\n', slowly=True)
+    parser = create_parser()
+    namespace = parser.parse_args()
+    is_failed = Tests(namespace.path_to_tests, namespace.skips_file_name).test()
     if is_failed:
-        exit('Some tests failed')
+        exit(f'Testing failed')

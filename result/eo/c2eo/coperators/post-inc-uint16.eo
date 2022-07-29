@@ -1,0 +1,9 @@
++package c2eo.coperators
+
++alias c2eo.coperators.read-as-uint16
++alias c2eo.coperators.write-as-uint16
+
+[a] > post-inc-uint16
+  seq > @
+    write-as-uint16 a ((read-as-uint16 a).plus 1)
+    (read-as-uint16 a).minus 1

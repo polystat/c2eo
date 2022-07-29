@@ -32,8 +32,10 @@ clang_tidy_checks:
 code_file_patterns:
 - '*.cpp'
 - '*.h'
-config: null
-current_eo_version: 0.23.17
+skips_for_test: test
+skips_for_compile: compile
+skips_for_transpile: transpile
+current_eo_version: 0.25.5
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:
 - Wunused-command-line-argument
@@ -41,13 +43,13 @@ ignored_transpilation_warnings:
 path_to_c2eo_build: ../build/
 path_to_c2eo_transpiler: ../bin/
 path_to_code_files: ../src/transpiler/
-path_to_config: data/config/
+path_to_skips: data/skips/
 path_to_eo: eo/
 path_to_eo_external: ../../result/eo/c2eo/external/
 path_to_eo_parse: target/01-parse/
 path_to_eo_project: ../../result/
 path_to_eo_src: ../../result/eo/c2eo/src/
-path_to_foreign_objects: target/eo-foreign.csv
+path_to_foreign_objects: target/eo/foreign.csv
 path_to_meta: data/meta/
 path_to_tests: ../tests/main/
 patterns_for_cleaning:
@@ -58,6 +60,5 @@ patterns_for_cleaning:
 - '*.log'
 - '*.txt'
 - '*.i'
-plug_replace: <file_name>
 result_dir_name: c2eo-result
 run_sh_replace: <object_name>

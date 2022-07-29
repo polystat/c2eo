@@ -1,0 +1,60 @@
+#include <stdio.h>
+
+long long c = 10;
+long long d = 255;
+long long *pc;
+long long *pd;
+long long **ppc;
+long long **ppd;
+
+int main() {
+  long long i = 0;
+  pc = &c;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  ppc = & pc;
+  pd = &d;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", d);
+  ppd = & pd;
+  c = *pc;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  c = **ppc;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  pc = &c;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  d = *&c;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", d);
+  printf("%lld\n", c);
+  pc = &*&c;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  d = *&*&c;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  printf("%lld\n", d);
+  pd = pc;
+  ppd = ppc;
+  pd = &*pc;
+  c = *&*pc;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  c = *&**&*ppc;
+  i++;
+  printf("%lld\n", i);
+  printf("%lld\n", c);
+  return 0;
+}

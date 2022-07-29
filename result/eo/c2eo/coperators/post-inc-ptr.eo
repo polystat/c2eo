@@ -5,6 +5,5 @@
 
 [a b] > post-inc-ptr
   seq > @
-    read-as-ptr a > value!
     write-as-ptr a ((read-as-ptr a).plus b)
-    value
+    (read-as-ptr a).minus b

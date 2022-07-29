@@ -28,7 +28,7 @@ SOFTWARE.
   <artifactId>c2eo-transpiler</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
-    <eolang.version>0.23.17</eolang.version>
+    <eolang.version>0.25.5</eolang.version>
   </properties>
   <build>
     <plugins>
@@ -45,7 +45,7 @@ SOFTWARE.
         <artifactId>eo-maven-plugin</artifactId>
         <version>${eolang.version}</version>
         <configuration>
-          <hash>2f66df8</hash>
+          <hash>0aa6875</hash>
         </configuration>
         <executions>
           <execution>

@@ -1,5 +1,29 @@
 #! /usr/bin/python3
 
+"""
+The MIT License (MIT)
+
+Copyright (c) 2021-2022 c2eo team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 import os
 import sys
 import subprocess
@@ -19,30 +43,31 @@ class EOBuilder(object):
         self.path_to_eo_parse = settings.get_setting('path_to_eo_parse')
 
     def build(self):
+        tools.pprint('Compilation start\n')
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
         if self.is_good_for_recompilation():
             tools.pprint('\nRecompilation eo project starts\n')
             result = subprocess.run('mvn compile', shell=True)
         else:
-            tools.pprint('Full eo project compilation starts\n')
+            tools.pprint('\nFull eo project compilation starts\n')
             result = subprocess.run('mvn clean compile', shell=True)
         os.chdir(original_path)
         if result.returncode:
-            exit('Failed during mvn execution')
+            exit('compilation failed')
 
     def is_good_for_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):
-            tools.pprint('Compile dir not found', status='WARNING')
+            tools.pprint('Compile dir not found', status=tools.WARNING)
             return False
         else:
-            tools.pprint('Compile dir found', status='PASS')
+            tools.pprint('Compile dir found', status=tools.PASS)
 
         if not self.is_actual_object_version():
-            tools.pprint('Old version detected', status='WARNING')
+            tools.pprint('Old version detected', status=tools.WARNING)
             return False
         else:
-            tools.pprint('Latest version detected', status='PASS')
+            tools.pprint('Latest version detected', status=tools.PASS)
 
         eo_src_files = tools.search_files_by_patterns(self.path_to_eo, ['*.eo'], recursive=True)
         eo_src_files = set(map(lambda x: x.replace(self.path_to_eo, '', 1).replace('.eo', '', 1), eo_src_files))
@@ -51,17 +76,18 @@ class EOBuilder(object):
         project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
+        tools.pprint()
         if difference:
-            tools.pprint('EO project files are incompatible', status='WARNING')
+            tools.pprint('EO project files are incompatible', status=tools.WARNING)
             tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
             return False
         else:
-            tools.pprint('EO project files are compatible', status='PASS')
+            tools.pprint('EO project files are compatible', status=tools.PASS)
 
         return True
 
     def is_actual_object_version(self):
-        tools.pprint('\nCheck version of compiled eo objects')
+        tools.pprint('\nCheck version of compiled eo objects\n')
         data = tools.read_file_as_dictionary(self.path_to_foreign_objects)
         for package in data:
             if package['version'] not in ['*.*.*', '0.0.0']:
