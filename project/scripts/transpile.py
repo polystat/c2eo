@@ -145,7 +145,14 @@ class Transpiler(object):
                   tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}, tools.SKIP: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.transpilation_units:
+            skip_message = self.check_unit_skip(unit)
             exception_message = check_unit_exception(unit)
+            if skip_message:
+                if skip_message not in result[tools.SKIP]:
+                    result[tools.SKIP][skip_message] = {}
+                result[tools.SKIP][skip_message][unit['name']] = set()
+                continue
+
             if exception_message:
                 if exception_message not in [tools.EXCEPTION]:
                     result[tools.EXCEPTION][exception_message] = {}
@@ -167,8 +174,15 @@ class Transpiler(object):
                             result[status][message][unit['name']] = set()
                         if unit['name'] in place:
                             result[status][message][unit['name']].add(place.split(':', 1)[1][:-2])
-        result[tools.PASS] -= set(file for value in result[tools.EXCEPTION].values() for file in value.keys())
+
+        for status in [tools.EXCEPTION, tools.SKIP]:
+            result[tools.PASS] -= set(file for value in result[status].values() for file in value.keys())
         return result
+
+    def check_unit_skip(self, unit):
+        for _filter, comment in self.skips.items():
+            if _filter in unit['name']:
+                return comment
 
     def move_transpiled_files(self):
         difference = []
@@ -208,13 +222,19 @@ class Transpiler(object):
 
 
 def check_unit_exception(unit):
+    exception_message = ''
+
     if unit['transpilation_result'].returncode:
-        return '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
+        exception_message = '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
     elif not os.path.isfile(unit['eo_file']):
-        return 'exception: was generated empty EO file'
+        exception_message = 'was generated empty EO file'
     elif os.stat(unit['eo_file']).st_size == 0:
-        return 'exception: the EO file was not generated'
-    return ''
+        exception_message = 'the EO file was not generated'
+
+    if not os.path.isfile(unit['eo_file']):
+        open(unit['eo_file'], 'a').close()
+
+    return exception_message
 
 
 def prepare_c_code(data):

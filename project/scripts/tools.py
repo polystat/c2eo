@@ -100,9 +100,9 @@ def clear_dir_by_patterns(path, file_patterns, recursive=False, print_files=Fals
 def compare_files(file1, file2):
     if not (os.path.isfile(file1) and os.path.isfile(file2)):
         return False
-    with open(file1, 'r') as f1:
+    with open(file1, 'r', encoding='ISO-8859-1') as f1:
         data1 = f1.read()
-    with open(file2, 'r') as f2:
+    with open(file2, 'r', encoding='ISO-8859-1') as f2:
         data2 = f2.read()
     return data1 == data2
 
