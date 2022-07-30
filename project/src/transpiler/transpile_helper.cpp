@@ -806,9 +806,19 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   } else {
     member.nested.push_back(GetStmtEOObject(child));
   }
+  auto *field = llvm::dyn_cast<clang::FieldDecl>(op->getMemberDecl());
+
+  if (field == nullptr) {
+    return {};
+  }
+  std::string field_name;
+  if (!field->isUnnamedBitfield() && !field->getNameAsString().empty()) {
+    field_name = /* "f-" + */ field->getNameAsString();
+  } else {
+    field_name = "field" + std::to_string(field->getID());
+  }
   member.nested.push_back(transpiler.record_manager_.GetShiftAlias(
-      qual_type->getAsRecordDecl()->getID(),
-      op->getMemberDecl()->getNameAsString()));
+      qual_type->getAsRecordDecl()->getID(), field_name));
   return member;
 }
 

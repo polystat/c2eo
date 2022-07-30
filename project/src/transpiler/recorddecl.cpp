@@ -76,10 +76,10 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
         return {};
       }
       std::string field_name;
-      if (!field->isUnnamedBitfield()) {
+      if (!field->isUnnamedBitfield() && !field->getNameAsString().empty()) {
         field_name = /* "f-" + */ field->getNameAsString();
       } else {
-        field_name = "field" + std::to_string(fields.size());
+        field_name = "field" + std::to_string(field->getID());
       }
       fields[field_name] = {field->getType(), shift};
 

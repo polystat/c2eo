@@ -26,7 +26,8 @@ int fibonacci_matrix(int n) {
     F.second.second = tmp2.second.second;
     n = n - 1;
   }
-  int ans = F.first.first;
+  int ans;
+  ans = F.first.first;
   return ans;
 }
 
@@ -35,8 +36,10 @@ int main() {
   tmp.second.first=1;
   tmp.first.second=1;
   tmp.second.second=0;
-  int n = 5;
-  int ans = fibonacci_matrix(n);
+  int n;
+  n = 5;
+  int ans;
+  ans = fibonacci_matrix(n);
   printf("%d\n", ans);
   return 0;
 }

@@ -58,9 +58,7 @@ __attribute__((unused)) size_t RecordManager::GetShift(
 EOObject RecordManager::GetShiftAlias(int64_t id, const std::string &member) {
   RecordType *rt = GetById(id);
   if (rt != nullptr) {
-    return EOObject{
-        rt->name + "-" + member,
-        EOObjectType::EO_LITERAL};  // TODO(nkchuykin): is it EO_LITERAL?
+    return EOObject{rt->name + "-" + member, EOObjectType::EO_LITERAL};
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
