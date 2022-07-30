@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install clang-tidy
+      - name: Install cpplint
         run: sudo pip install cpplint
 
       - name: Cpp-lint
@@ -86,7 +86,7 @@ jobs:
       - name: Parsing
         run: |
           cd ./project/scripts
-          python3 transpile_c2eo.py ../tests/parsing f
+          python3 transpile.py ../tests/parsing -n
 
   test:
     needs:

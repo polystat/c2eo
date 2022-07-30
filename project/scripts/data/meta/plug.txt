@@ -1,5 +1,5 @@
-+package c2eo.src.<file_name>
 +alias org.eolang.io.stdout
++package c2eo.src.<file_name>
 
 [args...] > global
-  stdout "exception: empty EO file generated\n" > @
+  stdout "exception: <exception_message>\n" > @
