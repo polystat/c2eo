@@ -1,7 +1,7 @@
-+package c2eo.coperators
-
-+alias c2eo.coperators.write-as-float64
 +alias c2eo.coperators.read-as-float64
++alias c2eo.coperators.write-as-float64
+
++package c2eo.coperators
 
 [a] > pre-dec-float64
   write-as-float64 a ((read-as-float64 a).minus 1) > @

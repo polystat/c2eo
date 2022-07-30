@@ -1,8 +1,8 @@
-+package c2eo.coperators
-
 +alias c2eo.coperators.printf
-+alias c2eo.coperators.write-as-float32
 +alias c2eo.coperators.read-as-float32
++alias c2eo.coperators.write-as-float32
+
++package c2eo.coperators
 
 [a] > pre-inc-float32
   seq > @

@@ -1,6 +1,6 @@
-+package c2eo.coperators
-
 +alias eoram org.eolang.ram
+
++package c2eo.coperators
 
 [size] > ram
 

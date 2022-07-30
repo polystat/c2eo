@@ -1,6 +1,6 @@
-+package c2eo.coperators
-
 +alias c2eo.coperators.printf
+
++package c2eo.coperators
 
 [a] > read-as-float32
   seq > @

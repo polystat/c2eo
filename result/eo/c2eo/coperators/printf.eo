@@ -1,7 +1,7 @@
-+package c2eo.coperators
-
-+alias org.eolang.txt.sprintf
 +alias org.eolang.io.stdout
++alias org.eolang.txt.sprintf
+
++package c2eo.coperators
 
 [format args...] > printf
   stdout (sprintf format ...args) > @

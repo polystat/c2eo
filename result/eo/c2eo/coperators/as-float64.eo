@@ -1,6 +1,6 @@
-+package c2eo.coperators
-
 +alias org.eolang.math.number
+
++package c2eo.coperators
 
 [a] > as-float64
   (number a).as-float > @
