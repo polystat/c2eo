@@ -288,7 +288,6 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   }
   if (CS != nullptr) {
     for (auto *stmt : CS->body()) {
-      Stmt::StmtClass stmt_class = stmt->getStmtClass();
       EOObject stmt_obj = GetStmtEOObject(stmt);
       res.nested.push_back(stmt_obj);
     }
