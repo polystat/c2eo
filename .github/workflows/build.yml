@@ -19,7 +19,7 @@ jobs:
         run: sudo pip install cpplint
 
       - name: Cpp-lint
-        run: cpplint --filter=-runtime/references,-runtime/string project/src/transpiler/** 
+        run: cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/** 
 
   clang-format:
     runs-on: ubuntu-22.04

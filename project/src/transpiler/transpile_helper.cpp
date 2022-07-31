@@ -416,7 +416,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
     std::string value = Escaped(op->getString().str());
-    // TODO remove lines below after fixing printf EOObject
+    // TODO(nchuykin) remove lines below after fixing printf EOObject
     value = std::regex_replace(value, std::regex("%[lh]*[ud]"), "%d");
     value = std::regex_replace(value, std::regex("%[lh]*f"), "%f");
     return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
