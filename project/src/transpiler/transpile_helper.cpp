@@ -1001,6 +1001,8 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     operation = "gt";
   } else if (op_code == BinaryOperatorKind::BO_GE) {
     operation = "gte";
+  } else if (op_code == BinaryOperatorKind::BO_Comma) {
+    operation = "seq";
   } else {
     operation = "undefined";
     llvm::errs() << "Warning: Unknown operator " << p_operator->getOpcodeStr()

@@ -1,3 +1,2 @@
 static: TODO fix static variables
 atypical_switch: TODO fix one line statement in switch
-for_with_multiple: TODO fix multiple statements in for cycle

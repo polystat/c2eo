@@ -13,7 +13,7 @@ include_directories("${PATH_TO_LLVM_BUILD}/tools/clang/include")
 include_directories("${PATH_TO_LLVM_BUILD}/include")
 link_directories("${PATH_TO_LLVM_BUILD}/lib/")
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-rtti)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
 # Source files list
 set(SOURCE_FILES
