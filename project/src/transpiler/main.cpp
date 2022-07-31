@@ -143,7 +143,6 @@ int main(int argc, const char **argv) {
   AddMatchers(finder);
   tool.setPrintErrorMessage(false);
 
-
   auto result = tool.run(newFrontendActionFactory(&finder).get());
   if (result != 0) {
     std::cerr << "An error in clang occurred\n";

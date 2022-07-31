@@ -133,4 +133,6 @@ void UnitTranspiler::SetPathName(std::string path_name) {
 
 void UnitTranspiler::GenerateMeta() { generate_meta_ = true; }
 
-bool UnitTranspiler::IsGenerateMeta() { return generate_meta_; }
+[[maybe_unused]] bool UnitTranspiler::IsGenerateMeta() const {
+  return generate_meta_;
+}
