@@ -154,4 +154,4 @@ jobs:
       - name: Testing
         run: |
           cd ./project/scripts
-          python3 test.py
+          python3 test.py -s test
