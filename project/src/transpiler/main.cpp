@@ -77,7 +77,7 @@ int main(int argc, const char **argv) {
   sigemptyset(&sa.sa_mask);
   sa.sa_sigaction = SegfaultSigaction;
   sa.sa_flags = SA_SIGINFO;
-  // sigaction(SIGSEGV, &sa, nullptr);
+  sigaction(SIGSEGV, &sa, nullptr);
 
   struct sigaction sab {};
   memset(&sab, 0, sizeof(struct sigaction));
