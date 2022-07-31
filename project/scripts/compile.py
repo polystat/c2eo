@@ -39,7 +39,7 @@ class Compiler(object):
 
     def __init__(self, path_to_files, skips_file_name, need_to_prepare_c_code=True):
         self.need_to_prepare_c_code = need_to_prepare_c_code
-        self.skips = settings.get_skips(skips_file_name)
+        self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
         self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.transpilation_units = []

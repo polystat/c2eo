@@ -46,7 +46,7 @@ class Transpiler(object):
         if os.path.isfile(path_to_c_files):
             self.filters = [os.path.split(path_to_c_files)[1]]
             path_to_c_files = os.path.dirname(path_to_c_files)
-        self.skips = settings.get_skips(skips_file_name)
+        self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')

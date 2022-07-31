@@ -75,15 +75,12 @@ def get_meta_code(name, read_as_lines=False):
 def get_skips(name):
     path = get_setting('path_to_skips')
     file = os.path.join(path, f'{name}.txt')
-    if not os.path.isfile(file):
-        return {}
-
     with open(file, 'r') as f:
         data = f.readlines()
     skips = {}
     for row in data:
         row = row.rstrip()
-        if row:
+        if row and not row.startswith('#'):
             _filters, comment = row.split(':', maxsplit=1)
             _filters = _filters.split(',')
             for _filter in _filters:
