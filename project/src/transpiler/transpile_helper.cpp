@@ -1191,6 +1191,9 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{std::to_string(var->value), EOObjectType::EO_LITERAL};
     }
     const auto *id = dyn_cast<VarDecl>(val);
+    if (id->isStaticLocal()) {
+      return EOObject{"s-" + id->getName().str()};
+    }
     const auto &var = transpiler.glob_.GetVarById(id);
     return EOObject{var.alias};
   } catch (std::invalid_argument &) {
@@ -1459,6 +1462,7 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
         break;
       case EOObjectType::EO_EMPTY:
       case EOObjectType::EO_LITERAL:
+      case EOObjectType::EO_TEMPLATE:
         break;
       case EOObjectType::EO_PLUG:
         if (cur.nested.empty()) {

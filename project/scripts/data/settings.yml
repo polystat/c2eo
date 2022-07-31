@@ -29,6 +29,7 @@ clang_tidy_checks:
 - -cppcoreguidelines-avoid-magic-numbers
 - -readability-magic-numbers
 - clang-analyzer-*
+- -clang-analyzer-cplusplus.NewDeleteLeaks
 code_file_patterns:
 - '*.cpp'
 - '*.h'

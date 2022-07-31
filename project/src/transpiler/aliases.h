@@ -73,6 +73,7 @@ std::map<std::string, std::string> known_aliases = {
     {"lt", "+alias c2eo.coperators.lt"},
     {"lte", "+alias c2eo.coperators.lte"},
     {"memadrcpy", "+alias c2eo.coperators.memadrcpy"},
+    {"meta", "+alias c2eo.coperators.meta"},
     {"minus", "+alias c2eo.coperators.minus"},
     {"mod", "+alias c2eo.coperators.mod"},
     {"neg", "+alias c2eo.coperators.neg"},

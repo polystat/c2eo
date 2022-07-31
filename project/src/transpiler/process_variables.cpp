@@ -200,7 +200,9 @@ void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS,
         Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Var) {
           auto *var_decl = dyn_cast<VarDecl>(decl);
-          all_local.push_back(transpiler.glob_.GetVarById(var_decl));
+          if (var_decl != nullptr && !var_decl->isStaticLocal()) {
+            all_local.push_back(transpiler.glob_.GetVarById(var_decl));
+          }
         }
       }
     } else if (stmt_class == Stmt::ForStmtClass) {
@@ -218,7 +220,9 @@ void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS,
           Decl::Kind decl_kind = decl->getKind();
           if (decl_kind == Decl::Var) {
             auto *var_decl = dyn_cast<VarDecl>(decl);
-            all_local.push_back(transpiler.glob_.GetVarById(var_decl));
+            if (var_decl != nullptr && !var_decl->isStaticLocal()) {
+              all_local.push_back(transpiler.glob_.GetVarById(var_decl));
+            }
           }
         }
       }
@@ -235,7 +239,9 @@ void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
     Decl::Kind decl_kind = decl->getKind();
     if (decl_kind == Decl::Var) {
       auto *var_decl = dyn_cast<VarDecl>(decl);
-      all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
+      if (var_decl != nullptr && !var_decl->isStaticLocal()) {
+        all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
+      }
     }
   }
 }
