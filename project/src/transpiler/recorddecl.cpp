@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "src/transpiler/transpile_helper.h"
@@ -60,7 +61,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
 
   uint64_t size = 0;
 
-  std::map<std::string, size_t> fields;
+  std::map<std::string, std::pair<clang::QualType, size_t>> fields;
   size_t shift = 0;
 
   for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
@@ -75,12 +76,12 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
         return {};
       }
       std::string field_name;
-      if (!field->isUnnamedBitfield()) {
+      if (!field->isUnnamedBitfield() && !field->getNameAsString().empty()) {
         field_name = /* "f-" + */ field->getNameAsString();
       } else {
-        field_name = "field" + std::to_string(fields.size());
+        field_name = "field" + std::to_string(field->getID());
       }
-      fields[field_name] = shift;
+      fields[field_name] = {field->getType(), shift};
 
       clang::QualType qual_type = field->getType();
       clang::TypeInfo type_info = field->getASTContext().getTypeInfo(qual_type);

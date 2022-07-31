@@ -14,8 +14,10 @@ int main() {
   tmp.second.first = 100;
   tmp.first.second = 100;
   tmp.second.second = 100;
-  int n = 5;
-  int ans = (((n + tmp.first.first * tmp.second.second - tmp.first.second * tmp.second.first * tmp.second.second)
+  int n;
+  n = 5;
+  int ans;
+  ans = (((n + tmp.first.first * tmp.second.second - tmp.first.second * tmp.second.first * tmp.second.second)
       >> (n - 1)) + tmp.second.second);
   printf("%d\n", ans);
   return 0;

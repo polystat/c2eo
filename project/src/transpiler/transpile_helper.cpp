@@ -24,6 +24,7 @@
 
 #include "src/transpiler/transpile_helper.h"
 
+#include <map>
 #include <queue>
 #include <sstream>
 #include <utility>
@@ -101,6 +102,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator);
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal);
 
 EOObject GetFunctionCallEOObject(const CallExpr *op);
+
+EOObject GetInitListEOObject(const clang::InitListExpr *list);
 
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
                                        size_t shift);
@@ -397,10 +400,97 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     // The empty statement
     return EOObject(EOObjectType::EO_EMPTY);
   }
+  if (stmt_class == Stmt::InitListExprClass) {
+    const auto *op = dyn_cast<clang::InitListExpr>(stmt);
+    return GetInitListEOObject(op);
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
+}
+
+EOObject GetInitListEOObject(const clang::InitListExpr *list) {
+  EOObject eoList{"*", EOObjectType::EO_EMPTY};
+  clang::QualType qualType = list->getType().getDesugaredType(*context);
+  std::vector<EOObject> inits;
+  std::string elementTypeName;
+  std::map<std::string, std::pair<clang::QualType, size_t>>::iterator
+      recElement;
+  size_t elementSize = 0;
+  if (qualType->isArrayType()) {
+    clang::QualType elementQualType =
+        llvm::dyn_cast<clang::ConstantArrayType>(qualType)->getElementType();
+    elementSize = 1;
+    while (elementQualType->isArrayType()) {
+      const auto *cat =
+          llvm::dyn_cast<clang::ConstantArrayType>(elementQualType);
+      elementSize *= cat->getSize().getLimitedValue();
+      elementQualType =
+          llvm::dyn_cast<clang::ConstantArrayType>(elementQualType)
+              ->getElementType();
+    }
+    elementTypeName = GetTypeName(elementQualType);
+    elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
+  } else if (qualType->isRecordType()) {
+    auto *recordType = transpiler.record_manager_.GetById(
+        qualType->getAsRecordDecl()->getID());
+    recElement = recordType->fields.begin();
+  }
+  int i = 0;
+  for (auto element = list->child_begin(); element != list->child_end();
+       element++, i++) {
+    EOObject shiftedAlias{"plus"};
+    shiftedAlias.nested.emplace_back("list-init-name",
+                                     EOObjectType::EO_TEMPLATE);
+    if (qualType->isArrayType()) {
+      EOObject newShift{"times"};
+      newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
+      newShift.nested.emplace_back(to_string(elementSize),
+                                   EOObjectType::EO_LITERAL);
+      shiftedAlias.nested.push_back(newShift);
+    } else if (qualType->isRecordType()) {
+      shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
+          qualType->getAsRecordDecl()->getID(), recElement->first));
+      elementTypeName = GetTypeName(recElement->second.first);
+    }
+    EOObject value = GetStmtEOObject(*element);
+    if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
+      EOObject newValue = ReplaceEmpty(value, shiftedAlias);
+      eoList.nested.insert(eoList.nested.end(), newValue.nested.begin(),
+                           newValue.nested.end());
+    } else {
+      EOObject res("write");
+      if (!elementTypeName.empty()) {
+        res.name += "-as-" + elementTypeName;
+      }
+      res.nested.emplace_back(shiftedAlias);
+      res.nested.emplace_back(value);
+      eoList.nested.push_back(res);
+      if (qualType->isRecordType()) {
+        recElement++;
+      }
+    }
+  }
+  return eoList;
+}
+
+EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias) {
+  EOObject res;
+  res.postfix = eoObject.postfix;
+  res.arguments = eoObject.arguments;
+  res.prefix = eoObject.prefix;
+  if (eoObject.type == EOObjectType::EO_TEMPLATE &&
+      eoObject.name == "list-init-name") {
+    res = alias;
+  } else {
+    res.name = eoObject.name;
+    res.type = eoObject.type;
+  }
+  for (const auto &nest : eoObject.nested) {
+    res.nested.push_back(ReplaceEmpty(nest, alias));
+  }
+  return res;
 }
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
@@ -716,9 +806,19 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
   } else {
     member.nested.push_back(GetStmtEOObject(child));
   }
+  auto *field = llvm::dyn_cast<clang::FieldDecl>(op->getMemberDecl());
+
+  if (field == nullptr) {
+    return {};
+  }
+  std::string field_name;
+  if (!field->isUnnamedBitfield() && !field->getNameAsString().empty()) {
+    field_name = /* "f-" + */ field->getNameAsString();
+  } else {
+    field_name = "field" + std::to_string(field->getID());
+  }
   member.nested.push_back(transpiler.record_manager_.GetShiftAlias(
-      qual_type->getAsRecordDecl()->getID(),
-      op->getMemberDecl()->getNameAsString()));
+      qual_type->getAsRecordDecl()->getID(), field_name));
   return member;
 }
 
@@ -901,6 +1001,8 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     operation = "gt";
   } else if (op_code == BinaryOperatorKind::BO_GE) {
     operation = "gte";
+  } else if (op_code == BinaryOperatorKind::BO_Comma) {
+    operation = "seq";
   } else {
     operation = "undefined";
     llvm::errs() << "Warning: Unknown operator " << p_operator->getOpcodeStr()
