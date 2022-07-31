@@ -219,15 +219,8 @@ def check_unit_exception(unit):
 
 def prepare_c_code(data):
     for i, line in enumerate(data):
-        if ('#include' in line) or ('printf' in line):
-            new_line = line.lstrip()
-            whitespace_count = len(line) - len(new_line)
-            indent = ' ' * whitespace_count
-            if new_line.startswith('printf'):
-                argument = line.rsplit(',', maxsplit=1)[1].replace(');', '').replace(',', '').strip()
-                data[i] = f'{indent}{argument}; // {new_line}'
-            else:
-                data[i] = data[i] = f'{indent}// {new_line}'
+        if ('#include' in line):
+            data[i] = f'// {line}'
 
 
 def create_parser():
