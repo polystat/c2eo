@@ -207,7 +207,7 @@ def pprint_result(header, total_tests, total_time, result, is_failed):
                 if status == EXCEPTION and message.count('\n') > 2:
                     pprint_status_result(file_places, status, message.rstrip(), max_lines=10)
                 else:
-                    pprint_status_result(message.rstrip(), status, file_places)
+                    pprint_status_result(' '.join(message.rstrip().split('\n')), status, file_places)
                 print()
             summary.append(f'{str(status).capitalize()}s: {count}')
         elif status == ERROR:
