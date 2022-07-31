@@ -219,8 +219,8 @@ def check_unit_exception(unit):
 
 def prepare_c_code(data):
     for i, line in enumerate(data):
-        if '#include' in line:
-            data[i] = f'{indent}// {new_line}'
+        if ('#include' in line):
+            data[i] = f'// {line}'
 
 
 def create_parser():
