@@ -1,5 +1,5 @@
 clang_tidy_checks:
-- -*
+  - -*
 - misc-*
 - -misc-non-private-member-variables-in-classes
 - -misc-no-recursion
@@ -29,6 +29,7 @@ clang_tidy_checks:
 - -cppcoreguidelines-avoid-magic-numbers
 - -readability-magic-numbers
 - clang-analyzer-*
+- -clang-analyzer-cplusplus.NewDeleteLeaks
 code_file_patterns:
 - '*.cpp'
 - '*.h'
