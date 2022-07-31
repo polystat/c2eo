@@ -51,6 +51,9 @@ class UnitTranspiler {
   static void SetPathName(std::string path_name);
   // std::vector<EOObject>
 
+  void GenerateMeta();
+  bool IsGenerateMeta();
+
  private:
   std::string package_name_;
   std::string path_name_;
@@ -58,6 +61,7 @@ class UnitTranspiler {
   // std::vector<EOObject> objects_;
 
   void GenerateResult();
+  bool generate_meta_ = false;
 };
 
 #endif  // PROJECT_SRC_TRANSPILER_UNIT_TRANSPILER_H_

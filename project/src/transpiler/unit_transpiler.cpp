@@ -130,3 +130,7 @@ void UnitTranspiler::SetPackageName(std::string package_name) {
 void UnitTranspiler::SetPathName(std::string path_name) {
   path_name = std::move(path_name);
 }
+
+void UnitTranspiler::GenerateMeta() { generate_meta_ = true; }
+
+bool UnitTranspiler::IsGenerateMeta() { return generate_meta_; }

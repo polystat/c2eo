@@ -1,2 +1,0 @@
-static: TODO fix static variables
-atypical_switch: TODO fix one line statement in switch
