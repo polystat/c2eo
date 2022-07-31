@@ -94,7 +94,41 @@ jobs:
       - name: Parsing
         run: |
           cd ./project/scripts
-          python3 transpile.py ../../../gcc.c-torture -s gcc -n
+          python3 transpile.py ../../gcc.c-torture -s gcc -n
+
+  c-testcuite:
+    needs:
+      - cpp-lint
+      - clang-format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
+          mv ~/llvm-clang .
+
+      - name: Download gcc.c-torture
+        run: wget https://github.com/polystat/c2eo/releases/download/0.1.16/c-testcuite.tar.gz                                                                                                                              ok  6m 3s  14:16:34 
+
+      - name: Unpack gcc.c-torture
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf c-testcuite.tar.gz -C . > /dev/null  
+
+      - name: Compilation
+        run: |
+          cd ./project/scripts
+          python3 compile.py -p ../../c-testcuite -s testcuite
 
   test:
     needs:
