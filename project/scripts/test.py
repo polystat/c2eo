@@ -184,16 +184,16 @@ def group_comparison_results(results):
         if is_skip:
             if log_data not in result[tools.SKIP]:
                 result[tools.SKIP][log_data] = {}
-            result[tools.SKIP][log_data][unit['name']] = set()
+            result[tools.SKIP][log_data][unit['unique_name']] = set()
         elif is_except:
             log_data = ''.join(log_data)
             if log_data not in result[tools.EXCEPTION]:
                 result[tools.EXCEPTION][log_data] = {}
-            result[tools.EXCEPTION][log_data][unit['name']] = set()
+            result[tools.EXCEPTION][log_data][unit['unique_name']] = set()
         elif is_equal:
-            result[tools.PASS].append(unit['name'])
+            result[tools.PASS].append(unit['unique_name'])
         else:
-            result[tools.ERROR].append((unit['name'], log_data))
+            result[tools.ERROR].append((unit['unique_name'], log_data))
     return result
 
 

@@ -90,7 +90,7 @@ class ClangTidy(object):
         return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
 
     def group_inspection_results(self):
-        result = {tools.PASS: set([unit['name'] for unit in self.results]), tools.NOTE: {}, tools.WARNING: {},
+        result = {tools.PASS: set([unit['file'] for unit in self.results]), tools.NOTE: {}, tools.WARNING: {},
                   tools.ERROR: {}, tools.EXCEPTION: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.results:
@@ -98,7 +98,7 @@ class ClangTidy(object):
                 log_data = ''.join(unit['inspection_result'].stderr)
                 if log_data not in result[tools.EXCEPTION]:
                     result[tools.EXCEPTION][log_data] = {}
-                result[tools.EXCEPTION][log_data][unit['name']] = set()
+                result[tools.EXCEPTION][log_data][unit['file']] = set()
                 continue
 
             for line in unit['inspection_result'].stdout.split('\n'):
@@ -113,7 +113,7 @@ class ClangTidy(object):
                             result[status][message] = {}
                         if unit['file'] not in result[status][message]:
                             result[status][message][unit['file']] = set()
-                        if unit['name'] in place:
+                        if unit['file'] in place:
                             result[status][message][unit['file']].add(place.split(':', 1)[1][:-2])
         for status in [tools.WARNING, tools.ERROR, tools.EXCEPTION]:
             result[tools.PASS] -= set(file for value in result[status].values() for file in value.keys())

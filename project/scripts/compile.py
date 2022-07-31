@@ -49,7 +49,7 @@ class Compiler(object):
         self.transpilation_units = Transpiler(self.path_to_tests, '', self.need_to_prepare_c_code).transpile()
         if self.transpilation_units:
             EOBuilder().build()
-            passes = [unit['name'] for unit in self.transpilation_units]
+            passes = [unit['unique_name'] for unit in self.transpilation_units]
             tools.pprint_result('COMPILE', len(passes), int(time.time() - start_time), {tools.PASS: passes}, 0)
         return self.transpilation_units
 
