@@ -36,7 +36,7 @@ code_file_patterns:
 skips_for_test: test
 skips_for_compile: compile
 skips_for_transpile: transpile
-current_eo_version: 0.25.5
+current_eo_version: 0.26.0
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:
 - Wunused-command-line-argument

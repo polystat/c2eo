@@ -204,7 +204,7 @@ def create_parser():
     _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
                          help='the relative path from the scripts folder to the tests folder')
 
-    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default=settings.get_setting('skips_for_test'),
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME',
                          help='the name of the file with a set of skips for tests')
     return _parser
 

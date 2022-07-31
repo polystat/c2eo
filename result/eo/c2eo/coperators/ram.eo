@@ -4,9 +4,7 @@
 
 [size] > ram
 
-  eoram size > mem!
-
-  memory > index
+  eoram size > mem
 
   mem > @
 
