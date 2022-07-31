@@ -84,6 +84,8 @@ def get_skips(name):
     for row in data:
         row = row.rstrip()
         if row:
-            _filter, comment = row.split(':', maxsplit=1)
-            skips[_filter] = comment.strip()
+            _filters, comment = row.split(':', maxsplit=1)
+            _filters = _filters.split(',')
+            for _filter in _filters:
+                skips[_filter.strip()] = comment.strip()
     return skips
