@@ -29,7 +29,7 @@ jobs:
       - name: Clang-format
         uses: jidicula/clang-format-action@v4.6.2
         with:
-          clang-format-version: '13'
+          clang-format-version: '14'
           check-path: 'project/src/transpiler'
           fallback-style: 'Google'
 
@@ -51,8 +51,7 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
       
       - name: Install clang-tidy
         run: sudo apt install clang-tidy
@@ -80,20 +79,17 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Download gcc-c-torture
         uses: robinraju/release-downloader@v1.4
         with:
           repository: "polystat/c2eo"
-          tag: "v0.1.16"
-          fileName: "c-testcuite.tar.gz"
+          tag: "0.1.16"
+          fileName: "gcc.c-torture.tar.gz"
 
       - name: Unpack gcc-c-torture
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf gcc.c-torture.tar.gz -C . > /dev/null  
+        run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null  
 
       - name: Parsing
         run: |
@@ -118,15 +114,14 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Download c-testcuite
         uses: robinraju/release-downloader@v1.4
         with:
           repository: "polystat/c2eo"
-          tag: "v0.1.16"
-          fileName: "c-testcuite.tar.gz"                                                                                                                             ok  6m 3s  14:16:34 
+          tag: "0.1.16"
+          fileName: "c-testcuite.tar.gz"
 
       - name: Unpack c-testcuite
         run: |
@@ -156,8 +151,7 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
           
       - name: Testing
         run: |
