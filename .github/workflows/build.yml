@@ -1,7 +1,7 @@
 name: Build C2EO
 
 on:
-  pull_request:
+  push:
     branches:
       - master
 
