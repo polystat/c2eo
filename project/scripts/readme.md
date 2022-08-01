@@ -8,19 +8,19 @@ All scripts are run from the `project/scripts` folder
 
 1. Start testing
     ```bash
-    # By default, the path "path_to_tests" and the "config" configuration in settings.yml will be taken, you can set other values in settings.yml
+    # By default, the path "path_to_tests" in settings.yml will be taken, you can set other values in settings.yml
 
     $ python3 test.py
 
 
     # You can specify a different path at startup
 
-    $ python3 test.py ../tests/nkchuykin
+    $ python3 test.py -p ../tests/nkchuykin
 
 
     # You can specify a different path and configuration at startup
 
-    $ python3 test.py ../tests/nkchuykin without_struct
+    $ python3 test.py -p ../tests/nkchuykin -s test
     ```
 
     <details>
@@ -30,14 +30,12 @@ All scripts are run from the `project/scripts` folder
 
     Tests are placed in the <code> tests </code> directory. Each test, a C file, is in a separate subdirectory. The program file name is the same as the directory name and has the .c extension. During testing, additional data with test information is created in these test directories.
 
-    The <code> scripts/data/config </code> directory contains files used for custom testing. Each file contains a list of lines, one of which must contain the path to the file. If you put a! Sign at the beginning of a line, then there should not be a single line from this list in the path to the file.
-    </details>
     &nbsp;
 
 1. Transpilation and assembly of all C-files found in this directory
 
     ```bash
-    $ python3 transpile_c2eo.py ../tests/nchuikin
+    $ python3 transpile.py -p ../tests/nchuikin
     ```
 
 1. Clear all the entire catalog, leaving only C-files (without -o at the end)
@@ -50,7 +48,7 @@ All scripts are run from the `project/scripts` folder
 
     # You can specify a different path and configuration at startup
 
-    $ python3 clean_before_transpilation.py ../tests/nkchuykin
+    $ python3 clean_before_transpilation.py -p ../tests/nkchuykin
     ```
 
 1. Build EO project `../../ result`
@@ -69,7 +67,7 @@ All scripts are run from the `project/scripts` folder
 
     # You can specify a different path at startup
 
-    $ python3 build_c2eo.py ../my_dir/bin
+    $ python3 build_c2eo.py -p ../my_dir/bin
     ```
 
 1. Single-threaded launch of c2eo without formatting the output to the console for all c files 
