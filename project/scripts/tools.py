@@ -100,9 +100,9 @@ def clear_dir_by_patterns(path, file_patterns, recursive=False, print_files=Fals
 def compare_files(file1, file2):
     if not (os.path.isfile(file1) and os.path.isfile(file2)):
         return False
-    with open(file1, 'r') as f1:
+    with open(file1, 'r', encoding='ISO-8859-1') as f1:
         data1 = f1.read()
-    with open(file2, 'r') as f2:
+    with open(file2, 'r', encoding='ISO-8859-1') as f2:
         data2 = f2.read()
     return data1 == data2
 
@@ -207,7 +207,7 @@ def pprint_result(header, total_tests, total_time, result, is_failed):
                 if status == EXCEPTION and message.count('\n') > 2:
                     pprint_status_result(file_places, status, message.rstrip(), max_lines=10)
                 else:
-                    pprint_status_result(message.rstrip(), status, file_places)
+                    pprint_status_result(' '.join(message.rstrip().split('\n')), status, file_places)
                 print()
             summary.append(f'{str(status).capitalize()}s: {count}')
         elif status == ERROR:

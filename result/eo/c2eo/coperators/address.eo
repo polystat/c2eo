@@ -3,7 +3,7 @@
 [mem addr] > address
 
   [size-bytes] > read
-    mem.read addr size-bytes > @
+    mem.slice addr size-bytes > @
 
   [value] > write
     mem.write addr (value.as-bytes) > @

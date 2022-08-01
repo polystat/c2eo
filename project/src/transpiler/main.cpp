@@ -49,8 +49,8 @@ void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: segfault at address " << si->si_addr
                << " while tool run\n";
   std::ofstream out(filename);
-  out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.coperators.printf\n\n";
+  out << "+package c2eo.src." << package_name << "\n\n";
   out << "[args...] > global\n";
   out << "  printf \"Segfault exception at address " << si->si_addr
       << " while tool run\" > @\n";
@@ -62,8 +62,8 @@ void SiAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: SIGABRT with code " << si->si_code
                << " while tool run\n";
   std::ofstream out(filename);
-  out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.coperators.printf\n\n";
+  out << "+package c2eo.src." << package_name << "\n\n";
   out << "[args...] > global\n";
   out << "  printf \"SIGABRT at address " << si->si_addr
       << " while tool run\" > @\n";

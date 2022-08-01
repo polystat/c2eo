@@ -1,7 +1,7 @@
-+package c2eo.coperators
-
 +alias c2eo.coperators.read-as-ptr
 +alias c2eo.coperators.write-as-ptr
+
++package c2eo.coperators
 
 [a b] > post-inc-ptr
   seq > @

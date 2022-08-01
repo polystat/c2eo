@@ -41,7 +41,7 @@ from compile import Compiler
 class Tests(object):
 
     def __init__(self, path_to_tests, skips_file_name):
-        self.skips = settings.get_skips(skips_file_name)
+        self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
@@ -184,16 +184,16 @@ def group_comparison_results(results):
         if is_skip:
             if log_data not in result[tools.SKIP]:
                 result[tools.SKIP][log_data] = {}
-            result[tools.SKIP][log_data][unit['name']] = set()
+            result[tools.SKIP][log_data][unit['unique_name']] = set()
         elif is_except:
             log_data = ''.join(log_data)
             if log_data not in result[tools.EXCEPTION]:
                 result[tools.EXCEPTION][log_data] = {}
-            result[tools.EXCEPTION][log_data][unit['name']] = set()
+            result[tools.EXCEPTION][log_data][unit['unique_name']] = set()
         elif is_equal:
-            result[tools.PASS].append(unit['name'])
+            result[tools.PASS].append(unit['unique_name'])
         else:
-            result[tools.ERROR].append((unit['name'], log_data))
+            result[tools.ERROR].append((unit['unique_name'], log_data))
     return result
 
 
@@ -204,7 +204,7 @@ def create_parser():
     _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
                          help='the relative path from the scripts folder to the tests folder')
 
-    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default=settings.get_setting('skips_for_test'),
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME',
                          help='the name of the file with a set of skips for tests')
     return _parser
 
