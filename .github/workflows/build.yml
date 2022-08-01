@@ -62,7 +62,7 @@ jobs:
           cd ./project/scripts
           python3 clang_tidy.py
 
-  gcc.c-torture:
+  gcc-c-torture:
     needs:
       - cpp-lint
       - clang-format
