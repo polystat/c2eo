@@ -84,7 +84,11 @@ jobs:
           mv ~/llvm-clang .
 
       - name: Download gcc.c-torture
-        run: wget https://github.com/polystat/c2eo/releases/download/0.1.16/gcc.c-torture.tar.gz                                                                                                                                ok  6m 3s  14:16:34 
+        uses: robinraju/release-downloader@v1.4
+        with:
+          repository: "polystat/c2eo"
+          tag: "v0.1.16"
+          fileName: "c-testcuite.tar.gz"
 
       - name: Unpack gcc.c-torture
         run: |
@@ -118,7 +122,11 @@ jobs:
           mv ~/llvm-clang .
 
       - name: Download gcc.c-torture
-        run: wget https://github.com/polystat/c2eo/releases/download/0.1.16/c-testcuite.tar.gz                                                                                                                              ok  6m 3s  14:16:34 
+        uses: robinraju/release-downloader@v1.4
+        with:
+          repository: "polystat/c2eo"
+          tag: "v0.1.16"
+          fileName: "c-testcuite.tar.gz"                                                                                                                             ok  6m 3s  14:16:34 
 
       - name: Unpack gcc.c-torture
         run: |
