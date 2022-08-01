@@ -115,7 +115,7 @@ void UnitTranspiler::GenerateResult() {
       }
     }
   }
-  
+
   result << "\n+package c2eo.src." << package_name_ << "\n";
   result << body;
   tmp_ = result.str();
