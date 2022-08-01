@@ -83,14 +83,14 @@ jobs:
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
           mv ~/llvm-clang .
 
-      - name: Download gcc.c-torture
+      - name: Download gcc-c-torture
         uses: robinraju/release-downloader@v1.4
         with:
           repository: "polystat/c2eo"
           tag: "v0.1.16"
           fileName: "c-testcuite.tar.gz"
 
-      - name: Unpack gcc.c-torture
+      - name: Unpack gcc-c-torture
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf gcc.c-torture.tar.gz -C . > /dev/null  
@@ -121,14 +121,14 @@ jobs:
           tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
           mv ~/llvm-clang .
 
-      - name: Download gcc.c-torture
+      - name: Download c-testcuite
         uses: robinraju/release-downloader@v1.4
         with:
           repository: "polystat/c2eo"
           tag: "v0.1.16"
           fileName: "c-testcuite.tar.gz"                                                                                                                             ok  6m 3s  14:16:34 
 
-      - name: Unpack gcc.c-torture
+      - name: Unpack c-testcuite
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf c-testcuite.tar.gz -C . > /dev/null  
