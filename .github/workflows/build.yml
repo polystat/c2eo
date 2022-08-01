@@ -126,7 +126,7 @@ jobs:
         with:
           repository: "polystat/c2eo"
           tag: "v0.1.16"
-          fileName: "c-testcuite.tar.gz"                                                                                                                             ok  6m 3s  14:16:34 
+          fileName: "c-testcuite.tar.gz"
 
       - name: Unpack c-testcuite
         run: |
