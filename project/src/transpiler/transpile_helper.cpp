@@ -168,6 +168,18 @@ std::string Escaped(const std::string &input) {
       case '\v':
         output += "\\v";
         break;
+      case '\\':
+        output += "\\\\";
+        break;
+      case '\'':
+        output += "\\\'";
+        break;
+      case '\"':
+        output += "\\\"";
+        break;
+      case '\0':
+        output += "\\0";
+        break;
       default:
         output += c;
         break;
