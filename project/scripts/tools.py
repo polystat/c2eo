@@ -136,7 +136,7 @@ def is_float(str_num):
 
 def make_name_from_path(path):
     path = path.replace(os.sep, ' ').replace('.', '')
-    names = filter(lambda x: x != '', path.split(' '))
+    names = path.split()
     return '.'.join(names)
 
 

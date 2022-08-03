@@ -28,37 +28,35 @@ import os
 import sys
 import argparse
 import subprocess
+import re as regex
 
 # Our scripts
 import tools
 import settings
+from transpile import Transpiler
 
 
-def main(path_to_c2eo_build, cmake_cmd='cmake ..'):
-    tools.pprint()
-    original_path = os.getcwd()
-    if not os.path.exists(path_to_c2eo_build):
-        os.mkdir(path_to_c2eo_build)
-    os.chdir(path_to_c2eo_build)
-    result = subprocess.run(cmake_cmd, shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
-        tools.pprint_status_result(cmake_cmd, tools.EXCEPTION, result.stderr)
-        os.chdir(original_path)
-        exit('Failed during cmake execution')
-
-    tools.pprint(result.stdout, slowly=True)
-    result = subprocess.run(f'make -j {tools.cpu_count()}', shell=True)
-    os.chdir(original_path)
-    if result.returncode != 0:
-        exit('Failed during make execution')
-    tools.pprint()
+def generate_codecov(path_to_tests, skips_file_name):
+    os.chdir(settings.get_setting('path_to_c2eo_transpiler'))
+    tools.pprint('Merging profdata\n')
+    subprocess.run(f'llvm-profdata-14 merge -j {tools.cpu_count()} -sparse *.profraw -o res.profdata', shell=True)
+    tools.pprint('Convert rec.profdata to report.txt')
+    subprocess.run('llvm-cov-14 report c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt',
+                   shell=True)
+    tools.clear_dir_by_patterns('.', ['*.profraw', '*.profdata'])
+    # send to codecov
+    os.remove('report.txt')
 
 
 def create_parser():
-    _parser = argparse.ArgumentParser(description='the script for building c2eo in the specified directory')
+    _parser = argparse.ArgumentParser(description='the script for generating codecov for c2eo transpiler')
 
-    _parser.add_argument('-p', '--path_to_c2eo_build', default=settings.get_setting('path_to_c2eo_build'),
-                         metavar='PATH', help='the relative path from the scripts folder to the build folder')
+    _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
+                         help='the relative path from the scripts folder to the tests folder')
+
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default='',
+                         help='the name of the file with a set of skips for transpile')
+
     return _parser
 
 
@@ -66,4 +64,4 @@ if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
     parser = create_parser()
     namespace = parser.parse_args()
-    main(namespace.path_to_c2eo_build)
+    generate_codecov(namespace.path_to_tests, namespace.skips_file_name)

@@ -41,12 +41,14 @@ import clean_before_transpilation
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files, skips_file_name, need_to_prepare_c_code=True):
+    def __init__(self, path_to_c_files, skips_file_name, need_to_prepare_c_code=True, need_to_generate_codecov=False):
         self.filters = None
         if os.path.isfile(path_to_c_files):
             self.filters = [os.path.split(path_to_c_files)[1]]
             path_to_c_files = os.path.dirname(path_to_c_files)
         self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
+        self.codecov_arg = 'LLVM_PROFILE_FILE="C%p.profraw"' if need_to_generate_codecov else ''
+        self.need_to_generate_codecov = need_to_generate_codecov
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
@@ -68,14 +70,14 @@ class Transpiler(object):
 
     def transpile(self):
         start_time = time.time()
-        build_c2eo.main(self.path_to_c2eo_build)
+        self.build_c2eo()
         tools.pprint('\nTranspilation start\n')
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'], filters=self.filters, recursive=True,
                                                  print_files=True)
         self.files_count = len(c_files)
         original_path = os.getcwd()
-        os.chdir(self.path_to_c2eo_build)
+        os.chdir(self.path_to_c2eo_transpiler)
         tools.pprint('\nTranspile files:\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
@@ -97,13 +99,21 @@ class Transpiler(object):
         os.chdir(original_path)
         return self.transpilation_units
 
+    def build_c2eo(self):
+        if self.need_to_generate_codecov:
+            build_c2eo.main(self.path_to_c2eo_build,
+                            'cmake -D CMAKE_CXX_COMPILER="/bin/clang++" -D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS '
+                            '-fprofile-instr-generate -fcoverage-mapping" .. ')
+        else:
+            build_c2eo.main(self.path_to_c2eo_build)
+
     def start_transpilation(self, c_file):
         path, name, _ = tools.split_path(c_file, with_end_sep=True)
         rel_c_path = path.replace(self.replaced_path, '')
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
         prepared_c_file, result_path = self.prepare_c_file(path, name, c_file)
         eo_file = f'{full_name}.eo'
-        transpile_cmd = f'{self.path_to_c2eo_transpiler}c2eo {prepared_c_file} {eo_file}'
+        transpile_cmd = f'{self.codecov_arg} ./c2eo {prepared_c_file} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, self.files_count)
@@ -259,8 +269,11 @@ def check_unit_exception(unit):
 
 def prepare_c_code(data):
     for i, line in enumerate(data):
-        if ('#include' in line):
-            data[i] = f'// {line}'
+        if '#include' in line:
+            new_line = line.lstrip()
+            whitespace_count = len(line) - len(new_line)
+            indent = ' ' * whitespace_count
+            data[i] = f'{indent}// {new_line}'
 
 
 def create_parser():
@@ -274,6 +287,9 @@ def create_parser():
 
     _parser.add_argument('-n', '--not_prepare_c_code', action='store_const', const=True, default=False,
                          help='the script will not change the c code in the input files')
+
+    _parser.add_argument('-c', '--codecov', action='store_const', const=True, default=False,
+                         help='the script will generate codecov files')
     return _parser
 
 
@@ -282,4 +298,4 @@ if __name__ == '__main__':
     parser = create_parser()
     namespace = parser.parse_args()
     Transpiler(os.path.abspath(namespace.path_to_c_files), namespace.skips_file_name,
-               not namespace.not_prepare_c_code).transpile()
+               not namespace.not_prepare_c_code, namespace.codecov).transpile()
