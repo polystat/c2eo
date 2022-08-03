@@ -37,9 +37,9 @@ import settings
 def generate_codecov():
     os.chdir(settings.get_setting('path_to_c2eo_transpiler'))
     tools.pprint('Merging profdata\n')
-    subprocess.run(f'llvm-profdata-14 merge -j {tools.cpu_count()} -sparse *.profraw -o res.profdata', shell=True)
-    tools.pprint('Convert rec.profdata to report.txt')
-    subprocess.run('llvm-cov-14 report c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt',
+    subprocess.run(f'llvm-profdata-14 merge -sparse *.profraw -o res.profdata', shell=True)
+    tools.pprint('Convert res.profdata to report.txt')
+    subprocess.run('llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt',
                    shell=True)
     tools.clear_dir_by_patterns('.', ['*.profraw', '*.profdata'])
 
