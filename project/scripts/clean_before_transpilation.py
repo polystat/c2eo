@@ -39,8 +39,7 @@ def main(path_to_files):
         path_to_files = os.path.dirname(path_to_files)
     tools.clear_dir_by_patterns(path_to_files, patterns, recursive=True)
     tools.remove_empty_dirs(path_to_files)
-    path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
-    tools.clear_dir_by_patterns(path_to_c2eo_build, ['*.eo'])
+    tools.clear_dir_by_patterns(settings.get_setting('path_to_c2eo_transpiler'), ['*.eo'])
 
 
 def create_parser():

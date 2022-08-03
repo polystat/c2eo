@@ -34,31 +34,18 @@ import tools
 import settings
 
 
-def main(path_to_c2eo_build, cmake_cmd='cmake ..'):
-    tools.pprint()
-    original_path = os.getcwd()
-    if not os.path.exists(path_to_c2eo_build):
-        os.mkdir(path_to_c2eo_build)
-    os.chdir(path_to_c2eo_build)
-    result = subprocess.run(cmake_cmd, shell=True, capture_output=True, text=True)
-    if result.returncode != 0:
-        tools.pprint_status_result(cmake_cmd, tools.EXCEPTION, result.stderr)
-        os.chdir(original_path)
-        exit('Failed during cmake execution')
-
-    tools.pprint(result.stdout, slowly=True)
-    result = subprocess.run(f'make -j {tools.cpu_count()}', shell=True)
-    os.chdir(original_path)
-    if result.returncode != 0:
-        exit('Failed during make execution')
-    tools.pprint()
+def generate_codecov():
+    os.chdir(settings.get_setting('path_to_c2eo_transpiler'))
+    tools.pprint('Merging profdata\n')
+    subprocess.run(f'llvm-profdata-14 merge -sparse *.profraw -o res.profdata', shell=True)
+    tools.pprint('Convert res.profdata to report.txt')
+    subprocess.run('llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt',
+                   shell=True)
+    tools.clear_dir_by_patterns('.', ['*.profraw', '*.profdata'])
 
 
 def create_parser():
-    _parser = argparse.ArgumentParser(description='the script for building c2eo in the specified directory')
-
-    _parser.add_argument('-p', '--path_to_c2eo_build', default=settings.get_setting('path_to_c2eo_build'),
-                         metavar='PATH', help='the relative path from the scripts folder to the build folder')
+    _parser = argparse.ArgumentParser(description='the script for generating codecov for c2eo transpiler')
     return _parser
 
 
@@ -66,4 +53,4 @@ if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
     parser = create_parser()
     namespace = parser.parse_args()
-    main(namespace.path_to_c2eo_build)
+    generate_codecov()
