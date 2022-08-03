@@ -28,15 +28,13 @@ import os
 import sys
 import argparse
 import subprocess
-import re as regex
 
 # Our scripts
 import tools
 import settings
-from transpile import Transpiler
 
 
-def generate_codecov(path_to_tests, skips_file_name):
+def generate_codecov():
     os.chdir(settings.get_setting('path_to_c2eo_transpiler'))
     tools.pprint('Merging profdata\n')
     subprocess.run(f'llvm-profdata-14 merge -j {tools.cpu_count()} -sparse *.profraw -o res.profdata', shell=True)
@@ -44,19 +42,10 @@ def generate_codecov(path_to_tests, skips_file_name):
     subprocess.run('llvm-cov-14 report c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt',
                    shell=True)
     tools.clear_dir_by_patterns('.', ['*.profraw', '*.profdata'])
-    # send to codecov
-    os.remove('report.txt')
 
 
 def create_parser():
     _parser = argparse.ArgumentParser(description='the script for generating codecov for c2eo transpiler')
-
-    _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
-                         help='the relative path from the scripts folder to the tests folder')
-
-    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default='',
-                         help='the name of the file with a set of skips for transpile')
-
     return _parser
 
 
@@ -64,4 +53,4 @@ if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
     parser = create_parser()
     namespace = parser.parse_args()
-    generate_codecov(namespace.path_to_tests, namespace.skips_file_name)
+    generate_codecov()
