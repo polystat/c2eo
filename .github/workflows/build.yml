@@ -91,7 +91,7 @@ jobs:
       - name: Unpack gcc-c-torture
         run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null  
 
-      - name: Parsing
+      - name: Transpilation
         run: |
           cd ./project/scripts
           python3 transpile.py ../../gcc.c-torture -s gcc -n
@@ -157,6 +157,44 @@ jobs:
         run: |
           cd ./project/scripts
           python3 test.py -s test
+
+  csmith:
+    needs:
+      - cpp-lint
+      - clang-format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Install csmith
+        run: |
+          git clone https://github.com/csmith-project/csmith.git
+          cd csmith
+          sudo apt install m4
+          cmake -DCMAKE_INSTALL_PREFIX=csmith .
+          make
+
+      - name: Generating tests
+        run: |
+          cd ./project/scripts
+          python3 csmith.py ../tests/main/csmith
+        
+      - name: Transpilation
+        run: |
+          cd ./project/scripts
+          python3 transpile.py ../tests/main/csmith -n     
 
   codecov:
     needs:
