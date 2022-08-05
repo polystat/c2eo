@@ -180,21 +180,21 @@ jobs:
 
       - name: Install csmith
         run: |
+          cd ..
           git clone https://github.com/csmith-project/csmith.git
           cd csmith
-          sudo apt install m4
           cmake -DCMAKE_INSTALL_PREFIX=csmith .
           make
 
       - name: Generating tests
         run: |
           cd ./project/scripts
-          python3 csmith.py ../tests/main/csmith
+          python3 csmith.py ../tests/main/csmith -c 1000
         
       - name: Transpilation
         run: |
           cd ./project/scripts
-          python3 transpile.py ../tests/main/csmith -n     
+          python3 transpile.py ../tests/main/csmith -n    
 
   codecov:
     needs:
