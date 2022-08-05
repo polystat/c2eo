@@ -63,7 +63,7 @@ class Csmith(object):
             f.write(result.stdout)
         self.generated_files_count += 1
         tools.print_progress_bar(self.generated_files_count, self.files_count)
-        return file_name, result.stdout
+        return file_name, result.stderr if result.returncode else result.stdout
 
 
 def create_parser():
