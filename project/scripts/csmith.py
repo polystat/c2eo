@@ -26,6 +26,7 @@ SOFTWARE.
 
 import os
 import sys
+import shutil
 import argparse
 import subprocess
 
@@ -39,12 +40,20 @@ class Csmith(object):
     def __init__(self, path_to_generate, files_count):
         self.csmith_args = ' '.join([f'--{arg}' for arg in settings.get_setting('csmith_args')])
         self.path_to_csmith = os.path.abspath(os.path.join(settings.get_setting('path_to_csmith'), 'csmith'))
+        self.path_to_csmith_runtime = os.path.join(settings.get_setting('path_to_csmith_runtime'))
         self.path_to_generate = path_to_generate
         self.files_count = files_count
         self.generated_files_count = 0
 
     def generate(self):
-        os.makedirs(self.path_to_generate, exist_ok=True)
+        tools.pprint('\nMaking the dir:', slowly=True)
+        if os.path.exists(self.path_to_generate):
+            tools.clear_dir_by_patterns(self.path_to_generate, ['*.c', '*.h'])
+        else:
+            os.makedirs(self.path_to_generate, exist_ok=True)
+        tools.pprint('\nCopying runtime files into the dir:', slowly=True)
+        for file in tools.search_files_by_patterns(self.path_to_csmith_runtime, ['*.h'], print_files=True):
+            shutil.copy(file, self.path_to_generate)
         os.chdir(self.path_to_generate)
         tools.pprint('\nRunning generating files:\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
