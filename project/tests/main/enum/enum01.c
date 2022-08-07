@@ -1,28 +1,20 @@
 #include "stdio.h"
 
-enum numbers_1 {
-    ZERO,
-    ONE,
-    TWO
-};
+enum numbers_1 { ZERO, ONE, TWO };
 
-enum numbers_2 {
-    FIVE = 5,
-    TEN = 10,
-    FIFTEEN = 15
-};
+enum numbers_2 { FIVE = 5, TEN = 10, FIFTEEN = 15 };
 
 enum numbers_3 {
-    TWENTY_FIVE = 25,
-    TWENTY_SIX,
-    TWENTY_SEVEN,
-    TWENTY_FIVE_2 = TWENTY_FIVE,
-    TWENTY_SIX_2,
-    TWENTY_SEVEN_2,
-    TWENTY_FOUR = 24,
-    MINUS_FOUR = -4,
-    MINUS_THREE,
-    MINUS_TWO
+  TWENTY_FIVE = 25,
+  TWENTY_SIX,
+  TWENTY_SEVEN,
+  TWENTY_FIVE_2 = TWENTY_FIVE,
+  TWENTY_SIX_2,
+  TWENTY_SEVEN_2,
+  TWENTY_FOUR = 24,
+  MINUS_FOUR = -4,
+  MINUS_THREE,
+  MINUS_TWO
 };
 
 int main() {
