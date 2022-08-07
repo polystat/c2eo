@@ -31,6 +31,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/transpiler/enumdecl.h"
 #include "src/transpiler/memory_manager.h"
 #include "src/transpiler/process_variables.h"
 #include "src/transpiler/recorddecl.h"
@@ -138,6 +139,8 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
 
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
+
+void AppendDeclStmt(const DeclStmt *stmt);
 
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
@@ -366,6 +369,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetFloatingLiteralEOObject(op);
   }
   if (stmt_class == Stmt::DeclStmtClass) {
+    const auto *op = dyn_cast<DeclStmt>(stmt);
+    AppendDeclStmt(op);
     return EOObject(EOObjectType::EO_EMPTY);
   }
   if (stmt_class == Stmt::CallExprClass) {
@@ -600,6 +605,15 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
   goto_object.nested.push_back(return_label);
 
   return goto_object;
+}
+
+void AppendDeclStmt(const DeclStmt *stmt) {
+  for (auto decl : stmt->decls()) {
+    if (decl->getKind() == Decl::Kind::Enum) {
+      auto *enum_decl = dyn_cast<clang::EnumDecl>(decl);
+      ProcessEnumDecl(enum_decl);
+    }
+  }
 }
 
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,

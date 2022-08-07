@@ -38,12 +38,18 @@ EnumType ProcessEnumDecl(const clang::EnumDecl *ED) {
   }
 
   extern UnitTranspiler transpiler;
-  //    if (transpiler.enum_manager_.GetById(ED)) {
-  //        return {};
-  //    }
+  if (transpiler.enum_manager_.GetById(ED) != nullptr) {
+    return {};
+  }
 
   std::vector<EnumConstantType> constants;
-  std::string enum_name = "en-" + ED->getNameAsString();
+  std::string enum_name = "en-";
+  try {
+    enum_name += ED->getNameAsString();
+  } catch (std::exception &) {
+    enum_name += "noname";
+  }
+
   uint64_t size = 0;
 
   for (auto decl = ED->decls_begin(); decl != ED->decls_end(); decl++) {
