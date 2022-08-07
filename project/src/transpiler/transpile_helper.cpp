@@ -384,10 +384,6 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
     return GetMemberExprEOObject(op);
   }
-  if (stmt_class == Stmt::MemberExprClass) {
-    const auto *op = dyn_cast<MemberExpr>(stmt);
-    return GetMemberExprEOObject(op);
-  }
   if (stmt_class == Stmt::ArraySubscriptExprClass) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     std::vector<uint64_t> dims;
@@ -751,7 +747,6 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
           final_write.nested.emplace_back(curr_shift);
           return final_write;
         }
-        return curr_shift;
       }
       return curr_shift;
     }
