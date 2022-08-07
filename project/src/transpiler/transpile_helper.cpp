@@ -608,7 +608,7 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
 }
 
 void AppendDeclStmt(const DeclStmt *stmt) {
-  for (auto decl : stmt->decls()) {
+  for (auto *decl : stmt->decls()) {
     if (decl->getKind() == Decl::Kind::Enum) {
       auto *enum_decl = dyn_cast<clang::EnumDecl>(decl);
       ProcessEnumDecl(enum_decl);
