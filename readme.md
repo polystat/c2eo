@@ -1,11 +1,11 @@
 <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)
-![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)
-![codecov](https://codecov.io/gh/polystat/c2eo/branch/master/graph/badge.svg)
+[![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)](https://github.com/polystat/c2eo/actions?query=event%3Aschedule++)
+[![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)](https://github.com/polystat/c2eo/releases/latest)
+[![codecov](https://codecov.io/gh/polystat/c2eo/branch/master/graph/badge.svg)](https://codecov.io/gh/polystat/c2eo)
 ![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)
-![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)
-![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)
+[![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo)](https://hitsofcode.com/view/github/polystat/c2eo)
+[![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)](https://github.com/polystat/c2eo/blob/master/license.txt)
 
 This is a experimental translator of [C](https://en.wikipedia.org/wiki/C_(programming_language)) programs to [EO](https://www.eolang.org) programs.
 
