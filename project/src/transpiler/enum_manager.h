@@ -56,6 +56,8 @@ class EnumManager {
 
   EnumConstantType *GetConstantById(const clang::EnumConstantDecl *id);
 
+  EnumType *GetById(const clang::EnumDecl *id);
+
   std::vector<EnumType> enum_types;
 };
 
