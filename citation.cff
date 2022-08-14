@@ -11,6 +11,7 @@ authors:
   orcid: "https://orcid.org/0000-0002-4957-5695"
 - family-names: "Ryabtsev"
   given-names: "Yaroslav"
+  orcid: "https://orcid.org/0000-0001-5530-3752"
 - family-names: "Kamensky"
   given-names: "Andrey"
 title: "c2eo: C to EO transpiler"
