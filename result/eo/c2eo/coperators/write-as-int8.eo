@@ -1,0 +1,8 @@
++alias c2eo.coperators.read-as-int8
+
++package c2eo.coperators
+
+[a b] > write-as-int8
+  seq > @
+    a.write (b.as-bytes.slice 7 1)
+    read-as-int8 a
