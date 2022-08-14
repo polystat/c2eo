@@ -1,4 +1,8 @@
 +package c2eo.coperators
 
 [a b] > write-as-string
-  a.write b > @
+  b.as-bytes > value
+  if. > @
+    (value.slice (value.size.minus 1) 1).eq 00-
+    a.write value
+    a.write (value.concat 00-)
