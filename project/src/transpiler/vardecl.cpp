@@ -94,7 +94,7 @@ EOObject InitValueEOObj(const VarDecl *VD, bool is_init) {
 
 EOObject InitValueAnalysis(const VarDecl *VD) {
   auto qual_type = VD->getType();
-  const auto *type_ptr = qual_type.getTypePtr();
+  //  const auto *type_ptr = qual_type.getTypePtr();
 
   auto type_info = VD->getASTContext().getTypeInfo(qual_type);
   auto size = type_info.Width;
