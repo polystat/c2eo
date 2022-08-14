@@ -41,7 +41,7 @@ from compile import Compiler
 class Tests(object):
 
     def __init__(self, path_to_tests, skips_file_name):
-        self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
+        self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
@@ -53,15 +53,16 @@ class Tests(object):
 
     def test(self):
         start_time = time.time()
-        self.transpilation_units = Compiler(self.path_to_tests, '').compile()
+        self.transpilation_units, skip_result = Compiler(self.path_to_tests, self.skips_file_name).compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
-                results = threads.map(self.compare_test_results, self.transpilation_units)
+                results = threads.map(compare_test_results, self.transpilation_units)
             result = group_comparison_results(results)
+            result[tools.SKIP] = skip_result
+            tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
             _is_failed = len(result[tools.ERROR]) + len(result[tools.EXCEPTION])
-            tools.pprint_result('TEST', len(self.transpilation_units), int(time.time() - start_time), result,
-                                _is_failed)
+            tools.pprint_result('TEST', tests_count, int(time.time() - start_time), result, _is_failed)
             return _is_failed
 
     def get_result_for_tests(self):
@@ -117,20 +118,6 @@ class Tests(object):
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
-    def compare_test_results(self, unit):
-        for _filter, comment in self.skips.items():
-            if _filter in unit['name']:
-                return unit, True, False, False, comment
-
-        with open(unit['result_c_file'], 'r') as f:
-            c_data = f.readlines()
-        with open(unit['result_eo_file'], 'r') as f:
-            eo_data = f.readlines()
-        is_except, is_equal, log_data = compare_files(c_data, eo_data)
-        with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
-            f.writelines(log_data)
-        return unit, False, is_except, is_equal, log_data
-
 
 def compare_files(c_data, eo_data):
     if is_exception(c_data):
@@ -178,14 +165,10 @@ def compare_lines(c_data, eo_data):
 
 
 def group_comparison_results(results):
-    result = {tools.PASS: [], tools.ERROR: [], tools.EXCEPTION: {}, tools.SKIP: {}}
+    result = {tools.PASS: [], tools.ERROR: [], tools.EXCEPTION: {}}
     tools.pprint('Getting results\n', slowly=True)
-    for unit, is_skip, is_except, is_equal, log_data in results:
-        if is_skip:
-            if log_data not in result[tools.SKIP]:
-                result[tools.SKIP][log_data] = {}
-            result[tools.SKIP][log_data][unit['unique_name']] = set()
-        elif is_except:
+    for unit, is_except, is_equal, log_data in results:
+        if is_except:
             log_data = ''.join(log_data)
             if log_data not in result[tools.EXCEPTION]:
                 result[tools.EXCEPTION][log_data] = {}
@@ -195,6 +178,17 @@ def group_comparison_results(results):
         else:
             result[tools.ERROR].append((unit['unique_name'], log_data))
     return result
+
+
+def compare_test_results(unit):
+    with open(unit['result_c_file'], 'r') as f:
+        c_data = f.readlines()
+    with open(unit['result_eo_file'], 'r') as f:
+        eo_data = f.readlines()
+    is_except, is_equal, log_data = compare_files(c_data, eo_data)
+    with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
+        f.writelines(log_data)
+    return unit, is_except, is_equal, log_data
 
 
 def create_parser():
