@@ -106,13 +106,13 @@ EOObject InitValueAnalysis(const VarDecl *VD) {
   std::string str;
   if (init_val->isInt()) {
     auto int_value = init_val->getInt().getExtValue();
-//    if (type_ptr->isCharType()) {
-//      str = "'";
-//      str += static_cast<char>(int_value);
-//      str += "'";
-//    } else {
-      str = std::to_string(int_value);
-//    }
+    //    if (type_ptr->isCharType()) {
+    //      str = "'";
+    //      str += static_cast<char>(int_value);
+    //      str += "'";
+    //    } else {
+    str = std::to_string(int_value);
+    //    }
   } else if (init_val->isFloat() && (size == double_size)) {
     auto float_value = init_val->getFloat().convertToDouble();
     str = std::to_string(float_value);
