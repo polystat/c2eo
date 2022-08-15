@@ -1,0 +1,7 @@
++package c2eo.coperators
+
+[a] > read-as-int8
+  if. > @
+    (a.read 1).as-int.gte 0
+    (00-00-00-00-00-00-00.concat (a.read 1)).as-int
+    (FF-FF-FF-FF-FF-FF-FF.concat (a.read 1)).as-int

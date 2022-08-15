@@ -73,7 +73,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
       auto *field = llvm::dyn_cast<clang::FieldDecl>(*it);
 
       if (field == nullptr) {
-        return {};
+        continue;
       }
       std::string field_name;
       if (!field->isUnnamedBitfield() && !field->getNameAsString().empty()) {

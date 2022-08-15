@@ -46,15 +46,6 @@ RecordType *RecordManager::GetById(int64_t id) {
   return nullptr;
 }
 
-__attribute__((unused)) size_t RecordManager::GetShift(
-    int64_t id, const std::string &member) {
-  RecordType *rt = GetById(id);
-  if (rt != nullptr) {
-    return rt->fields[member].second;
-  }
-  return -1;
-}
-
 EOObject RecordManager::GetShiftAlias(int64_t id, const std::string &member) {
   RecordType *rt = GetById(id);
   if (rt != nullptr) {

@@ -140,6 +140,7 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
 
+EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal);
 void AppendDeclStmt(const DeclStmt *stmt);
 
 extern UnitTranspiler transpiler;
@@ -364,6 +365,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<IntegerLiteral>(stmt);
     return GetIntegerLiteralEOObject(op);
   }
+  if (stmt_class == Stmt::CharacterLiteralClass) {
+    const auto *op = dyn_cast<clang::CharacterLiteral>(stmt);
+    return GetCharacterLiteralEOObject(op);
+  }
   if (stmt_class == Stmt::FloatingLiteralClass) {
     const auto *op = dyn_cast<FloatingLiteral>(stmt);
     return GetFloatingLiteralEOObject(op);
@@ -438,7 +443,14 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
 
   return EOObject(EOObjectType::EO_PLUG);
 }
-
+EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
+  if (p_literal != nullptr) {
+    unsigned int an_int = p_literal->getValue();
+    std::string str_val{std::to_string(an_int)};
+    return EOObject{str_val, EOObjectType::EO_LITERAL};
+  }
+  return EOObject{EOObjectType::EO_PLUG};
+}
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
@@ -1393,10 +1405,10 @@ std::string GetPostfix(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  if (type_ptr->isCharType()) {
-    str += "char";
-    return str;
-  }
+  //  if (type_ptr->isCharType()) {
+  //    str += "int8";
+  //    return str;
+  //  }
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
@@ -1428,10 +1440,10 @@ std::string GetTypeName(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  if (type_ptr->isCharType()) {
-    str += "char";
-    return str;
-  }
+  //  if (type_ptr->isCharType()) {
+  //    str += "char";
+  //    return str;
+  //  }
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
