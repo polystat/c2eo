@@ -946,7 +946,7 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
   vector<string> formats;
   for (const auto *arg : op->arguments()) {
     auto param = GetStmtEOObject(arg);
-    if (idx != 0 && param.type == EOObjectType::EO_LITERAL) {
+    if (idx == 0 && param.type == EOObjectType::EO_LITERAL) {
       const std::regex re("%([lh]*)([cdfs])");
       auto formats_begin =
           std::sregex_iterator(param.name.begin(), param.name.end(), re);
