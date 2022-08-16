@@ -49,9 +49,9 @@ class Compiler(object):
         self.transpilation_units, skip_result = Transpiler(self.path_to_tests, self.skips_file_name,
                                                            self.need_to_prepare_c_code).transpile()
         if self.transpilation_units:
-            EOBuilder().build()
-            passes = set(unit['unique_name'] for unit in self.transpilation_units)
-            result = {tools.PASS: passes, tools.SKIP: skip_result}
+            errors, error_result = EOBuilder(self.transpilation_units).build()
+            passes = set(unit['unique_name'] for unit in self.transpilation_units) - errors
+            result = {tools.PASS: passes, tools.ERROR: error_result, tools.SKIP: skip_result}
             tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
             tools.pprint_result('COMPILE', tests_count, int(time.time() - start_time), result, 0)
         return self.transpilation_units, skip_result
