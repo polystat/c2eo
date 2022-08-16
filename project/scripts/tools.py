@@ -155,7 +155,7 @@ def pprint(*data, slowly=False, status=INFO, end='\n', on_the_next_line=False):
         if type(token) == list:
             token = ''.join(list(map(str, token)))
         for line in str(token).split('\n'):
-            status_str = f'[{[{get_status(status)}]}] ' if status else ''
+            status_str = f'[{get_status(status)}] ' if status else ''
             print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
                 time.sleep(0.01)
