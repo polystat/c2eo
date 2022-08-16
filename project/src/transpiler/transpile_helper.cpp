@@ -646,32 +646,40 @@ EOObject GetCastEOObject(const CastExpr *op) {
   if (op == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-
   auto cast_kind = op->getCastKind();
+  QualType qual_type = op->getType();
+  string type = GetTypeName(qual_type);
   if (cast_kind == clang::CK_LValueToRValue) {
-    QualType qual_type = op->getType();
-    string type = GetTypeName(qual_type);
     EOObject read{"read"};
     read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-    if (!qual_type->isRecordType()) {
-      read.name += "-as-" + type;
-    } else {
+    if (qual_type->isRecordType()) {
       read.nested.emplace_back(
           to_string(transpiler.record_manager_
                         .GetById(qual_type->getAsRecordDecl()->getID())
                         ->size),
           EOObjectType::EO_LITERAL);
+
+    } else {
+      read.name += "-as-" + type;
     }
     return read;
   }
   if (cast_kind == clang::CK_FloatingToIntegral ||
       cast_kind == clang::CK_IntegralToFloating) {
-    QualType qual_type = op->getType();
-    string type = GetTypeName(qual_type);
     EOObject cast{"as-" + type};
     cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
     return cast;
   }
+  //  if (cast_kind == clang::CK_ArrayToPointerDecay &&
+  //      (*op->child_begin())->getStmtClass() !=
+  //      clang::Stmt::StringLiteralClass) {
+  //    EOObject read{"read"};
+  //    if (type != "ptr") {
+  //      read.name += "-as-" + type;
+  //    }
+  //    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+  //    return read;
+  //  }
   // TODO(nkchuykin) if cast kinds and also split it to another func
   return GetStmtEOObject(*op->child_begin());
 }
@@ -934,8 +942,37 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
 
 EOObject GetPrintfCallEOObject(const CallExpr *op) {
   EOObject printf{"printf"};
+  int idx = 0;
+  vector<string> formats;
   for (const auto *arg : op->arguments()) {
-    printf.nested.push_back(GetStmtEOObject(arg));
+    auto param = GetStmtEOObject(arg);
+    if (!idx && param.type == EOObjectType::EO_LITERAL) {
+      const std::regex re("%([lh]*)([cdfs])");
+      auto formats_begin =
+          std::sregex_iterator(param.name.begin(), param.name.end(), re);
+      auto formats_end = std::sregex_iterator();
+      for (std::sregex_iterator i = formats_begin; i != formats_end; ++i) {
+        char match_format = i->str(2)[0];
+        switch (match_format) {
+          case 's':
+            formats.emplace_back("read-as-string");
+            break;
+          case 'c':
+            formats.emplace_back("as-char");
+            break;
+          default:
+            formats.emplace_back("");
+            break;
+        }
+      }
+    } else if (idx <= formats.size() && !formats[idx - 1].empty()) {
+      EOObject cast{formats[idx - 1]};
+      cast.nested.push_back(param);
+      printf.nested.push_back(cast);
+    } else {
+      printf.nested.push_back(param);
+    }
+    idx++;
   }
   return printf;
 }
@@ -1405,10 +1442,7 @@ std::string GetPostfix(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  //  if (type_ptr->isCharType()) {
-  //    str += "int8";
-  //    return str;
-  //  }
+
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
@@ -1428,7 +1462,12 @@ std::string GetTypeName(QualType qual_type) {
   }
 
   if (type_ptr->isPointerType()) {
-    str += "ptr";
+    auto ptr_type = dyn_cast<clang::PointerType>(type_ptr);
+    if (ptr_type && ptr_type->getPointeeType()->isCharType()) {
+      str += "string";
+    } else {
+      str += "ptr";
+    }
     return str;
   }
 
@@ -1440,10 +1479,6 @@ std::string GetTypeName(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  //  if (type_ptr->isCharType()) {
-  //    str += "char";
-  //    return str;
-  //  }
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
