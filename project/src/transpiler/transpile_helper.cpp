@@ -946,7 +946,7 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
   vector<string> formats;
   for (const auto *arg : op->arguments()) {
     auto param = GetStmtEOObject(arg);
-    if (!idx && param.type == EOObjectType::EO_LITERAL) {
+    if (idx != 0 && param.type == EOObjectType::EO_LITERAL) {
       const std::regex re("%([lh]*)([cdfs])");
       auto formats_begin =
           std::sregex_iterator(param.name.begin(), param.name.end(), re);
@@ -1463,8 +1463,8 @@ std::string GetTypeName(QualType qual_type) {
   }
 
   if (type_ptr->isPointerType()) {
-    auto ptr_type = dyn_cast<clang::PointerType>(type_ptr);
-    if (ptr_type && ptr_type->getPointeeType()->isCharType()) {
+    const auto ptr_type = dyn_cast<clang::PointerType>(type_ptr);
+    if (ptr_type != nullptr && ptr_type->getPointeeType()->isCharType()) {
       str += "string";
     } else {
       str += "ptr";
