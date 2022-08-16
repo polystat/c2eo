@@ -66,10 +66,7 @@ def get_meta_code(name, read_as_lines=False):
     path = get_setting('path_to_meta')
     file = os.path.join(path, f'{name}.txt')
     with open(file, 'r') as f:
-        if read_as_lines:
-            return f.readlines()
-        else:
-            return f.read()
+        return f.readlines() if read_as_lines else f.read()
 
 
 def get_skips(name):

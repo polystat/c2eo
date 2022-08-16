@@ -63,7 +63,6 @@ class Transpiler(object):
         self.transpilation_units = []
         self.replaced_path = f'{os.path.split(self.path_to_c_files[:-1])[0]}{os.sep}'
         self.files_handled_count = 0
-        self.files_count = 0
         self.ignored_transpilation_warnings = settings.get_setting('ignored_transpilation_warnings')
         if not self.ignored_transpilation_warnings:
             self.ignored_transpilation_warnings = []
@@ -75,18 +74,21 @@ class Transpiler(object):
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_patterns(self.path_to_c_files, ['*.c'], filters=self.filters, recursive=True,
                                                  print_files=True)
-        self.files_count = len(c_files)
+        with tools.thread_pool() as threads:
+            self.transpilation_units = list(threads.map(self.make_unit, c_files))
+        generate_unique_names_for_units(self.transpilation_units)
+        skip_result = self.check_skips()
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_transpiler)
         tools.pprint('\nTranspile files:\n', slowly=True)
-        tools.print_progress_bar(0, self.files_count)
+        tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
-            self.transpilation_units = list(threads.map(self.start_transpilation, c_files))
-        generate_unique_names_for_units(self.transpilation_units, 2)
+            threads.map(self.start_transpilation, self.transpilation_units)
         result = self.group_transpilation_results()
+        result[tools.SKIP] = skip_result
+        tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
         is_failed = sum(map(len, result[tools.EXCEPTION].values()))
-        tools.pprint_result('TRANSPILE', len(self.transpilation_units), int(time.time() - start_time), result,
-                            is_failed)
+        tools.pprint_result('TRANSPILE', tests_count, int(time.time() - start_time), result, is_failed)
         if is_failed:
             exit(f'transpilation failed')
 
@@ -97,7 +99,7 @@ class Transpiler(object):
             self.generate_run_sh(self.transpilation_units[0]['full_name'])
         tools.pprint('\nTranspilation done\n')
         os.chdir(original_path)
-        return self.transpilation_units
+        return self.transpilation_units, skip_result
 
     def build_c2eo(self):
         if self.need_to_generate_codecov:
@@ -107,19 +109,36 @@ class Transpiler(object):
         else:
             build_c2eo.main(self.path_to_c2eo_build)
 
-    def start_transpilation(self, c_file):
+    def make_unit(self, c_file):
         path, name, _ = tools.split_path(c_file, with_end_sep=True)
         rel_c_path = path.replace(self.replaced_path, '')
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
         prepared_c_file, result_path = self.prepare_c_file(path, name, c_file)
-        eo_file = f'{full_name}.eo'
-        transpile_cmd = f'{self.codecov_arg} ./c2eo {prepared_c_file} {eo_file}'
+        return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name, 'prepared_c_file': prepared_c_file,
+                'result_path': result_path, 'name': name, 'unique_name': name}
+
+    def check_skips(self):
+        skip_units = []
+        skips = {}
+        for unit in self.transpilation_units:
+            for _filter, comment in self.skips.items():
+                if _filter in unit['name']:
+                    if comment not in skips:
+                        skips[comment] = {}
+                    skips[comment][unit['unique_name']] = set()
+                    skip_units.append(unit)
+        self.transpilation_units = list(filter(lambda x: x not in skip_units, self.transpilation_units))
+        return skips
+
+    def start_transpilation(self, unit):
+        eo_file = f'{unit["full_name"]}.eo'
+        transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
-        tools.print_progress_bar(self.files_handled_count, self.files_count)
-        return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name, 'transpilation_result': result,
-                'eo_file': os.path.abspath(eo_file), 'rel_eo_file': os.path.join(rel_c_path, f'{name}.eo'),
-                'name': name, 'result_path': result_path, 'prepared_c_file': prepared_c_file, 'unique_name': name}
+        tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
+        unit['transpilation_result'] = result
+        unit['eo_file'] = os.path.abspath(eo_file)
+        unit['rel_eo_file'] = os.path.join(unit["rel_c_path"], f'{unit["name"]}.eo')
 
     def prepare_c_file(self, path, file_name, c_file):
         with open(f'{c_file}', 'r', encoding='ISO-8859-1') as f:
@@ -153,17 +172,10 @@ class Transpiler(object):
 
     def group_transpilation_results(self):
         result = {tools.PASS: set([unit['unique_name'] for unit in self.transpilation_units]), tools.NOTE: {},
-                  tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}, tools.SKIP: {}}
+                  tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.transpilation_units:
-            skip_message = self.check_unit_skip(unit)
             exception_message = check_unit_exception(unit)
-            if skip_message:
-                if skip_message not in result[tools.SKIP]:
-                    result[tools.SKIP][skip_message] = {}
-                result[tools.SKIP][skip_message][unit['unique_name']] = set()
-                continue
-
             if exception_message:
                 if exception_message not in [tools.EXCEPTION]:
                     result[tools.EXCEPTION][exception_message] = {}
@@ -186,14 +198,9 @@ class Transpiler(object):
                         if unit['unique_name'] in place:
                             result[status][message][unit['unique_name']].add(place.split(':', 1)[1][:-2])
 
-        for status in [tools.EXCEPTION, tools.SKIP]:
+        for status in [tools.EXCEPTION]:
             result[tools.PASS] -= set(file for value in result[status].values() for file in value.keys())
         return result
-
-    def check_unit_skip(self, unit):
-        for _filter, comment in self.skips.items():
-            if _filter in unit['name']:
-                return comment
 
     def move_transpiled_files(self):
         difference = []
@@ -232,7 +239,7 @@ class Transpiler(object):
             f.write(code)
 
 
-def generate_unique_names_for_units(units, i):
+def generate_unique_names_for_units(units, words_in_name=2):
     names = {}
     collision_names = {}
     for unit in units:
@@ -246,24 +253,21 @@ def generate_unique_names_for_units(units, i):
     for name, _units in collision_names.items():
         units.extend(_units)
         for unit in _units:
-            unit['unique_name'] = f'{os.sep.join(unit["rel_c_path"].split(os.sep)[-i:])}{unit["name"]}'
+            unit['unique_name'] = f'{os.sep.join(unit["rel_c_path"].split(os.sep)[-words_in_name:])}{unit["name"]}'
     if len(collision_names) > 0:
-        generate_unique_names_for_units(units, i + 1)
+        generate_unique_names_for_units(units, words_in_name + 1)
 
 
 def check_unit_exception(unit):
     exception_message = ''
-
     if unit['transpilation_result'].returncode:
         exception_message = '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
     elif not os.path.isfile(unit['eo_file']):
         exception_message = 'was generated empty EO file'
     elif os.stat(unit['eo_file']).st_size == 0:
         exception_message = 'the EO file was not generated'
-
     if not os.path.isfile(unit['eo_file']):
         open(unit['eo_file'], 'a').close()
-
     return exception_message
 
 

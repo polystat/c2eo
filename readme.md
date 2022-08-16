@@ -1,17 +1,17 @@
 <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)
-![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)
-![codecov](https://codecov.io/gh/polystat/c2eo/branch/master/graph/badge.svg)
+[![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)](https://github.com/polystat/c2eo/actions?query=event%3Aschedule++)
+[![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)](https://github.com/polystat/c2eo/releases/latest)
+[![codecov](https://codecov.io/gh/polystat/c2eo/branch/master/graph/badge.svg)](https://codecov.io/gh/polystat/c2eo)
 ![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)
-![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)
-![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)
+[![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo)](https://hitsofcode.com/view/github/polystat/c2eo)
+[![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)](https://github.com/polystat/c2eo/blob/master/license.txt)
 
-This is a experimental translator of [C](https://en.wikipedia.org/wiki/C_(programming_language)) programs to [EO](https://www.eolang.org) programs.
+This is a experimental translator of C ([ISO/IEC 9899:2018](https://www.iso.org/standard/74528.htm)) programs to [EO](https://www.eolang.org) programs.
 
 ## How to Use
 
-Assuming, you are on [Ubuntu 20+](https://ubuntu.com/download):
+Assuming, you are on [Ubuntu 22.04+](https://ubuntu.com/download):
 
 ```bash
 $ apt update
@@ -42,7 +42,7 @@ However, you can try to build the project from source at your own risk.
 
 ## How to Contribute
 
-Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
+Again, we recommend [Ubuntu 22.04+](https://ubuntu.com/download) and you will need
 [wget 1.21+](https://www.tecmint.com/install-wget-in-linux/), 
 [tar 1.30+](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git 2.32.+](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),

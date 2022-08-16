@@ -155,11 +155,8 @@ def pprint(*data, slowly=False, status=INFO, end='\n', on_the_next_line=False):
         if type(token) == list:
             token = ''.join(list(map(str, token)))
         for line in str(token).split('\n'):
-            if status:
-                print(f'{IWhite}[{get_status(status)}] {line}', end=end)
-            else:
-                print(f'{IWhite}{line}', end=end)
-
+            status_str = f'[{[{get_status(status)}]}] ' if status else ''
+            print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
                 time.sleep(0.01)
 
@@ -229,9 +226,7 @@ def pprint_separation_line():
 
 def pprint_truncated_data(data, max_lines):
     if type(data) == str:
-        data = data.split('\n')
-        data = data[:max_lines]
-        data = '\n'.join(data)
+        data = '\n'.join(data.split('\n')[:max_lines])
     else:
         data = data[:max_lines]
     pprint(data, slowly=True, status='')
