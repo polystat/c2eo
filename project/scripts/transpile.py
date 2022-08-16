@@ -260,17 +260,14 @@ def generate_unique_names_for_units(units, words_in_name=2):
 
 def check_unit_exception(unit):
     exception_message = ''
-
     if unit['transpilation_result'].returncode:
         exception_message = '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
     elif not os.path.isfile(unit['eo_file']):
         exception_message = 'was generated empty EO file'
     elif os.stat(unit['eo_file']).st_size == 0:
         exception_message = 'the EO file was not generated'
-
     if not os.path.isfile(unit['eo_file']):
         open(unit['eo_file'], 'a').close()
-
     return exception_message
 
 

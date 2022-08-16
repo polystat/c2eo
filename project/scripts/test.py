@@ -111,7 +111,7 @@ class Tests(object):
         try:
             process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
-            subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
+            process.kill()
             with open(unit['result_eo_file'], 'w') as f:
                 f.write(f'exception: execution time EO file exceeded {timeout} seconds\n')
         finally:
@@ -145,16 +145,14 @@ def compare_lines(c_data, eo_data):
     is_equal = True
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
-        c_line = c_line.rstrip()
-        eo_line = eo_line.rstrip()
+        c_line, eo_line = c_line.rstrip(), eo_line.rstrip()
         ok_line = f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n'
         if c_line == eo_line:
             log_data.append(ok_line)
             continue
 
         is_both_float = tools.is_float(c_line) and tools.is_float(eo_line)
-        c_line = c_line.replace(',', '.')
-        eo_line = eo_line.replace(',', '.')
+        c_line, eo_line = c_line.replace(',', '.'), eo_line.replace(',', '.')
         if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
             log_data.append(ok_line)
         else:
