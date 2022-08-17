@@ -965,8 +965,8 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
             break;
         }
       }
-    }
-    if (idx <= formats.size() && !formats[idx - 1].empty()) {
+      printf.nested.push_back(param);
+    } else if (idx <= formats.size() && !formats[idx - 1].empty()) {
       EOObject cast{formats[idx - 1]};
       cast.nested.push_back(param);
       printf.nested.push_back(cast);
@@ -1463,7 +1463,7 @@ std::string GetTypeName(QualType qual_type) {
   }
 
   if (type_ptr->isPointerType()) {
-    const auto ptr_type = dyn_cast<clang::PointerType>(type_ptr);
+    const auto *const ptr_type = dyn_cast<clang::PointerType>(type_ptr);
     if (ptr_type != nullptr && ptr_type->getPointeeType()->isCharType()) {
       str += "string";
     } else {
