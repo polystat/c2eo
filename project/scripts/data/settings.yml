@@ -29,13 +29,22 @@ clang_tidy_checks:
 - -cppcoreguidelines-avoid-magic-numbers
 - -readability-magic-numbers
 - clang-analyzer-*
+- -clang-analyzer-cplusplus.NewDeleteLeaks
 code_file_patterns:
 - '*.cpp'
 - '*.h'
+csmith_args:
+- 'max-block-depth 2'
+- 'max-array-len-per-dim 4'
+- 'max-block-size 2'
+- 'max-expr-complexity 3'
+- 'max-funcs 2'
+- 'max-struct-fields 3'
+- 'max-union-fields 3'
 skips_for_test: test
 skips_for_compile: compile
 skips_for_transpile: transpile
-current_eo_version: 0.25.5
+current_eo_version: 0.27.0
 ignored_inspection_warnings: null
 ignored_transpilation_warnings:
 - Wunused-command-line-argument
@@ -44,6 +53,8 @@ path_to_c2eo_build: ../build/
 path_to_c2eo_transpiler: ../bin/
 path_to_code_files: ../src/transpiler/
 path_to_skips: data/skips/
+path_to_csmith: ../../../csmith/src/
+path_to_csmith_runtime: ../../../csmith/runtime/
 path_to_eo: eo/
 path_to_eo_external: ../../result/eo/c2eo/external/
 path_to_eo_parse: target/01-parse/

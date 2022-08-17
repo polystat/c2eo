@@ -94,7 +94,7 @@ EOObject InitValueEOObj(const VarDecl *VD, bool is_init) {
 
 EOObject InitValueAnalysis(const VarDecl *VD) {
   auto qual_type = VD->getType();
-  const auto *type_ptr = qual_type.getTypePtr();
+  //  const auto *type_ptr = qual_type.getTypePtr();
 
   auto type_info = VD->getASTContext().getTypeInfo(qual_type);
   auto size = type_info.Width;
@@ -106,13 +106,13 @@ EOObject InitValueAnalysis(const VarDecl *VD) {
   std::string str;
   if (init_val->isInt()) {
     auto int_value = init_val->getInt().getExtValue();
-    if (type_ptr->isCharType()) {
-      str = "'";
-      str += static_cast<char>(int_value);
-      str += "'";
-    } else {
-      str = std::to_string(int_value);
-    }
+    //    if (type_ptr->isCharType()) {
+    //      str = "'";
+    //      str += static_cast<char>(int_value);
+    //      str += "'";
+    //    } else {
+    str = std::to_string(int_value);
+    //    }
   } else if (init_val->isFloat() && (size == double_size)) {
     auto float_value = init_val->getFloat().convertToDouble();
     str = std::to_string(float_value);

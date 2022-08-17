@@ -1,6 +1,5 @@
 +package c2eo.coperators
 
-+alias org.eolang.math.number
-
 [a b] > mod
-  (number a).mod b > @
+  a.minus ((a.div b).times b) > @
+

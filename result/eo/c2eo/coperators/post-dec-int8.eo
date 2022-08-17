@@ -1,0 +1,9 @@
++alias c2eo.coperators.read-as-int8
++alias c2eo.coperators.write-as-int8
+
++package c2eo.coperators
+
+[a] > post-dec-int8
+  seq > @
+    write-as-int8 a ((read-as-int8 a).minus 1)
+    (read-as-int8 a).plus 1

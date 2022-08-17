@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > read-as-uint8
+  (00-00-00-00-00-00-00.concat (a.read 1)).as-int > @

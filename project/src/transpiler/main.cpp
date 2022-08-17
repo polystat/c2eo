@@ -49,8 +49,8 @@ void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: segfault at address " << si->si_addr
                << " while tool run\n";
   std::ofstream out(filename);
-  out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.coperators.printf\n\n";
+  out << "+package c2eo.src." << package_name << "\n\n";
   out << "[args...] > global\n";
   out << "  printf \"Segfault exception at address " << si->si_addr
       << " while tool run\" > @\n";
@@ -62,8 +62,8 @@ void SiAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: SIGABRT with code " << si->si_code
                << " while tool run\n";
   std::ofstream out(filename);
-  out << "+package c2eo.src." << package_name << "\n\n";
   out << "+alias c2eo.coperators.printf\n\n";
+  out << "+package c2eo.src." << package_name << "\n\n";
   out << "[args...] > global\n";
   out << "  printf \"SIGABRT at address " << si->si_addr
       << " while tool run\" > @\n";
@@ -72,9 +72,23 @@ void SiAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
 }
 
 int main(int argc, const char **argv) {
+  struct sigaction sa {};
+  memset(&sa, 0, sizeof(struct sigaction));
+  sigemptyset(&sa.sa_mask);
+  sa.sa_sigaction = SegfaultSigaction;
+  sa.sa_flags = SA_SIGINFO;
+  sigaction(SIGSEGV, &sa, nullptr);
+
+  struct sigaction sab {};
+  memset(&sab, 0, sizeof(struct sigaction));
+  sigemptyset(&sab.sa_mask);
+  sab.sa_sigaction = SiAbrtSigaction;
+  sab.sa_flags = SA_SIGINFO;
+  sigaction(SIGABRT, &sab, nullptr);
+
   if (argc < 3) {
     llvm::errs() << "exception: incorrect command line format. Necessary: c2eo "
-                    "<C-file-name_> <EO-file-name_>\n";
+                    "<C-file-name_> <EO-file-name_> [--meta]\n";
     return -1;
   }
 
@@ -87,6 +101,16 @@ int main(int argc, const char **argv) {
   argv[1] = new_in_file_name.c_str();
   const char **parser_argv = TransformArgv(argv);
   filename = argv[2];
+
+  if (argc == 4) {
+    if (std::string("--meta") != argv[3]) {
+      llvm::errs()
+          << "exception: incorrect command line format. Necessary: c2eo "
+             "<C-file-name_> <EO-file-name_> [--meta]\n";
+      return -1;
+    }
+    transpiler.GenerateMeta();
+  }
 
   package_name = filename.substr(0, filename.size() - 3);
   if (package_name.rfind('/') != std::string::npos) {
@@ -118,20 +142,6 @@ int main(int argc, const char **argv) {
   clang::ast_matchers::MatchFinder finder;
   AddMatchers(finder);
   tool.setPrintErrorMessage(false);
-
-  struct sigaction sa {};
-  memset(&sa, 0, sizeof(struct sigaction));
-  sigemptyset(&sa.sa_mask);
-  sa.sa_sigaction = SegfaultSigaction;
-  sa.sa_flags = SA_SIGINFO;
-  sigaction(SIGSEGV, &sa, nullptr);
-
-  struct sigaction sab {};
-  memset(&sab, 0, sizeof(struct sigaction));
-  sigemptyset(&sab.sa_mask);
-  sab.sa_sigaction = SiAbrtSigaction;
-  sab.sa_flags = SA_SIGINFO;
-  sigaction(SIGABRT, &sab, nullptr);
 
   auto result = tool.run(newFrontendActionFactory(&finder).get());
   if (result != 0) {

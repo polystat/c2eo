@@ -1,6 +1,6 @@
-+package c2eo.coperators
-
 +alias org.eolang.math.number
+
++package c2eo.coperators
 
 [a] > as-int32
   (number a).as-int > value!

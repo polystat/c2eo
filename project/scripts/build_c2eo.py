@@ -34,15 +34,15 @@ import tools
 import settings
 
 
-def main(path_to_c2eo_build):
+def main(path_to_c2eo_build, cmake_cmd='cmake ..'):
     tools.pprint()
     original_path = os.getcwd()
     if not os.path.exists(path_to_c2eo_build):
         os.mkdir(path_to_c2eo_build)
     os.chdir(path_to_c2eo_build)
-    result = subprocess.run('cmake ..', shell=True, capture_output=True, text=True)
+    result = subprocess.run(cmake_cmd, shell=True, capture_output=True, text=True)
     if result.returncode != 0:
-        tools.pprint_status_result('cmake ..', tools.EXCEPTION, result.stderr)
+        tools.pprint_status_result(cmake_cmd, tools.EXCEPTION, result.stderr)
         os.chdir(original_path)
         exit('Failed during cmake execution')
 

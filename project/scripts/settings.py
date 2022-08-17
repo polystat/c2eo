@@ -66,24 +66,20 @@ def get_meta_code(name, read_as_lines=False):
     path = get_setting('path_to_meta')
     file = os.path.join(path, f'{name}.txt')
     with open(file, 'r') as f:
-        if read_as_lines:
-            return f.readlines()
-        else:
-            return f.read()
+        return f.readlines() if read_as_lines else f.read()
 
 
 def get_skips(name):
     path = get_setting('path_to_skips')
     file = os.path.join(path, f'{name}.txt')
-    if not os.path.isfile(file):
-        return {}
-
     with open(file, 'r') as f:
         data = f.readlines()
     skips = {}
     for row in data:
         row = row.rstrip()
-        if row:
-            _filter, comment = row.split(':', maxsplit=1)
-            skips[_filter] = comment.strip()
+        if row and not row.startswith('#'):
+            _filters, comment = row.split(':', maxsplit=1)
+            _filters = _filters.split(',')
+            for _filter in _filters:
+                skips[_filter.strip()] = comment.strip()
     return skips

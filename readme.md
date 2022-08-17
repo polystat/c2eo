@@ -1,16 +1,17 @@
 <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)
-![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)
-![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)
+[![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)](https://github.com/polystat/c2eo/actions?query=event%3Aschedule++)
+[![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)](https://github.com/polystat/c2eo/releases/latest)
+[![codecov](https://codecov.io/gh/polystat/c2eo/branch/master/graph/badge.svg)](https://codecov.io/gh/polystat/c2eo)
 ![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)
-![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo?branch=master)
+[![Hits-of-Code](https://hitsofcode.com/github/polystat/c2eo)](https://hitsofcode.com/view/github/polystat/c2eo)
+[![license](https://img.shields.io/github/license/polystat/c2eo?color=e6e6e6)](https://github.com/polystat/c2eo/blob/master/license.txt)
 
-This is a experimental translator of [C](https://en.wikipedia.org/wiki/C_(programming_language)) programs to [EO](https://www.eolang.org) programs.
+This is a experimental translator of C ([ISO/IEC 9899:2018](https://www.iso.org/standard/74528.htm)) programs to [EO](https://www.eolang.org) programs.
 
 ## How to Use
 
-Assuming, you are on [Ubuntu 20+](https://ubuntu.com/download):
+Assuming, you are on [Ubuntu 22.04+](https://ubuntu.com/download):
 
 ```bash
 $ apt update
@@ -41,7 +42,7 @@ However, you can try to build the project from source at your own risk.
 
 ## How to Contribute
 
-Again, we recommend [Ubuntu 20+](https://ubuntu.com/download) and you will need
+Again, we recommend [Ubuntu 22.04+](https://ubuntu.com/download) and you will need
 [wget 1.21+](https://www.tecmint.com/install-wget-in-linux/), 
 [tar 1.30+](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
 [git 2.32.+](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
@@ -100,23 +101,41 @@ $ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
 # ./c2eo ../some_dir/example.c example.eo
 ```
 
-Ok, it works, but you're not going to manually broadcast each file and check if everything is OK. To do this, there are a couple of scripts that will simplify your life:
+### Checking before creating PR
 
+Your PR will pass the following checks, so before creating PR run these locally to make sure everything is ok:
+
+1. [clang-format-14](https://pypi.org/project/clang-format/)
 ```bash
-# Transpile and run all c files in folder, then compare their results and show statistics
-$ python3 test.py ../tests/main
-
-# Single-threaded launch of c2eo without formatting the output to the console for all c files
-$ python3 c2eo-all ../tests/main
-
-# Show code lines statistics in this dir 
-$ python3 code_lines.py ../tests/main
-
-# Transpile all c files and run EO compiler
-$ python3 compile.py ../tests/main
+$ clang-format project/src/transpiler/*.(cpp|h) -i 
 ```
 
-The main tests are in the folder `/project/tests/main`, if they pass, then everything is ok. [Here](./project/scripts/readme.md) you can find more information about scripts.
+2. [cpplint](https://github.com/cpplint/cpplint)
+```bash
+$ cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/** 
+```
+3. [clang-tidy](https://packages.ubuntu.com/en/bionic/clang-tidy)
+```bash
+$ cd project/srcipts
+$ python3 clang_tidy.py
+```
+4. [gcc.c-torture](https://github.com/polystat/c2eo/releases/download/0.1.16/gcc.c-torture.tar.gz)
+```bash
+$ cd project/srcipts
+$ python3 transpile.py <your_path_to_the_folder>/gcc.c-torture -s gcc -n
+```
+
+5. [c-testcuite](https://github.com/polystat/c2eo/releases/download/0.1.16/c-testcuite.tar.gz)
+```bash
+$ cd project/srcipts
+$ python3 compile.py -p <your_path_to_the_folder>/c-testcuite -s testcuite
+```
+
+6. test
+```bash
+$ cd project/srcipts
+$ python3 test.py -s test
+```
 
 ## How to release
 
@@ -280,6 +299,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 
 :heavy_check_mark: [Implemented](#implemented):
 - [basic data types: double, int, bool](#direct-memory-access-for-basic-data-types)
+- [const](#const)
 - [arrays](#arrays)
 - [structures](#structures)
 - [unions](#unions)
@@ -294,16 +314,15 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [for](#for)
 - [break](#break)
 - [continue](#continue)
+- [switch case default](#switch-case-default)
 - [operators](#operators)
 
 :hammer: In progress:
 - [bit operators (inconsistent implementation in the EO)](#bit-operators)
-- [char, unsigned + short + int, float (not supported by EO)](#basic-types)
+- [char, float (not supported by EO)](#basic-types)
+- [enums](#enums)
 
 :x: [Not implemented](#not-implemented):
-- [switch case default](#switch-case-default)
-- [const](#const)
-- [enums](#enums)
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
 - [pointers on function](#pointers-on-function)
@@ -323,6 +342,26 @@ In EO, we represent the global memory space as a copy of [ram](https://github.co
 ```java
 ram > global
 global.write 0 (3.14.as-bytes)
+```
+
+### Const
+
+We transform const like ordinary variable.
+
+```c
+const int a = 3;
+if (a == 10) {
+  ...
+}
+```
+
+```java
+a.write-as-int32 3 // only once
+if
+  a.read-as-int32.eq 10
+  seq
+    ...
+    True
 ```
 
 ### Arrays
@@ -718,74 +757,6 @@ goto
         TRUE
 ```
 
-### Operators
-
-The table of all C operators and similar objects in the EO.
-
-С|EO
--|-
-+|[add](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/add.eo)
--|[sub](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/sub.eo)
-*|[mul](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/mul.eo)
-/|[div](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/div.eo)
-=|[write](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/write.eo)
-%|[mod](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/mod.eo)
-==|[eq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/eq.eo)
-!=|[neq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/neq.eo)
-<|[less](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/less.eo)
-<=|[leq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/leq.eo)
-\>|[greater](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/greater.eo)
-\>=|[geq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/geq.eo)
-&&|[and](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/and.eo)
-\|\||[or](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/or.eo)
-!|[not](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/not.eo)
--x|[neg](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/neg.eo)
-++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/pre-inc-int64.eo)
-x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/post-inc-int64.eo)
---x|[pre-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/pre-dec-int64.eo)
-x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/post-dec-int64.eo)
-(double)|[as-float64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-float64.eo)
-(long long int)|[as-int64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-int64.eo)
-
-```c
-x += 10;
-```
-
-For assignment operations, we generate the following constructs
-
-```java
-x.write (x.add 10)
-```
-
-### In progress
-
-### Basic types
-
-Some types are not yet implemented due to problems with working with bytes in the EO.
-
-```c
-char a = '1';
-short int b = 2;
-long int c = 3;
-float d = 4.0;
-unsigned int e = 5;
-```
-
-### Bit operators
-
-Some operators are not yet implemented due to problems with working with bytes in the EO.
-
-C|EO
--|-
-&|[bit-and](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-and.eo)
-\||[bit-or](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-or.eo)
-^|[bit-xor](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-xor.eo)
-~|[bit-not](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-not.eo)
-<<|[shift-right](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-right.eo)
-\>>|[shift-left](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-left.eo)
-
-### Not implemented
-
 ### Switch case default
 
 We can convert such simple switch statement to [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object.
@@ -859,25 +830,54 @@ switch (x): {
         TRUE
 ```
 
-### Const
+### Operators
 
-We will replace all calls to the constant with its value.
+The table of all C operators and similar objects in the EO.
+
+С|EO
+-|-
++|[add](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/add.eo)
+-|[sub](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/sub.eo)
+*|[mul](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/mul.eo)
+/|[div](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/div.eo)
+=|[write](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/write.eo)
+%|[mod](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/mod.eo)
+==|[eq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/eq.eo)
+!=|[neq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/neq.eo)
+<|[less](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/less.eo)
+<=|[leq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/leq.eo)
+\>|[greater](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/greater.eo)
+\>=|[geq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/geq.eo)
+&&|[and](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/and.eo)
+\|\||[or](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/or.eo)
+!|[not](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/not.eo)
+-x|[neg](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/neg.eo)
+++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/pre-inc-int64.eo)
+x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/post-inc-int64.eo)
+--x|[pre-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/pre-dec-int64.eo)
+x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/post-dec-int64.eo)
+(double)|[as-float64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-float64.eo)
+(long long int)|[as-int64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-int64.eo)
 
 ```c
-const int a = 3;
-if (a == 10) {
-  ...
-}
+x += 10;
 ```
 
+For assignment operations, we generate the following constructs
+
 ```java
-if
-  3.eq 10
-  seq
-    ...
-    True
-  seq
-    True
+x.write (x.add 10)
+```
+
+### In progress
+
+### Basic types
+
+Some types are not yet implemented due to problems with working with bytes in the EO.
+
+```c
+char a = '1';
+float d = 4.0;
 ```
 
 ### Enums
@@ -900,6 +900,21 @@ if
   seq
     True
 ```
+
+### Bit operators
+
+Some operators are not yet implemented due to problems with working with bytes in the EO.
+
+C|EO
+-|-
+&|[bit-and](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-and.eo)
+\||[bit-or](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-or.eo)
+^|[bit-xor](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-xor.eo)
+~|[bit-not](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-not.eo)
+<<|[shift-right](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-right.eo)
+\>>|[shift-left](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-left.eo)
+
+### Not implemented
 
 ### Goto and labels
 

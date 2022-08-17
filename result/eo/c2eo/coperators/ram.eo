@@ -1,12 +1,10 @@
-+package c2eo.coperators
-
 +alias eoram org.eolang.ram
+
++package c2eo.coperators
 
 [size] > ram
 
-  eoram size > mem!
-
-  memory > index
+  eoram size > mem
 
   mem > @
 

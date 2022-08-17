@@ -34,12 +34,13 @@
 *.exe
 *.out
 *.app
-project/bin/c2eo
+
+# c2eo and temp eo files
+project/bin/*
 
 #LLVM directory
 llvm-clang/**
 !llvm-clang/.gitkeep
-
 
 # User-specific stuff
 **/.vscode/**
@@ -110,9 +111,6 @@ project/tests/**/*.eo
 
 # Log files
 *.log
-
-# Compiled c2eo
-project/bin/c2eo
 
 # release stuff
 *.so

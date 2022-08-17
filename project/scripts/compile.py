@@ -37,21 +37,24 @@ from transpile import Transpiler
 
 class Compiler(object):
 
-    def __init__(self, path_to_tests, skips_file_name, need_to_prepare_c_code=True):
+    def __init__(self, path_to_files, skips_file_name, need_to_prepare_c_code=True):
         self.need_to_prepare_c_code = need_to_prepare_c_code
-        self.skips = settings.get_skips(skips_file_name)
-        self.path_to_tests = path_to_tests
+        self.skips_file_name = skips_file_name
+        self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.transpilation_units = []
 
     def compile(self):
         start_time = time.time()
-        self.transpilation_units = Transpiler(self.path_to_tests, '', self.need_to_prepare_c_code).transpile()
+        self.transpilation_units, skip_result = Transpiler(self.path_to_tests, self.skips_file_name,
+                                                           self.need_to_prepare_c_code).transpile()
         if self.transpilation_units:
-            EOBuilder().build()
-            passes = [unit['name'] for unit in self.transpilation_units]
-            tools.pprint_result('COMPILE', len(passes), int(time.time() - start_time), {tools.PASS: passes}, 0)
-        return self.transpilation_units
+            errors, error_result = EOBuilder(self.transpilation_units).build()
+            passes = set(unit['unique_name'] for unit in self.transpilation_units) - errors
+            result = {tools.PASS: passes, tools.ERROR: error_result, tools.SKIP: skip_result}
+            tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
+            tools.pprint_result('COMPILE', tests_count, int(time.time() - start_time), result, 0)
+        return self.transpilation_units, skip_result
 
 
 def create_parser():
@@ -72,4 +75,4 @@ if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
     parser = create_parser()
     namespace = parser.parse_args()
-    Compiler(namespace.path_to_tests, namespace.skips_file_name, not namespace.not_prepare_c_code).compile()
+    Compiler(namespace.path_to_files, namespace.skips_file_name, not namespace.not_prepare_c_code).compile()

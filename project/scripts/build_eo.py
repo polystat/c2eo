@@ -35,40 +35,47 @@ import settings
 
 class EOBuilder(object):
 
-    def __init__(self):
+    def __init__(self, transpilation_units):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.current_version = settings.get_setting('current_eo_version')
         self.path_to_foreign_objects = settings.get_setting('path_to_foreign_objects')
         self.path_to_eo = settings.get_setting('path_to_eo')
         self.path_to_eo_parse = settings.get_setting('path_to_eo_parse')
+        self.transpilation_units = transpilation_units
+        self.errors = set()
+        self.error_result = {}
 
     def build(self):
         tools.pprint('Compilation start\n')
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
-        if self.is_good_for_recompilation():
-            tools.pprint('\nRecompilation eo project starts\n')
-            result = subprocess.run('mvn compile', shell=True)
-        else:
-            tools.pprint('\nFull eo project compilation starts\n')
-            result = subprocess.run('mvn clean compile', shell=True)
+        result = self.is_recompilation()
+        tools.pprint(f'\n{"Recompilation eo project starts" if result else "Full eo project compilation starts"}\n')
+        cmd = f'mvn {"" if result else "clean"} compile'
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+        for line in process.stdout:
+            if line:
+                print(line, end='')
+                if 'error:' in line:
+                    self.handle_eo_error(line)
+            elif process.poll() is not None:
+                break
         os.chdir(original_path)
-        if result.returncode:
+        if process.poll():
             exit('compilation failed')
+        return self.errors, self.error_result
 
-    def is_good_for_recompilation(self):
+    def is_recompilation(self):
         if not os.path.exists(self.path_to_foreign_objects):
             tools.pprint('Compile dir not found', status=tools.WARNING)
             return False
-        else:
-            tools.pprint('Compile dir found', status=tools.PASS)
 
+        tools.pprint('Compile dir found', status=tools.PASS)
         if not self.is_actual_object_version():
             tools.pprint('Old version detected', status=tools.WARNING)
             return False
-        else:
-            tools.pprint('Latest version detected', status=tools.PASS)
 
+        tools.pprint('Latest version detected', status=tools.PASS)
         eo_src_files = tools.search_files_by_patterns(self.path_to_eo, ['*.eo'], recursive=True)
         eo_src_files = set(map(lambda x: x.replace(self.path_to_eo, '', 1).replace('.eo', '', 1), eo_src_files))
         project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, ['*.xmir'],
@@ -76,14 +83,12 @@ class EOBuilder(object):
         project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
-        tools.pprint()
         if difference:
-            tools.pprint('EO project files are incompatible', status=tools.WARNING)
+            tools.pprint('\nEO project files are incompatible', status=tools.WARNING)
             tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
             return False
-        else:
-            tools.pprint('EO project files are compatible', status=tools.PASS)
 
+        tools.pprint('\nEO project files are compatible', status=tools.PASS)
         return True
 
     def is_actual_object_version(self):
@@ -96,7 +101,18 @@ class EOBuilder(object):
                     return True
         return False
 
+    def handle_eo_error(self, message):
+        file, error = message.split('/', maxsplit=1)[1].split('with error:', maxsplit=1)
+        file, error = file.strip(), error.strip()
+        for unit in self.transpilation_units:
+            if unit['unique_name'] in file:
+                if error not in self.error_result:
+                    self.error_result[error] = {}
+                self.error_result[error][unit['unique_name']] = set()
+                self.errors.add(unit['unique_name'])
+                return
+
 
 if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
-    EOBuilder().build()
+    EOBuilder([]).build()

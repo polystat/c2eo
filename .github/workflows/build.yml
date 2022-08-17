@@ -19,7 +19,7 @@ jobs:
         run: sudo pip install cpplint
 
       - name: Cpp-lint
-        run: cpplint --filter=-runtime/references,-runtime/string project/src/transpiler/** 
+        run: cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/** 
 
   clang-format:
     runs-on: ubuntu-22.04
@@ -29,7 +29,7 @@ jobs:
       - name: Clang-format
         uses: jidicula/clang-format-action@v4.6.2
         with:
-          clang-format-version: '13'
+          clang-format-version: '14'
           check-path: 'project/src/transpiler'
           fallback-style: 'Google'
 
@@ -51,8 +51,7 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
       
       - name: Install clang-tidy
         run: sudo apt install clang-tidy
@@ -62,7 +61,7 @@ jobs:
           cd ./project/scripts
           python3 clang_tidy.py
 
-  parsing:
+  gcc-c-torture:
     needs:
       - cpp-lint
       - clang-format
@@ -80,13 +79,59 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
-          
-      - name: Parsing
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Download gcc-c-torture
+        uses: robinraju/release-downloader@v1.4
+        with:
+          repository: "polystat/c2eo"
+          tag: "0.1.16"
+          fileName: "gcc.c-torture.tar.gz"
+
+      - name: Unpack gcc-c-torture
+        run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null  
+
+      - name: Transpilation
         run: |
           cd ./project/scripts
-          python3 transpile.py ../tests/parsing -n
+          python3 transpile.py ../../gcc.c-torture -s gcc -n
+
+  c-testcuite:
+    needs:
+      - cpp-lint
+      - clang-format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Download c-testcuite
+        uses: robinraju/release-downloader@v1.4
+        with:
+          repository: "polystat/c2eo"
+          tag: "0.1.16"
+          fileName: "c-testcuite.tar.gz"
+
+      - name: Unpack c-testcuite
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf c-testcuite.tar.gz -C . > /dev/null  
+
+      - name: Compilation
+        run: |
+          cd ./project/scripts
+          python3 compile.py -p ../../c-testcuite -s testcuite
 
   test:
     needs:
@@ -106,10 +151,83 @@ jobs:
       - name: Unpack LLVM
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C ~ > /dev/null
-          mv ~/llvm-clang .
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
           
       - name: Testing
         run: |
           cd ./project/scripts
-          python3 test.py
+          python3 test.py -s test
+
+  csmith:
+    needs:
+      - cpp-lint
+      - clang-format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Install csmith
+        run: |
+          cd ..
+          git clone https://github.com/csmith-project/csmith.git
+          cd csmith
+          cmake -DCMAKE_INSTALL_PREFIX=csmith .
+          make
+
+      - name: Generating tests
+        run: |
+          cd ./project/scripts
+          python3 csmith.py ../tests/main/csmith -c 1000
+        
+      - name: Transpilation
+        run: |
+          cd ./project/scripts
+          python3 transpile.py ../tests/main/csmith -n    
+
+  codecov:
+    needs:
+      - clang-tidy
+      - gcc-c-torture
+      - c-testcuite
+      - test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+          
+      - name: Generate raw code coverage
+        run: |
+          cd ./project/scripts
+          python3 transpile.py ../tests/main -c
+
+      - name: Convert raw code coverage to report
+        run: |
+          cd ./project/scripts
+          python3 codecov.py
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./project/bin/report.txt

@@ -26,10 +26,12 @@
 
 #include <map>
 #include <queue>
+#include <regex>
 #include <sstream>
 #include <utility>
 #include <vector>
 
+#include "src/transpiler/enumdecl.h"
 #include "src/transpiler/memory_manager.h"
 #include "src/transpiler/process_variables.h"
 #include "src/transpiler/recorddecl.h"
@@ -103,6 +105,8 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal);
 
 EOObject GetFunctionCallEOObject(const CallExpr *op);
 
+EOObject GetPrintfCallEOObject(const CallExpr *op);
+
 EOObject GetInitListEOObject(const clang::InitListExpr *list);
 
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
@@ -136,8 +140,57 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i);
 
+EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal);
+void AppendDeclStmt(const DeclStmt *stmt);
+
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
+
+std::string Escaped(const std::string &input) {
+  std::string output;
+  output.reserve(input.size());
+  for (const char c : input) {
+    switch (c) {
+      case '\a':
+        output += "\\a";
+        break;
+      case '\b':
+        output += "\\b";
+        break;
+      case '\f':
+        output += "\\f";
+        break;
+      case '\n':
+        output += "\\n";
+        break;
+      case '\r':
+        output += "\\r";
+        break;
+      case '\t':
+        output += "\\t";
+        break;
+      case '\v':
+        output += "\\v";
+        break;
+      case '\\':
+        output += "\\\\";
+        break;
+      case '\'':
+        output += "\\\'";
+        break;
+      case '\"':
+        output += "\\\"";
+        break;
+      case '\0':
+        output += "\\0";
+        break;
+      default:
+        output += c;
+        break;
+    }
+  }
+  return output;
+}
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   if (!FD->hasBody()) {
@@ -251,38 +304,6 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   }
   if (CS != nullptr) {
     for (auto *stmt : CS->body()) {
-      Stmt::StmtClass stmt_class = stmt->getStmtClass();
-      if (stmt_class == Stmt::ImplicitCastExprClass) {
-        auto *ref = dyn_cast<Expr>(*stmt->child_begin());
-        if (ref == nullptr) {
-          continue;
-        }
-        QualType qual_type = ref->getType();
-        string type = GetTypeName(qual_type);
-        string formatter = "?";  // TODO(nkchuykin)
-        if (type == "float32" || type == "float64") {
-          formatter = "f";
-        } else {
-          formatter = "d";
-        }
-        EOObject printer{"printf"};
-        printer.nested.emplace_back("\"%" + formatter + "\\n\"",
-                                    EOObjectType::EO_LITERAL);
-        EOObject read_val{"read"};
-        read_val.nested.emplace_back(GetStmtEOObject(ref));
-        if (!qual_type->isRecordType()) {
-          read_val.name += "-as-" + type;
-        } else {
-          read_val.nested.emplace_back(
-              to_string(transpiler.record_manager_
-                            .GetById(qual_type->getAsRecordDecl()->getID())
-                            ->size),
-              EOObjectType::EO_LITERAL);
-        }
-        printer.nested.push_back(read_val);
-        res.nested.push_back(printer);
-        continue;
-      }
       EOObject stmt_obj = GetStmtEOObject(stmt);
       res.nested.push_back(stmt_obj);
     }
@@ -326,7 +347,6 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
         return GetIfElseStmtEOObject(op);
       }
     }
-
     return GetIfStmtEOObject(op);
   }
   if (stmt_class == Stmt::WhileStmtClass) {
@@ -345,24 +365,30 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<IntegerLiteral>(stmt);
     return GetIntegerLiteralEOObject(op);
   }
+  if (stmt_class == Stmt::CharacterLiteralClass) {
+    const auto *op = dyn_cast<clang::CharacterLiteral>(stmt);
+    return GetCharacterLiteralEOObject(op);
+  }
   if (stmt_class == Stmt::FloatingLiteralClass) {
     const auto *op = dyn_cast<FloatingLiteral>(stmt);
     return GetFloatingLiteralEOObject(op);
   }
   if (stmt_class == Stmt::DeclStmtClass) {
+    const auto *op = dyn_cast<DeclStmt>(stmt);
+    AppendDeclStmt(op);
     return EOObject(EOObjectType::EO_EMPTY);
   }
   if (stmt_class == Stmt::CallExprClass) {
     const auto *op = dyn_cast<CallExpr>(stmt);
+    if (op->getDirectCallee() != nullptr &&
+        op->getDirectCallee()->getNameInfo().getAsString() == "printf") {
+      return GetPrintfCallEOObject(op);
+    }
     return GetFunctionCallEOObject(op);
   }
   if (stmt_class == Stmt::ReturnStmtClass) {
     const auto *op = dyn_cast<ReturnStmt>(stmt);
     return GetReturnStmtEOObject(op);
-  }
-  if (stmt_class == Stmt::MemberExprClass) {
-    const auto *op = dyn_cast<MemberExpr>(stmt);
-    return GetMemberExprEOObject(op);
   }
   if (stmt_class == Stmt::MemberExprClass) {
     const auto *op = dyn_cast<MemberExpr>(stmt);
@@ -404,12 +430,27 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<clang::InitListExpr>(stmt);
     return GetInitListEOObject(op);
   }
+  if (stmt_class == Stmt::StringLiteralClass) {
+    const auto *op = dyn_cast<clang::StringLiteral>(stmt);
+    std::string value = Escaped(op->getString().str());
+    // TODO(nchuykin) remove lines below after fixing printf EOObject
+    value = std::regex_replace(value, std::regex("%[lh]*[ud]"), "%d");
+    value = std::regex_replace(value, std::regex("%[lh]*f"), "%f");
+    return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
 }
-
+EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
+  if (p_literal != nullptr) {
+    unsigned int an_int = p_literal->getValue();
+    std::string str_val{std::to_string(an_int)};
+    return EOObject{str_val, EOObjectType::EO_LITERAL};
+  }
+  return EOObject{EOObjectType::EO_PLUG};
+}
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
@@ -578,6 +619,15 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
   return goto_object;
 }
 
+void AppendDeclStmt(const DeclStmt *stmt) {
+  for (auto *decl : stmt->decls()) {
+    if (decl->getKind() == Decl::Kind::Enum) {
+      auto *enum_decl = dyn_cast<clang::EnumDecl>(decl);
+      ProcessEnumDecl(enum_decl);
+    }
+  }
+}
+
 EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
                              const EOObject &switch_exp, size_t i) {
   EOObject eq_object{"eq"};
@@ -723,7 +773,6 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
           final_write.nested.emplace_back(curr_shift);
           return final_write;
         }
-        return curr_shift;
       }
       return curr_shift;
     }
@@ -881,6 +930,14 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   }
 
   return call;
+}
+
+EOObject GetPrintfCallEOObject(const CallExpr *op) {
+  EOObject printf{"printf"};
+  for (const auto *arg : op->arguments()) {
+    printf.nested.push_back(GetStmtEOObject(arg));
+  }
+  return printf;
 }
 
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
@@ -1167,6 +1224,9 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{std::to_string(var->value), EOObjectType::EO_LITERAL};
     }
     const auto *id = dyn_cast<VarDecl>(val);
+    if (id->isStaticLocal()) {
+      return EOObject{"s-" + id->getName().str()};
+    }
     const auto &var = transpiler.glob_.GetVarById(id);
     return EOObject{var.alias};
   } catch (std::invalid_argument &) {
@@ -1345,10 +1405,10 @@ std::string GetPostfix(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  if (type_ptr->isCharType()) {
-    str += "char";
-    return str;
-  }
+  //  if (type_ptr->isCharType()) {
+  //    str += "int8";
+  //    return str;
+  //  }
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
@@ -1380,10 +1440,10 @@ std::string GetTypeName(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  if (type_ptr->isCharType()) {
-    str += "char";
-    return str;
-  }
+  //  if (type_ptr->isCharType()) {
+  //    str += "char";
+  //    return str;
+  //  }
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
@@ -1435,6 +1495,7 @@ std::set<std::string> FindAllExternalObjects(const EOObject &obj) {
         break;
       case EOObjectType::EO_EMPTY:
       case EOObjectType::EO_LITERAL:
+      case EOObjectType::EO_TEMPLATE:
         break;
       case EOObjectType::EO_PLUG:
         if (cur.nested.empty()) {

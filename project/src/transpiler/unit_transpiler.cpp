@@ -95,7 +95,6 @@ void UnitTranspiler::GenerateResult() {
   body.nested.push_back(init_seq);
 
   std::stringstream result;
-  result << "+package c2eo.src." << package_name_ << "\n";
 
   used_external_objects_ = FindAllExternalObjects(body);
   for (const auto &ext_obj : used_external_objects_) {
@@ -108,8 +107,8 @@ void UnitTranspiler::GenerateResult() {
         result << "+alias c2eo.external." << ext_obj << "\n";
         std::string alias_file_name{path_name_ + ext_obj + ".eo.alias"};
         std::ofstream alias_out(alias_file_name);
-        alias_out << "+package c2eo.external\n\n"
-                  << "+alias c2eo.coperators.printf\n\n"
+        alias_out << "+alias c2eo.coperators.printf\n\n"
+                  << "+package c2eo.external\n\n"
                   << "[args...] > " << ext_obj << "\n"
                   << "  printf \"" << ext_obj
                   << " is declaration only\\n\" > @";
@@ -117,8 +116,7 @@ void UnitTranspiler::GenerateResult() {
     }
   }
 
-  result << "\n";
-
+  result << "\n+package c2eo.src." << package_name_ << "\n";
   result << body;
   tmp_ = result.str();
 }
@@ -129,4 +127,10 @@ void UnitTranspiler::SetPackageName(std::string package_name) {
 
 void UnitTranspiler::SetPathName(std::string path_name) {
   path_name = std::move(path_name);
+}
+
+void UnitTranspiler::GenerateMeta() { generate_meta_ = true; }
+
+[[maybe_unused]] bool UnitTranspiler::IsGenerateMeta() const {
+  return generate_meta_;
 }

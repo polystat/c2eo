@@ -41,7 +41,7 @@ from compile import Compiler
 class Tests(object):
 
     def __init__(self, path_to_tests, skips_file_name):
-        self.skips = settings.get_skips(skips_file_name)
+        self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
@@ -53,15 +53,16 @@ class Tests(object):
 
     def test(self):
         start_time = time.time()
-        self.transpilation_units = Compiler(self.path_to_tests, '').compile()
+        self.transpilation_units, skip_result = Compiler(self.path_to_tests, self.skips_file_name).compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
-                results = threads.map(self.compare_test_results, self.transpilation_units)
+                results = threads.map(compare_test_results, self.transpilation_units)
             result = group_comparison_results(results)
+            result[tools.SKIP] = skip_result
+            tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
             _is_failed = len(result[tools.ERROR]) + len(result[tools.EXCEPTION])
-            tools.pprint_result('TEST', len(self.transpilation_units), int(time.time() - start_time), result,
-                                _is_failed)
+            tools.pprint_result('TEST', tests_count, int(time.time() - start_time), result, _is_failed)
             return _is_failed
 
     def get_result_for_tests(self):
@@ -110,26 +111,12 @@ class Tests(object):
         try:
             process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
-            subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
+            process.kill()
             with open(unit['result_eo_file'], 'w') as f:
                 f.write(f'exception: execution time EO file exceeded {timeout} seconds\n')
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
-
-    def compare_test_results(self, unit):
-        for _filter, comment in self.skips.items():
-            if _filter in unit['name']:
-                return unit, True, False, False, comment
-
-        with open(unit['result_c_file'], 'r') as f:
-            c_data = f.readlines()
-        with open(unit['result_eo_file'], 'r') as f:
-            eo_data = f.readlines()
-        is_except, is_equal, log_data = compare_files(c_data, eo_data)
-        with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
-            f.writelines(log_data)
-        return unit, False, is_except, is_equal, log_data
 
 
 def compare_files(c_data, eo_data):
@@ -158,16 +145,14 @@ def compare_lines(c_data, eo_data):
     is_equal = True
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
-        c_line = c_line.rstrip()
-        eo_line = eo_line.rstrip()
+        c_line, eo_line = c_line.rstrip(), eo_line.rstrip()
         ok_line = f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n'
         if c_line == eo_line:
             log_data.append(ok_line)
             continue
 
         is_both_float = tools.is_float(c_line) and tools.is_float(eo_line)
-        c_line = c_line.replace(',', '.')
-        eo_line = eo_line.replace(',', '.')
+        c_line, eo_line = c_line.replace(',', '.'), eo_line.replace(',', '.')
         if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
             log_data.append(ok_line)
         else:
@@ -178,23 +163,30 @@ def compare_lines(c_data, eo_data):
 
 
 def group_comparison_results(results):
-    result = {tools.PASS: [], tools.ERROR: [], tools.EXCEPTION: {}, tools.SKIP: {}}
+    result = {tools.PASS: [], tools.ERROR: [], tools.EXCEPTION: {}}
     tools.pprint('Getting results\n', slowly=True)
-    for unit, is_skip, is_except, is_equal, log_data in results:
-        if is_skip:
-            if log_data not in result[tools.SKIP]:
-                result[tools.SKIP][log_data] = {}
-            result[tools.SKIP][log_data][unit['name']] = set()
-        elif is_except:
+    for unit, is_except, is_equal, log_data in results:
+        if is_except:
             log_data = ''.join(log_data)
             if log_data not in result[tools.EXCEPTION]:
                 result[tools.EXCEPTION][log_data] = {}
-            result[tools.EXCEPTION][log_data][unit['name']] = set()
+            result[tools.EXCEPTION][log_data][unit['unique_name']] = set()
         elif is_equal:
-            result[tools.PASS].append(unit['name'])
+            result[tools.PASS].append(unit['unique_name'])
         else:
-            result[tools.ERROR].append((unit['name'], log_data))
+            result[tools.ERROR].append((unit['unique_name'], log_data))
     return result
+
+
+def compare_test_results(unit):
+    with open(unit['result_c_file'], 'r') as f:
+        c_data = f.readlines()
+    with open(unit['result_eo_file'], 'r') as f:
+        eo_data = f.readlines()
+    is_except, is_equal, log_data = compare_files(c_data, eo_data)
+    with open(os.path.join(unit['result_path'], f'{unit["name"]}.log'), 'w') as f:
+        f.writelines(log_data)
+    return unit, is_except, is_equal, log_data
 
 
 def create_parser():
@@ -204,7 +196,7 @@ def create_parser():
     _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
                          help='the relative path from the scripts folder to the tests folder')
 
-    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME', default=settings.get_setting('skips_for_test'),
+    _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME',
                          help='the name of the file with a set of skips for tests')
     return _parser
 
