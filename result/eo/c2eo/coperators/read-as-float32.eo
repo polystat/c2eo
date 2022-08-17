@@ -1,8 +1,4 @@
-+alias c2eo.coperators.printf
-
 +package c2eo.coperators
 
 [a] > read-as-float32
-  seq > @
-    printf "TODO read-as-float32"
-    0
+  (a.read 8).as-float > @

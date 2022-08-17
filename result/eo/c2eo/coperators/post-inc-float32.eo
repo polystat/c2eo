@@ -1,4 +1,3 @@
-+alias c2eo.coperators.printf
 +alias c2eo.coperators.read-as-float32
 +alias c2eo.coperators.write-as-float32
 
@@ -6,6 +5,5 @@
 
 [a] > post-inc-float32
   seq > @
-    printf "TODO post-inc-float32"
     write-as-float32 a ((read-as-float32 a).plus 1)
     (read-as-float32 a).minus 1

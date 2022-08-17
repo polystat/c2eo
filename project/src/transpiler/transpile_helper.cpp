@@ -444,8 +444,9 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
     std::string value = Escaped(op->getString().str());
     // TODO(nchuykin) remove lines below after fixing printf EOObject
-    value = std::regex_replace(value, std::regex("%[lh]*[ud]"), "%d");
-    value = std::regex_replace(value, std::regex("%[lh]*f"), "%f");
+    value = std::regex_replace(value, std::regex("%[lh]{1,2}"), "%");
+    value = std::regex_replace(value, std::regex("%u"), "%d");
+
     return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()

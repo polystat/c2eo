@@ -1,8 +1,6 @@
-+alias c2eo.coperators.printf
++alias org.eolang.math.number
 
 +package c2eo.coperators
 
 [a] > as-float32
-  seq > @
-    printf "TODO as-float32"
-    0
+  (number a).as-float > @
