@@ -1,0 +1,9 @@
++alias c2eo.coperators.read-as-uint64
++alias c2eo.coperators.write-as-uint64
+
++package c2eo.coperators
+
+[a] > post-dec-uint64
+  seq > @
+    write-as-uint64 a ((read-as-uint64 a).minus 1)
+    (read-as-uint64 a).plus 1
