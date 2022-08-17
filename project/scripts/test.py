@@ -27,7 +27,6 @@ SOFTWARE.
 import os
 import sys
 import time
-import math
 import argparse
 import subprocess
 import re as regex
@@ -146,19 +145,12 @@ def compare_lines(c_data, eo_data):
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
         c_line, eo_line = c_line.rstrip(), eo_line.rstrip()
-        ok_line = f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n'
-        if c_line == eo_line:
-            log_data.append(ok_line)
+        if c_line == eo_line or tools.is_equal_float_strs(c_line, eo_line) or tools.is_equal_hex_strs(c_line, eo_line):
+            log_data.append(f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n')
             continue
 
-        is_both_float = tools.is_float(c_line) and tools.is_float(eo_line)
-        c_line, eo_line = c_line.replace(',', '.'), eo_line.replace(',', '.')
-        if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
-            log_data.append(ok_line)
-        else:
-            is_equal = False
-            error_line = f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n'
-            log_data.append(error_line)
+        is_equal = False
+        log_data.append(f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n')
     return is_equal, log_data
 
 
