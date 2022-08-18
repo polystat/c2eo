@@ -143,7 +143,8 @@ EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
 EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal);
 void AppendDeclStmt(const DeclStmt *stmt);
 
-EOObject GetUnaryExprOrTypeTraitExprEOObect(const clang::UnaryExprOrTypeTraitExpr *p_expr);
+EOObject GetUnaryExprOrTypeTraitExprEOObect(
+    const clang::UnaryExprOrTypeTraitExpr *p_expr);
 
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
@@ -436,9 +437,9 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<clang::UnaryExprOrTypeTraitExpr>(stmt);
     // Need to release instead this code
     return GetUnaryExprOrTypeTraitExprEOObect(op);
-    //llvm::errs() << "Warning: Noreleased statement "
-    //             << stmt->getStmtClassName() << "\n";
-    //return EOObject(EOObjectType::EO_PLUG);
+    // llvm::errs() << "Warning: Noreleased statement "
+    //              << stmt->getStmtClassName() << "\n";
+    // return EOObject(EOObjectType::EO_PLUG);
   }
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
@@ -1209,11 +1210,11 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 }
 
 EOObject GetUnaryExprOrTypeTraitExprEOObect(
-              const clang::UnaryExprOrTypeTraitExpr *p_expr) {
+    const clang::UnaryExprOrTypeTraitExpr *p_expr) {
   if (p_expr == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-  if(p_expr->isArgumentType()) {
+  if (p_expr->isArgumentType()) {
     // Argument isTtype
     QualType qual_type = p_expr->getTypeOfArgument();
     auto type_size = GetTypeSize(qual_type);
