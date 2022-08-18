@@ -52,10 +52,10 @@ class EOBuilder(object):
         result = self.is_recompilation()
         tools.pprint(f'\n{"Recompilation eo project starts" if result else "Full eo project compilation starts"}\n')
         cmd = f'mvn {"" if result else "clean"} compile'
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, text=True)
         for line in process.stdout:
             if line:
-                print(line, end='')
+                print(line.replace('\x1b', '\033'), end='')
                 if 'error:' in line:
                     self.handle_eo_error(line)
             elif process.poll() is not None:
