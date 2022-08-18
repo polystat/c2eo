@@ -143,7 +143,7 @@ EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
 EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal);
 void AppendDeclStmt(const DeclStmt *stmt);
 
-EOObject GetUnaryExprOrTypeTraitExprEOObect(
+EOObject GetUnaryExprOrTypeTraitExprEOObject(
     const clang::UnaryExprOrTypeTraitExpr *p_expr);
 
 extern UnitTranspiler transpiler;
@@ -436,7 +436,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::UnaryExprOrTypeTraitExprClass) {
     const auto *op = dyn_cast<clang::UnaryExprOrTypeTraitExpr>(stmt);
     // Need to release instead this code
-    return GetUnaryExprOrTypeTraitExprEOObect(op);
+    return GetUnaryExprOrTypeTraitExprEOObject(op);
     // llvm::errs() << "Warning: Noreleased statement "
     //              << stmt->getStmtClassName() << "\n";
     // return EOObject(EOObjectType::EO_PLUG);
@@ -1209,7 +1209,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   return unary_op;
 }
 
-EOObject GetUnaryExprOrTypeTraitExprEOObect(
+EOObject GetUnaryExprOrTypeTraitExprEOObject(
     const clang::UnaryExprOrTypeTraitExpr *p_expr) {
   if (p_expr == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
@@ -1220,14 +1220,13 @@ EOObject GetUnaryExprOrTypeTraitExprEOObect(
     auto type_size = GetTypeSize(qual_type);
     std::string str_val{std::to_string(type_size)};
     return EOObject{str_val, EOObjectType::EO_LITERAL};
-  } else {
-    // Argument is Expr
-    auto p_size_expr = p_expr->getArgumentExpr();
-    QualType expr_type = p_size_expr->getType();
-    auto expr_type_size = GetTypeSize(expr_type);
-    std::string str_val{std::to_string(expr_type_size)};
-    return EOObject{str_val, EOObjectType::EO_LITERAL};
   }
+  // Argument is Expr
+  const auto *p_size_expr = p_expr->getArgumentExpr();
+  QualType expr_type = p_size_expr->getType();
+  auto expr_type_size = GetTypeSize(expr_type);
+  std::string str_val{std::to_string(expr_type_size)};
+  return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
