@@ -83,12 +83,13 @@ class EOBuilder(object):
         project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
+        tools.pprint()
         if difference:
-            tools.pprint('\nEO project files are incompatible', status=tools.WARNING)
+            tools.pprint('EO project files are incompatible', status=tools.WARNING)
             tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
             return False
 
-        tools.pprint('\nEO project files are compatible', status=tools.PASS)
+        tools.pprint('EO project files are compatible', status=tools.PASS)
         return True
 
     def is_actual_object_version(self):

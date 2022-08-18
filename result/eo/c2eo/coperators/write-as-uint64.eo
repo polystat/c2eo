@@ -1,0 +1,8 @@
++alias c2eo.coperators.read-as-uint64
+
++package c2eo.coperators
+
+[a b] > write-as-uint64
+  seq > @
+    a.write (b.as-bytes.slice 1 7)
+    read-as-uint64 a

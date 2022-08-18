@@ -143,7 +143,8 @@ EOObject GetCaseCondEOObject(const vector<const Expr *> &all_cases,
 EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal);
 void AppendDeclStmt(const DeclStmt *stmt);
 
-EOObject GetUnaryExprOrTypeTraitExprEOObect(const clang::UnaryExprOrTypeTraitExpr *p_expr);
+EOObject GetUnaryExprOrTypeTraitExprEOObject(
+    const clang::UnaryExprOrTypeTraitExpr *p_expr);
 
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
@@ -435,17 +436,18 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::UnaryExprOrTypeTraitExprClass) {
     const auto *op = dyn_cast<clang::UnaryExprOrTypeTraitExpr>(stmt);
     // Need to release instead this code
-    return GetUnaryExprOrTypeTraitExprEOObect(op);
-    //llvm::errs() << "Warning: Noreleased statement "
-    //             << stmt->getStmtClassName() << "\n";
-    //return EOObject(EOObjectType::EO_PLUG);
+    return GetUnaryExprOrTypeTraitExprEOObject(op);
+    // llvm::errs() << "Warning: Noreleased statement "
+    //              << stmt->getStmtClassName() << "\n";
+    // return EOObject(EOObjectType::EO_PLUG);
   }
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
     std::string value = Escaped(op->getString().str());
     // TODO(nchuykin) remove lines below after fixing printf EOObject
-    value = std::regex_replace(value, std::regex("%[lh]*[ud]"), "%d");
-    value = std::regex_replace(value, std::regex("%[lh]*f"), "%f");
+    value = std::regex_replace(value, std::regex("%[lh]{1,2}"), "%");
+    value = std::regex_replace(value, std::regex("%u"), "%d");
+
     return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
@@ -1207,25 +1209,24 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   return unary_op;
 }
 
-EOObject GetUnaryExprOrTypeTraitExprEOObect(
-              const clang::UnaryExprOrTypeTraitExpr *p_expr) {
+EOObject GetUnaryExprOrTypeTraitExprEOObject(
+    const clang::UnaryExprOrTypeTraitExpr *p_expr) {
   if (p_expr == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-  if(p_expr->isArgumentType()) {
+  if (p_expr->isArgumentType()) {
     // Argument isTtype
     QualType qual_type = p_expr->getTypeOfArgument();
     auto type_size = GetTypeSize(qual_type);
     std::string str_val{std::to_string(type_size)};
     return EOObject{str_val, EOObjectType::EO_LITERAL};
-  } else {
-    // Argument is Expr
-    auto p_size_expr = p_expr->getArgumentExpr();
-    QualType expr_type = p_size_expr->getType();
-    auto expr_type_size = GetTypeSize(expr_type);
-    std::string str_val{std::to_string(expr_type_size)};
-    return EOObject{str_val, EOObjectType::EO_LITERAL};
   }
+  // Argument is Expr
+  const auto *p_size_expr = p_expr->getArgumentExpr();
+  QualType expr_type = p_size_expr->getType();
+  auto expr_type_size = GetTypeSize(expr_type);
+  std::string str_val{std::to_string(expr_type_size)};
+  return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
