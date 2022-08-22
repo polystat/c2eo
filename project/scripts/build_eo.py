@@ -51,11 +51,12 @@ class EOBuilder(object):
         os.chdir(self.path_to_eo_project)
         result = self.is_recompilation()
         tools.pprint(f'\n{"Recompilation eo project starts" if result else "Full eo project compilation starts"}\n')
-        cmd = f'mvn {"" if result else "clean"} compile'
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+        cmd = ['mvn'] if result else ['mvn', 'clean']
+        cmd.extend(['compile', '-Djansi.force=true', '-Dstyle.color=always'])
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
         for line in process.stdout:
             if line:
-                print(line, end='')
+                print(line.rstrip())
                 if 'error:' in line:
                     self.handle_eo_error(line)
             elif process.poll() is not None:
@@ -83,12 +84,13 @@ class EOBuilder(object):
         project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
                                    project_eo_files))
         difference = project_eo_files - eo_src_files
+        tools.pprint()
         if difference:
-            tools.pprint('\nEO project files are incompatible', status=tools.WARNING)
+            tools.pprint('EO project files are incompatible', status=tools.WARNING)
             tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
             return False
 
-        tools.pprint('\nEO project files are compatible', status=tools.PASS)
+        tools.pprint('EO project files are compatible', status=tools.PASS)
         return True
 
     def is_actual_object_version(self):

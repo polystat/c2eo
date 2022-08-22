@@ -319,8 +319,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 
 :hammer: In progress:
 - [bit operators (inconsistent implementation in the EO)](#bit-operators)
-- [char, float (not supported by EO)](#basic-types)
-- [enums](#enums)
+- [char, uint64, float (not supported by EO)](#basic-types)
 
 :x: [Not implemented](#not-implemented):
 - [goto and labels](#goto-and-labels)
@@ -361,6 +360,27 @@ if
   a.read-as-int32.eq 10
   seq
     ...
+    True
+```
+
+### Enums
+
+We can work with enumerated types as well as with constants and substitute numeric values instead of names.
+
+```c
+enum State {Working = 1, Failed = 0};
+if (10 == Working) {
+  ...
+}
+```
+
+```java
+if
+  10.eq 1
+  seq
+    ...
+    True
+  seq
     True
 ```
 
@@ -877,28 +897,8 @@ Some types are not yet implemented due to problems with working with bytes in th
 
 ```c
 char a = '1';
-float d = 4.0;
-```
-
-### Enums
-
-We can work with enumerated types as well as with constants and substitute numeric values instead of names.
-
-```c
-enum State {Working = 1, Failed = 0};
-if (10 == Working) {
-  ...
-}
-```
-
-```java
-if
-  10.eq 1
-  seq
-    ...
-    True
-  seq
-    True
+float b = 4.0;
+unsigned long long int c = 10223372036854775807;
 ```
 
 ### Bit operators

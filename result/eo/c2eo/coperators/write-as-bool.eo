@@ -4,5 +4,5 @@
 
 [a b] > write-as-bool
   seq > @
-    a ((b.eq 0).if 00- 01-)
+    a.write ((b.eq 0).if 00- 01-)
     read-as-bool a

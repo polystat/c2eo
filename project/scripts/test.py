@@ -27,7 +27,6 @@ SOFTWARE.
 import os
 import sys
 import time
-import math
 import argparse
 import subprocess
 import re as regex
@@ -84,19 +83,21 @@ class Tests(object):
     def get_result_for_c_file(self, unit):
         compiled_file = os.path.join(unit['result_path'], f'{unit["name"]}.out')
         unit['result_c_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-c.txt')
-        compile_cmd = f'clang {unit["c_file"]} -o {compiled_file} -Wno-everything > /dev/null' \
-                      f' 2>>{unit["result_c_file"]}'
+        compile_cmd = ['clang', unit['c_file'], '-o', compiled_file, '-Wno-everything']
         try:
-            subprocess.run(compile_cmd, shell=True, check=True)
+            subprocess.run(compile_cmd, check=True, capture_output=True, text=True)
         except subprocess.CalledProcessError as exc:
-            return exc
+            with open(unit['result_c_file'], 'w') as f:
+                f.write(exc.stderr)
         else:
-            process = subprocess.Popen(f'{compiled_file} >> {unit["result_c_file"]} 2>&1', shell=True)
+            process = subprocess.Popen([compiled_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             timeout = 10
             try:
-                process.communicate(timeout=timeout)
+                outs, errs = process.communicate(timeout=timeout)
+                with open(unit['result_c_file'], 'w') as f:
+                    f.write(outs + errs)
             except subprocess.TimeoutExpired:
-                subprocess.run(f'pkill -TERM -P {process.pid}', shell=True)
+                process.kill()
                 with open(unit['result_c_file'], 'w') as f:
                     f.write(f'exception: execution time of C file exceeded {timeout} seconds\n')
         finally:
@@ -104,12 +105,14 @@ class Tests(object):
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
     def get_result_for_eo_file(self, unit):
-        command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd)
+        command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd).split()
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
-        process = subprocess.Popen(f'{command} >> {unit["result_eo_file"]} 2>&1', shell=True)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         timeout = 60
         try:
-            process.communicate(timeout=timeout)
+            outs, errs = process.communicate(timeout=timeout)
+            with open(unit['result_eo_file'], 'w') as f:
+                f.write(outs + errs)
         except subprocess.TimeoutExpired:
             process.kill()
             with open(unit['result_eo_file'], 'w') as f:
@@ -146,19 +149,12 @@ def compare_lines(c_data, eo_data):
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
         c_line, eo_line = c_line.rstrip(), eo_line.rstrip()
-        ok_line = f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n'
-        if c_line == eo_line:
-            log_data.append(ok_line)
+        if c_line == eo_line or tools.is_equal_float_strs(c_line, eo_line) or tools.is_equal_hex_strs(c_line, eo_line):
+            log_data.append(f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n')
             continue
 
-        is_both_float = tools.is_float(c_line) and tools.is_float(eo_line)
-        c_line, eo_line = c_line.replace(',', '.'), eo_line.replace(',', '.')
-        if is_both_float and math.isclose(float(c_line), float(eo_line), abs_tol=0.0001):
-            log_data.append(ok_line)
-        else:
-            is_equal = False
-            error_line = f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n'
-            log_data.append(error_line)
+        is_equal = False
+        log_data.append(f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n')
     return is_equal, log_data
 
 

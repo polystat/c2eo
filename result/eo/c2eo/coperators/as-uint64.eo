@@ -1,0 +1,6 @@
++alias org.eolang.math.number
+
++package c2eo.coperators
+
+[a] > as-uint64
+  (00-.concat ((number a).as-int.as-bytes.slice 1 7)).as-int > @ > @

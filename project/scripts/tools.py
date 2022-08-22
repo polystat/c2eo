@@ -27,7 +27,7 @@ import csv
 import json
 import glob
 import time
-import re as regex
+import math
 from multiprocessing.dummy import Pool as ThreadPool
 
 # Reset
@@ -128,10 +128,25 @@ def get_file_name(path):
     return name
 
 
-def is_float(str_num):
-    float_pattern = r'[-+]?[0-9]*[.,][0-9]+(?:[eE][-+]?[0-9]+)?'
-    result = regex.fullmatch(float_pattern, str_num)
-    return result is not None
+def is_equal_float_strs(str_num1, str_num2):
+    str_num1, str_num2 = str_num1.replace(',', '.'), str_num2.replace(',', '.')
+    try:
+        return math.isclose(float(str_num1), float(str_num2), abs_tol=0.0001)
+    except ValueError:
+        return False
+
+
+def is_equal_hex_strs(str_num1, str_num2):
+    try:
+        if len(str_num1) == len(str_num2):
+            return int(str_num1, 16) == int(str_num2, 16)
+        else:
+            str_num1, str_num2 = (str_num1, str_num2) if len(str_num1) >= len(str_num2) else (str_num2, str_num1)
+            value_index = len(str_num1) - len(str_num2)
+            prefix, value = set(str_num1[:value_index].lower()), str_num1[value_index:]
+            return prefix == {'f'} and value == str_num2
+    except ValueError:
+        return False
 
 
 def make_name_from_path(path):
@@ -216,7 +231,7 @@ def pprint_result(header, total_tests, total_time, result, is_failed):
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}') if is_failed else pprint(f'{BGreen}{header} SUCCESS{IWhite}')
     summary = ', '.join(summary)
-    time_header = f'Total time: {total_time // 60:02}:{ total_time % 60:02} min'
+    time_header = f'Total time: {total_time // 60:02}:{total_time % 60:02} min'
     pprint_header(f'{summary}\n{time_header}')
 
 
