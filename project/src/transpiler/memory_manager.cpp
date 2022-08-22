@@ -41,8 +41,11 @@ Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
   if (res != variables_.end()) {
     return *res;
   }
+  std::string unique_alias;
   if (duplicates[alias] > 0) {
-    alias += "-" + std::to_string(duplicates[alias]);
+    unique_alias = alias + "-" + std::to_string(duplicates[alias]);
+  } else {
+    unique_alias = alias;
   }
   duplicates[alias]++;
   std::string type_postfix = type.substr(2);
@@ -58,7 +61,7 @@ Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
                   pointer_,
                   size,
                   type,
-                  std::move(alias),
+                  std::move(unique_alias),
                   std::move(value),
                   std::move(local_name),
                   shift,
