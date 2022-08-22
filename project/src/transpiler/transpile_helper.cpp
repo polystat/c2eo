@@ -978,7 +978,8 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
         }
       }
       printf.nested.push_back(param);
-    } else if (idx <= formats.size() && !formats[idx - 1].empty()) {
+    } else if (idx <= formats.size() && !formats[idx - 1].empty() &&
+               param.type != EOObjectType::EO_LITERAL) {
       EOObject cast{formats[idx - 1]};
       cast.nested.push_back(param);
       printf.nested.push_back(cast);
