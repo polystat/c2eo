@@ -264,8 +264,7 @@ def add_return_code_to_eo_file(eo_file):
     with open(f'{eo_file}', 'r', encoding='ISO-8859-1') as f:
         data = f.readlines()
     is_main = False
-    aliases = {'+alias c2eo.coperators.write-as-int32\n', '+alias c2eo.coperators.printf\n',
-               '+alias c2eo.coperators.read-as-int32\n'}
+    aliases = {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n'}
     aliases_count = 0
     for i, line in enumerate(data):
         if line.startswith('+alias'):
@@ -275,6 +274,7 @@ def add_return_code_to_eo_file(eo_file):
             is_main = True
         elif is_main and line == '          TRUE\n' and data[i - 1] != '          goto-return-label.forward TRUE\n':
             data[i] = '          write-as-int32 return 0\n          goto-return-label.forward TRUE\n'
+            aliases.add('+alias c2eo.coperators.write-as-int32\n')
             break
     data[-1] = '    printf "%d" (read-as-int32 return)\n'
     with open(f'{eo_file}', 'w', encoding='ISO-8859-1') as f:
