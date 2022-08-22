@@ -1257,7 +1257,8 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     }
     const auto *id = dyn_cast<VarDecl>(val);
     if (id->isStaticLocal()) {
-      return EOObject{"s-" + id->getName().str()};
+      auto var = ProcessVariable(id, "s-" + id->getName().str(), 8);
+      return EOObject{var.alias};
     }
     const auto &var = transpiler.glob_.GetVarById(id);
     return EOObject{var.alias};

@@ -36,6 +36,11 @@ Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
                             const std::string &type, std::string alias,
                             EOObject value, std::string local_name,
                             size_t shift, bool is_initialized) {
+  auto res = find_if(variables_.begin(), variables_.end(),
+                     [id](const Variable &x) { return x.id == id; });
+  if (res != variables_.end()) {
+    return *res;
+  }
   if (duplicates[alias] > 0) {
     alias += "-" + std::to_string(duplicates[alias]);
   }
