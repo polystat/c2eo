@@ -52,6 +52,11 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Upload Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
       
       - name: Install clang-tidy
         run: sudo apt install clang-tidy
@@ -80,6 +85,11 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Upload Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
 
       - name: Download gcc-c-torture
         uses: robinraju/release-downloader@v1.4
@@ -115,6 +125,11 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Upload Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
 
       - name: Download c-testcuite
         uses: robinraju/release-downloader@v1.4
@@ -152,6 +167,11 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Upload Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
           
       - name: Testing
         run: |
@@ -177,6 +197,11 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Upload Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
 
       - name: Install csmith
         run: |
@@ -217,6 +242,11 @@ jobs:
         run: |
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Upload Submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule update --recursive --remote
           
       - name: Generate raw code coverage
         run: |
