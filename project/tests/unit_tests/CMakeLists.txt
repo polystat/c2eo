@@ -1,11 +1,13 @@
-include_directories(../../src/transpiler)
+include_directories(
+        .
+        ../../src/transpiler
+)
 
-include_directories(.)
-enable_testing()
-add_subdirectory(googletest)
+find_package(GTest REQUIRED)
+
 add_executable(unit_tests
         #
-        util_test.cpp
+        ./util_test.cpp
         #
         ../../src/transpiler/util.h
         ../../src/transpiler/util.cpp
@@ -13,9 +15,18 @@ add_executable(unit_tests
 
 # add pthread for unix systems
 if (UNIX)
-    target_link_libraries(unit_tests pthread)
+    find_package(Threads REQUIRED)
+    target_link_libraries(
+            unit_tests
+            ${GTEST_LIBRARIES}
+            Threads::Threads
+    )
 endif ()
+
 target_link_libraries(unit_tests gtest_main gmock_main)
+
+enable_testing()
+add_test(unit_tests "./unit_tests")
 
 # for coverage
 # TARGET_COMPILE_OPTIONS(unit_tests PUBLIC --coverage)
