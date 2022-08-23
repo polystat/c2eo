@@ -53,10 +53,15 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Upload Submodules
+      - name: Install GoogleTests
         run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
       
       - name: Install clang-tidy
         run: sudo apt install clang-tidy
@@ -86,10 +91,15 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Upload Submodules
+      - name: Install GoogleTests
         run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
 
       - name: Download gcc-c-torture
         uses: robinraju/release-downloader@v1.4
@@ -126,10 +136,15 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Upload Submodules
+      - name: Install GoogleTests
         run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
 
       - name: Download c-testcuite
         uses: robinraju/release-downloader@v1.4
@@ -168,10 +183,15 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Upload Submodules
+      - name: Install GoogleTests
         run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
           
       - name: Testing
         run: |
@@ -198,10 +218,15 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Upload Submodules
+      - name: Install GoogleTests
         run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
 
       - name: Install csmith
         run: |
@@ -219,7 +244,44 @@ jobs:
       - name: Transpilation
         run: |
           cd ./project/scripts
-          python3 transpile.py ../tests/main/csmith -n    
+          python3 transpile.py ../tests/main/csmith -n   
+
+  unit-tests:
+#    needs:
+#      - cpp-lint
+#      - clang-format
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache LLVM
+        id: cache-llvm
+        uses: actions/cache@v3
+        with:
+          path: llvm-clang.tar.gz
+          key: ${{ runner.os }}-llvm-clang
+
+      - name: Unpack LLVM
+        run: |
+          sudo chmod ugo+rwx llvm-clang.tar.gz
+          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+
+      - name: Install GoogleTests
+        run: |
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
+
+      - name: Unit testing
+        run: |
+          cd ./project/scripts
+          python3 build_c2eo.py
+          cd ../bin/
+          ./unit_tests --gtest_filter=* --gtest_color=no
 
   codecov:
     needs:
@@ -243,10 +305,15 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Upload Submodules
+      - name: Install GoogleTests
         run: |
-          git submodule update --init --recursive
-          git submodule update --recursive --remote
+          sudo apt-get install libgtest-dev -y
+          sudo apt-get install googletest -y
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          cd lib
+          sudo cp *.a /usr/local/lib
           
       - name: Generate raw code coverage
         run: |
