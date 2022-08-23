@@ -278,7 +278,7 @@ jobs:
 
       - name: Unit testing
         run: |
-          cd ../project/
+          cd ./project/bin/unit_tests --gtest_filter=* --gtest_color=no
 
   codecov:
     needs:
