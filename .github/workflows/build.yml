@@ -278,7 +278,10 @@ jobs:
 
       - name: Unit testing
         run: |
-          ./project/bin/unit_tests --gtest_filter=* --gtest_color=no
+          cd ./project/scripts
+          python3 build_c2eo.py
+          cd ../bin/
+          ./unit_tests --gtest_filter=* --gtest_color=no
 
   codecov:
     needs:
