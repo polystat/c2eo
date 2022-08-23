@@ -133,6 +133,8 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt);
 
 uint64_t GetTypeSize(QualType qual_type);
 
+uint64_t GetSizeOfType(QualType qual_type);
+
 EOObject GetCastEOObject(const CastExpr *op);
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
@@ -435,11 +437,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::UnaryExprOrTypeTraitExprClass) {
     const auto *op = dyn_cast<clang::UnaryExprOrTypeTraitExpr>(stmt);
-    // Need to release instead this code
     return GetUnaryExprOrTypeTraitExprEOObject(op);
-    // llvm::errs() << "Warning: Noreleased statement "
-    //              << stmt->getStmtClassName() << "\n";
-    // return EOObject(EOObjectType::EO_PLUG);
   }
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
@@ -1256,14 +1254,15 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   if (p_expr->isArgumentType()) {
     // Argument isTtype
     QualType qual_type = p_expr->getTypeOfArgument();
-    auto type_size = GetTypeSize(qual_type);
+    auto type_size = GetSizeOfType(qual_type);
     std::string str_val{std::to_string(type_size)};
     return EOObject{str_val, EOObjectType::EO_LITERAL};
   }
   // Argument is Expr
   const auto *p_size_expr = p_expr->getArgumentExpr();
   QualType expr_type = p_size_expr->getType();
-  auto expr_type_size = GetTypeSize(expr_type);
+//   auto expr_type_size = GetTypeSize(expr_type);
+  auto expr_type_size = GetSizeOfType(expr_type);
   std::string str_val{std::to_string(expr_type_size)};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
@@ -1451,6 +1450,19 @@ uint64_t GetTypeSize(QualType qual_type) {
 
   return type_size / byte_size;
 }
+
+uint64_t GetSizeOfType(QualType qual_type) {
+  const clang::Type *type_ptr = qual_type.getTypePtr();
+  TypeInfo type_info = context->getTypeInfo(type_ptr);
+  uint64_t type_size = type_info.Width;
+
+  if (type_ptr->isPointerType()) {
+    return 8; // Size of any pointer == 8 byte
+  }
+
+  return type_size / byte_size;
+}
+
 
 std::string GetPostfix(QualType qual_type) {
   const clang::Type *type_ptr = qual_type.getTypePtr();
