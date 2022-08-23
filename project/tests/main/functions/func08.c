@@ -15,7 +15,7 @@ i64 fun2(i64 a, i64 b) {
   return result;
 }
 
-i64 main() {
+int main() {
     i64 res = fun1(7, 9);
     printf("%lld\n", res);
 }

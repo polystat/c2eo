@@ -135,10 +135,12 @@ class Transpiler(object):
         transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
-        tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
         unit['transpilation_result'] = result
         unit['eo_file'] = os.path.abspath(eo_file)
         unit['rel_eo_file'] = os.path.join(unit["rel_c_path"], f'{unit["name"]}.eo')
+        if not result.returncode:
+            add_return_code_to_eo_file(eo_file)
+        tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
 
     def prepare_c_file(self, path, file_name, c_file):
         with open(f'{c_file}', 'r', encoding='ISO-8859-1') as f:
@@ -256,6 +258,28 @@ def generate_unique_names_for_units(units, words_in_name=2):
             unit['unique_name'] = f'{os.sep.join(unit["rel_c_path"].split(os.sep)[-words_in_name:])}{unit["name"]}'
     if len(collision_names) > 0:
         generate_unique_names_for_units(units, words_in_name + 1)
+
+
+def add_return_code_to_eo_file(eo_file):
+    with open(f'{eo_file}', 'r', encoding='ISO-8859-1') as f:
+        data = f.readlines()
+    is_main = False
+    aliases = {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n'}
+    aliases_count = 0
+    for i, line in enumerate(data):
+        if line.startswith('+alias'):
+            aliases.add(line)
+            aliases_count += 1
+        elif line == '  [param-start param-size] > main\n':
+            is_main = True
+        elif is_main and line == '          TRUE\n' and data[i - 1] != '          goto-return-label.forward TRUE\n':
+            data[i] = '          write-as-int32 return 0\n          goto-return-label.forward TRUE\n'
+            aliases.add('+alias c2eo.coperators.write-as-int32\n')
+            break
+    data[-1] = '    printf "%d" (read-as-int32 return)\n'
+    with open(f'{eo_file}', 'w', encoding='ISO-8859-1') as f:
+        f.writelines(sorted(aliases))
+        f.writelines(data[aliases_count:])
 
 
 def check_unit_exception(unit):

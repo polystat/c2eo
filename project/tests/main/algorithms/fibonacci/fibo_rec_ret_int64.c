@@ -48,7 +48,7 @@ int64 fibonacci(int64 n) {
   }
 }
 
-int64 main() {
+int main() {
   int64 fib;
   fib = fibonacci(10);
 

@@ -128,7 +128,7 @@ $ python3 transpile.py <your_path_to_the_folder>/gcc.c-torture -s gcc -n
 5. [c-testcuite](https://github.com/polystat/c2eo/releases/download/0.1.16/c-testcuite.tar.gz)
 ```bash
 $ cd project/srcipts
-$ python3 compile.py -p <your_path_to_the_folder>/c-testcuite -s testcuite
+$ python3 test.py -p <your_path_to_the_folder>/c-testcuite -s testcuite -n
 ```
 
 6. test

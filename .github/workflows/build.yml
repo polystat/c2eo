@@ -158,10 +158,10 @@ jobs:
           sudo chmod ugo+rwx llvm-clang.tar.gz
           tar -xvf c-testcuite.tar.gz -C . > /dev/null  
 
-      - name: Compilation
+      - name: Testing
         run: |
           cd ./project/scripts
-          python3 compile.py -p ../../c-testcuite -s testcuite
+          python3 test.py -p ../../c-testcuite -s testcuite -n
 
   test:
     needs:
