@@ -39,7 +39,8 @@ from compile import Compiler
 
 class Tests(object):
 
-    def __init__(self, path_to_tests, skips_file_name):
+    def __init__(self, path_to_tests, skips_file_name, need_to_prepare_c_code=True):
+        self.need_to_prepare_c_code = need_to_prepare_c_code
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
@@ -52,7 +53,8 @@ class Tests(object):
 
     def test(self):
         start_time = time.time()
-        self.transpilation_units, skip_result = Compiler(self.path_to_tests, self.skips_file_name).compile()
+        self.transpilation_units, skip_result = Compiler(self.path_to_tests, self.skips_file_name,
+                                                         self.need_to_prepare_c_code).compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
@@ -95,7 +97,7 @@ class Tests(object):
             try:
                 outs, errs = process.communicate(timeout=timeout)
                 with open(unit['result_c_file'], 'w') as f:
-                    f.write(outs + errs)
+                    f.write(outs + errs + str(process.returncode))
             except subprocess.TimeoutExpired:
                 process.kill()
                 with open(unit['result_c_file'], 'w') as f:
@@ -105,7 +107,7 @@ class Tests(object):
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
     def get_result_for_eo_file(self, unit):
-        command = regex.sub(self.run_sh_replace, unit['full_name'], self.run_sh_cmd).split()
+        command = regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split()
         unit['result_eo_file'] = os.path.join(unit['result_path'], f'{unit["name"]}-eo.txt')
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         timeout = 60
@@ -194,6 +196,9 @@ def create_parser():
 
     _parser.add_argument('-s', '--skips_file_name', metavar='FILE_NAME',
                          help='the name of the file with a set of skips for tests')
+
+    _parser.add_argument('-n', '--not_prepare_c_code', action='store_const', const=True, default=False,
+                         help='the script will not change the c code in the input files')
     return _parser
 
 
@@ -201,6 +206,6 @@ if __name__ == '__main__':
     tools.move_to_script_dir(sys.argv[0])
     parser = create_parser()
     namespace = parser.parse_args()
-    is_failed = Tests(namespace.path_to_tests, namespace.skips_file_name).test()
+    is_failed = Tests(namespace.path_to_tests, namespace.skips_file_name, not namespace.not_prepare_c_code).test()
     if is_failed:
         exit(f'Testing failed')
