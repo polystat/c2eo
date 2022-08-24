@@ -1261,7 +1261,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   // Argument is Expr
   const auto *p_size_expr = p_expr->getArgumentExpr();
   QualType expr_type = p_size_expr->getType();
-//   auto expr_type_size = GetTypeSize(expr_type);
+  //   auto expr_type_size = GetTypeSize(expr_type);
   auto expr_type_size = GetSizeOfType(expr_type);
   std::string str_val{std::to_string(expr_type_size)};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
@@ -1457,12 +1457,11 @@ uint64_t GetSizeOfType(QualType qual_type) {
   uint64_t type_size = type_info.Width;
 
   if (type_ptr->isPointerType()) {
-    return 8; // Size of any pointer == 8 byte
+    return 8;  // Size of any pointer == 8 byte
   }
 
   return type_size / byte_size;
 }
-
 
 std::string GetPostfix(QualType qual_type) {
   const clang::Type *type_ptr = qual_type.getTypePtr();
