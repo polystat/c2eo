@@ -151,12 +151,20 @@ def compare_lines(c_data, eo_data):
     log_data = []
     for i, (c_line, eo_line) in enumerate(zip(c_data, eo_data)):
         c_line, eo_line = c_line.rstrip(), eo_line.rstrip()
-        if c_line == eo_line or tools.is_equal_float_strs(c_line, eo_line) or tools.is_equal_hex_strs(c_line, eo_line):
-            log_data.append(f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n')
-            continue
+        c_args, eo_args = c_line.split(), eo_line.split()
+        is_line_equal = len(c_args) == len(eo_args)
+        if is_line_equal:
+            for c_arg, eo_arg in zip(c_args, eo_args):
+                if c_arg == eo_arg or tools.is_equal_float_strs(c_arg, eo_arg) or tools.is_equal_hex_strs(c_arg, eo_arg):
+                    continue
+                is_line_equal = False
+                break
 
-        is_equal = False
-        log_data.append(f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n')
+        if is_line_equal:
+            log_data.append(f'\t{tools.BGreen}Line {i}: {c_line} == {eo_line}{tools.IWhite}\n')
+        else:
+            is_equal = False
+            log_data.append(f'\t{tools.BRed}Line {i}: {c_line} != {eo_line}{tools.IWhite}\n')
     return is_equal, log_data
 
 
