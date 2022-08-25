@@ -265,7 +265,7 @@ def add_return_code_to_eo_file(eo_file):
         data = f.readlines()
     is_main = False
     aliases = {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n',
-               '+alias c2eo.coperators.as-uint8'}
+               '+alias c2eo.coperators.as-uint8\n'}
     aliases_count = 0
     for i, line in enumerate(data):
         if line.startswith('+alias'):
