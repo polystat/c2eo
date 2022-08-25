@@ -4,4 +4,4 @@
 +package c2eo.coperators
 
 [a] > pre-inc-float64
-  write-as-float64 a ((read-as-float64 a).plus 1) > @
+  write-as-float64 a ((read-as-float64 a).plus 1.0) > @
