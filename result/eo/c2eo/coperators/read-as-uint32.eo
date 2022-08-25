@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
 [a] > read-as-uint32
-  (00-00-00-00-00-00.concat (a.read 4)).as-int > @
+  (00-00-00-00.concat (a.read 4)).as-int > @
