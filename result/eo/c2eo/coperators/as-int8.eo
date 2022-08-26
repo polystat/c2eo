@@ -3,8 +3,4 @@
 +package c2eo.coperators
 
 [a] > as-int8
-  (number a).as-int > value!
-  if. > @
-    (value.as-bytes.slice 7 1).as-int.gte 0
-    (00-00-00-00-00-00-00.concat (value.as-bytes.slice 7 1)).as-int
-    (FF-FF-FF-FF-FF-FF-FF.concat (value.as-bytes.slice 7 1)).as-int
+  ((number a).as-int.as-bytes.slice 7 1).as-int > @
