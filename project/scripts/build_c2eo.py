@@ -34,7 +34,7 @@ import tools
 import settings
 
 
-def main(path_to_c2eo_build, cmake_cmd='cmake ..'):
+def main(path_to_c2eo_build: str, cmake_cmd: str = 'cmake ..') -> None:
     tools.pprint()
     original_path = os.getcwd()
     if not os.path.exists(path_to_c2eo_build):
@@ -54,7 +54,7 @@ def main(path_to_c2eo_build, cmake_cmd='cmake ..'):
     tools.pprint()
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for building c2eo in the specified directory')
 
     _parser.add_argument('-p', '--path_to_c2eo_build', default=settings.get_setting('path_to_c2eo_build'),

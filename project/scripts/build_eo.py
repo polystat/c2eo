@@ -35,7 +35,7 @@ import settings
 
 class EOBuilder(object):
 
-    def __init__(self, transpilation_units):
+    def __init__(self, transpilation_units: list[dict]):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.current_version = settings.get_setting('current_eo_version')
         self.path_to_foreign_objects = settings.get_setting('path_to_foreign_objects')
@@ -45,7 +45,7 @@ class EOBuilder(object):
         self.errors = set()
         self.error_result = {}
 
-    def build(self):
+    def build(self) -> (set[dict], dict):
         tools.pprint('Compilation start\n')
         original_path = os.getcwd()
         os.chdir(self.path_to_eo_project)
@@ -66,7 +66,7 @@ class EOBuilder(object):
             exit('compilation failed')
         return self.errors, self.error_result
 
-    def is_recompilation(self):
+    def is_recompilation(self) -> bool:
         if not os.path.exists(self.path_to_foreign_objects):
             tools.pprint('Compile dir not found', status=tools.WARNING)
             return False
@@ -93,7 +93,7 @@ class EOBuilder(object):
         tools.pprint('EO project files are compatible', status=tools.PASS)
         return True
 
-    def is_actual_object_version(self):
+    def is_actual_object_version(self) -> bool:
         tools.pprint('\nCheck version of compiled eo objects\n')
         data = tools.read_file_as_dictionary(self.path_to_foreign_objects)
         for package in data:
@@ -103,7 +103,7 @@ class EOBuilder(object):
                     return True
         return False
 
-    def handle_eo_error(self, message):
+    def handle_eo_error(self, message) -> None:
         file, error = message.split('/', maxsplit=1)[1].split('with error:', maxsplit=1)
         file, error = file.strip(), error.strip()
         for unit in self.transpilation_units:

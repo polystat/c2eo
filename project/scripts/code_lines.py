@@ -32,7 +32,6 @@ import subprocess
 if __name__ == '__main__':
     path_to_files = os.path.abspath(sys.argv[1])
     if not os.path.exists(path_to_files):
-        print('This path does not exist')
         exit('This path does not exist')
 
     path_to_files = os.path.join(path_to_files, '**')

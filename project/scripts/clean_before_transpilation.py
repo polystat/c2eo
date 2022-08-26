@@ -33,7 +33,7 @@ import tools
 import settings
 
 
-def main(path_to_files):
+def main(path_to_files: str) -> None:
     patterns = settings.get_setting('patterns_for_cleaning')
     if os.path.isfile(path_to_files):
         path_to_files = os.path.dirname(path_to_files)
@@ -42,7 +42,7 @@ def main(path_to_files):
     tools.clear_dir_by_patterns(settings.get_setting('path_to_c2eo_transpiler'), ['*.eo'])
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for cleaning the folder from temporary files')
 
     _parser.add_argument('-p', '--path_to_files', metavar='PATH', default=settings.get_setting('path_to_tests'),

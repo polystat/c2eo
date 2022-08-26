@@ -37,14 +37,14 @@ from transpile import Transpiler
 
 class Compiler(object):
 
-    def __init__(self, path_to_files, skips_file_name, need_to_prepare_c_code=True):
+    def __init__(self, path_to_files: str, skips_file_name: str, need_to_prepare_c_code: bool = True):
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.transpilation_units = []
 
-    def compile(self):
+    def compile(self) -> Transpiler.transpile:
         start_time = time.time()
         self.transpilation_units, skip_result = Transpiler(self.path_to_tests, self.skips_file_name,
                                                            self.need_to_prepare_c_code).transpile()
@@ -53,11 +53,11 @@ class Compiler(object):
             passes = set(unit['unique_name'] for unit in self.transpilation_units) - errors
             result = {tools.PASS: passes, tools.ERROR: error_result, tools.SKIP: skip_result}
             tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
-            tools.pprint_result('COMPILE', tests_count, int(time.time() - start_time), result, 0)
+            tools.pprint_result('COMPILE', tests_count, int(time.time() - start_time), result, False)
         return self.transpilation_units, skip_result
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for compiling translated files from C to EO')
 
     _parser.add_argument('-p', '--path_to_files', metavar='PATH',

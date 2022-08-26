@@ -48,7 +48,7 @@ def main():
     tools.pprint('EO version updated\n')
 
 
-def is_update_needed(current_version, latest_version):
+def is_update_needed(current_version: str, latest_version: str) -> (bool, str):
     compare = tools.version_compare(current_version, latest_version)
     is_latest_version = False
     if compare == 1:
@@ -65,7 +65,7 @@ def is_update_needed(current_version, latest_version):
     return is_latest_version, latest_version
 
 
-def update_version_in_files(files, latest_version):
+def update_version_in_files(files: list[str], latest_version: str) -> int:
     tools.pprint('Updating version')
     count_changed_files = 0
     pattern = r'<eolang\.version>.*<\/eolang\.version>'

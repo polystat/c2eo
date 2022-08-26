@@ -33,7 +33,6 @@ import clean_before_transpilation
 if __name__ == '__main__':
     path_to_c_files = os.path.abspath(sys.argv[1])
     if not os.path.exists(path_to_c_files):
-        print('This path does not exist')
         exit('This path does not exist')
 
     clean_before_transpilation.main(path_to_c_files)

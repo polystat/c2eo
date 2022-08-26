@@ -37,7 +37,7 @@ import settings
 
 class Csmith(object):
 
-    def __init__(self, path_to_generate, files_count):
+    def __init__(self, path_to_generate: str, files_count: int):
         self.csmith_args = ' '.join([f'--{arg}' for arg in settings.get_setting('csmith_args')])
         self.path_to_csmith = os.path.abspath(os.path.join(settings.get_setting('path_to_csmith'), 'csmith'))
         self.path_to_csmith_runtime = os.path.join(settings.get_setting('path_to_csmith_runtime'))
@@ -45,7 +45,7 @@ class Csmith(object):
         self.files_count = files_count
         self.generated_files_count = 0
 
-    def generate(self):
+    def generate(self) -> None:
         tools.pprint('\nMaking the dir:', slowly=True)
         if os.path.exists(self.path_to_generate):
             tools.clear_dir_by_patterns(self.path_to_generate, ['*.c', '*.h'])
@@ -65,7 +65,7 @@ class Csmith(object):
             print(f'{file_name}:\n')
             print(code)
 
-    def generate_file(self, number):
+    def generate_file(self, number: int) -> (str, list[str]):
         result = subprocess.run(f'{self.path_to_csmith} {self.csmith_args}', shell=True, text=True, capture_output=True)
         file_name = f'{number + 1:0{len(str(self.files_count))}}.c'
         with open(file_name, 'w') as f:
@@ -75,7 +75,7 @@ class Csmith(object):
         return file_name, result.stderr if result.returncode else result.stdout
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for generating csmith testsuite for c2eo transpiler')
 
     _parser.add_argument('path_to_generate', metavar='PATH',

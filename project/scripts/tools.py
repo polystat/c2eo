@@ -71,7 +71,7 @@ statuses = {INFO: f'{BBlue}{INFO}{IWhite}', WARNING: f'{BPurple}{WARNING}{IWhite
 separation_line = f'{BIWhite}{"-" * 108}{IWhite}'
 
 
-def apply_filters_to_files(files, filters=None, print_files=False):
+def apply_filters_to_files(files: list[str], filters: list[str] = None, print_files: bool = False) -> list[str]:
     if filters is None:
         return files
 
@@ -90,14 +90,15 @@ def apply_filters_to_files(files, filters=None, print_files=False):
     return result
 
 
-def clear_dir_by_patterns(path, file_patterns, recursive=False, print_files=False):
+def clear_dir_by_patterns(path: str, file_patterns: list[str], recursive: bool = False,
+                          print_files: bool = False) -> None:
     found_files = search_files_by_patterns(path, file_patterns, recursive=recursive, print_files=print_files)
     for file in found_files:
         os.remove(file)
     pprint('Files removed')
 
 
-def compare_files(file1, file2):
+def compare_files(file1: str, file2: str) -> bool:
     if not (os.path.isfile(file1) and os.path.isfile(file2)):
         return False
     with open(file1, 'r', encoding='ISO-8859-1') as f1:
@@ -107,28 +108,28 @@ def compare_files(file1, file2):
     return data1 == data2
 
 
-def cpu_count():
+def cpu_count() -> int:
     count = os.cpu_count()
     if count is None:
         return 1
     return count
 
 
-def get_or_none(array, index):
+def get_or_none(array: list, index: int):
     return array[index] if index < len(array) else None
 
 
-def get_status(status):
+def get_status(status: str) -> str:
     return statuses[status]
 
 
-def get_file_name(path):
+def get_file_name(path: str) -> str:
     file = os.path.basename(path)
     name = os.path.splitext(file)[0]
     return name
 
 
-def is_equal_float_strs(str_num1, str_num2):
+def is_equal_float_strs(str_num1: str, str_num2: str) -> bool:
     str_num1, str_num2 = str_num1.replace(',', '.'), str_num2.replace(',', '.')
     try:
         return math.isclose(float(str_num1), float(str_num2), abs_tol=0.0001)
@@ -136,7 +137,7 @@ def is_equal_float_strs(str_num1, str_num2):
         return False
 
 
-def is_equal_hex_strs(str_num1, str_num2):
+def is_equal_hex_strs(str_num1: str, str_num2: str) -> bool:
     try:
         if len(str_num1) == len(str_num2):
             return int(str_num1, 16) == int(str_num2, 16)
@@ -149,19 +150,20 @@ def is_equal_hex_strs(str_num1, str_num2):
         return False
 
 
-def make_name_from_path(path):
+def make_name_from_path(path: str) -> str:
     path = path.replace(os.sep, ' ').replace('.', '')
     names = path.split()
     return '.'.join(names)
 
 
-def move_to_script_dir(path_to_script):
+def move_to_script_dir(path_to_script: str) -> None:
     path_to_script = os.path.dirname(path_to_script)
     if os.path.exists(path_to_script):
         os.chdir(path_to_script)
 
 
-def pprint(*data, slowly=False, status=INFO, end='\n', on_the_next_line=False):
+def pprint(*data: str | list, slowly: bool = False, status: str = INFO, end: str = '\n',
+           on_the_next_line: bool = False) -> None:
     if on_the_next_line:
         print()
     if not data:
@@ -176,13 +178,13 @@ def pprint(*data, slowly=False, status=INFO, end='\n', on_the_next_line=False):
                 time.sleep(0.01)
 
 
-def pprint_header(header):
+def pprint_header(header: str) -> None:
     pprint_separation_line()
     pprint(header, slowly=True)
     pprint_separation_line()
 
 
-def pprint_status_result(name, status, log_data, max_lines=None):
+def pprint_status_result(name: str, status: str, log_data: list[str] | str, max_lines: int = None) -> None:
     pprint(name, slowly=True, status=status)
     if max_lines:
         pprint_truncated_data(log_data, max_lines)
@@ -190,13 +192,14 @@ def pprint_status_result(name, status, log_data, max_lines=None):
         pprint(log_data, slowly=True, status='')
 
 
-def pprint_only_file_names(files):
+def pprint_only_file_names(files: list[str]) -> None:
     names = list(map(lambda x: get_file_name(x), files))
     pprint(', '.join(sorted(names, key=str.casefold)))
     pprint()
 
 
-def pprint_result(header, total_tests, total_time, result, is_failed):
+def pprint_result(header: str, total_tests: int, total_seconds: int,
+                  result: dict[str, set[str | str, str] | dict[str, dict[str, set[str]]]], is_failed: bool) -> None:
     pprint_header(f'{header} RESULTS')
     summary = [f'Total tests: {total_tests}']
     for status in result:
@@ -231,15 +234,15 @@ def pprint_result(header, total_tests, total_time, result, is_failed):
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}') if is_failed else pprint(f'{BGreen}{header} SUCCESS{IWhite}')
     summary = ', '.join(summary)
-    time_header = f'Total time: {total_time // 60:02}:{total_time % 60:02} min'
+    time_header = f'Total time: {total_seconds // 60:02}:{total_seconds % 60:02} min'
     pprint_header(f'{summary}\n{time_header}')
 
 
-def pprint_separation_line():
+def pprint_separation_line() -> None:
     pprint(separation_line, slowly=True)
 
 
-def pprint_truncated_data(data, max_lines):
+def pprint_truncated_data(data: list[str] | str, max_lines: int) -> None:
     if type(data) == str:
         data = '\n'.join(data.split('\n')[:max_lines])
     else:
@@ -247,7 +250,7 @@ def pprint_truncated_data(data, max_lines):
     pprint(data, slowly=True, status='')
 
 
-def print_progress_bar(i, n):
+def print_progress_bar(i: int, n: int) -> None:
     cell_count = 20
     cell_size = n / cell_count
     filled_cell_count = int(i / (float(n) / cell_count)) if n > 0 else cell_count
@@ -261,7 +264,7 @@ def print_progress_bar(i, n):
     print(f'\r[{get_status(INFO)}] {percentage}|{bar}| {i}/{n}', end='')
 
 
-def read_file_as_dictionary(path):
+def read_file_as_dictionary(path: str) -> str:
     _, _, extension = split_path(path)
     data = []
     if '.csv' == extension:
@@ -277,7 +280,7 @@ def read_file_as_dictionary(path):
     return data
 
 
-def remove_empty_dirs(path):
+def remove_empty_dirs(path: str) -> None:
     is_removed = True
     while is_removed:
         is_removed = False
@@ -288,7 +291,8 @@ def remove_empty_dirs(path):
                 is_removed = True
 
 
-def search_files_by_patterns(path, file_patterns, filters=None, recursive=False, print_files=False):
+def search_files_by_patterns(path: str, file_patterns: list[str], filters: list[str] = None, recursive: bool = False,
+                             print_files: bool = False) -> list[str]:
     if recursive:
         path = os.path.join(path, '**')
     pprint(f'\nLooking for "{file_patterns}" files in "{path}"')
@@ -302,7 +306,7 @@ def search_files_by_patterns(path, file_patterns, filters=None, recursive=False,
     return found_files
 
 
-def split_path(path_to_file, with_end_sep=False):
+def split_path(path_to_file: str, with_end_sep: bool = False) -> tuple[str, str, str]:
     path, file = os.path.split(path_to_file)
     if with_end_sep:
         path += os.sep
@@ -314,7 +318,7 @@ def thread_pool():
     return ThreadPool(cpu_count())
 
 
-def version_compare(ver1, ver2):
+def version_compare(ver1: str, ver2: str) -> int:
     for v1, v2 in zip(ver1.split('.'), ver2.split('.')):
         if int(v1) > int(v2):
             return 1

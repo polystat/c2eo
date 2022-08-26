@@ -31,6 +31,7 @@ import shutil
 import argparse
 import subprocess
 import re as regex
+from subprocess import CompletedProcess
 
 # Our scripts
 import tools
@@ -41,7 +42,8 @@ import clean_before_transpilation
 
 class Transpiler(object):
 
-    def __init__(self, path_to_c_files, skips_file_name, need_to_prepare_c_code=True, need_to_generate_codecov=False):
+    def __init__(self, path_to_c_files: str, skips_file_name: str, need_to_prepare_c_code: bool = True,
+                 need_to_generate_codecov: bool = False):
         self.filters = None
         if os.path.isfile(path_to_c_files):
             self.filters = [os.path.split(path_to_c_files)[1]]
@@ -67,7 +69,7 @@ class Transpiler(object):
         if not self.ignored_transpilation_warnings:
             self.ignored_transpilation_warnings = []
 
-    def transpile(self):
+    def transpile(self) -> (list[dict[str, str | CompletedProcess]], dict[str, dict[str, set[str]]]):
         start_time = time.time()
         self.build_c2eo()
         tools.pprint('\nTranspilation start\n')
@@ -87,7 +89,7 @@ class Transpiler(object):
         result = self.group_transpilation_results()
         result[tools.SKIP] = skip_result
         tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
-        is_failed = sum(map(len, result[tools.EXCEPTION].values()))
+        is_failed = sum(map(len, result[tools.EXCEPTION].values())) != 0
         tools.pprint_result('TRANSPILE', tests_count, int(time.time() - start_time), result, is_failed)
         if is_failed:
             exit(f'transpilation failed')
@@ -101,7 +103,7 @@ class Transpiler(object):
         os.chdir(original_path)
         return self.transpilation_units, skip_result
 
-    def build_c2eo(self):
+    def build_c2eo(self) -> None:
         if self.need_to_generate_codecov:
             build_c2eo.main(self.path_to_c2eo_build,
                             'cmake -D CMAKE_CXX_COMPILER="/bin/clang++" -D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS '
@@ -109,7 +111,7 @@ class Transpiler(object):
         else:
             build_c2eo.main(self.path_to_c2eo_build)
 
-    def make_unit(self, c_file):
+    def make_unit(self, c_file: str) -> dict[str, str]:
         path, name, _ = tools.split_path(c_file, with_end_sep=True)
         rel_c_path = path.replace(self.replaced_path, '')
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{name}'
@@ -117,7 +119,7 @@ class Transpiler(object):
         return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name, 'prepared_c_file': prepared_c_file,
                 'result_path': result_path, 'name': name, 'unique_name': name}
 
-    def check_skips(self):
+    def check_skips(self) -> dict[str, dict[str, set[str]]]:
         skip_units = []
         skips = {}
         for unit in self.transpilation_units:
@@ -130,7 +132,7 @@ class Transpiler(object):
         self.transpilation_units = list(filter(lambda x: x not in skip_units, self.transpilation_units))
         return skips
 
-    def start_transpilation(self, unit):
+    def start_transpilation(self, unit: dict[str, str | CompletedProcess]) -> None:
         eo_file = f'{unit["full_name"]}.eo'
         transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
@@ -142,7 +144,7 @@ class Transpiler(object):
             add_return_code_to_eo_file(eo_file)
         tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
 
-    def prepare_c_file(self, path, file_name, c_file):
+    def prepare_c_file(self, path: str, file_name: str, c_file: str) -> (str, str):
         with open(f'{c_file}', 'r', encoding='ISO-8859-1') as f:
             data = f.readlines()
         if self.need_to_prepare_c_code:
@@ -155,7 +157,7 @@ class Transpiler(object):
             f.writelines(data)
         return prepared_c_file, result_path
 
-    def remove_unused_eo_files(self):
+    def remove_unused_eo_files(self) -> None:
         transpiled_eo_names = set(map(lambda x: x['rel_eo_file'], self.transpilation_units))
         src_eo_names = tools.search_files_by_patterns(self.path_to_eo_src, ['*.eo'], recursive=True)
         src_eo_names = set(map(lambda x: x.replace(self.path_to_eo_src, ''), src_eo_names))
@@ -166,13 +168,13 @@ class Transpiler(object):
             unit['src_eo_file'] = os.path.join(unit['src_eo_path'], f'{unit["name"]}.eo')
         tools.remove_empty_dirs(self.path_to_eo_src)
 
-    def create_plug_file(self, unit, message):
+    def create_plug_file(self, unit: dict[str, str | CompletedProcess], message: str) -> None:
         plug = regex.sub('<file_name>', unit['full_name'], self.plug_code)
         plug = regex.sub('<exception_message>', message, plug)
         with open(unit['eo_file'], 'w') as f:
             f.write(plug)
 
-    def group_transpilation_results(self):
+    def group_transpilation_results(self) -> dict[str, set[str] | dict[str, dict[str, set[str]]]]:
         result = {tools.PASS: set([unit['unique_name'] for unit in self.transpilation_units]), tools.NOTE: {},
                   tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
@@ -204,7 +206,7 @@ class Transpiler(object):
             result[tools.PASS] -= set(file for value in result[status].values() for file in value.keys())
         return result
 
-    def move_transpiled_files(self):
+    def move_transpiled_files(self) -> None:
         difference = []
         for unit in self.transpilation_units:
             shutil.copy(unit['eo_file'], os.path.join(unit['result_path'], f'{unit["name"]}.eo'))
@@ -225,7 +227,7 @@ class Transpiler(object):
         else:
             tools.pprint('\nNot found any changes in src files')
 
-    def move_aliases(self):
+    def move_aliases(self) -> None:
         aliases = tools.search_files_by_patterns('.', ['*.alias'], print_files=True)
         if not os.path.exists(self.path_to_eo_external):
             os.makedirs(self.path_to_eo_external, exist_ok=True)
@@ -235,13 +237,13 @@ class Transpiler(object):
             destination_file = os.path.join(self.path_to_eo_external, file_name)
             shutil.move(alias, destination_file)
 
-    def generate_run_sh(self, full_name):
+    def generate_run_sh(self, full_name: str) -> None:
         code = regex.sub(self.run_sh_replace, full_name, self.run_sh_code)
         with open(f'{self.path_to_eo_project}run.sh', 'w') as f:
             f.write(code)
 
 
-def generate_unique_names_for_units(units, words_in_name=2):
+def generate_unique_names_for_units(units: list[dict[str, str | CompletedProcess]], words_in_name: int = 2) -> None:
     names = {}
     collision_names = {}
     for unit in units:
@@ -260,7 +262,7 @@ def generate_unique_names_for_units(units, words_in_name=2):
         generate_unique_names_for_units(units, words_in_name + 1)
 
 
-def add_return_code_to_eo_file(eo_file):
+def add_return_code_to_eo_file(eo_file: str) -> None:
     with open(f'{eo_file}', 'r', encoding='ISO-8859-1') as f:
         data = f.readlines()
     is_main = False
@@ -283,7 +285,7 @@ def add_return_code_to_eo_file(eo_file):
         f.writelines(data[aliases_count:])
 
 
-def check_unit_exception(unit):
+def check_unit_exception(unit: dict[str, str | CompletedProcess]) -> str:
     exception_message = ''
     if unit['transpilation_result'].returncode:
         exception_message = '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
@@ -296,7 +298,7 @@ def check_unit_exception(unit):
     return exception_message
 
 
-def prepare_c_code(data):
+def prepare_c_code(data: list[str]) -> None:
     for i, line in enumerate(data):
         if '#include' in line:
             new_line = line.lstrip()
@@ -305,7 +307,7 @@ def prepare_c_code(data):
             data[i] = f'{indent}// {new_line}'
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for translating C files to the EO files')
 
     _parser.add_argument('path_to_c_files', metavar='PATH',

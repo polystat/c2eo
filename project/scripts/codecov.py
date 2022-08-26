@@ -34,7 +34,7 @@ import tools
 import settings
 
 
-def generate_codecov():
+def generate_codecov() -> None:
     os.chdir(settings.get_setting('path_to_c2eo_transpiler'))
     tools.pprint('Merging profdata\n')
     subprocess.run(f'llvm-profdata-14 merge -sparse *.profraw -o res.profdata', shell=True)
@@ -44,7 +44,7 @@ def generate_codecov():
     tools.clear_dir_by_patterns('.', ['*.profraw', '*.profdata'])
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for generating codecov for c2eo transpiler')
     return _parser
 

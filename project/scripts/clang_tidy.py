@@ -37,7 +37,7 @@ import tools
 
 class ClangTidy(object):
 
-    def __init__(self, path_to_code_files):
+    def __init__(self, path_to_code_files: str):
         self.filters = None
         if os.path.isfile(path_to_code_files):
             self.filters = [os.path.split(path_to_code_files)[1]]
@@ -54,7 +54,7 @@ class ClangTidy(object):
         self.clang_tidy_checks = ','.join(settings.get_setting('clang_tidy_checks'))
         self.results = []
 
-    def inspect(self):
+    def inspect(self) -> bool:
         start_time = time.time()
         tools.pprint('\nInspection start\n')
         self.generate_compile_commands()
@@ -71,7 +71,7 @@ class ClangTidy(object):
         tools.pprint_result('INSPECTION', self.files_count, int(time.time() - start_time), result, _is_failed)
         return _is_failed
 
-    def generate_compile_commands(self):
+    def generate_compile_commands(self) -> None:
         original_path = os.getcwd()
         os.chdir(self.path_to_c2eo_build)
         cmd = f'cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
@@ -82,14 +82,14 @@ class ClangTidy(object):
             exit('Failed during cmake execution')
         tools.pprint(result.stdout, slowly=True)
 
-    def inspect_file(self, file):
+    def inspect_file(self, file: str) -> dict[str, str | subprocess.CompletedProcess]:
         transpile_cmd = f'clang-tidy -p {self.path_to_c2eo_build} --checks=\'{self.clang_tidy_checks}\' {file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, self.files_count)
         return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
 
-    def group_inspection_results(self):
+    def group_inspection_results(self) -> dict:
         result = {tools.PASS: set([unit['file'] for unit in self.results]), tools.NOTE: {}, tools.WARNING: {},
                   tools.ERROR: {}, tools.EXCEPTION: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
@@ -120,7 +120,7 @@ class ClangTidy(object):
         return result
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='script for checking code files using Clang-Tidy')
 
     _parser.add_argument('-p', '--path_to_code_files', default=settings.get_setting('path_to_code_files'),
