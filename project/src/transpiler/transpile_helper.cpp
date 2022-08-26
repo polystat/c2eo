@@ -1298,6 +1298,19 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{"s-" + id->getName().str()};
     }
     const auto &var = transpiler.glob_.GetVarById(id);
+    // TEST output
+    std::cout << "It is var " << id->getName().str() << "\n";
+    clang::QualType qual_type = id->getType();
+    clang::TypeInfo type_info = id->getASTContext().getTypeInfo(qual_type);
+//     std::cout << "Size of variable = " << var.size << "\n";
+    std::cout << "QualType as string = " << qual_type.getAsString() << "\n";
+    const clang::Type *type = qual_type.getTypePtrOrNull();
+    if(type->isArrayType()) {
+      std::cout << "It is array type which used as pointer\n";
+      EOObject array_as_ptr{"addr-of"};
+      array_as_ptr.nested.push_back(EOObject{var.alias});
+      return array_as_ptr;
+    }
     return EOObject{var.alias};
   } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
