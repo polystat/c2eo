@@ -49,7 +49,8 @@ Again, we recommend [Ubuntu 22.04+](https://ubuntu.com/download) and you will ne
 [cmake 3.18+](https://cmake.org/download/), 
 [gcc 11.2.+](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
 [g++ 11.2.+](https://pkgs.org/download/g++), 
-[ninja-build 1.10.1+](https://ninja-build.org/)
+[ninja-build 1.10.1+](https://ninja-build.org/), 
+[clang 14.0.0+](https://releases.llvm.org/14.0.0/tools/clang/docs/)
 and
 [python3 3.9.7+](https://www.python.org/downloads/).
 You will also need requirements for [the EO project](https://github.com/objectionary/eo) ([Maven 3.3+](https://maven.apache.org) and Java 8+)
