@@ -5,5 +5,5 @@
 
 [a] > post-dec-float32
   seq > @
-    write-as-float32 a ((read-as-float32 a).minus 1)
-    (read-as-float32 a).plus 1
+    write-as-float32 a ((read-as-float32 a).minus 1.0)
+    (read-as-float32 a).plus 1.0

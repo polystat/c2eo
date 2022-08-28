@@ -1,0 +1,4 @@
++package c2eo.coperators
+
+[a] > as-char
+  a.as-bytes.slice 7 1 > @
