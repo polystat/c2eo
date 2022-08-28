@@ -26,7 +26,6 @@ SOFTWARE.
 
 import sys
 import csv
-import json
 import subprocess
 from os import chdir
 from os import sep as os_sep
