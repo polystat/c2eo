@@ -18,6 +18,21 @@ int main() {
   printf("x = %lld\n", x);
   printf("y = %lld\n", y);
 
+  x = a[1];
+  y = a[0];
+  printf("x = %lld\n", x);
+  printf("y = %lld\n", y);
+
+  i64 v = *a;
+  i64 w = *(a+1);
+  printf("v = %lld\n", v);
+  printf("w = %lld\n", w);
+
+  v = *(a+1);
+  w = *a;
+  printf("v = %lld\n", v);
+  printf("w = %lld\n", w);
+
   return 0;
 }
 

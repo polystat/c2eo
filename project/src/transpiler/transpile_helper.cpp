@@ -749,7 +749,9 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   if (tmp_dims.size() > dims->size()) {
     dims = &tmp_dims;
   }
+
   uint64_t dim_size = decl_info.first;  // current dimension size.
+
   for (int i = 0; i < depth && i < dims->size(); ++i) {
     dim_size *= dims->at(i);
   }
@@ -776,20 +778,47 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
         add_shift.nested.emplace_back(next_shift);
 
         if (depth == 0) {
+          // TEST
+          // std::cout << "depth == 0\n";
           EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(add_shift);
-          return final_write;
+//           return final_write;
+          EOObject addr{"address"};
+          EOObject glob_ram{"global-ram"};
+          addr.nested.emplace_back(glob_ram);
+          addr.nested.emplace_back(final_write);
+          return addr;
         }
         return add_shift;
       }
-      if (stmt_class == Stmt::DeclRefExprClass ||
-          stmt_class == Stmt::MemberExprClass) {
+      if (stmt_class == Stmt::DeclRefExprClass) {
         if (depth == 0) {
+          // TEST
+          // std::cout << "(Stmt::DeclRefExprClass || Stmt::MemberExprClass) && depth == 0\n";
+          EOObject final_write{"plus"};
+          final_write.nested.emplace_back(decl_info.second);
+          final_write.nested.emplace_back(curr_shift);
+//           return final_write;
+          EOObject addr{"address"};
+          EOObject glob_ram{"global-ram"};
+          addr.nested.emplace_back(glob_ram);
+          addr.nested.emplace_back(final_write);
+          return addr;
+        }
+      } else if (stmt_class == Stmt::MemberExprClass) {
+        if (depth == 0) {
+          // TEST
+          // std::cout << "(Stmt::DeclRefExprClass || Stmt::MemberExprClass) && depth == 0\n";
           EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(curr_shift);
           return final_write;
+//           EOObject addr{"address"};
+//           EOObject glob_ram{"global-ram"};
+//           addr.nested.emplace_back(glob_ram);
+//           addr.nested.emplace_back(final_write);
+//           return addr;
         }
       }
       return curr_shift;
@@ -978,8 +1007,14 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
       printf.nested.push_back(param);
     } else if (idx <= formats.size() && !formats[idx - 1].empty() &&
                param.type != EOObjectType::EO_LITERAL) {
+      // TEST out
+      // std::cout << "formats[" << (idx - 1) << "] = " << formats[idx - 1] << "\n";
       EOObject cast{formats[idx - 1]};
-      cast.nested.push_back(param);
+      EOObject addr{"address"};
+      EOObject ram{"global-ram"};
+      addr.nested.push_back(ram);
+      addr.nested.push_back(param);
+      cast.nested.push_back(addr);
       printf.nested.push_back(cast);
     } else {
       printf.nested.push_back(param);
@@ -1018,10 +1053,55 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   auto op_code = p_operator->getOpcode();
   std::string operation;
 
+  auto opd1 = p_operator->getLHS();
+  auto opd2 = p_operator->getRHS();
+  auto eo_opd1 = GetStmtEOObject(opd1);
+  auto eo_opd2 = GetStmtEOObject(opd2);
+  auto qual_type1 = opd1->getType();
+  auto qual_type2 = opd2->getType();
+
   if (op_code == BinaryOperatorKind::BO_AddAssign) {
     operation = "plus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject read_op{"read-as-ptr"};
+      read_op.nested.push_back(eo_opd1);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(read_op);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_SubAssign) {
     operation = "minus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject read_op{"read-as-ptr"};
+      read_op.nested.push_back(eo_opd1);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(read_op);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_MulAssign) {
     operation = "times";
   } else if (op_code == BinaryOperatorKind::BO_DivAssign) {
@@ -1042,23 +1122,27 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
 
   EOObject binary_op{operation};
   EOObject eo_object{"read"};
-  Expr *left = dyn_cast<Expr>(p_operator->getLHS());
-  if (left != nullptr) {
-    QualType qual_type = left->getType();
-    eo_object.nested.push_back(GetStmtEOObject(left));
-    if (!qual_type->isRecordType()) {
-      eo_object.name += "-as-" + GetTypeName(qual_type);
+//   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
+//   if (left != nullptr) {
+  if (opd1 != nullptr) {
+//     QualType qual_type = left->getType();
+//     eo_object.nested.push_back(GetStmtEOObject(left));
+    eo_object.nested.push_back(eo_opd1);
+//     if (!qual_type->isRecordType()) {
+//       eo_object.name += "-as-" + GetTypeName(qual_type);
+    if (!qual_type1->isRecordType()) {
+      eo_object.name += "-as-" + GetTypeName(qual_type1);
     } else {
       eo_object.nested.emplace_back(
           to_string(transpiler.record_manager_
-                        .GetById(qual_type->getAsRecordDecl()->getID())
+                        .GetById(qual_type1->getAsRecordDecl()->getID())
                         ->size),
           EOObjectType::EO_LITERAL);
     }
   }
   binary_op.nested.emplace_back(eo_object);
-
-  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  binary_op.nested.push_back(eo_opd2);
+//   binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binary_op;
 }
 
@@ -1071,10 +1155,62 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   if (op_code == BinaryOperatorKind::BO_Assign) {
     return GetAssignmentOperatorEOObject(p_operator);
   }
+  auto opd1 = p_operator->getLHS();
+  auto opd2 = p_operator->getRHS();
+  auto eo_opd1 = GetStmtEOObject(opd1);
+  auto eo_opd2 = GetStmtEOObject(opd2);
+  auto qual_type1 = opd1->getType();
+  auto qual_type2 = opd2->getType();
   if (op_code == BinaryOperatorKind::BO_Add) {
     operation = "plus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(eo_opd1);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_Sub) {
     operation = "minus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    const clang::Type *type2 = qual_type2.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // Second operand maybe pointer too
+      if(type2->isArrayType() || type2->isPointerType()) {
+        //uint64_t type_size2 = GetTypeSize(qual_type2);
+        EOObject substr{"minus"};
+        substr.nested.push_back(eo_opd1);
+        substr.nested.push_back(eo_opd2);
+        EOObject div{"div"};
+        div.nested.push_back(substr);
+        div.nested.push_back(value);
+        return div;
+      }
+      // Or second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(eo_opd1);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_Mul) {
     operation = "times";
   } else if (op_code == BinaryOperatorKind::BO_Div) {
@@ -1114,10 +1250,11 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     llvm::errs() << "Warning: Unknown operator " << p_operator->getOpcodeStr()
                  << "\n";
   }
-
   EOObject binary_op{operation};
-  binary_op.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
-  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  binary_op.nested.push_back(eo_opd1);
+  binary_op.nested.push_back(eo_opd2);
+//   binary_op.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+//   binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binary_op;
 }
 
@@ -1298,6 +1435,21 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{"s-" + id->getName().str()};
     }
     const auto &var = transpiler.glob_.GetVarById(id);
+    // TEST output
+    // std::cout << "It is var " << id->getName().str() << "\n";
+    clang::QualType qual_type = id->getType();
+    clang::TypeInfo type_info = id->getASTContext().getTypeInfo(qual_type);
+    // TEST output
+    // std::cout << "Size of variable = " << var.size << "\n";
+    // std::cout << "QualType as string = " << qual_type.getAsString() << "\n";
+    const clang::Type *type = qual_type.getTypePtrOrNull();
+    if(type->isArrayType()) {
+      // TEST output
+      // std::cout << "It is array type which used as pointer\n";
+      EOObject array_as_ptr{"addr-of"};
+      array_as_ptr.nested.push_back(EOObject{var.alias});
+      return array_as_ptr;
+    }
     return EOObject{var.alias};
   } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
