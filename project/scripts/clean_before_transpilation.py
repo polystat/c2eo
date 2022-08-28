@@ -24,22 +24,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os
+
 import sys
 import argparse
+from pathlib import Path
 
 # Our scripts
 import tools
 import settings
 
 
-def main(path_to_files: str) -> None:
-    patterns = settings.get_setting('patterns_for_cleaning')
-    if os.path.isfile(path_to_files):
-        path_to_files = os.path.dirname(path_to_files)
+def main(path_to_files: Path) -> None:
+    patterns = set(settings.get_setting('patterns_for_cleaning'))
+    if path_to_files.is_file():
+        path_to_files = path_to_files.parent
     tools.clear_dir_by_patterns(path_to_files, patterns, recursive=True)
     tools.remove_empty_dirs(path_to_files)
-    tools.clear_dir_by_patterns(settings.get_setting('path_to_c2eo_transpiler'), ['*.eo'])
+    tools.clear_dir_by_patterns(settings.get_setting('path_to_c2eo_transpiler'), {'*.eo'})
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -51,7 +52,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == '__main__':
-    tools.move_to_script_dir(sys.argv[0])
+    tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
-    main(namespace.path_to_files)
+    main(Path(namespace.path_to_files))

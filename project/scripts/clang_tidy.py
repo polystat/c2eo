@@ -24,11 +24,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os
 import sys
 import time
 import argparse
 import subprocess
+from os import chdir
+from pathlib import Path
 
 # Our scripts
 import settings
@@ -37,28 +38,25 @@ import tools
 
 class ClangTidy(object):
 
-    def __init__(self, path_to_code_files: str):
+    def __init__(self, path_to_code_files: Path):
         self.filters = None
-        if os.path.isfile(path_to_code_files):
-            self.filters = [os.path.split(path_to_code_files)[1]]
-            path_to_code_files = os.path.dirname(path_to_code_files)
+        if path_to_code_files.is_file():
+            self.filters = {path_to_code_files.name}
+            path_to_code_files = path_to_code_files.parent
         self.path_to_code_files = path_to_code_files
         self.files_handled_count = 0
         self.files_count = 0
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
-        if not os.path.exists(self.path_to_c2eo_build):
-            os.mkdir(self.path_to_c2eo_build)
-        self.ignored_inspection_warnings = settings.get_setting('ignored_inspection_warnings')
-        if not self.ignored_inspection_warnings:
-            self.ignored_inspection_warnings = []
+        self.path_to_c2eo_build.mkdir(exist_ok=True)
+        self.ignored_inspection_warnings = settings.get_setting('ignored_inspection_warnings') or []
         self.clang_tidy_checks = ','.join(settings.get_setting('clang_tidy_checks'))
-        self.results = []
+        self.results: list[dict[str, str | Path | subprocess.CompletedProcess]] = []
 
     def inspect(self) -> bool:
         start_time = time.time()
         tools.pprint('\nInspection start\n')
         self.generate_compile_commands()
-        patterns = settings.get_setting('code_file_patterns')
+        patterns = set(settings.get_setting('code_file_patterns'))
         code_files = tools.search_files_by_patterns(self.path_to_code_files, patterns, filters=self.filters,
                                                     recursive=True, print_files=True)
         self.files_count = len(code_files)
@@ -67,30 +65,30 @@ class ClangTidy(object):
         with tools.thread_pool() as threads:
             self.results = [result for result in threads.map(self.inspect_file, code_files)]
         result = self.group_inspection_results()
-        _is_failed = len(result[tools.WARNING]) + len(result[tools.EXCEPTION])
+        _is_failed = len(result[tools.WARNING]) + len(result[tools.EXCEPTION]) > 0
         tools.pprint_result('INSPECTION', self.files_count, int(time.time() - start_time), result, _is_failed)
         return _is_failed
 
     def generate_compile_commands(self) -> None:
-        original_path = os.getcwd()
-        os.chdir(self.path_to_c2eo_build)
+        original_path = Path.cwd()
+        chdir(self.path_to_c2eo_build)
         cmd = f'cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        os.chdir(original_path)
+        chdir(original_path)
         if result.returncode != 0:
             tools.pprint_status_result(cmd, tools.EXCEPTION, result.stderr)
             exit('Failed during cmake execution')
         tools.pprint(result.stdout, slowly=True)
 
-    def inspect_file(self, file: str) -> dict[str, str | subprocess.CompletedProcess]:
+    def inspect_file(self, file: Path) -> dict[str, str | Path | subprocess.CompletedProcess]:
         transpile_cmd = f'clang-tidy -p {self.path_to_c2eo_build} --checks=\'{self.clang_tidy_checks}\' {file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, self.files_count)
-        return {'name': tools.get_file_name(file), 'file': os.path.basename(file), 'inspection_result': result}
+        return {'name': file.stem, 'file': file.name, 'inspection_result': result}
 
-    def group_inspection_results(self) -> dict:
-        result = {tools.PASS: set([unit['file'] for unit in self.results]), tools.NOTE: {}, tools.WARNING: {},
+    def group_inspection_results(self) -> dict[str, set[str] | dict[str, [dict[str, set[str]]]]]:
+        result = {tools.PASS: {unit['file'] for unit in self.results}, tools.NOTE: {}, tools.WARNING: {},
                   tools.ERROR: {}, tools.EXCEPTION: {}}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.results:
@@ -116,7 +114,7 @@ class ClangTidy(object):
                         if unit['file'] in place:
                             result[status][message][unit['file']].add(place.split(':', 1)[1][:-2])
         for status in [tools.WARNING, tools.ERROR, tools.EXCEPTION]:
-            result[tools.PASS] -= set(file for value in result[status].values() for file in value.keys())
+            result[tools.PASS] -= {file for value in result[status].values() for file in value.keys()}
         return result
 
 
@@ -129,9 +127,9 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == '__main__':
-    tools.move_to_script_dir(sys.argv[0])
+    tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
-    is_failed = ClangTidy(namespace.path_to_code_files).inspect()
+    is_failed = ClangTidy(Path(namespace.path_to_code_files)).inspect()
     if is_failed:
         exit(f'clang-tidy checks failed')

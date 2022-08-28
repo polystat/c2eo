@@ -27,6 +27,8 @@ SOFTWARE.
 import sys
 import time
 import argparse
+from pathlib import Path
+from subprocess import CompletedProcess
 
 # Our scripts
 import tools
@@ -37,12 +39,12 @@ from transpile import Transpiler
 
 class Compiler(object):
 
-    def __init__(self, path_to_files: str, skips_file_name: str, need_to_prepare_c_code: bool = True):
+    def __init__(self, path_to_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True):
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
-        self.transpilation_units = []
+        self.transpilation_units: list[dict[str, str | Path | CompletedProcess]] = []
 
     def compile(self) -> Transpiler.transpile:
         start_time = time.time()
@@ -50,7 +52,7 @@ class Compiler(object):
                                                            self.need_to_prepare_c_code).transpile()
         if self.transpilation_units:
             errors, error_result = EOBuilder(self.transpilation_units).build()
-            passes = set(unit['unique_name'] for unit in self.transpilation_units) - errors
+            passes = {unit['unique_name'] for unit in self.transpilation_units} - errors
             result = {tools.PASS: passes, tools.ERROR: error_result, tools.SKIP: skip_result}
             tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
             tools.pprint_result('COMPILE', tests_count, int(time.time() - start_time), result, False)
@@ -72,7 +74,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == '__main__':
-    tools.move_to_script_dir(sys.argv[0])
+    tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
-    Compiler(namespace.path_to_files, namespace.skips_file_name, not namespace.not_prepare_c_code).compile()
+    Compiler(Path(namespace.path_to_files), namespace.skips_file_name, not namespace.not_prepare_c_code).compile()

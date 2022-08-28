@@ -23,8 +23,8 @@ SOFTWARE.
 """
 
 import yaml
-import os.path
 import requests
+from pathlib import Path
 from yaml.loader import SafeLoader
 
 # Our scripts
@@ -33,15 +33,15 @@ import tools
 settings_file = 'data/settings.yml'
 
 
-def get_setting(setting_name: str) -> str | list[str]:
+def get_setting(setting_name: str) -> str | list[str] | Path:
     if setting_name == 'latest_eo_version':
         return get_latest_eo_version()
 
     with open(settings_file) as f:
         data = yaml.load(f, Loader=SafeLoader)
     setting = data[setting_name]
-    if 'path' in setting_name and '.' not in setting:
-        setting = os.path.join(setting, '')
+    if 'path' in setting_name:
+        setting = Path(setting)
     return setting
 
 
@@ -64,22 +64,22 @@ def get_latest_eo_version() -> str:
 
 def get_meta_code(name: str, read_as_lines: bool = False) -> str | list[str]:
     path = get_setting('path_to_meta')
-    file = os.path.join(path, f'{name}.txt')
+    file = path / f'{name}.txt'
     with open(file, 'r') as f:
         return f.readlines() if read_as_lines else f.read()
 
 
 def get_skips(name: str) -> dict:
     path = get_setting('path_to_skips')
-    file = os.path.join(path, f'{name}.txt')
-    with open(file, 'r') as f:
-        data = f.readlines()
+    file = path / f'{name}.txt'
     skips = {}
-    for row in data:
-        row = row.rstrip()
-        if row and not row.startswith('#'):
-            _filters, comment = row.split(':', maxsplit=1)
-            _filters = _filters.split(',')
-            for _filter in _filters:
-                skips[_filter.strip()] = comment.strip()
+    with open(file, 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                continue
+
+            if line := line.rstrip():
+                filters, comment = line.split(':', maxsplit=1)
+                for _filter in filters.split(','):
+                    skips[_filter.strip()] = comment.strip()
     return skips
