@@ -75,8 +75,9 @@ class MemoryManager {
       : name_(std::move(name)), pointer_(start_pointer) {}
 
   Variable Add(const clang::VarDecl *id, size_t size, const std::string &type,
-               std::string alias, EOObject value, std::string local_name = "",
-               size_t shift = 0, bool is_initialized = true);
+               const std::string &alias, EOObject value,
+               std::string local_name = "", size_t shift = 0,
+               bool is_initialized = true);
 
   Variable AddExternal(const clang::VarDecl *id, size_t size,
                        const std::string &type, std::string alias,

@@ -33,7 +33,7 @@
 #include "src/transpiler/transpile_helper.h"
 
 Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
-                            const std::string &type, std::string alias,
+                            const std::string &type, const std::string &alias,
                             EOObject value, std::string local_name,
                             size_t shift, bool is_initialized) {
   auto res = find_if(variables_.begin(), variables_.end(),
