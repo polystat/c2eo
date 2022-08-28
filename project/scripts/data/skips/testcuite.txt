@@ -1,4 +1,28 @@
+00087, 00089, 00124, 00130, 00150, 00159, 00170, 00189, 00204, 00209, 00210, 00216, 00220: TODO parsing problem
 00095, 00096: variables declaration duplicates
-00078, 00128, 00175: TODO char
+00078, 00128, 00132, 00175, 00208, 00220, 00058, 00173, 00137, 00138: TODO char
 00040, 00104, 00181, 00182: uint64 is unsupported
 00205: java code too large
+00025, 00180, 00179: using str functions
+00073, 00072, 00032, 00037, 00077, 00014, 00013, 00130: TODO pointers and arrays
+00050: TODO structures and unions
+00051, 00199, 00010, 000129, 00213, 00207, 00129: goto
+00092, 00151: TODO array initialization
+00091, 00148: TODO array in structure
+00154: TODO array of structure
+00053: TODO structures
+00174: using math.h
+00186: using sprintf
+00187: using stdio.h for work with files
+00149, 00163: TODO pointers on structures
+00197: TODO static variables
+00212: TODO sizeof(void*) == 8
+00219, 00217: TODO?
+00143: TODO too strange switch
+00026: TODO arithmetics
+00087, 00089, 00124, 00088: pointers on functions
+00041: TODO too slow code
+00076, 00109, 00144, 00183: TODO ternary operator
+00045: TODO pointers
+00200: TODO shift
+00214: using __builtin_expect

@@ -5,7 +5,7 @@ typedef long long i64;
 i64 x = 42;
 i64 y = 0;
 
-i64 main() {
+int main() {
     x = 1 + x;
     printf("%ld\n", x);
     x = x + 1;

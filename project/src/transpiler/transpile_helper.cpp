@@ -133,6 +133,8 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt);
 
 uint64_t GetTypeSize(QualType qual_type);
 
+uint64_t GetSizeOfType(QualType qual_type);
+
 EOObject GetCastEOObject(const CastExpr *op);
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt);
@@ -435,11 +437,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::UnaryExprOrTypeTraitExprClass) {
     const auto *op = dyn_cast<clang::UnaryExprOrTypeTraitExpr>(stmt);
-    // Need to release instead this code
     return GetUnaryExprOrTypeTraitExprEOObject(op);
-    // llvm::errs() << "Warning: Noreleased statement "
-    //              << stmt->getStmtClassName() << "\n";
-    // return EOObject(EOObjectType::EO_PLUG);
   }
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
@@ -658,32 +656,40 @@ EOObject GetCastEOObject(const CastExpr *op) {
   if (op == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-
   auto cast_kind = op->getCastKind();
+  QualType qual_type = op->getType();
+  string type = GetTypeName(qual_type);
   if (cast_kind == clang::CK_LValueToRValue) {
-    QualType qual_type = op->getType();
-    string type = GetTypeName(qual_type);
     EOObject read{"read"};
     read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-    if (!qual_type->isRecordType()) {
-      read.name += "-as-" + type;
-    } else {
+    if (qual_type->isRecordType()) {
       read.nested.emplace_back(
           to_string(transpiler.record_manager_
                         .GetById(qual_type->getAsRecordDecl()->getID())
                         ->size),
           EOObjectType::EO_LITERAL);
+
+    } else {
+      read.name += "-as-" + type;
     }
     return read;
   }
   if (cast_kind == clang::CK_FloatingToIntegral ||
       cast_kind == clang::CK_IntegralToFloating) {
-    QualType qual_type = op->getType();
-    string type = GetTypeName(qual_type);
     EOObject cast{"as-" + type};
     cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
     return cast;
   }
+  //  if (cast_kind == clang::CK_ArrayToPointerDecay &&
+  //      (*op->child_begin())->getStmtClass() !=
+  //      clang::Stmt::StringLiteralClass) {
+  //    EOObject read{"read"};
+  //    if (type != "ptr") {
+  //      read.name += "-as-" + type;
+  //    }
+  //    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+  //    return read;
+  //  }
   // TODO(nkchuykin) if cast kinds and also split it to another func
   return GetStmtEOObject(*op->child_begin());
 }
@@ -743,7 +749,9 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   if (tmp_dims.size() > dims->size()) {
     dims = &tmp_dims;
   }
+
   uint64_t dim_size = decl_info.first;  // current dimension size.
+
   for (int i = 0; i < depth && i < dims->size(); ++i) {
     dim_size *= dims->at(i);
   }
@@ -770,20 +778,47 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
         add_shift.nested.emplace_back(next_shift);
 
         if (depth == 0) {
+          // TEST
+          // std::cout << "depth == 0\n";
           EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(add_shift);
-          return final_write;
+//           return final_write;
+          EOObject addr{"address"};
+          EOObject glob_ram{"global-ram"};
+          addr.nested.emplace_back(glob_ram);
+          addr.nested.emplace_back(final_write);
+          return addr;
         }
         return add_shift;
       }
-      if (stmt_class == Stmt::DeclRefExprClass ||
-          stmt_class == Stmt::MemberExprClass) {
+      if (stmt_class == Stmt::DeclRefExprClass) {
         if (depth == 0) {
+          // TEST
+          // std::cout << "(Stmt::DeclRefExprClass || Stmt::MemberExprClass) && depth == 0\n";
+          EOObject final_write{"plus"};
+          final_write.nested.emplace_back(decl_info.second);
+          final_write.nested.emplace_back(curr_shift);
+//           return final_write;
+          EOObject addr{"address"};
+          EOObject glob_ram{"global-ram"};
+          addr.nested.emplace_back(glob_ram);
+          addr.nested.emplace_back(final_write);
+          return addr;
+        }
+      } else if (stmt_class == Stmt::MemberExprClass) {
+        if (depth == 0) {
+          // TEST
+          // std::cout << "(Stmt::DeclRefExprClass || Stmt::MemberExprClass) && depth == 0\n";
           EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(curr_shift);
           return final_write;
+//           EOObject addr{"address"};
+//           EOObject glob_ram{"global-ram"};
+//           addr.nested.emplace_back(glob_ram);
+//           addr.nested.emplace_back(final_write);
+//           return addr;
         }
       }
       return curr_shift;
@@ -946,8 +981,45 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
 
 EOObject GetPrintfCallEOObject(const CallExpr *op) {
   EOObject printf{"printf"};
+  int idx = 0;
+  vector<string> formats;
   for (const auto *arg : op->arguments()) {
-    printf.nested.push_back(GetStmtEOObject(arg));
+    auto param = GetStmtEOObject(arg);
+    if (idx == 0 && param.type == EOObjectType::EO_LITERAL) {
+      const std::regex re("%([lh]*)([cdfs])");
+      auto formats_begin =
+          std::sregex_iterator(param.name.begin(), param.name.end(), re);
+      auto formats_end = std::sregex_iterator();
+      for (std::sregex_iterator i = formats_begin; i != formats_end; ++i) {
+        char match_format = i->str(2)[0];
+        switch (match_format) {
+          case 's':
+            formats.emplace_back("read-as-string");
+            break;
+          case 'c':
+            formats.emplace_back("as-char");
+            break;
+          default:
+            formats.emplace_back("");
+            break;
+        }
+      }
+      printf.nested.push_back(param);
+    } else if (idx <= formats.size() && !formats[idx - 1].empty() &&
+               param.type != EOObjectType::EO_LITERAL) {
+      // TEST out
+      // std::cout << "formats[" << (idx - 1) << "] = " << formats[idx - 1] << "\n";
+      EOObject cast{formats[idx - 1]};
+      EOObject addr{"address"};
+      EOObject ram{"global-ram"};
+      addr.nested.push_back(ram);
+      addr.nested.push_back(param);
+      cast.nested.push_back(addr);
+      printf.nested.push_back(cast);
+    } else {
+      printf.nested.push_back(param);
+    }
+    idx++;
   }
   return printf;
 }
@@ -981,10 +1053,55 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   auto op_code = p_operator->getOpcode();
   std::string operation;
 
+  auto opd1 = p_operator->getLHS();
+  auto opd2 = p_operator->getRHS();
+  auto eo_opd1 = GetStmtEOObject(opd1);
+  auto eo_opd2 = GetStmtEOObject(opd2);
+  auto qual_type1 = opd1->getType();
+  auto qual_type2 = opd2->getType();
+
   if (op_code == BinaryOperatorKind::BO_AddAssign) {
     operation = "plus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject read_op{"read-as-ptr"};
+      read_op.nested.push_back(eo_opd1);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(read_op);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_SubAssign) {
     operation = "minus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject read_op{"read-as-ptr"};
+      read_op.nested.push_back(eo_opd1);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(read_op);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_MulAssign) {
     operation = "times";
   } else if (op_code == BinaryOperatorKind::BO_DivAssign) {
@@ -1005,23 +1122,27 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
 
   EOObject binary_op{operation};
   EOObject eo_object{"read"};
-  Expr *left = dyn_cast<Expr>(p_operator->getLHS());
-  if (left != nullptr) {
-    QualType qual_type = left->getType();
-    eo_object.nested.push_back(GetStmtEOObject(left));
-    if (!qual_type->isRecordType()) {
-      eo_object.name += "-as-" + GetTypeName(qual_type);
+//   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
+//   if (left != nullptr) {
+  if (opd1 != nullptr) {
+//     QualType qual_type = left->getType();
+//     eo_object.nested.push_back(GetStmtEOObject(left));
+    eo_object.nested.push_back(eo_opd1);
+//     if (!qual_type->isRecordType()) {
+//       eo_object.name += "-as-" + GetTypeName(qual_type);
+    if (!qual_type1->isRecordType()) {
+      eo_object.name += "-as-" + GetTypeName(qual_type1);
     } else {
       eo_object.nested.emplace_back(
           to_string(transpiler.record_manager_
-                        .GetById(qual_type->getAsRecordDecl()->getID())
+                        .GetById(qual_type1->getAsRecordDecl()->getID())
                         ->size),
           EOObjectType::EO_LITERAL);
     }
   }
   binary_op.nested.emplace_back(eo_object);
-
-  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  binary_op.nested.push_back(eo_opd2);
+//   binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binary_op;
 }
 
@@ -1034,10 +1155,62 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
   if (op_code == BinaryOperatorKind::BO_Assign) {
     return GetAssignmentOperatorEOObject(p_operator);
   }
+  auto opd1 = p_operator->getLHS();
+  auto opd2 = p_operator->getRHS();
+  auto eo_opd1 = GetStmtEOObject(opd1);
+  auto eo_opd2 = GetStmtEOObject(opd2);
+  auto qual_type1 = opd1->getType();
+  auto qual_type2 = opd2->getType();
   if (op_code == BinaryOperatorKind::BO_Add) {
     operation = "plus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(eo_opd1);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_Sub) {
     operation = "minus";
+    // is 1st pointer or array?
+    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
+    const clang::Type *type2 = qual_type2.getTypePtrOrNull();
+    if(type1->isArrayType() || type1->isPointerType()) {
+      // set size of pointer shift
+      uint64_t type_size = GetTypeSize(qual_type1);
+      // TEST type size output
+      // std::cout << "Size of type = " << type_size << "\n";
+      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
+      // Second operand maybe pointer too
+      if(type2->isArrayType() || type2->isPointerType()) {
+        //uint64_t type_size2 = GetTypeSize(qual_type2);
+        EOObject substr{"minus"};
+        substr.nested.push_back(eo_opd1);
+        substr.nested.push_back(eo_opd2);
+        EOObject div{"div"};
+        div.nested.push_back(substr);
+        div.nested.push_back(value);
+        return div;
+      }
+      // Or second Operand must be integer expression else C-error
+      EOObject mult{"times"};
+      mult.nested.push_back(eo_opd2);
+      mult.nested.push_back(value);
+      EOObject binary_op{operation};
+      binary_op.nested.push_back(eo_opd1);
+      binary_op.nested.push_back(mult);
+      return binary_op;
+    }
   } else if (op_code == BinaryOperatorKind::BO_Mul) {
     operation = "times";
   } else if (op_code == BinaryOperatorKind::BO_Div) {
@@ -1077,10 +1250,11 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     llvm::errs() << "Warning: Unknown operator " << p_operator->getOpcodeStr()
                  << "\n";
   }
-
   EOObject binary_op{operation};
-  binary_op.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
-  binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
+  binary_op.nested.push_back(eo_opd1);
+  binary_op.nested.push_back(eo_opd2);
+//   binary_op.nested.push_back(GetStmtEOObject(p_operator->getLHS()));
+//   binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
   return binary_op;
 }
 
@@ -1217,14 +1391,15 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   if (p_expr->isArgumentType()) {
     // Argument isTtype
     QualType qual_type = p_expr->getTypeOfArgument();
-    auto type_size = GetTypeSize(qual_type);
+    auto type_size = GetSizeOfType(qual_type);
     std::string str_val{std::to_string(type_size)};
     return EOObject{str_val, EOObjectType::EO_LITERAL};
   }
   // Argument is Expr
   const auto *p_size_expr = p_expr->getArgumentExpr();
   QualType expr_type = p_size_expr->getType();
-  auto expr_type_size = GetTypeSize(expr_type);
+  //   auto expr_type_size = GetTypeSize(expr_type);
+  auto expr_type_size = GetSizeOfType(expr_type);
   std::string str_val{std::to_string(expr_type_size)};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
@@ -1261,6 +1436,21 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{var.alias};
     }
     const auto &var = transpiler.glob_.GetVarById(id);
+    // TEST output
+    // std::cout << "It is var " << id->getName().str() << "\n";
+    clang::QualType qual_type = id->getType();
+    clang::TypeInfo type_info = id->getASTContext().getTypeInfo(qual_type);
+    // TEST output
+    // std::cout << "Size of variable = " << var.size << "\n";
+    // std::cout << "QualType as string = " << qual_type.getAsString() << "\n";
+    const clang::Type *type = qual_type.getTypePtrOrNull();
+    if(type->isArrayType()) {
+      // TEST output
+      // std::cout << "It is array type which used as pointer\n";
+      EOObject array_as_ptr{"addr-of"};
+      array_as_ptr.nested.push_back(EOObject{var.alias});
+      return array_as_ptr;
+    }
     return EOObject{var.alias};
   } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
@@ -1414,6 +1604,18 @@ uint64_t GetTypeSize(QualType qual_type) {
   return type_size / byte_size;
 }
 
+uint64_t GetSizeOfType(QualType qual_type) {
+  const clang::Type *type_ptr = qual_type.getTypePtr();
+  TypeInfo type_info = context->getTypeInfo(type_ptr);
+  uint64_t type_size = type_info.Width;
+
+  if (type_ptr->isPointerType()) {
+    return 8;  // Size of any pointer == 8 byte
+  }
+
+  return type_size / byte_size;
+}
+
 std::string GetPostfix(QualType qual_type) {
   const clang::Type *type_ptr = qual_type.getTypePtr();
   TypeInfo type_info = context->getTypeInfo(type_ptr);
@@ -1438,10 +1640,7 @@ std::string GetPostfix(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  //  if (type_ptr->isCharType()) {
-  //    str += "int8";
-  //    return str;
-  //  }
+
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;
@@ -1461,7 +1660,12 @@ std::string GetTypeName(QualType qual_type) {
   }
 
   if (type_ptr->isPointerType()) {
-    str += "ptr";
+    const auto *const ptr_type = dyn_cast<clang::PointerType>(type_ptr);
+    if (ptr_type != nullptr && ptr_type->getPointeeType()->isCharType()) {
+      str += "string";
+    } else {
+      str += "ptr";
+    }
     return str;
   }
 
@@ -1473,10 +1677,6 @@ std::string GetTypeName(QualType qual_type) {
   if (!type_ptr->isSignedIntegerType()) {
     str += "u";
   }
-  //  if (type_ptr->isCharType()) {
-  //    str += "char";
-  //    return str;
-  //  }
   if (type_ptr->isIntegerType()) {
     str += "int" + std::to_string(type_size);
     return str;

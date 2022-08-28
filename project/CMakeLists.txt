@@ -7,3 +7,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${BUILD_DIR}/../bin")
 
 include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(src/transpiler)
+add_subdirectory(tests/unit_tests)
