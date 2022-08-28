@@ -206,12 +206,16 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   size_t shift = transpiler.glob_.GetFreeSpacePointer();
+  vector<Variable> all_static_local;
+  ProcessFunctionLocalVariables(func_body, all_static_local, shift, true);
+  shift = transpiler.glob_.GetFreeSpacePointer();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
   vector<EOObject> all_types = PrecessRecordTypes(func_body);
+
   vector<Variable> all_local;
-  ProcessFunctionLocalVariables(func_body, all_local,
-                                shift + param_memory_size);
+  ProcessFunctionLocalVariables(func_body, all_local, shift + param_memory_size,
+                                false);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("plus", "local-start");
   local_start.nested.emplace_back("param-start");

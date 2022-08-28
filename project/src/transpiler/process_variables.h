@@ -31,7 +31,7 @@
 
 void ProcessFunctionLocalVariables(const clang::CompoundStmt* CS,
                                    std::vector<Variable>& all_local,
-                                   size_t shift);
+                                   size_t shift, bool process_only_static);
 
 void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt* CS,
                                             std::vector<Variable>& all_local);

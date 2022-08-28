@@ -100,7 +100,7 @@ class MemoryManager {
 
   [[nodiscard]] EOObject GetEOObject() const;
 
-  void RemoveAllUsed(std::vector<Variable> &all_local);
+  void RemoveAllUsed(const std::vector<Variable> &all_local);
 
   void SetExtEqGlob();
 
