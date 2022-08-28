@@ -18,7 +18,8 @@ int main() {
 
    long long x;
   i = 0;
-  ptr = &A;
+//   ptr = &A;
+  ptr = A;
   while(i < n) {
      x = *ptr;
      printf("%lld\n", x);
