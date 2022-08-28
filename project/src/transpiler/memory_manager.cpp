@@ -154,10 +154,20 @@ EOObject MemoryManager::GetEOObject() const {
   return res;
 }
 
-void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
+void MemoryManager::RemoveAllUsed(std::vector<Variable> &all_local) {
+  size_t local_shift = 0;
+  size_t static_shift = 0;
+  std::reverse(std::begin(all_local), std::end(all_local));
   for (const auto &var : all_local) {
-    pointer_ -= var.size;
-    variables_.erase(find(variables_.begin(), variables_.end(), var));
+    auto var_in_memory = find(variables_.begin(), variables_.end(), var);
+    if (var_in_memory->id->isStaticLocal()) {
+      static_shift += var_in_memory->size;
+      var_in_memory->position -= local_shift;
+      continue;
+    }
+    local_shift += var_in_memory->size;
+    pointer_ -= var_in_memory->size;
+    variables_.erase(var_in_memory);
   }
 }
 
