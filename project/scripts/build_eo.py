@@ -24,9 +24,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os
 import sys
+import csv
+import json
 import subprocess
+from os import chdir
+from os import sep as os_sep
+from pathlib import Path
 
 # Our scripts
 import tools
@@ -35,7 +39,7 @@ import settings
 
 class EOBuilder(object):
 
-    def __init__(self, transpilation_units):
+    def __init__(self, transpilation_units: list[dict]):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.current_version = settings.get_setting('current_eo_version')
         self.path_to_foreign_objects = settings.get_setting('path_to_foreign_objects')
@@ -45,14 +49,16 @@ class EOBuilder(object):
         self.errors = set()
         self.error_result = {}
 
-    def build(self):
+    def build(self) -> (set[dict], dict):
         tools.pprint('Compilation start\n')
-        original_path = os.getcwd()
-        os.chdir(self.path_to_eo_project)
-        result = self.is_recompilation()
-        tools.pprint(f'\n{"Recompilation eo project starts" if result else "Full eo project compilation starts"}\n')
-        cmd = ['mvn'] if result else ['mvn', 'clean']
-        cmd.extend(['compile', '-Djansi.force=true', '-Dstyle.color=always'])
+        original_path = Path.cwd()
+        chdir(self.path_to_eo_project)
+        can_recompile = self.is_recompilation()
+        if can_recompile:
+            cmd, _ = ['mvn'], tools.pprint('\nRecompilation eo project starts')
+        else:
+            cmd, _ = ['mvn', 'clean'], tools.pprint('Full eo project compilation starts\n')
+        cmd.extend(['compile', '-D', 'jansi.force=true', '-D' 'style.color=always'])
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
         for line in process.stdout:
             if line:
@@ -61,13 +67,13 @@ class EOBuilder(object):
                     self.handle_eo_error(line)
             elif process.poll() is not None:
                 break
-        os.chdir(original_path)
+        chdir(original_path)
         if process.poll():
             exit('compilation failed')
         return self.errors, self.error_result
 
-    def is_recompilation(self):
-        if not os.path.exists(self.path_to_foreign_objects):
+    def is_recompilation(self) -> bool:
+        if not self.path_to_foreign_objects.exists():
             tools.pprint('Compile dir not found', status=tools.WARNING)
             return False
 
@@ -77,12 +83,12 @@ class EOBuilder(object):
             return False
 
         tools.pprint('Latest version detected', status=tools.PASS)
-        eo_src_files = tools.search_files_by_patterns(self.path_to_eo, ['*.eo'], recursive=True)
-        eo_src_files = set(map(lambda x: x.replace(self.path_to_eo, '', 1).replace('.eo', '', 1), eo_src_files))
-        project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, ['*.xmir'],
-                                                          recursive=True, filters=['!org/eolang'])
-        project_eo_files = set(map(lambda x: x.replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1),
-                                   project_eo_files))
+        eo_src_files = tools.search_files_by_patterns(self.path_to_eo, {'*.eo'}, recursive=True)
+        eo_src_files = {Path(str(x).replace(self.path_to_eo, '', 1).replace('.eo', '', 1)) for x in eo_src_files}
+        project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, {'*.xmir'},
+                                                          recursive=True, filters={'!org/eolang'})
+        project_eo_files = {Path(str(x).replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1)) for x in
+                            project_eo_files}
         difference = project_eo_files - eo_src_files
         tools.pprint()
         if difference:
@@ -93,9 +99,16 @@ class EOBuilder(object):
         tools.pprint('EO project files are compatible', status=tools.PASS)
         return True
 
-    def is_actual_object_version(self):
+    def is_actual_object_version(self) -> bool:
         tools.pprint('\nCheck version of compiled eo objects\n')
-        data = tools.read_file_as_dictionary(self.path_to_foreign_objects)
+        data = []
+        if not self.path_to_foreign_objects.exists():
+            return False
+
+        with open(self.path_to_foreign_objects) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                data.append(row)
         for package in data:
             if package['version'] not in ['*.*.*', '0.0.0']:
                 compare = tools.version_compare(self.current_version, package['version'])
@@ -103,8 +116,8 @@ class EOBuilder(object):
                     return True
         return False
 
-    def handle_eo_error(self, message):
-        file, error = message.split('/', maxsplit=1)[1].split('with error:', maxsplit=1)
+    def handle_eo_error(self, message) -> None:
+        file, error = message.split(os_sep, maxsplit=1)[1].split('with error:', maxsplit=1)
         file, error = file.strip(), error.strip()
         for unit in self.transpilation_units:
             if unit['unique_name'] in file:
@@ -116,5 +129,5 @@ class EOBuilder(object):
 
 
 if __name__ == '__main__':
-    tools.move_to_script_dir(sys.argv[0])
+    tools.move_to_script_dir(Path(sys.argv[0]))
     EOBuilder([]).build()
