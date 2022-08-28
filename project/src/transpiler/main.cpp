@@ -129,6 +129,8 @@ int main(int argc, const char **argv) {
   auto expected_parser = CommonOptionsParser::create(
       parser_argc, parser_argv, MyToolCategory, llvm::cl::Optional);
 
+  delete[] parser_argv;
+
   if (!expected_parser) {
     // Fail gracefully for unsupported options.
     llvm::errs() << expected_parser.takeError();

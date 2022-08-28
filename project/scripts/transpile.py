@@ -109,7 +109,8 @@ class Transpiler(object):
                             'cmake -D CMAKE_CXX_COMPILER="/bin/clang++" -D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS '
                             '-fprofile-instr-generate -fcoverage-mapping" .. ')
         else:
-            build_c2eo.main(self.path_to_c2eo_build)
+            build_c2eo.main(self.path_to_c2eo_build,
+                            'cmake -D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -fsanitize=address" .. ')
 
     def make_unit(self, c_file: Path) -> dict[str, str | Path]:
         rel_c_path = Path(str(c_file.parent).replace(str(self.replaced_path), '').lstrip(os_sep))
