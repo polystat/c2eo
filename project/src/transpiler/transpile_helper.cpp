@@ -1007,8 +1007,14 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
       printf.nested.push_back(param);
     } else if (idx <= formats.size() && !formats[idx - 1].empty() &&
                param.type != EOObjectType::EO_LITERAL) {
+      // TEST out
+      // std::cout << "formats[" << (idx - 1) << "] = " << formats[idx - 1] << "\n";
       EOObject cast{formats[idx - 1]};
-      cast.nested.push_back(param);
+      EOObject addr{"address"};
+      EOObject ram{"global-ram"};
+      addr.nested.push_back(ram);
+      addr.nested.push_back(param);
+      cast.nested.push_back(addr);
       printf.nested.push_back(cast);
     } else {
       printf.nested.push_back(param);
