@@ -39,7 +39,9 @@ from transpile import Transpiler
 
 class Compiler(object):
 
-    def __init__(self, path_to_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True):
+    def __init__(self, path_to_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
+                 need_to_generate_codecov: bool = False):
+        self.need_to_generate_codecov = need_to_generate_codecov
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_files
@@ -49,7 +51,8 @@ class Compiler(object):
     def compile(self) -> Transpiler.transpile:
         start_time = time.time()
         self.transpilation_units, skip_result = Transpiler(self.path_to_tests, self.skips_file_name,
-                                                           self.need_to_prepare_c_code).transpile()
+                                                           self.need_to_prepare_c_code,
+                                                           self.need_to_generate_codecov).transpile()
         if self.transpilation_units:
             errors, error_result = EOBuilder(self.transpilation_units).build()
             passes = {unit['unique_name'] for unit in self.transpilation_units} - errors
@@ -70,6 +73,9 @@ def create_parser() -> argparse.ArgumentParser:
 
     _parser.add_argument('-n', '--not_prepare_c_code', action='store_const', const=True, default=False,
                          help='the script will not change the c code in the input files')
+
+    _parser.add_argument('-c', '--codecov', action='store_const', const=True, default=False,
+                         help='the script will generate codecov files')
     return _parser
 
 
@@ -77,4 +83,5 @@ if __name__ == '__main__':
     tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
-    Compiler(Path(namespace.path_to_files), namespace.skips_file_name, not namespace.not_prepare_c_code).compile()
+    Compiler(Path(namespace.path_to_files), namespace.skips_file_name, not namespace.not_prepare_c_code,
+             namespace.codecov).compile()
