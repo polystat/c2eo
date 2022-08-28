@@ -33,11 +33,19 @@
 #include "src/transpiler/transpile_helper.h"
 
 Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
-                            const std::string &type, std::string alias,
+                            const std::string &type, const std::string &alias,
                             EOObject value, std::string local_name,
                             size_t shift, bool is_initialized) {
+  auto res = find_if(variables_.begin(), variables_.end(),
+                     [id](const Variable &x) { return x.id == id; });
+  if (res != variables_.end()) {
+    return *res;
+  }
+  std::string unique_alias;
   if (duplicates[alias] > 0) {
-    alias += "-" + std::to_string(duplicates[alias]);
+    unique_alias = alias + "-" + std::to_string(duplicates[alias]);
+  } else {
+    unique_alias = alias;
   }
   duplicates[alias]++;
   std::string type_postfix = type.substr(2);
@@ -53,7 +61,7 @@ Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
                   pointer_,
                   size,
                   type,
-                  std::move(alias),
+                  std::move(unique_alias),
                   std::move(value),
                   std::move(local_name),
                   shift,
@@ -146,10 +154,20 @@ EOObject MemoryManager::GetEOObject() const {
   return res;
 }
 
-void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
+void MemoryManager::RemoveAllUsed(std::vector<Variable> &all_local) {
+  size_t local_shift = 0;
+  size_t static_shift = 0;
+  std::reverse(std::begin(all_local), std::end(all_local));
   for (const auto &var : all_local) {
-    pointer_ -= var.size;
-    variables_.erase(find(variables_.begin(), variables_.end(), var));
+    auto var_in_memory = find(variables_.begin(), variables_.end(), var);
+    if (var_in_memory->id->isStaticLocal()) {
+      static_shift += var_in_memory->size;
+      var_in_memory->position -= local_shift;
+      continue;
+    }
+    local_shift += var_in_memory->size;
+    pointer_ -= var_in_memory->size;
+    variables_.erase(var_in_memory);
   }
 }
 

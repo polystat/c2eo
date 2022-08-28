@@ -217,7 +217,14 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   local_start.nested.emplace_back("param-start");
   local_start.nested.emplace_back("param-size");
   func_body_eo.nested.push_back(local_start);
-  size_t free_pointer = transpiler.glob_.GetFreeSpacePointer();
+  size_t local_static_size = 0;
+  for (const auto &var : all_local) {
+    if (var.id->isStaticLocal()) {
+      local_static_size += var.size;
+    }
+  }
+  size_t free_pointer =
+      transpiler.glob_.GetFreeSpacePointer() - local_static_size;
   EOObject local_empty_position("plus", "empty-local-position");
   local_empty_position.nested.emplace_back("local-start");
   local_empty_position.nested.emplace_back(
@@ -231,6 +238,9 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
     func_body_eo.nested.push_back(var);
   }
   for (const auto &var : all_local) {
+    if (var.id->isStaticLocal()) {
+      continue;
+    }
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob_.name_));
   }
   EOObject goto_object{"goto", "@"};
@@ -1433,9 +1443,10 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{std::to_string(var->value), EOObjectType::EO_LITERAL};
     }
     const auto *id = dyn_cast<VarDecl>(val);
-    if (id->isStaticLocal()) {
-      return EOObject{"s-" + id->getName().str()};
-    }
+    /*    if (id->isStaticLocal()) {
+          auto var = ProcessVariable(id, "s-" + id->getName().str(), 8);
+          return EOObject{var.alias};
+        }*/
     const auto &var = transpiler.glob_.GetVarById(id);
     // TEST output
     // std::cout << "It is var " << id->getName().str() << "\n";
@@ -1448,7 +1459,7 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       // TEST output
       // std::cout << "It is array type which used as pointer\n";
       EOObject array_as_ptr{"addr-of"};
-      array_as_ptr.nested.emplace_back(EOObject{var.alias});
+      array_as_ptr.nested.emplace_back(var.alias);
       return array_as_ptr;
     }
     return EOObject{var.alias};
