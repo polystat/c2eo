@@ -19,5 +19,7 @@ int main() {
   a = func1(func2(c), 30);
   printf("%lld\n", a);
 
-  return func1(func2(23), 30);
+  printf("%lld\n", func1(func2(23), 30));
+
+  return 0;
 }
