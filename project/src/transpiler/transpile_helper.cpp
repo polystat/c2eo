@@ -206,12 +206,16 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   size_t shift = transpiler.glob_.GetFreeSpacePointer();
+  vector<Variable> all_static_local;
+  ProcessFunctionLocalVariables(func_body, all_static_local, shift, true);
+  shift = transpiler.glob_.GetFreeSpacePointer();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
   vector<EOObject> all_types = PrecessRecordTypes(func_body);
+
   vector<Variable> all_local;
-  ProcessFunctionLocalVariables(func_body, all_local,
-                                shift + param_memory_size);
+  ProcessFunctionLocalVariables(func_body, all_local, shift + param_memory_size,
+                                false);
   EOObject func_body_eo = EOObject(EOObjectType::EO_EMPTY);
   EOObject local_start("plus", "local-start");
   local_start.nested.emplace_back("param-start");
@@ -598,9 +602,20 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
       eq_obj.nested.push_back(GetStmtEOObject(case_stmt->getLHS()));
       cond_obj.nested.push_back(
           GetCaseCondEOObject(all_cases, switch_expr_object, 0));
-      if_obj.nested.push_back(cond_obj);
+      if (nested != nullptr &&
+          nested->getStmtClass() == Stmt::DefaultStmtClass) {
+        EOObject always_true_obj{"or"};
+        always_true_obj.nested.push_back(cond_obj);
+        always_true_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+        if_obj.nested.push_back(always_true_obj);
+        const auto *def_stmt = dyn_cast<DefaultStmt>(nested);
+        nested = def_stmt->getSubStmt();
+      } else {
+        if_obj.nested.push_back(cond_obj);
+      }
       EOObject buffer_obj{"seq"};
-      if (nested != nullptr) {
+      if (nested != nullptr &&
+          nested->getStmtClass() != Stmt::DefaultStmtClass) {
         buffer_obj.nested.push_back(GetStmtEOObject(nested));
       }
       auto tmp = stmt;
@@ -614,6 +629,27 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
       buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
       if_obj.nested.push_back(buffer_obj);
       seq_object.nested.push_back(if_obj);
+
+      if (nested != nullptr &&
+          nested->getStmtClass() == Stmt::DefaultStmtClass) {
+        const auto *default_stmt = dyn_cast<DefaultStmt>(nested);
+        EOObject buffer_obj_def{"seq"};
+        if (default_stmt->getSubStmt() != nullptr) {
+          buffer_obj_def.nested.push_back(
+              GetStmtEOObject(default_stmt->getSubStmt()));
+        }
+        auto tmp_def = stmt;
+        tmp_def++;
+        while (tmp_def != end &&
+               (*tmp_def)->getStmtClass() != Stmt::CaseStmtClass &&
+               (*tmp_def)->getStmtClass() != Stmt::DefaultStmtClass) {
+          buffer_obj_def.nested.push_back(GetStmtEOObject(*tmp_def));
+          tmp_def++;
+        }
+        buffer_obj_def.nested.push_back(set_flag_object);
+        buffer_obj_def.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+        seq_object.nested.push_back(buffer_obj_def);
+      }
     } else if ((*stmt)->getStmtClass() == Stmt::DefaultStmtClass) {
       const auto *default_stmt = dyn_cast<DefaultStmt>(*stmt);
       EOObject buffer_obj{"seq"};

@@ -26,22 +26,22 @@ void op10() {
 
 void test_switch() {
   switch (x) {
-    case 1:
-      op1();
-      break;
-    case 2:
-    case 3:
-      op23();
-      break;
-    case 4:
-      op4();
-    case 5:
-      op5();
-      break;
-    case 6:
-    default:
-      op10();
-      break;
+  case 1:
+    op1();
+    break;
+  case 2:
+  case 3:
+    op23();
+    break;
+  case 4:
+    op4();
+  case 5:
+    op5();
+    break;
+  case 6:
+  default:
+    op10();
+    break;
   }
 }
 
