@@ -233,8 +233,7 @@ class Transpiler(object):
 
     def generate_run_sh(self, full_name: str) -> None:
         code = regex.sub(self.run_sh_replace, full_name, self.run_sh_code)
-        with open(f'{self.path_to_eo_project}run.sh', 'w') as f:
-            f.write(code)
+        (self.path_to_eo_project / 'run.sh').write_text(code)
 
 
 def generate_unique_names_for_units(units: list[dict[str, str | CompletedProcess]], words_in_name: int = 2) -> None:
