@@ -24,33 +24,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os
 import sys
 import argparse
 import subprocess
+from os import chdir
+from pathlib import Path
 
 # Our scripts
 import tools
 import settings
 
 
-def generate_codecov():
-    os.chdir(settings.get_setting('path_to_c2eo_transpiler'))
+def generate_codecov() -> None:
+    chdir(settings.get_setting('path_to_c2eo_transpiler'))
     tools.pprint('Merging profdata\n')
     subprocess.run(f'llvm-profdata-14 merge -sparse *.profraw -o res.profdata', shell=True)
     tools.pprint('Convert res.profdata to report.txt')
     subprocess.run('llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt',
                    shell=True)
-    tools.clear_dir_by_patterns('.', ['*.profraw', '*.profdata'])
+    tools.clear_dir_by_patterns(Path.cwd(), {'*.profraw', '*.profdata'})
 
 
-def create_parser():
+def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for generating codecov for c2eo transpiler')
     return _parser
 
 
 if __name__ == '__main__':
-    tools.move_to_script_dir(sys.argv[0])
+    tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
     generate_codecov()

@@ -1,6 +1,6 @@
 include_directories(
-        .
-        ../../src/transpiler
+    .
+    ../../src/transpiler
 )
 
 find_package(GTest REQUIRED)
@@ -17,9 +17,9 @@ add_executable(unit_tests
 if (UNIX)
     find_package(Threads REQUIRED)
     target_link_libraries(
-            unit_tests
-            ${GTEST_LIBRARIES}
-            Threads::Threads
+        unit_tests
+        ${GTEST_LIBRARIES}
+        Threads::Threads
     )
 endif ()
 

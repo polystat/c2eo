@@ -46,141 +46,163 @@ using std::vector;
 extern UnitTranspiler transpiler;
 
 void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
-                     DeclStmt *decl_stmt);
+                     DeclStmt *decl_stmt, bool process_only_static);
 
 void ProcessForStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                  ForStmt *for_stmt);
+                                  ForStmt *for_stmt, bool process_only_static);
 void ProcessWhileStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                    WhileStmt *while_stmt);
+                                    WhileStmt *while_stmt,
+                                    bool process_only_static);
 void ProcessCaseStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                   CaseStmt *case_stmt);
+                                   CaseStmt *case_stmt,
+                                   bool process_only_static);
 void ProcessIfStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                 IfStmt *if_stmt);
+                                 IfStmt *if_stmt, bool process_only_static);
 void ProcessDefaultStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                      DefaultStmt *default_stmt);
+                                      DefaultStmt *default_stmt,
+                                      bool process_only_static);
 void ProcessSwitchStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                     SwitchStmt *switch_stmt);
+                                     SwitchStmt *switch_stmt,
+                                     bool process_only_static);
 void ProcessDoStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                 DoStmt *do_stmt);
+                                 DoStmt *do_stmt, bool process_only_static);
 void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                               Stmt *stmt) {
+                               Stmt *stmt, bool process_only_static) {
   Stmt::StmtClass stmt_class = stmt->getStmtClass();
   if (stmt_class == Stmt::DeclStmtClass) {
     auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
-    ProcessDeclStmt(shift, all_local, decl_stmt);
+    ProcessDeclStmt(shift, all_local, decl_stmt, process_only_static);
   } else if (stmt_class == Stmt::ForStmtClass) {
     auto *for_stmt = dyn_cast<ForStmt>(stmt);
-    ProcessForStmtLocalVariables(all_local, shift, for_stmt);
+    ProcessForStmtLocalVariables(all_local, shift, for_stmt,
+                                 process_only_static);
   } else if (stmt_class == Stmt::CompoundStmtClass) {
     auto *compound_stmt = dyn_cast<CompoundStmt>(stmt);
-    ProcessFunctionLocalVariables(compound_stmt, all_local, shift);
+    ProcessFunctionLocalVariables(compound_stmt, all_local, shift,
+                                  process_only_static);
   } else if (stmt_class == Stmt::WhileStmtClass) {
     auto *while_stmt = dyn_cast<WhileStmt>(stmt);
-    ProcessWhileStmtLocalVariables(all_local, shift, while_stmt);
+    ProcessWhileStmtLocalVariables(all_local, shift, while_stmt,
+                                   process_only_static);
   } else if (stmt_class == Stmt::SwitchStmtClass) {
     auto *switch_stmt = dyn_cast<SwitchStmt>(stmt);
-    ProcessSwitchStmtLocalVariables(all_local, shift, switch_stmt);
+    ProcessSwitchStmtLocalVariables(all_local, shift, switch_stmt,
+                                    process_only_static);
   } else if (stmt_class == Stmt::DoStmtClass) {
     auto *do_stmt = dyn_cast<DoStmt>(stmt);
-    ProcessDoStmtLocalVariables(all_local, shift, do_stmt);
+    ProcessDoStmtLocalVariables(all_local, shift, do_stmt, process_only_static);
   } else if (stmt_class == Stmt::CaseStmtClass) {
     auto *case_stmt = dyn_cast<CaseStmt>(stmt);
-    ProcessCaseStmtLocalVariables(all_local, shift, case_stmt);
+    ProcessCaseStmtLocalVariables(all_local, shift, case_stmt,
+                                  process_only_static);
   } else if (stmt_class == Stmt::DefaultStmtClass) {
     auto *default_stmt = dyn_cast<DefaultStmt>(stmt);
-    ProcessDefaultStmtLocalVariables(all_local, shift, default_stmt);
+    ProcessDefaultStmtLocalVariables(all_local, shift, default_stmt,
+                                     process_only_static);
   } else if (stmt_class == Stmt::IfStmtClass) {
     auto *if_stmt = dyn_cast<IfStmt>(stmt);
-    ProcessIfStmtLocalVariables(all_local, shift, if_stmt);
+    ProcessIfStmtLocalVariables(all_local, shift, if_stmt, process_only_static);
   }
 }
 
 void ProcessFunctionLocalVariables(const clang::CompoundStmt *CS,
                                    std::vector<Variable> &all_local,
-                                   size_t shift) {
+                                   size_t shift, bool process_only_static) {
   if (CS == nullptr) {
     return;
   }
   for (auto *stmt : CS->body()) {
-    ProcessStmtLocalVariables(all_local, shift, stmt);
+    ProcessStmtLocalVariables(all_local, shift, stmt, process_only_static);
   }
 }
 void ProcessDoStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                 DoStmt *do_stmt) {
+                                 DoStmt *do_stmt, bool process_only_static) {
   if (do_stmt == nullptr) {
     return;
   }
   if (do_stmt->getBody() != nullptr &&
       do_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
     auto *compound_stmt = dyn_cast<CompoundStmt>(do_stmt->getBody());
-    ProcessFunctionLocalVariables(compound_stmt, all_local, shift);
+    ProcessFunctionLocalVariables(compound_stmt, all_local, shift,
+                                  process_only_static);
   }
 }
 void ProcessSwitchStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                     SwitchStmt *switch_stmt) {
+                                     SwitchStmt *switch_stmt,
+                                     bool process_only_static) {
   if (switch_stmt == nullptr) {
     return;
   }
   if (switch_stmt->getBody() != nullptr &&
       switch_stmt->getBody()->getStmtClass() == Stmt::CompoundStmtClass) {
     auto *compound_stmt = dyn_cast<CompoundStmt>(switch_stmt->getBody());
-    ProcessFunctionLocalVariables(compound_stmt, all_local, shift);
+    ProcessFunctionLocalVariables(compound_stmt, all_local, shift,
+                                  process_only_static);
   }
 }
 void ProcessDefaultStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                      DefaultStmt *default_stmt) {
+                                      DefaultStmt *default_stmt,
+                                      bool process_only_static) {
   if (default_stmt == nullptr) {
     return;
   }
   if (default_stmt->getSubStmt() != nullptr &&
       default_stmt->getSubStmt()->getStmtClass() == Stmt::CompoundStmtClass) {
     auto *compound_stmt = dyn_cast<CompoundStmt>(default_stmt->getSubStmt());
-    ProcessFunctionLocalVariables(compound_stmt, all_local, shift);
+    ProcessFunctionLocalVariables(compound_stmt, all_local, shift,
+                                  process_only_static);
   } else if (default_stmt->getSubStmt() != nullptr &&
              default_stmt->getSubStmt()->getStmtClass() ==
                  Stmt::DeclStmtClass) {
     auto *decl_stmt = dyn_cast<DeclStmt>(default_stmt->getSubStmt());
-    ProcessDeclStmt(shift, all_local, decl_stmt);
+    ProcessDeclStmt(shift, all_local, decl_stmt, process_only_static);
   }
 }
 void ProcessIfStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                 IfStmt *if_stmt) {
+                                 IfStmt *if_stmt, bool process_only_static) {
   if (if_stmt == nullptr) {
     return;
   }
   if (if_stmt->getThen() != nullptr) {
-    ProcessStmtLocalVariables(all_local, shift, if_stmt->getThen());
+    ProcessStmtLocalVariables(all_local, shift, if_stmt->getThen(),
+                              process_only_static);
   }
   if (if_stmt->getElse() != nullptr) {
-    ProcessStmtLocalVariables(all_local, shift, if_stmt->getElse());
+    ProcessStmtLocalVariables(all_local, shift, if_stmt->getElse(),
+                              process_only_static);
   }
 }
 void ProcessCaseStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                   CaseStmt *case_stmt) {
+                                   CaseStmt *case_stmt,
+                                   bool process_only_static) {
   if (case_stmt == nullptr || case_stmt->getSubStmt() == nullptr) {
     return;
   }
-  ProcessStmtLocalVariables(all_local, shift, case_stmt->getSubStmt());
+  ProcessStmtLocalVariables(all_local, shift, case_stmt->getSubStmt(),
+                            process_only_static);
 }
 void ProcessWhileStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                    WhileStmt *while_stmt) {
+                                    WhileStmt *while_stmt,
+                                    bool process_only_static) {
   if (while_stmt == nullptr || while_stmt->getBody() == nullptr) {
     return;
   }
-  ProcessStmtLocalVariables(all_local, shift, while_stmt->getBody());
+  ProcessStmtLocalVariables(all_local, shift, while_stmt->getBody(),
+                            process_only_static);
 }
 void ProcessForStmtLocalVariables(vector<Variable> &all_local, size_t shift,
-                                  ForStmt *for_stmt) {
+                                  ForStmt *for_stmt, bool process_only_static) {
   if (for_stmt == nullptr) {
     return;
   }
   if (for_stmt->getInit() != nullptr &&
       for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
     auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
-    ProcessDeclStmt(shift, all_local, decl_stmt);
+    ProcessDeclStmt(shift, all_local, decl_stmt, process_only_static);
   }
   if (for_stmt->getBody() != nullptr) {
-    ProcessStmtLocalVariables(all_local, shift, for_stmt->getBody());
+    ProcessStmtLocalVariables(all_local, shift, for_stmt->getBody(),
+                              process_only_static);
   }
 }
 
@@ -231,7 +253,7 @@ void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS,
 }
 
 void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
-                     DeclStmt *decl_stmt) {
+                     DeclStmt *decl_stmt, bool process_only_static) {
   if (decl_stmt == nullptr) {
     return;
   }
@@ -239,8 +261,10 @@ void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
     Decl::Kind decl_kind = decl->getKind();
     if (decl_kind == Decl::Var) {
       auto *var_decl = dyn_cast<VarDecl>(decl);
-      if (var_decl != nullptr && !var_decl->isStaticLocal()) {
-        all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
+      if (var_decl != nullptr) {
+        if (var_decl->isStaticLocal() == process_only_static) {
+          all_local.push_back(ProcessVariable(var_decl, "local-start", shift));
+        }
       }
     }
   }

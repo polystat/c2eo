@@ -27,6 +27,7 @@
 
 static const int some_non_zero_position = 999999;
 static const int eight_kilobytes = 8192;
+static const int eight_bytes = 8;
 #include <map>
 #include <memory>
 #include <string>
@@ -72,11 +73,12 @@ class MemoryManager {
  public:
   [[maybe_unused]] explicit MemoryManager(std::string name,
                                           size_t start_pointer = 8)
-      : pointer_(start_pointer), name_(std::move(name)) {}
+      : name_(std::move(name)), pointer_(start_pointer) {}
 
   Variable Add(const clang::VarDecl *id, size_t size, const std::string &type,
-               std::string alias, EOObject value, std::string local_name = "",
-               size_t shift = 0, bool is_initialized = true);
+               const std::string &alias, EOObject value,
+               std::string local_name = "", size_t shift = 0,
+               bool is_initialized = true);
 
   Variable AddExternal(const clang::VarDecl *id, size_t size,
                        const std::string &type, std::string alias,
@@ -104,7 +106,7 @@ class MemoryManager {
 
  private:
   // index of first free byte in memory
-  size_t pointer_;
+  size_t pointer_ = eight_bytes;
   int mem_size_ = eight_kilobytes;
   std::vector<Variable> variables_;
   std::map<std::string, int> duplicates;
