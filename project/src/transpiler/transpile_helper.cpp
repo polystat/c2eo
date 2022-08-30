@@ -148,6 +148,10 @@ void AppendDeclStmt(const DeclStmt *stmt);
 EOObject GetUnaryExprOrTypeTraitExprEOObject(
     const clang::UnaryExprOrTypeTraitExpr *p_expr);
 
+EOObject GetInitArrayEOObject(const clang::InitListExpr *list,
+                              QualType qualType);
+EOObject GetInitRecordEOObject(const clang::InitListExpr *list,
+                               QualType qualType);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -475,7 +479,94 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
+
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
+  clang::QualType qualType = list->getType().getDesugaredType(*context);
+  if (qualType->isArrayType()) {
+    return GetInitArrayEOObject(list, qualType);
+  } else if (qualType->isRecordType()) {
+    return GetInitRecordEOObject(list, qualType);
+  }
+  return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetInitRecordEOObject(const clang::InitListExpr *list,
+                               QualType qualType) {
+  EOObject eoList{"*", EOObjectType::EO_EMPTY};
+  auto *recordType =
+      transpiler.record_manager_.GetById(qualType->getAsRecordDecl()->getID());
+  std::string elementTypeName;
+  auto recElement = recordType->fields.begin();
+  for (auto element = list->child_begin(); element != list->child_end();
+       element++) {
+    EOObject shiftedAlias{"plus"};
+    shiftedAlias.nested.emplace_back("list-init-name",
+                                     EOObjectType::EO_TEMPLATE);
+    shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
+        qualType->getAsRecordDecl()->getID(), recElement->first));
+    elementTypeName = GetTypeName(recElement->second.first);
+    EOObject value = GetStmtEOObject(*element);
+    if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
+      EOObject newValue = ReplaceEmpty(value, shiftedAlias);
+      eoList.nested.insert(eoList.nested.end(), newValue.nested.begin(),
+                           newValue.nested.end());
+    } else {
+      EOObject res("write");
+      if (!elementTypeName.empty()) {
+        res.name += "-as-" + elementTypeName;
+      }
+      res.nested.emplace_back(shiftedAlias);
+      res.nested.emplace_back(value);
+      eoList.nested.push_back(res);
+      recElement++;
+    }
+  }
+  return eoList;
+}
+EOObject GetInitArrayEOObject(const clang::InitListExpr *list,
+                              QualType qualType) {
+  EOObject eoList{"*", EOObjectType::EO_EMPTY};
+  clang::QualType elementQualType =
+      llvm::dyn_cast<clang::ConstantArrayType>(qualType)->getElementType();
+  size_t elementSize = 1;
+  std::string elementTypeName;
+  while (elementQualType->isArrayType()) {  // todo: isConstantArrayType() ?
+    const auto *cat = llvm::dyn_cast<clang::ConstantArrayType>(elementQualType);
+    elementSize *= cat->getSize().getLimitedValue();
+    elementQualType = llvm::dyn_cast<clang::ConstantArrayType>(elementQualType)
+                          ->getElementType();
+  }
+  elementTypeName = GetTypeName(elementQualType);
+  elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
+  int i = 0;
+  for (auto element = list->child_begin(); element != list->child_end();
+       element++, i++) {
+    EOObject shiftedAlias{"plus"};
+    shiftedAlias.nested.emplace_back("list-init-name",
+                                     EOObjectType::EO_TEMPLATE);
+    EOObject newShift{"times"};
+    newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
+    newShift.nested.emplace_back(to_string(elementSize),
+                                 EOObjectType::EO_LITERAL);
+    shiftedAlias.nested.push_back(newShift);
+    EOObject value = GetStmtEOObject(*element);
+    if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
+      EOObject newValue = ReplaceEmpty(value, shiftedAlias);
+      eoList.nested.insert(eoList.nested.end(), newValue.nested.begin(),
+                           newValue.nested.end());
+    } else {
+      EOObject res("write");
+      if (!elementTypeName.empty()) {
+        res.name += "-as-" + elementTypeName;
+      }
+      res.nested.emplace_back(shiftedAlias);
+      res.nested.emplace_back(value);
+      eoList.nested.push_back(res);
+    }
+  }
+  return eoList;
+}
+
+/*EOObject GetInitListEOObject2(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
@@ -538,7 +629,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     }
   }
   return eoList;
-}
+}*/
 
 EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias) {
   EOObject res;
