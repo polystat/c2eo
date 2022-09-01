@@ -11,11 +11,9 @@ install: |-
   sudo apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd libgtest-dev googletest -y
   pip3 install git_config pgpy s3cmd
   sudo pip3 install cmake
-  cd /usr/src/googletest
-  sudo cmake .
+  sudo cmake /usr/src/googletest/
   sudo make
-  cd lib
-  sudo cp *.a /usr/local/lib
+  sudo cp /root/lib/ /usr/local/ -r
 release:
   script: |-
     git checkout ${branch}
