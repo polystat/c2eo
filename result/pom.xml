@@ -45,7 +45,7 @@ SOFTWARE.
         <artifactId>eo-maven-plugin</artifactId>
         <version>${eolang.version}</version>
         <configuration>
-          <hash>0.27.0</hash>
+          <hash>0.27.2</hash>
           <failOnError>false</failOnError>
         </configuration>
         <executions>
