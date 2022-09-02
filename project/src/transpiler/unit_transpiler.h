@@ -35,7 +35,8 @@
 
 class UnitTranspiler {
  public:
-  UnitTranspiler() = default;
+//   UnitTranspiler() = default;
+   UnitTranspiler() {func_manager_.SetNameCount(0);}
 
   // MemoryManager glob_{"global-ram", 8}, ret_{"return-ram"};
   MemoryManager glob_{"global-ram"}, ret_{"return-ram"};

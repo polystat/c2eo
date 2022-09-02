@@ -57,12 +57,26 @@ void FunctionManager::AddDeclaration(const FunctionDeclaration &func_decl) {
 void FunctionManager::AddEoObject(const EOObject &func) {
   functions.push_back(func);
 }
-
+//------------------------------------------------------------------------------
+void FunctionManager::AddToMap(std::string func_name) {
+  if(func_name_map.find(func_name) == func_name_map.end()) {
+    func_name_map[func_name] = name_count++;
+  }
+}
+//------------------------------------------------------------------------------
+void FunctionManager::ReverseMapToArrayMap() {
+  for(const auto &func_pair: func_name_map) {
+    func_name_map_as_array[func_pair.second] = func_pair.first;
+  }
+}
 //------------------------------------------------------------------------------
 const std::vector<EOObject> &FunctionManager::GetAllEoDefinitions() {
   return functions;
 }
-
+//------------------------------------------------------------------------------
+std::map<int, std::string> &FunctionManager::GetFuncArray() {
+  return func_name_map_as_array;
+}
 //------------------------------------------------------------------------------
 EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
                                           size_t param_size) const {
@@ -109,5 +123,17 @@ __attribute__((unused)) void FunctionManager::TestOut() {
     }
   } else {
     std::cout << "No function definitions\n";
+  }
+  if (!func_name_map.empty()) {
+    std::cout << "Function names in map:\n";
+    for (const auto &func_pair: func_name_map) {
+      std::cout << func_pair.first << "[" << func_pair.second << "]\n";
+    }
+    std::cout << "Function names in array:\n";
+    for (const auto &func_pair: func_name_map_as_array) {
+      std::cout << func_pair.first << ": " << func_pair.second << "\n";
+    }
+  } else {
+    std::cout << "No names in function map\n";
   }
 }

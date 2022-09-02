@@ -41,6 +41,7 @@ std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
 
 void UnitTranspiler::GenerateResult() {
   EOObject body(EOObjectType::EO_ABSTRACT);
+
   body.arguments.emplace_back("args...");
   body.postfix = "global";
   body.nested.emplace_back("$", "root");
@@ -70,6 +71,22 @@ void UnitTranspiler::GenerateResult() {
       }
     }
   }
+
+  // call function generation
+  func_manager_.ReverseMapToArrayMap();
+  // TEST tmp out to see functions
+  // func_manager_.TestOut();
+  EOObject call{"[index param-start param-size] > call", EOObjectType::EO_LITERAL};
+  EOObject index_of{"at. > @", EOObjectType::EO_LITERAL};
+  EOObject star{"*", EOObjectType::EO_LITERAL};
+  for(const auto &func_element: func_manager_.GetFuncArray()) {
+    std::string func_name{func_element.second};
+    star.nested.emplace_back(func_name, EOObjectType::EO_LITERAL);
+  }
+  index_of.nested.push_back(star);
+  index_of.nested.emplace_back("index", EOObjectType::EO_LITERAL);
+  call.nested.push_back(index_of);
+  body.nested.push_back(call);
 
   for (const auto &func : func_manager_.GetAllEoDefinitions()) {
     body.nested.push_back(func);
