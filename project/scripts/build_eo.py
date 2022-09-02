@@ -128,5 +128,6 @@ class EOBuilder(object):
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
     EOBuilder([]).build()
