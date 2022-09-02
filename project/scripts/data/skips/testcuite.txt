@@ -7,7 +7,6 @@
 00073, 00072, 00032, 00037, 00077, 00014, 00013, 00130: TODO pointers and arrays
 00050: TODO structures and unions
 00051, 00199, 00010, 000129, 00213, 00207, 00129: goto
-00092, 00151: TODO array initialization
 00091, 00148: TODO array in structure
 00154: TODO array of structure
 00053: TODO structures

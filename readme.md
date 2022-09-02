@@ -52,7 +52,7 @@ Again, we recommend [Ubuntu 22.04+](https://ubuntu.com/download) and you will ne
 [ninja-build 1.10.1+](https://ninja-build.org/), 
 [clang 14.0.0+](https://releases.llvm.org/14.0.0/tools/clang/docs/)
 and
-[python3 3.9.7+](https://www.python.org/downloads/).
+[python3 3.10.0+](https://www.python.org/downloads/).
 You will also need requirements for [the EO project](https://github.com/objectionary/eo) ([Maven 3.3+](https://maven.apache.org) and Java 8+)
 
 Then, you need to install [LLVM/Clang 12.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1) :
