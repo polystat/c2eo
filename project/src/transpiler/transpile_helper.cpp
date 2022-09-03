@@ -485,7 +485,7 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
   return EOObject{EOObjectType::EO_PLUG};
 }
 
-EOObject GetInitListEOObject(const clang::InitListExpr *list) {
+/*EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   if (qualType->isArrayType()) {
     return GetInitArrayEOObject(list, qualType);
@@ -522,8 +522,8 @@ EOObject GetInitRecordEOObject(const clang::InitListExpr *list,
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
       eoList.nested.push_back(res);
-      recElement++;
     }
+    recElement++;
   }
   return eoList;
 }
@@ -569,9 +569,9 @@ EOObject GetInitArrayEOObject(const clang::InitListExpr *list,
     }
   }
   return eoList;
-}
+}*/
 
-/*EOObject GetInitListEOObject2(const clang::InitListExpr *list) {
+EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
@@ -628,13 +628,13 @@ EOObject GetInitArrayEOObject(const clang::InitListExpr *list,
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
       eoList.nested.push_back(res);
-      if (qualType->isRecordType()) {
-        recElement++;
-      }
+    }
+    if (qualType->isRecordType()) {
+      recElement++;
     }
   }
   return eoList;
-}*/
+}
 
 EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias) {
   EOObject res;
