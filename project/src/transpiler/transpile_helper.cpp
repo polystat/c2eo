@@ -482,11 +482,12 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 }
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
+  //  list->dump();
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
   std::string elementTypeName;
-  std::map<std::string, std::pair<clang::QualType, size_t>>::iterator
+  std::vector<std::tuple<std::string, clang::QualType, size_t>>::iterator
       recElement;
   size_t elementSize = 0;
   if (qualType->isArrayType()) {
@@ -522,8 +523,11 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       shiftedAlias.nested.push_back(newShift);
     } else if (qualType->isRecordType()) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
-          qualType->getAsRecordDecl()->getID(), recElement->first));
-      elementTypeName = GetTypeName(recElement->second.first);
+          qualType->getAsRecordDecl()->getID(), std::get<0>(*recElement)));
+      elementTypeName = GetTypeName(std::get<1>(*recElement));
+      //      std::cerr << "=======\n" << elementTypeName << "\n-\n";
+      //      recElement->second.first.dump();
+      //      std::cerr << "=======\n\n";
     }
     EOObject value = GetStmtEOObject(*element);
     if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
