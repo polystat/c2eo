@@ -18,7 +18,7 @@ int main() {
      for(int j=0;j<n;j++)
        for(int k=0;k<n;k++) {
 //          a[i][j][k]=i*n*n+j*n+k;
-         printf("[%d,%d,%d]: %d\n", i, j, k, a[i][j][k]);
+         printf("[%d,%d,%d]: %d\n", i, j, k, i+j+k);
        }
 
 //    int *x = a[2];
