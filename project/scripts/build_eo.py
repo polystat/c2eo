@@ -26,7 +26,6 @@ SOFTWARE.
 
 import sys
 import csv
-import json
 import subprocess
 from os import chdir
 from os import sep as os_sep
@@ -84,10 +83,10 @@ class EOBuilder(object):
 
         tools.pprint('Latest version detected', status=tools.PASS)
         eo_src_files = tools.search_files_by_patterns(self.path_to_eo, {'*.eo'}, recursive=True)
-        eo_src_files = {Path(str(x).replace(self.path_to_eo, '', 1).replace('.eo', '', 1)) for x in eo_src_files}
+        eo_src_files = {str(x).replace(str(self.path_to_eo), '', 1).replace('.eo', '', 1) for x in eo_src_files}
         project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, {'*.xmir'},
                                                           recursive=True, filters={'!org/eolang'})
-        project_eo_files = {Path(str(x).replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1)) for x in
+        project_eo_files = {str(x).replace(str(self.path_to_eo_parse), '', 1).replace('.xmir', '', 1) for x in
                             project_eo_files}
         difference = project_eo_files - eo_src_files
         tools.pprint()
@@ -129,5 +128,6 @@ class EOBuilder(object):
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
     EOBuilder([]).build()
