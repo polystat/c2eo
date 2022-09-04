@@ -150,6 +150,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
+EOObject GetStmtWithoutMetaEOObject(const Stmt *stmt);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -325,6 +326,28 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
 }
 
 EOObject GetStmtEOObject(const Stmt *stmt) {
+  if (!transpiler.IsGenerateMeta()) {
+    return GetStmtWithoutMetaEOObject(stmt);
+  }
+  EOObject meta{"meta"};
+  clang::SourceManager &source_manager = context->getSourceManager();
+  clang::SourceRange loc = stmt->getSourceRange();
+  auto loc_start = source_manager.getPresumedLoc(loc.getBegin());
+  auto loc_end = source_manager.getPresumedLoc(loc.getEnd());
+  string line_start = to_string(loc_start.getLine());
+  string line_end = to_string(loc_end.getLine());
+  meta.nested.emplace_back(loc_start.getFilename(), EOObjectType::EO_LITERAL);
+  if (line_start == line_end) {
+    meta.nested.emplace_back(line_start, EOObjectType::EO_LITERAL);
+  } else {
+    meta.nested.emplace_back(line_start + "-" + line_end,
+                             EOObjectType::EO_LITERAL);
+  }
+  meta.nested.push_back(GetStmtWithoutMetaEOObject(stmt));
+  return meta;
+}
+
+EOObject GetStmtWithoutMetaEOObject(const Stmt *stmt) {
   if (stmt == nullptr) {
     llvm::errs() << "Warning: Try to construct EOObject for nullptr\n";
     return EOObject(EOObjectType::EO_PLUG);
@@ -1071,7 +1094,7 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
   int idx = 0;
   vector<string> formats;
   for (const auto *arg : op->arguments()) {
-    auto param = GetStmtEOObject(arg);
+    auto param = GetStmtWithoutMetaEOObject(arg);
     if (idx == 0 && param.type == EOObjectType::EO_LITERAL) {
       const std::regex re("%([lh]*)([cdfs])");
       auto formats_begin =

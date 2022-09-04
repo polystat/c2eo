@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
+/*
 #ifndef PROJECT_SRC_TRANSPILER_TRACER_H_
 #define PROJECT_SRC_TRANSPILER_TRACER_H_
 
@@ -52,3 +52,4 @@ __attribute__((unused)) void TraceOutEOObject(EOObject &eo_object);
 void TraceOutFunctionDecl(const clang::FunctionDecl *FD);
 
 #endif  // PROJECT_SRC_TRANSPILER_TRACER_H_
+*/

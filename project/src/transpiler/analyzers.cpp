@@ -37,9 +37,7 @@ clang::ASTContext *context;
 //------------------------------------------------------------------------------
 // Function analysis
 void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
-  if (context == nullptr) {
-    context = result.Context;
-  }
+  context = result.Context;
   const auto *FD = result.Nodes.getNodeAs<clang::FunctionDecl>("funcDecl");
   // We do not want to convert header files!
   //   if (!FD || !FD->isDefined() ||
@@ -71,9 +69,7 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
 }
 
 void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
-  if (context == nullptr) {
-    context = result.Context;
-  }
+  context = result.Context;
   const auto *RD = result.Nodes.getNodeAs<clang::RecordDecl>("recordDecl");
   if (RD == nullptr) {
     return;
@@ -83,9 +79,7 @@ void RecordDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
 
 void DeclBaseVarGlobalMemoryAnalyzer::run(
     const MatchFinder::MatchResult &result) {
-  if (context == nullptr) {
-    context = result.Context;
-  }
+  context = result.Context;
   const auto *VD =
       result.Nodes.getNodeAs<clang::VarDecl>("declBaseVarGlobalMemory");
   // We do not want to convert header files!
