@@ -148,6 +148,8 @@ void AppendDeclStmt(const DeclStmt *stmt);
 EOObject GetUnaryExprOrTypeTraitExprEOObject(
     const clang::UnaryExprOrTypeTraitExpr *p_expr);
 
+EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
+EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -466,10 +468,43 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     // todo: do i need type?
     return {"0", EOObjectType::EO_LITERAL};
   }
+  if (stmt_class == Stmt::GotoStmtClass) {
+    const auto *op = dyn_cast<clang::GotoStmt>(stmt);
+    return GetGotoStmtEOObject(op);
+  }
+  if (stmt_class == Stmt::LabelStmtClass) {
+    const auto *op = dyn_cast<clang::LabelStmt>(stmt);
+    return GetLabelStmtEOObject(op);
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
 
   return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
+  EOObject res{EOObjectType::EO_EMPTY};
+  EOObject c_label{"c-label"};
+  c_label.nested.emplace_back("\"" + string(p_stmt->getName()) + "\"",
+                              EOObjectType::EO_LITERAL);
+  res.nested.push_back(c_label);
+  if (p_stmt->getSubStmt() != nullptr) {
+    res.nested.push_back(GetStmtEOObject(p_stmt->getSubStmt()));
+  }
+  return res;
+}
+EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
+  // EOObject res{EOObjectType::EO_EMPTY};
+  EOObject c_goto{"c-goto"};
+  c_goto.nested.emplace_back(
+      "\"" + p_stmt->getLabel()->getNameAsString() + "\"",
+      EOObjectType::EO_LITERAL);
+  return c_goto;
 }
 EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
   if (p_literal != nullptr) {
