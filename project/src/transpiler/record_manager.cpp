@@ -25,11 +25,12 @@
 #include "src/transpiler/record_manager.h"
 
 #include <map>
+#include <tuple>
 #include <vector>
 
 RecordType RecordManager::Add(
     int64_t id, std::string name, size_t size,
-    std::map<std::string, std::pair<clang::QualType, size_t>> fields,
+    std::vector<std::tuple<std::string, clang::QualType, size_t>> fields,
     bool is_local = false) {
   RecordType record_type = {id, std::move(name), size, std::move(fields),
                             is_local};
@@ -68,8 +69,8 @@ std::vector<EOObject> RecordType::GetEORecordDecl() {
   std::vector<EOObject> record_decl;
   std::string shift;
   for (const auto &field : fields) {
-    shift = std::to_string(field.second.second);
-    EOObject eo_shift{shift, name + "-" + field.first};
+    shift = std::to_string(std::get<2>(field));
+    EOObject eo_shift{shift, name + "-" + std::get<0>(field)};
     eo_shift.type = EOObjectType::EO_LITERAL;
     record_decl.push_back(eo_shift);
   }
