@@ -465,12 +465,11 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::ImplicitValueInitExprClass) {
     //    const auto *op = dyn_cast<clang::ImplicitValueInitExpr>(stmt);
-    // todo: do i need type?
+    // todo: do i need type or other info?
     return {"0", EOObjectType::EO_LITERAL};
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
-
   return EOObject(EOObjectType::EO_PLUG);
 }
 EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
