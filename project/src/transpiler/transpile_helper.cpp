@@ -312,15 +312,6 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   if (is_decorator) {
     res.postfix = "@";
   }
-  vector<Variable> all_local_in_block;
-  ProcessCompoundStatementLocalVariables(CS, all_local_in_block);
-  auto pos_it = res.nested.begin();
-  for (const auto &var : all_local_in_block) {
-    if (var.is_initialized) {
-      pos_it = res.nested.insert(pos_it, var.GetInitializer());
-      pos_it++;
-    }
-  }
   if (CS != nullptr) {
     for (auto *stmt : CS->body()) {
       EOObject stmt_obj = GetStmtEOObject(stmt);
@@ -395,7 +386,15 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::DeclStmtClass) {
     const auto *op = dyn_cast<DeclStmt>(stmt);
     AppendDeclStmt(op);
-    return EOObject(EOObjectType::EO_EMPTY);
+    EOObject result = EOObject{EOObjectType::EO_EMPTY};
+    for (auto *decl : op->decls()) {
+      if (decl->getKind() == clang::Decl::Var) {
+        auto *VD = dyn_cast<VarDecl>(decl);
+        result.nested.push_back(
+            transpiler.glob_.GetVarById(VD).GetInitializer());
+      }
+    }
+    return result;
   }
   if (stmt_class == Stmt::CallExprClass) {
     const auto *op = dyn_cast<CallExpr>(stmt);
