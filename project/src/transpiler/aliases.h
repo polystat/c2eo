@@ -66,6 +66,8 @@ std::map<std::string, std::string> known_aliases = {
     {"bit-not", "+alias c2eo.coperators.bit-not"},
     {"bit-or", "+alias c2eo.coperators.bit-or"},
     {"bit-xor", "+alias c2eo.coperators.bit-xor"},
+    {"c-goto", "+alias c2eo.coperators.c-goto"},
+    {"c-label", "+alias c2eo.coperators.c-label"},
     {"div", "+alias c2eo.coperators.div"},
     {"eq", "+alias c2eo.coperators.eq"},
     {"goto", "+alias org.eolang.goto"},
