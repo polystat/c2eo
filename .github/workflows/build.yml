@@ -113,7 +113,12 @@ jobs:
         run: tar -xvf c-testcuite.tar.gz -C . > /dev/null
 
       - name: Testing
-        run: cd ./project/scripts && python3 test.py -p ../../c-testcuite -s testcuite -n
+        run: cd ./project/scripts && python3 test.py -p ../../c-testcuite -s testcuite -n -c
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: c-testcuite_codecov
+          path: project/bin/*.profraw
 
   test:
     needs: [cpp-lint, clang-format]
@@ -133,7 +138,12 @@ jobs:
         run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Testing
-        run: cd ./project/scripts && python3 test.py -s test
+        run: cd ./project/scripts && python3 test.py -s test -c
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: main_test_codecov
+          path: project/bin/*.profraw
 
   csmith:
     needs: [cpp-lint, clang-format]
@@ -194,23 +204,19 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: MarkusJx/googletest-installer@v1.1
+ 
+      - run: mkdir project/bin/
 
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
+      - name: Download raw code coverage
+        uses: actions/download-artifact@v3
         with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
-
-      - name: Generate raw code coverage
-        run: cd ./project/scripts && python3 transpile.py ../tests/main -c
+          path: project/bin/
 
       - name: Convert raw code coverage to report
-        run: cd ./project/scripts && python3 codecov.py
+        run: |
+          cd project/bin/
+          llvm-profdata-14 merge -sparse **/*.profraw -o res.profdata
+          llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > report.txt
 
       - uses: codecov/codecov-action@v3
         with:
