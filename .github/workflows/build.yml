@@ -19,7 +19,7 @@ jobs:
         run: sudo pip install cpplint
 
       - name: Cpp-lint
-        run: cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/** 
+        run: cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/**
 
   clang-format:
     runs-on: ubuntu-22.04
@@ -34,50 +34,33 @@ jobs:
           fallback-style: 'Google'
 
   clang-tidy:
-    needs:
-      - cpp-lint
-      - clang-format
+    needs: [cpp-lint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
-        id: cache-llvm
         uses: actions/cache@v3
         with:
           path: llvm-clang.tar.gz
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
-
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
       
       - name: Install clang-tidy
         run: sudo apt install clang-tidy
       
       - name: Clang-tidy
-        run: |
-          cd ./project/scripts
-          python3 clang_tidy.py
+        run: cd ./project/scripts && python3 clang_tidy.py
 
   gcc-c-torture:
-    needs:
-      - cpp-lint
-      - clang-format
+    needs: [cpp-lint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
         id: cache-llvm
@@ -87,19 +70,7 @@ jobs:
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
-
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Download gcc-c-torture
         uses: robinraju/release-downloader@v1.4
@@ -109,20 +80,17 @@ jobs:
           fileName: "gcc.c-torture.tar.gz"
 
       - name: Unpack gcc-c-torture
-        run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null  
+        run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null
 
       - name: Transpilation
-        run: |
-          cd ./project/scripts
-          python3 transpile.py ../../gcc.c-torture -s gcc -n
+        run: cd ./project/scripts && python3 transpile.py ../../gcc.c-torture -s gcc -n
 
   c-testcuite:
-    needs:
-      - cpp-lint
-      - clang-format
+    needs: [cpp-lint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
         id: cache-llvm
@@ -132,19 +100,7 @@ jobs:
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
-
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Download c-testcuite
         uses: robinraju/release-downloader@v1.4
@@ -154,22 +110,17 @@ jobs:
           fileName: "c-testcuite.tar.gz"
 
       - name: Unpack c-testcuite
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf c-testcuite.tar.gz -C . > /dev/null  
+        run: tar -xvf c-testcuite.tar.gz -C . > /dev/null
 
       - name: Testing
-        run: |
-          cd ./project/scripts
-          python3 test.py -p ../../c-testcuite -s testcuite -n
+        run: cd ./project/scripts && python3 test.py -p ../../c-testcuite -s testcuite -n
 
   test:
-    needs:
-      - cpp-lint
-      - clang-format
+    needs: [cpp-lint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
         id: cache-llvm
@@ -179,32 +130,17 @@ jobs:
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
-          
       - name: Testing
-        run: |
-          cd ./project/scripts
-          python3 test.py -s test
+        run: cd ./project/scripts && python3 test.py -s test
 
   csmith:
-    needs:
-      - cpp-lint
-      - clang-format
+    needs: [cpp-lint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
         id: cache-llvm
@@ -214,19 +150,7 @@ jobs:
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
-
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Install csmith
         run: |
@@ -237,22 +161,17 @@ jobs:
           make
 
       - name: Generating tests
-        run: |
-          cd ./project/scripts
-          python3 csmith.py ../tests/main/csmith -c 1000
+        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 1000
         
       - name: Transpilation
-        run: |
-          cd ./project/scripts
-          python3 transpile.py ../tests/main/csmith -n   
+        run: cd ./project/scripts && python3 transpile.py ../tests/main/csmith -n
 
   unit-tests:
-#    needs:
-#      - cpp-lint
-#      - clang-format
+    needs: [cpp-lint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
         id: cache-llvm
@@ -262,36 +181,20 @@ jobs:
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
+      - name: Build c2eo
+        run: cd ./project/scripts && python3 build_c2eo.py
 
       - name: Unit testing
-        run: |
-          cd ./project/scripts
-          python3 build_c2eo.py
-          cd ../bin/
-          ./unit_tests --gtest_filter=* --gtest_color=no
+        run: cd ./project/bin/ && ./unit_tests --gtest_filter=*
 
   codecov:
-    needs:
-      - clang-tidy
-      - gcc-c-torture
-      - c-testcuite
-      - test
+    needs: [clang-tidy, gcc-c-torture, c-testcuite, test, unit-tests]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+      - uses: MarkusJx/googletest-installer@v1.1
 
       - name: Cache LLVM
         id: cache-llvm
@@ -301,29 +204,13 @@ jobs:
           key: ${{ runner.os }}-llvm-clang
 
       - name: Unpack LLVM
-        run: |
-          sudo chmod ugo+rwx llvm-clang.tar.gz
-          tar -xvf llvm-clang.tar.gz -C . > /dev/null
+        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
-      - name: Install GoogleTests
-        run: |
-          sudo apt-get install libgtest-dev -y
-          sudo apt-get install googletest -y
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          cd lib
-          sudo cp *.a /usr/local/lib
-          
       - name: Generate raw code coverage
-        run: |
-          cd ./project/scripts
-          python3 transpile.py ../tests/main -c
+        run: cd ./project/scripts && python3 transpile.py ../tests/main -c
 
       - name: Convert raw code coverage to report
-        run: |
-          cd ./project/scripts
-          python3 codecov.py
+        run: cd ./project/scripts && python3 codecov.py
 
       - uses: codecov/codecov-action@v3
         with:
