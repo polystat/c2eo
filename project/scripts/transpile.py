@@ -52,7 +52,9 @@ class Transpiler(object):
             path_to_c_files = path_to_c_files.parent
         self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
         self.need_to_generate_codecov = need_to_generate_codecov
-        self.codecov_arg = 'LLVM_PROFILE_FILE="C%p.profraw"' if self.need_to_generate_codecov else ''
+        self.codecov_arg = ''
+        if self.need_to_generate_codecov:
+            self.codecov_arg = f'LLVM_PROFILE_FILE="{path_to_c_files.stem}_%p.profraw"'
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_c2eo_transpiler = settings.get_setting('path_to_c2eo_transpiler')
@@ -104,13 +106,13 @@ class Transpiler(object):
         return self.transpilation_units, skip_result
 
     def build_c2eo(self) -> None:
+        cmd = 'cmake '
+        cmake_cxx_flags = ['-fsanitize=address']
         if self.need_to_generate_codecov:
-            build_c2eo.main(self.path_to_c2eo_build,
-                            'cmake -D CMAKE_CXX_COMPILER="/bin/clang++" -D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS '
-                            '-fprofile-instr-generate -fcoverage-mapping" .. ')
-        else:
-            build_c2eo.main(self.path_to_c2eo_build,
-                            'cmake -D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -fsanitize=address" .. ')
+            cmd += '-D CMAKE_CXX_COMPILER="/bin/clang++" '
+            cmake_cxx_flags.extend(['-fprofile-instr-generate', '-fcoverage-mapping'])
+        cmd += f'-D CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS {" ".join(cmake_cxx_flags)}" ..'
+        build_c2eo.main(self.path_to_c2eo_build, cmd)
 
     def make_unit(self, c_file: Path) -> dict[str, str | Path]:
         rel_c_path = Path(str(c_file.parent).replace(str(self.replaced_path), '').lstrip(os_sep))
