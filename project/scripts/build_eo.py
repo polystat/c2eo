@@ -89,7 +89,7 @@ class EOBuilder(object):
         eo_src_files = tools.search_files_by_patterns(self.path_to_eo, {'*.eo'}, recursive=True)
         eo_src_files = {str(x).replace(str(self.path_to_eo), '', 1).replace('.eo', '', 1) for x in eo_src_files}
         project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, {'*.xmir'},
-                                                          recursive=True, filters={'!/org/eolang'}, print_files=True)
+                                                          recursive=True, filters={'!org/eolang'})
         project_eo_files = {str(x).replace(str(self.path_to_eo_parse), '', 1).replace('.xmir', '', 1) for x in
                             project_eo_files}
         difference = project_eo_files - eo_src_files
