@@ -94,7 +94,7 @@ class Transpiler(object):
         is_failed = sum(map(len, result[tools.EXCEPTION].values())) > 0
         tools.pprint_result('TRANSPILE', tests_count, int(time.time() - start_time), result, is_failed)
         if is_failed:
-            exit(f'transpilation failed')
+            exit('transpilation failed')
 
         self.remove_unused_eo_files()
         self.move_transpiled_files()
@@ -220,7 +220,7 @@ class Transpiler(object):
             unit['eo_file'].unlink(missing_ok=True)
         difference = set(filter(lambda x: x, difference))  # Filter None values
         if difference:
-            tools.pprint(f'\nDetected changes in src files:')
+            tools.pprint('\nDetected changes in src files:')
             tools.pprint_only_file_names(difference)
             tools.pprint('Move these files to src dir\n')
         else:
