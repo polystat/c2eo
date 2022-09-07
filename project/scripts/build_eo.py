@@ -73,10 +73,10 @@ class EOBuilder(object):
 
     def is_recompilation(self) -> bool:
         if not self.path_to_foreign_objects.exists():
-            tools.pprint('Compile dir not found', status=tools.WARNING)
+            tools.pprint('Compilation information not found', status=tools.WARNING)
             return False
 
-        tools.pprint('Compile dir found', status=tools.PASS)
+        tools.pprint('Compilation information found', status=tools.PASS)
         if not self.is_actual_object_version():
             tools.pprint('Old version detected', status=tools.WARNING)
             return False
@@ -101,9 +101,6 @@ class EOBuilder(object):
     def is_actual_object_version(self) -> bool:
         tools.pprint('\nCheck version of compiled eo objects\n')
         data = []
-        if not self.path_to_foreign_objects.exists():
-            return False
-
         with open(self.path_to_foreign_objects) as f:
             reader = csv.DictReader(f)
             for row in reader:

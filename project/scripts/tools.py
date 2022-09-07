@@ -81,11 +81,11 @@ def apply_filters_to_files(files: set[Path], filters: set[str] = None, print_fil
     if inclusion_filters := [f for f in filters if f[0] != '!']:
         result = set()
         for _filter in inclusion_filters:
-            result |= set(x for x in files if x.match(_filter))
+            result |= set(x for x in files if _filter in str(x))
     else:
         result = copy.copy(files)
     for exclusion_filter in [x[1:] for x in filters if x[0] == '!']:
-        result = {file for file in result if not file.match(exclusion_filter)}
+        result = {file for file in result if exclusion_filter not in str(file)}
     pprint(f'{len(result)} files left')
     if print_files:
         pprint_only_file_names(result)

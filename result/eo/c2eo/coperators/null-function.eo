@@ -1,0 +1,6 @@
++alias c2eo.coperators.printf
+
++package c2eo.coperators
+
+[args...] > null-function
+  printf "exception: the pointer to function is not initialized\n" > @

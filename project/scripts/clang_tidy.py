@@ -72,7 +72,7 @@ class ClangTidy(object):
     def generate_compile_commands(self) -> None:
         original_path = Path.cwd()
         chdir(self.path_to_c2eo_build)
-        cmd = f'cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
+        cmd = 'cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         chdir(original_path)
         if result.returncode != 0:
@@ -133,4 +133,4 @@ if __name__ == '__main__':
     namespace = parser.parse_args()
     is_failed = ClangTidy(Path(namespace.path_to_code_files)).inspect()
     if is_failed:
-        exit(f'clang-tidy checks failed')
+        exit('clang-tidy checks failed')

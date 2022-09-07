@@ -224,4 +224,4 @@ if __name__ == '__main__':
     is_failed = Tests(Path(namespace.path_to_tests), namespace.skips_file_name, not namespace.not_prepare_c_code,
                       namespace.codecov).test()
     if is_failed:
-        exit(f'Testing failed')
+        exit('Testing failed')
