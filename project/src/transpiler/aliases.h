@@ -84,6 +84,7 @@ std::map<std::string, std::string> known_aliases = {
     {"neg", "+alias c2eo.coperators.neg"},
     {"neq", "+alias c2eo.coperators.neq"},
     {"not", "+alias c2eo.coperators.not"},
+    {"null-function", "+alias c2eo.coperators.null-function"},
     {"or", "+alias c2eo.coperators.or"},
     {"plug", "+alias c2eo.coperators.plug"},
     {"plus", "+alias c2eo.coperators.plus"},
