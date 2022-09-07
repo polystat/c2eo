@@ -149,6 +149,14 @@ $ cd project/srcipts
 $ python3 test.py -s test
 ```
 
+7. unit-tests
+```bash
+$ cd project/scripts
+$ python3 build_c2eo.py
+$ project/bin/
+$ ./unit_tests --gtest_filter=*
+```
+
 ## How to release
 
 From `project/scripts/` directory:
