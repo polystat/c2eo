@@ -5,7 +5,7 @@
 00205: java code too large
 00025, 00180, 00179: using str functions
 00073, 00072, 00032, 00037, 00077, 00014, 00013, 00130: TODO pointers and arrays
-00050: TODO structures and unions
+00208: TODO struct initialization with str
 00051, 00199, 00010, 000129, 00213, 00207, 00129: goto
 00091, 00148: TODO array in structure
 00154: TODO array of structure
