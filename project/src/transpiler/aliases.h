@@ -52,6 +52,7 @@ std::map<std::string, std::string> known_aliases = {
     {"addrmemcpy", "+alias c2eo.coperators.addrmemcpy"},
     {"and", "+alias c2eo.coperators.and"},
     {"as-bool", "+alias c2eo.coperators.as-bool"},
+    {"as-char", "+alias c2eo.coperators.as-char"},
     {"as-float32", "+alias c2eo.coperators.as-float32"},
     {"as-float64", "+alias c2eo.coperators.as-float64"},
     {"as-int8", "+alias c2eo.coperators.as-int8"},
