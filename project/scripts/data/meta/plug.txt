@@ -1,5 +1,6 @@
-+alias org.eolang.io.stdout
++alias c2eo.coperators.printf
+
 +package c2eo.src.<file_name>
 
 [args...] > global
-  stdout "exception: <exception_message>\n" > @
+  printf "exception: <exception_message>\n" > @

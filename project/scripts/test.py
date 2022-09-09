@@ -134,7 +134,7 @@ def compare_files(c_data: list[str], eo_data: list[str]) -> (bool, bool, list[st
     if len(c_data) != len(eo_data):
         log_data = ['Results have different length!\n', '\nC result:\n']
         log_data.extend(c_data)
-        log_data.append('\nEO result:\n')
+        log_data.append('\n\nEO result:\n')
         log_data.extend(eo_data)
         return False, False, log_data
 

@@ -52,23 +52,23 @@ void SegfaultSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   out << "+alias c2eo.coperators.printf\n\n";
   out << "+package c2eo.src." << package_name << "\n\n";
   out << "[args...] > global\n";
-  out << "  printf \"Segfault exception at address " << si->si_addr
+  out << "  printf \"exception: segfault at address " << si->si_addr
       << " while tool run\" > @\n";
   out.close();
-  exit(0);
+  exit(-1);
 }
 
-void SiAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
+void SigAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   llvm::errs() << "exception: SIGABRT with code " << si->si_code
                << " while tool run\n";
   std::ofstream out(filename);
   out << "+alias c2eo.coperators.printf\n\n";
   out << "+package c2eo.src." << package_name << "\n\n";
   out << "[args...] > global\n";
-  out << "  printf \"SIGABRT at address " << si->si_addr
+  out << "  printf \"exception: SIGABRT at address " << si->si_addr
       << " while tool run\" > @\n";
   out.close();
-  exit(0);
+  exit(-1);
 }
 
 int main(int argc, const char **argv) {
@@ -82,7 +82,7 @@ int main(int argc, const char **argv) {
   struct sigaction sab {};
   memset(&sab, 0, sizeof(struct sigaction));
   sigemptyset(&sab.sa_mask);
-  sab.sa_sigaction = SiAbrtSigaction;
+  sab.sa_sigaction = SigAbrtSigaction;
   sab.sa_flags = SA_SIGINFO;
   sigaction(SIGABRT, &sab, nullptr);
 

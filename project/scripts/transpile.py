@@ -182,7 +182,7 @@ class Transpiler(object):
         for unit in self.transpilation_units:
             exception_message = check_unit_exception(unit)
             if exception_message:
-                if exception_message not in [tools.EXCEPTION]:
+                if exception_message not in result[tools.EXCEPTION]:
                     result[tools.EXCEPTION][exception_message] = {}
                 if unit['unique_name'] not in result[tools.EXCEPTION][exception_message]:
                     result[tools.EXCEPTION][exception_message][unit['unique_name']] = set()
@@ -261,8 +261,7 @@ def add_return_code_to_eo_file(eo_file: Path) -> None:
     with open(f'{eo_file}', 'r', encoding=tools.ISO_8859_1) as f:
         data = f.readlines()
     is_main = False
-    aliases = {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n',
-               '+alias c2eo.coperators.as-uint8\n'}
+    aliases = {'+alias c2eo.coperators.as-uint8\n'}
     aliases_count = 0
     for i, line in enumerate(data):
         if line.startswith('+alias'):
@@ -274,7 +273,10 @@ def add_return_code_to_eo_file(eo_file: Path) -> None:
             data[i] = '          write-as-int32 return 0\n          goto-return-label.forward TRUE\n'
             aliases.add('+alias c2eo.coperators.write-as-int32\n')
             break
-    data[-1] = '    printf "%d" (as-uint8 (read-as-int32 return))\n'
+
+    if data[-1].strip() == 'TRUE':
+        data[-1] = '    printf "%d" (as-uint8 (read-as-int32 return))\n'
+        aliases |= {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n'}
     with open(f'{eo_file}', 'w', encoding=tools.ISO_8859_1) as f:
         f.writelines(sorted(aliases))
         f.writelines(data[aliases_count:])
