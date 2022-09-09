@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import copy
-import time
 import math
 from os import chdir
 from pathlib import Path
 from os import sep as os_sep
 from os import cpu_count as os_cpu_count
+from time import localtime, strftime, sleep
 from multiprocessing.dummy import Pool as ThreadPool
 
 ISO_8859_1 = 'ISO-8859-1'
@@ -156,7 +156,7 @@ def pprint(*data: str | list, slowly: bool = False, status: str = INFO, end: str
             status_str = f'[{get_status(status)}] ' if status else ''
             print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
-                time.sleep(0.01)
+                sleep(0.01)
 
 
 def pprint_header(header: str) -> None:
@@ -213,8 +213,9 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
     pprint()
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}' if is_failed else f'{BGreen}{header} SUCCESS{IWhite}')
-    time_header = f'Total time: {total_seconds // 60:02}:{total_seconds % 60:02} min'
-    pprint_header(f'{", ".join(summary)}\n{time_header}')
+    total_time = f'Total time: {total_seconds // 60:02}:{total_seconds % 60:02} min'
+    finished_at = f'Finished at: {strftime("%a, %d %b %Y %H:%M:%S", localtime())}'
+    pprint_header(f'{", ".join(summary)}\n{total_time}\n{finished_at}')
 
 
 def pprint_separation_line() -> None:
