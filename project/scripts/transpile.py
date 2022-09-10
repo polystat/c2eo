@@ -131,6 +131,7 @@ class Transpiler(object):
                         skips[comment] = {}
                     skips[comment][unit['unique_name']] = set()
                     skip_units.append(unit)
+                    break
         self.transpilation_units = list(filter(lambda x: x not in skip_units, self.transpilation_units))
         return skips
 
