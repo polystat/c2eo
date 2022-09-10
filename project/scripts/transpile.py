@@ -80,7 +80,7 @@ class Transpiler(object):
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
         with tools.thread_pool() as threads:
-            self.transpilation_units = list(threads.map(self.make_unit, c_files))
+            self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
         generate_unique_names_for_units(self.transpilation_units)
         skip_result = self.check_skips()
         original_path = Path.cwd()
@@ -88,7 +88,7 @@ class Transpiler(object):
         tools.pprint('\nTranspile files:\n', slowly=True)
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
-            threads.map(self.start_transpilation, self.transpilation_units)
+            list(threads.imap_unordered(self.start_transpilation, self.transpilation_units))
         result = self.group_transpilation_results()
         result[tools.SKIP] = skip_result
         tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))

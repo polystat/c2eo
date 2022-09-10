@@ -63,7 +63,7 @@ class Tests(object):
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
-                results = threads.map(compare_test_results, self.transpilation_units)
+                results = list(threads.imap_unordered(compare_test_results, self.transpilation_units))
             result = group_comparison_results(results)
             result[tools.SKIP] = skip_result
             tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
@@ -75,7 +75,7 @@ class Tests(object):
         tools.pprint('\nRunning C tests:\n', slowly=True)
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
-            threads.map(self.get_result_for_c_file, self.transpilation_units)
+            list(threads.imap_unordered(self.get_result_for_c_file, self.transpilation_units))
         tools.pprint(on_the_next_line=True)
         tools.pprint('\nRunning EO tests:\n', slowly=True)
         self.test_handled_count = 0
@@ -83,7 +83,7 @@ class Tests(object):
         chdir(self.path_to_eo_project)
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
-            threads.map(self.get_result_for_eo_file, self.transpilation_units)
+            list(threads.imap_unordered(self.get_result_for_eo_file, self.transpilation_units))
         chdir(original_path)
         tools.pprint(on_the_next_line=True)
 
