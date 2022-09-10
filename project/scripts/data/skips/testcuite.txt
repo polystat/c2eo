@@ -1,27 +1,30 @@
-00087, 00089, 00124, 00130, 00150, 00159, 00170, 00189, 00204, 00209, 00210, 00216, 00220: TODO parsing problem
-00095, 00096: variables declaration duplicates
-00078, 00128, 00132, 00175, 00208, 00220, 00058, 00173, 00137, 00138: TODO char
-00040, 00104, 00181, 00182: uint64 is unsupported
-00205: java code too large
-00025, 00180, 00179: using str functions
-00073, 00072, 00032, 00037, 00077, 00014, 00013, 00130: TODO pointers and arrays
-00050: TODO structures and unions
-00051, 00199, 00010, 000129, 00213, 00207, 00129: goto
+00204: TODO segfault at address 0x0 while tool run
+00087, 00088, 00089, 00124, 00159, 00189, 00209, 00210, 00216: TODO segfault at address 0x10 while tool run
+00130: TODO segfault at address 0x30 while tool run
+00150: TODO /home/maksim/llvm-clang/llvm/include/llvm/Support/Casting.h:104: static bool llvm::isa_impl_cl<To, const From*>::doit(const From*) [with To = clang::TranslationUnitDecl; From = clang::Decl]: Assertion `Val && "isa<> used on a null pointer"' failed. exception: SIGABRT with code -6 while tool run
+00220: TODO /home/maksim/Projects/c2eo/project/src/transpiler/../../../llvm-clang/clang/include/clang/AST/Expr.h:1840: llvm::StringRef clang::StringLiteral::getString() const: Assertion `getCharByteWidth() == 1 && "This function is used in places that assume strings use char"' failed. exception: SIGABRT with code -6 while tool run
+00132: TODO printf char with const
+00173: TODO printf with char pointer
+00208: TODO struct initialization with str
+00175: TODO printf char
+00058: TODO pointer on char
+00078, 00217: TODO pointer on function
+00137, 00138, 00219: TODO define function
+00053: TODO structures
 00091, 00148: TODO array in structure
 00154: TODO array of structure
-00053: TODO structures
+00149: TODO pointers on structures
+00197: TODO static variables
+00026: TODO arithmetics
+00143: TODO Tom Duff switch
+00076, 00109, 00144, 00183: TODO ternary operator
+00200: TODO shift
+00010, 00051, 00129, 00199, 00207, 00213: goto
 00174: using math.h
 00186: using sprintf
 00187: using stdio.h for work with files
-00149, 00163: TODO pointers on structures
-00197: TODO static variables
-00212: TODO sizeof(void*) == 8
-00219, 00217: TODO?
-00143: TODO too strange switch
-00026: TODO arithmetics
-00087, 00089, 00124, 00088: pointers on functions
-00041: TODO too slow code
-00076, 00109, 00144, 00183: TODO ternary operator
-00045: TODO pointers
-00200: TODO shift
+00041: too slow eo code
+00040, 00104, 00181, 00182: uint64 is unsupported
+00205: java code too large
+00025, 00180, 00179: using str functions
 00214: using __builtin_expect

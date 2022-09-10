@@ -63,7 +63,7 @@ class ClangTidy(object):
         tools.pprint('\nInspect files:\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
-            self.results = [result for result in threads.map(self.inspect_file, code_files)]
+            self.results = list(threads.imap_unordered(self.inspect_file, code_files))
         result = self.group_inspection_results()
         _is_failed = len(result[tools.WARNING]) + len(result[tools.EXCEPTION]) > 0
         tools.pprint_result('INSPECTION', self.files_count, int(time.time() - start_time), result, _is_failed)

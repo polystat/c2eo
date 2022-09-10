@@ -27,6 +27,7 @@ SOFTWARE.
 import sys
 import time
 import argparse
+import resource
 import subprocess
 import re as regex
 from os import chdir
@@ -74,12 +75,12 @@ class Transpiler(object):
     def transpile(self) -> (list[dict[str, str | Path | CompletedProcess]], dict[str, dict[str, set[str]]]):
         start_time = time.time()
         self.build_c2eo()
-        tools.pprint('\nTranspilation start\n')
+        tools.pprint('\nTranspilation start\n', slowly=True)
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
         with tools.thread_pool() as threads:
-            self.transpilation_units = list(threads.map(self.make_unit, c_files))
+            self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
         generate_unique_names_for_units(self.transpilation_units)
         skip_result = self.check_skips()
         original_path = Path.cwd()
@@ -87,7 +88,7 @@ class Transpiler(object):
         tools.pprint('\nTranspile files:\n', slowly=True)
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
-            threads.map(self.start_transpilation, self.transpilation_units)
+            list(threads.imap_unordered(self.start_transpilation, self.transpilation_units))
         result = self.group_transpilation_results()
         result[tools.SKIP] = skip_result
         tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
@@ -99,8 +100,6 @@ class Transpiler(object):
         self.remove_unused_eo_files()
         self.move_transpiled_files()
         self.move_aliases()
-        if len(c_files) == 1:
-            self.generate_run_sh(self.transpilation_units[0]['full_name'])
         tools.pprint('\nTranspilation done\n')
         chdir(original_path)
         return self.transpilation_units, skip_result
@@ -123,6 +122,7 @@ class Transpiler(object):
                 'prepared_c_i_file': prepared_c_file.with_suffix('.c.i')}
 
     def check_skips(self) -> dict[str, dict[str, set[str]]]:
+        tools.pprint('Check skips', slowly=True)
         skip_units = []
         skips = {}
         for unit in self.transpilation_units:
@@ -132,13 +132,16 @@ class Transpiler(object):
                         skips[comment] = {}
                     skips[comment][unit['unique_name']] = set()
                     skip_units.append(unit)
+                    break
         self.transpilation_units = list(filter(lambda x: x not in skip_units, self.transpilation_units))
         return skips
 
     def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess]) -> None:
         eo_file = Path(f'{unit["full_name"]}.eo')
         transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
+        time_start = resource.getrusage(resource.RUSAGE_CHILDREN)[0]
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
+        time_end = resource.getrusage(resource.RUSAGE_CHILDREN)[0]
         self.files_handled_count += 1
         unit['transpilation_result'] = result
         unit['eo_file'] = eo_file.resolve()
@@ -182,7 +185,7 @@ class Transpiler(object):
         for unit in self.transpilation_units:
             exception_message = check_unit_exception(unit)
             if exception_message:
-                if exception_message not in [tools.EXCEPTION]:
+                if exception_message not in result[tools.EXCEPTION]:
                     result[tools.EXCEPTION][exception_message] = {}
                 if unit['unique_name'] not in result[tools.EXCEPTION][exception_message]:
                     result[tools.EXCEPTION][exception_message][unit['unique_name']] = set()
@@ -233,10 +236,6 @@ class Transpiler(object):
         for alias in aliases:
             alias.replace(self.path_to_eo_external / alias.stem)
 
-    def generate_run_sh(self, full_name: str) -> None:
-        code = regex.sub(self.run_sh_replace, full_name, self.run_sh_code)
-        (self.path_to_eo_project / 'run.sh').write_text(code)
-
 
 def generate_unique_names_for_units(units: list[dict[str, str | CompletedProcess]], words_in_name: int = 2) -> None:
     names = {}
@@ -261,8 +260,7 @@ def add_return_code_to_eo_file(eo_file: Path) -> None:
     with open(f'{eo_file}', 'r', encoding=tools.ISO_8859_1) as f:
         data = f.readlines()
     is_main = False
-    aliases = {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n',
-               '+alias c2eo.coperators.as-uint8\n'}
+    aliases = {'+alias c2eo.coperators.as-uint8\n'}
     aliases_count = 0
     for i, line in enumerate(data):
         if line.startswith('+alias'):
@@ -274,7 +272,10 @@ def add_return_code_to_eo_file(eo_file: Path) -> None:
             data[i] = '          write-as-int32 return 0\n          goto-return-label.forward TRUE\n'
             aliases.add('+alias c2eo.coperators.write-as-int32\n')
             break
-    data[-1] = '    printf "%d" (as-uint8 (read-as-int32 return))\n'
+
+    if data[-1].strip() == 'TRUE':
+        data[-1] = '    printf "%d" (as-uint8 (read-as-int32 return))\n'
+        aliases |= {'+alias c2eo.coperators.printf\n', '+alias c2eo.coperators.read-as-int32\n'}
     with open(f'{eo_file}', 'w', encoding=tools.ISO_8859_1) as f:
         f.writelines(sorted(aliases))
         f.writelines(data[aliases_count:])
