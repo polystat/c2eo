@@ -75,7 +75,7 @@ class Transpiler(object):
     def transpile(self) -> (list[dict[str, str | Path | CompletedProcess]], dict[str, dict[str, set[str]]]):
         start_time = time.time()
         self.build_c2eo()
-        tools.pprint('\nTranspilation start\n')
+        tools.pprint('\nTranspilation start\n', slowly=True)
         clean_before_transpilation.main(self.path_to_c_files)
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
@@ -122,6 +122,7 @@ class Transpiler(object):
                 'prepared_c_i_file': prepared_c_file.with_suffix('.c.i')}
 
     def check_skips(self) -> dict[str, dict[str, set[str]]]:
+        tools.pprint('Check skips', slowly=True)
         skip_units = []
         skips = {}
         for unit in self.transpilation_units:
