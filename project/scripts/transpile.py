@@ -27,6 +27,7 @@ SOFTWARE.
 import sys
 import time
 import argparse
+import resource
 import subprocess
 import re as regex
 from os import chdir
@@ -99,8 +100,6 @@ class Transpiler(object):
         self.remove_unused_eo_files()
         self.move_transpiled_files()
         self.move_aliases()
-        if len(c_files) == 1:
-            self.generate_run_sh(self.transpilation_units[0]['full_name'])
         tools.pprint('\nTranspilation done\n')
         chdir(original_path)
         return self.transpilation_units, skip_result
@@ -138,7 +137,9 @@ class Transpiler(object):
     def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess]) -> None:
         eo_file = Path(f'{unit["full_name"]}.eo')
         transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
+        time_start = resource.getrusage(resource.RUSAGE_CHILDREN)[0]
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
+        time_end = resource.getrusage(resource.RUSAGE_CHILDREN)[0]
         self.files_handled_count += 1
         unit['transpilation_result'] = result
         unit['eo_file'] = eo_file.resolve()
@@ -232,10 +233,6 @@ class Transpiler(object):
         tools.clear_dir_by_patterns(self.path_to_eo_external, {'*.eo'})
         for alias in aliases:
             alias.replace(self.path_to_eo_external / alias.stem)
-
-    def generate_run_sh(self, full_name: str) -> None:
-        code = regex.sub(self.run_sh_replace, full_name, self.run_sh_code)
-        (self.path_to_eo_project / 'run.sh').write_text(code)
 
 
 def generate_unique_names_for_units(units: list[dict[str, str | CompletedProcess]], words_in_name: int = 2) -> None:
