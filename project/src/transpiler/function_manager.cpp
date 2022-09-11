@@ -60,7 +60,11 @@ void FunctionManager::AddEoObject(const EOObject &func) {
 //------------------------------------------------------------------------------
 void FunctionManager::AddToMap(std::string func_name) {
   if(func_name_map.find(func_name) == func_name_map.end()) {
-    func_name_map[func_name] = name_count++;
+    if(func_name == "f-printf") {
+      func_name_map["printf"] = name_count++;
+    } else {
+      func_name_map[func_name] = name_count++;
+    }
   }
 }
 //------------------------------------------------------------------------------

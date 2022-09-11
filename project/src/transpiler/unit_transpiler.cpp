@@ -114,6 +114,8 @@ void UnitTranspiler::GenerateResult() {
   std::stringstream result;
 
   used_external_objects_ = FindAllExternalObjects(body);
+  // Null Function Alias Creating
+  result << "+alias c2eo.coperators.null-function\n";
   for (const auto &ext_obj : used_external_objects_) {
     if (known_types.find(ext_obj) == known_types.end()) {
       std::string alias;
@@ -143,7 +145,7 @@ void UnitTranspiler::SetPackageName(std::string package_name) {
 }
 
 void UnitTranspiler::SetPathName(std::string path_name) {
-  path_name = std::move(path_name);
+  path_name_ = path_name;
 }
 
 void UnitTranspiler::GenerateMeta() { generate_meta_ = true; }
