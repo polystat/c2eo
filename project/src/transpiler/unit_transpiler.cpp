@@ -134,3 +134,6 @@ void UnitTranspiler::GenerateMeta() { generate_meta_ = true; }
 [[maybe_unused]] bool UnitTranspiler::IsGenerateMeta() const {
   return generate_meta_;
 }
+void UnitTranspiler::NotGenerateMeta() {
+  generate_meta_ = false;
+}

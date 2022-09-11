@@ -52,6 +52,7 @@ class UnitTranspiler {
   // std::vector<EOObject>
 
   void GenerateMeta();
+  void NotGenerateMeta();
   [[maybe_unused]] [[nodiscard]] bool IsGenerateMeta() const;
 
  private:

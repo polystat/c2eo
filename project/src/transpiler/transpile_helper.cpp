@@ -336,11 +336,11 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   auto loc_end = source_manager.getPresumedLoc(loc.getEnd());
   string line_start = to_string(loc_start.getLine());
   string line_end = to_string(loc_end.getLine());
-  meta.nested.emplace_back(loc_start.getFilename(), EOObjectType::EO_LITERAL);
+  meta.nested.emplace_back("\"" + string(loc_start.getFilename()) + "\"" , EOObjectType::EO_LITERAL);
   if (line_start == line_end) {
-    meta.nested.emplace_back(line_start, EOObjectType::EO_LITERAL);
+    meta.nested.emplace_back("\"" + string(line_start) + "\"", EOObjectType::EO_LITERAL);
   } else {
-    meta.nested.emplace_back(line_start + "-" + line_end,
+    meta.nested.emplace_back("\"" + string(line_start + "-" + line_end) + "\"",
                              EOObjectType::EO_LITERAL);
   }
   meta.nested.push_back(GetStmtWithoutMetaEOObject(stmt));
@@ -1092,6 +1092,8 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
 EOObject GetPrintfCallEOObject(const CallExpr *op) {
   EOObject printf{"printf"};
   int idx = 0;
+  bool old_value =  transpiler.IsGenerateMeta();
+  transpiler.NotGenerateMeta();
   vector<string> formats;
   for (const auto *arg : op->arguments()) {
     auto param = GetStmtWithoutMetaEOObject(arg);
@@ -1131,6 +1133,9 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
       printf.nested.push_back(param);
     }
     idx++;
+  }
+  if (old_value) {
+    transpiler.GenerateMeta();
   }
   return printf;
 }

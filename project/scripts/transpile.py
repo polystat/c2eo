@@ -135,7 +135,7 @@ class Transpiler(object):
 
     def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess]) -> None:
         eo_file = Path(f'{unit["full_name"]}.eo')
-        transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
+        transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file} --meta'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         self.files_handled_count += 1
         unit['transpilation_result'] = result
