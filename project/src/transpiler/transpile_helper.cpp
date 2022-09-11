@@ -151,6 +151,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
+EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -476,6 +477,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::LabelStmtClass) {
     const auto *op = dyn_cast<clang::LabelStmt>(stmt);
     return GetLabelStmtEOObject(op);
+  }
+  if (stmt_class == Stmt::ConditionalOperatorClass) {
+    const auto *op = dyn_cast<clang::ConditionalOperator>(stmt);
+    return GetConditionalStmtEOObject(op);
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
@@ -1595,6 +1600,14 @@ EOObject GetIfElseStmtEOObject(const IfStmt *p_stmt) {
   if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
   if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getElse()));
+  return if_else_stmt;
+}
+
+EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt) {
+  EOObject if_else_stmt{"if-else"};
+  if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getTrueExpr()));
+  if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getFalseExpr()));
   return if_else_stmt;
 }
 

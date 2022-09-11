@@ -17,7 +17,6 @@
 00197: TODO static variables
 00026: TODO arithmetics
 00143: TODO Tom Duff switch
-00076, 00109, 00144, 00183: TODO ternary operator
 00200: TODO shift
 00010, 00051, 00129, 00199, 00207, 00213: goto
 00174: using math.h
