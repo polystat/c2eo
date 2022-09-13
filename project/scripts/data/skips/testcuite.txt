@@ -19,6 +19,7 @@
 00076, 00109, 00144, 00183: TODO ternary operator
 00200: TODO shift
 00010, 00051, 00129, 00199, 00207, 00213: goto
+00174: using math.h
 00186: using sprintf
 00187: using stdio.h for work with files
 00041: too slow eo code

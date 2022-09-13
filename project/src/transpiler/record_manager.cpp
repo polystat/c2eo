@@ -24,7 +24,6 @@
 
 #include "src/transpiler/record_manager.h"
 
-#include <iostream>
 #include <map>
 #include <tuple>
 #include <vector>
@@ -36,7 +35,6 @@ RecordType RecordManager::Add(
   RecordType record_type = {id, std::move(name), size, std::move(fields),
                             is_local};
   record_types.push_back(record_type);
-  std::cerr << record_types.size() << "!\n";
   return record_type;
 }
 
@@ -51,7 +49,6 @@ RecordType *RecordManager::GetById(int64_t id) {
 
 EOObject RecordManager::GetShiftAlias(int64_t id, const std::string &member) {
   RecordType *rt = GetById(id);
-  std::cerr << id << "!\n";
   if (rt != nullptr) {
     return EOObject{rt->name + "-" + member, EOObjectType::EO_LITERAL};
   }
