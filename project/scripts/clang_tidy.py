@@ -63,7 +63,7 @@ class ClangTidy(object):
         tools.pprint('\nInspect files:\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
-            self.results = [result for result in threads.map(self.inspect_file, code_files)]
+            self.results = list(threads.imap_unordered(self.inspect_file, code_files))
         result = self.group_inspection_results()
         _is_failed = len(result[tools.WARNING]) + len(result[tools.EXCEPTION]) > 0
         tools.pprint_result('INSPECTION', self.files_count, int(time.time() - start_time), result, _is_failed)
@@ -72,7 +72,7 @@ class ClangTidy(object):
     def generate_compile_commands(self) -> None:
         original_path = Path.cwd()
         chdir(self.path_to_c2eo_build)
-        cmd = f'cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
+        cmd = 'cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         chdir(original_path)
         if result.returncode != 0:
@@ -127,9 +127,10 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
     is_failed = ClangTidy(Path(namespace.path_to_code_files)).inspect()
     if is_failed:
-        exit(f'clang-tidy checks failed')
+        exit('clang-tidy checks failed')

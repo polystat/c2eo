@@ -59,7 +59,7 @@ class Csmith(object):
         tools.pprint('\nRunning generating files:\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
-            results = threads.map(self.generate_file, range(self.files_count))
+            results = list(threads.imap_unordered(self.generate_file, range(self.files_count)))
         tools.pprint('\nGenerated files: ', on_the_next_line=True)
         for file_name, code in sorted(results, key=lambda x: x[0]):
             print(f'{file_name}:\n\n', code)
@@ -85,6 +85,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()

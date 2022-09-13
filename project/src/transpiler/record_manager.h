@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -40,7 +41,7 @@ struct RecordType {
   int64_t id;
   std::string name;
   size_t size;
-  std::map<std::string, std::pair<clang::QualType, size_t>> fields;
+  std::vector<std::tuple<std::string, clang::QualType, size_t>> fields;
   std::vector<EOObject> GetEORecordDecl();
   bool is_local;
 };
@@ -48,7 +49,7 @@ struct RecordType {
 struct RecordManager {
   RecordType Add(
       int64_t id, std::string name, size_t size,
-      std::map<std::string, std::pair<clang::QualType, size_t>> fields,
+      std::vector<std::tuple<std::string, clang::QualType, size_t>> fields,
       bool is_local);
   RecordType *GetById(int64_t id);
   [[nodiscard]] std::vector<RecordType>::const_iterator begin() const;

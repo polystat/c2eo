@@ -26,7 +26,6 @@ SOFTWARE.
 
 import sys
 import csv
-import json
 import subprocess
 from os import chdir
 from os import sep as os_sep
@@ -74,20 +73,20 @@ class EOBuilder(object):
 
     def is_recompilation(self) -> bool:
         if not self.path_to_foreign_objects.exists():
-            tools.pprint('Compile dir not found', status=tools.WARNING)
+            tools.pprint('Compilation information not found', status=tools.WARNING)
             return False
 
-        tools.pprint('Compile dir found', status=tools.PASS)
+        tools.pprint('Compilation information found', status=tools.PASS)
         if not self.is_actual_object_version():
             tools.pprint('Old version detected', status=tools.WARNING)
             return False
 
         tools.pprint('Latest version detected', status=tools.PASS)
         eo_src_files = tools.search_files_by_patterns(self.path_to_eo, {'*.eo'}, recursive=True)
-        eo_src_files = {Path(str(x).replace(self.path_to_eo, '', 1).replace('.eo', '', 1)) for x in eo_src_files}
+        eo_src_files = {str(x).replace(str(self.path_to_eo), '', 1).replace('.eo', '', 1) for x in eo_src_files}
         project_eo_files = tools.search_files_by_patterns(self.path_to_eo_parse, {'*.xmir'},
                                                           recursive=True, filters={'!org/eolang'})
-        project_eo_files = {Path(str(x).replace(self.path_to_eo_parse, '', 1).replace('.xmir', '', 1)) for x in
+        project_eo_files = {str(x).replace(str(self.path_to_eo_parse), '', 1).replace('.xmir', '', 1) for x in
                             project_eo_files}
         difference = project_eo_files - eo_src_files
         tools.pprint()
@@ -102,9 +101,6 @@ class EOBuilder(object):
     def is_actual_object_version(self) -> bool:
         tools.pprint('\nCheck version of compiled eo objects\n')
         data = []
-        if not self.path_to_foreign_objects.exists():
-            return False
-
         with open(self.path_to_foreign_objects) as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -129,5 +125,6 @@ class EOBuilder(object):
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
     EOBuilder([]).build()

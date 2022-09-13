@@ -52,10 +52,21 @@ Again, we recommend [Ubuntu 22.04+](https://ubuntu.com/download) and you will ne
 [ninja-build 1.10.1+](https://ninja-build.org/), 
 [clang 14.0.0+](https://releases.llvm.org/14.0.0/tools/clang/docs/)
 and
-[python3 3.9.7+](https://www.python.org/downloads/).
+[python3 3.10.0+](https://www.python.org/downloads/).
 You will also need requirements for [the EO project](https://github.com/objectionary/eo) ([Maven 3.3+](https://maven.apache.org) and Java 8+)
 
-Then, you need to install [LLVM/Clang 12.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1) :
+Then, you need to install [GTest 1.12.1+](https://github.com/google/googletest)
+
+```bash
+$ apt install libgtest-dev googletest
+$ cd /usr/src/googletest
+$ cmake .
+$ make
+$ lib
+$ cp *.a /usr/local/lib
+```
+
+After that, you need to install [LLVM/Clang 12.0.1](https://github.com/llvm/llvm-project/releases/tag/llvmorg-12.0.1) or you may use an alternative way below this code:
 
 ```bash
 $ wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-12.0.1.tar.gz
@@ -136,6 +147,14 @@ $ python3 test.py -p <your_path_to_the_folder>/c-testcuite -s testcuite -n
 ```bash
 $ cd project/srcipts
 $ python3 test.py -s test
+```
+
+7. unit-tests
+```bash
+$ cd project/scripts
+$ python3 build_c2eo.py
+$ project/bin/
+$ ./unit_tests --gtest_filter=*
 ```
 
 ## How to release

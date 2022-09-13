@@ -227,27 +227,6 @@ void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS,
           }
         }
       }
-    } else if (stmt_class == Stmt::ForStmtClass) {
-      auto *for_stmt = dyn_cast<ForStmt>(stmt);
-      if (for_stmt == nullptr) {
-        continue;
-      }
-      if (for_stmt->getInit() != nullptr &&
-          for_stmt->getInit()->getStmtClass() == Stmt::DeclStmtClass) {
-        auto *decl_stmt = dyn_cast<DeclStmt>(for_stmt->getInit());
-        if (decl_stmt == nullptr) {
-          continue;
-        }
-        for (auto *decl : decl_stmt->decls()) {
-          Decl::Kind decl_kind = decl->getKind();
-          if (decl_kind == Decl::Var) {
-            auto *var_decl = dyn_cast<VarDecl>(decl);
-            if (var_decl != nullptr && !var_decl->isStaticLocal()) {
-              all_local.push_back(transpiler.glob_.GetVarById(var_decl));
-            }
-          }
-        }
-      }
     }
   }
 }

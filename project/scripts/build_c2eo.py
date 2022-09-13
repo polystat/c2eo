@@ -40,6 +40,7 @@ def main(path_to_c2eo_build: Path, cmake_cmd: str = 'cmake ..') -> None:
     original_path = Path.cwd()
     path_to_c2eo_build.mkdir(exist_ok=True)
     chdir(path_to_c2eo_build)
+    tools.pprint(cmake_cmd)
     result = subprocess.run(cmake_cmd, shell=True, capture_output=True, text=True)
     if result.returncode:
         tools.pprint_status_result(cmake_cmd, tools.EXCEPTION, result.stderr)
@@ -63,6 +64,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == '__main__':
+    assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()

@@ -1,0 +1,6 @@
++alias c2eo.coperators.printf
+
++package c2eo.coperators
+
+[args...] > c-label
+  printf "exception: label is not supported\n" > @

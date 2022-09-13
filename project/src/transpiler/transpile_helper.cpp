@@ -28,6 +28,7 @@
 #include <queue>
 #include <regex>
 #include <sstream>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -149,6 +150,8 @@ void AppendDeclStmt(const DeclStmt *stmt);
 EOObject GetUnaryExprOrTypeTraitExprEOObject(
     const clang::UnaryExprOrTypeTraitExpr *p_expr);
 
+EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
+EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -313,15 +316,6 @@ EOObject GetCompoundStmt(const clang::CompoundStmt *CS,
   if (is_decorator) {
     res.postfix = "@";
   }
-  vector<Variable> all_local_in_block;
-  ProcessCompoundStatementLocalVariables(CS, all_local_in_block);
-  auto pos_it = res.nested.begin();
-  for (const auto &var : all_local_in_block) {
-    if (var.is_initialized) {
-      pos_it = res.nested.insert(pos_it, var.GetInitializer());
-      pos_it++;
-    }
-  }
   if (CS != nullptr) {
     for (auto *stmt : CS->body()) {
       EOObject stmt_obj = GetStmtEOObject(stmt);
@@ -396,7 +390,15 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   if (stmt_class == Stmt::DeclStmtClass) {
     const auto *op = dyn_cast<DeclStmt>(stmt);
     AppendDeclStmt(op);
-    return EOObject(EOObjectType::EO_EMPTY);
+    EOObject result = EOObject{EOObjectType::EO_EMPTY};
+    for (auto *decl : op->decls()) {
+      if (decl->getKind() == clang::Decl::Var) {
+        auto *VD = dyn_cast<VarDecl>(decl);
+        result.nested.push_back(
+            transpiler.glob_.GetVarById(VD).GetInitializer());
+      }
+    }
+    return result;
   }
   if (stmt_class == Stmt::CallExprClass) {
     const auto *op = dyn_cast<CallExpr>(stmt);
@@ -465,13 +467,45 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::ImplicitValueInitExprClass) {
     //    const auto *op = dyn_cast<clang::ImplicitValueInitExpr>(stmt);
-    // todo: do i need type?
+    // todo: do i need type or other info?
     return {"0", EOObjectType::EO_LITERAL};
+  }
+  if (stmt_class == Stmt::GotoStmtClass) {
+    const auto *op = dyn_cast<clang::GotoStmt>(stmt);
+    return GetGotoStmtEOObject(op);
+  }
+  if (stmt_class == Stmt::LabelStmtClass) {
+    const auto *op = dyn_cast<clang::LabelStmt>(stmt);
+    return GetLabelStmtEOObject(op);
   }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
-
   return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
+  EOObject res{EOObjectType::EO_EMPTY};
+  EOObject c_label{"c-label"};
+  c_label.nested.emplace_back("\"" + string(p_stmt->getName()) + "\"",
+                              EOObjectType::EO_LITERAL);
+  res.nested.push_back(c_label);
+  if (p_stmt->getSubStmt() != nullptr) {
+    res.nested.push_back(GetStmtEOObject(p_stmt->getSubStmt()));
+  }
+  return res;
+}
+EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
+  // EOObject res{EOObjectType::EO_EMPTY};
+  EOObject c_goto{"c-goto"};
+  c_goto.nested.emplace_back(
+      "\"" + p_stmt->getLabel()->getNameAsString() + "\"",
+      EOObjectType::EO_LITERAL);
+  return c_goto;
 }
 EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
   if (p_literal != nullptr) {
@@ -481,12 +515,14 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
+
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
+  //  list->dump();
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
   std::string elementTypeName;
-  std::map<std::string, std::pair<clang::QualType, size_t>>::iterator
+  std::vector<std::tuple<std::string, clang::QualType, size_t>>::iterator
       recElement;
   size_t elementSize = 0;
   if (qualType->isArrayType()) {
@@ -522,8 +558,11 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       shiftedAlias.nested.push_back(newShift);
     } else if (qualType->isRecordType()) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
-          qualType->getAsRecordDecl()->getID(), recElement->first));
-      elementTypeName = GetTypeName(recElement->second.first);
+          qualType->getAsRecordDecl()->getID(), std::get<0>(*recElement)));
+      elementTypeName = GetTypeName(std::get<1>(*recElement));
+      //      std::cerr << "=======\n" << elementTypeName << "\n-\n";
+      //      recElement->second.first.dump();
+      //      std::cerr << "=======\n\n";
     }
     EOObject value = GetStmtEOObject(*element);
     if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
@@ -538,9 +577,9 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
       eoList.nested.push_back(res);
-      if (qualType->isRecordType()) {
-        recElement++;
-      }
+    }
+    if (qualType->isRecordType()) {
+      recElement++;
     }
   }
   return eoList;

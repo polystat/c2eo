@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import copy
-import time
 import math
 from os import chdir
 from pathlib import Path
 from os import sep as os_sep
 from os import cpu_count as os_cpu_count
+from time import localtime, strftime, sleep
 from multiprocessing.dummy import Pool as ThreadPool
 
 ISO_8859_1 = 'ISO-8859-1'
@@ -81,11 +81,11 @@ def apply_filters_to_files(files: set[Path], filters: set[str] = None, print_fil
     if inclusion_filters := [f for f in filters if f[0] != '!']:
         result = set()
         for _filter in inclusion_filters:
-            result |= set(x for x in files if x.match(_filter))
+            result |= set(x for x in files if _filter in str(x))
     else:
         result = copy.copy(files)
     for exclusion_filter in [x[1:] for x in filters if x[0] == '!']:
-        result = {file for file in result if not file.match(exclusion_filter)}
+        result = {file for file in result if exclusion_filter not in str(file)}
     pprint(f'{len(result)} files left')
     if print_files:
         pprint_only_file_names(result)
@@ -156,7 +156,7 @@ def pprint(*data: str | list, slowly: bool = False, status: str = INFO, end: str
             status_str = f'[{get_status(status)}] ' if status else ''
             print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
-                time.sleep(0.01)
+                sleep(0.01)
 
 
 def pprint_header(header: str) -> None:
@@ -213,8 +213,9 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
     pprint()
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}' if is_failed else f'{BGreen}{header} SUCCESS{IWhite}')
-    time_header = f'Total time: {total_seconds // 60:02}:{total_seconds % 60:02} min'
-    pprint_header(f'{", ".join(summary)}\n{time_header}')
+    total_time = f'Total time: {total_seconds // 60:02}:{total_seconds % 60:02} min'
+    finished_at = f'Finished at: {strftime("%a, %d %b %Y %H:%M:%S", localtime())}'
+    pprint_header(f'{", ".join(summary)}\n{total_time}\n{finished_at}')
 
 
 def pprint_separation_line() -> None:

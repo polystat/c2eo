@@ -120,3 +120,5 @@ project/tests/**/*.eo
 *venv*/
 
 *.alias
+
+result/run.sh
