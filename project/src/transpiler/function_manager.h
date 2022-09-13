@@ -59,12 +59,15 @@ struct FunctionManager {
   void AddEoObject(const EOObject &func);
 
   void AddToMap(std::string func_name);
+  int GetMapIndex(std::string func_name) {return func_name_map[func_name];}
   void ReverseMapToArrayMap();
 
   const std::vector<EOObject> &GetAllEoDefinitions();
 
   EOObject GetFunctionCall(const clang::FunctionDecl *FD,
                            size_t param_size) const;
+  std::string GetEOFunctionName(const clang::FunctionDecl *FD) const;
+
   std::map<int, std::string> &GetFuncArray();
 
   void SetNameCount(int value) {name_count = value;}

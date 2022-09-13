@@ -4,7 +4,6 @@ project(c2eo)
 
 # llvm_config
 set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
-set(CMAKE_CXX_STANDARD 17)
 
 set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
 include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
@@ -14,7 +13,7 @@ include_directories("${PATH_TO_LLVM_BUILD}/include")
 link_directories("${PATH_TO_LLVM_BUILD}/lib/")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-
+set(CMAKE_BUILD_TYPE Debug)
 # Source files list
 set(SOURCE_FILES
         # Headers

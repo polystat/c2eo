@@ -58,6 +58,7 @@ using clang::EnumConstantDecl;
 using clang::Expr;
 using clang::FloatingLiteral;
 using clang::ForStmt;
+using clang::FunctionDecl;
 using clang::IfStmt;
 using clang::IntegerLiteral;
 using clang::MemberExpr;
@@ -403,8 +404,6 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
         op->getDirectCallee()->getNameInfo().getAsString() == "printf") {
       return GetPrintfCallEOObject(op);
     }
-    // TEST
-    // std::cout << "GetFunctionCallEOObject\n";
     return GetFunctionCallEOObject(op);
   }
   if (stmt_class == Stmt::ReturnStmtClass) {
@@ -976,171 +975,55 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
   EOObject call("seq");
   vector<std::size_t> var_sizes;
-  auto *func_decl = op->getDirectCallee();
-  // TEST
-  std::cout << "NamArgs = " << op->getNumArgs() << "\n";
 
-
-  // Function call using pointer
-  if (func_decl == nullptr) {
-    // TEST
-    // std::cout << "it is not direct function call\n";
-    // Function pointer analysis
-    auto func_ptr_decl = op->getCalleeDecl();
-    if (func_ptr_decl == nullptr) {
-      // TEST
-      // std::cout << "it is not function call using pointer\n";
-      return EOObject{EOObjectType::EO_PLUG};
-    }
-    if (func_ptr_decl->getKind() == clang::Decl::Var) {
-      const clang::VarDecl *varDecl = clang::dyn_cast<clang::VarDecl>(func_ptr_decl);
-      auto func_ptr_qualtype{varDecl->getType()};
-      if(func_ptr_qualtype->isFunctionPointerType() == true) {
-        // TEST
-        std::cout << "it is function call using pointer\n";
-        // TEST
-        std::string func_ptr_name{func_ptr_qualtype.getAsString()};
-        std::cout << "func_ptr_name = " << func_ptr_name << "\n";
-        std::cout << "varDecl = " << varDecl->getNameAsString() << "\n";
-
-        // Пока я пытаюсь продублировать код, используемый для прямого вызова функции,
-        // чтобы понять, каким образом формируются параметры.
-        // Нужно добиться корректной работы.
-        const clang::PointerType *pt = varDecl->getType()->getAs<clang::PointerType>();
-        // TEST
-        std::cout << "pt = " << pt << "\n";
-        const clang::FunctionType *ft = pt->getPointeeType()->getAs<clang::FunctionType>();
-        // TEST
-        std::cout << "ft = " << ft << "\n";
-        if (ft != nullptr) {
-          auto pointee_type = func_ptr_qualtype->getPointeeType();
-          std::string retTypeName = ft->getReturnType().getAsString();
-          // TEST
-          std::cout << "retTypeName = " << retTypeName << "\n";
-          if (pointee_type->isFunctionNoProtoType()) {
-            // TEST
-            std::cout << "pointer_type is not prototype" << "\n";
-            const clang::FunctionType *func_type = pointee_type->getAs<clang::FunctionType>();
-          } else if (pointee_type->isFunctionProtoType()) {
-            // TEST
-            std::cout << "pointer_type is prototype" << "\n";
-            const clang::FunctionProtoType *fpt = pt->getPointeeType()->getAs<clang::FunctionProtoType>();
-            std::cout << "fpt = " << fpt << "\n";
-            if (fpt != nullptr) {
-              auto paramsCount = fpt->getNumParams();
-              // TEST
-              std::cout << "paramsCount = " << paramsCount << "\n";
-              for (size_t i = 0; i < paramsCount; ++i) {
-                  clang::QualType paramType = fpt->getParamType(i);
-                  std::string paramTypeName = paramType.getAsString();
-                  // TEST
-                  std::cout << "paramTypeName[" << i << "] = " << paramsCount << "\n";
-              }
-              // Далее идет фарагмент обработки параметров
-              // Пока их нет, но пробуем тупо откомпилировать
-              size_t shift = 0;
-              int i = 0;
-              if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
-                for (const auto *arg : op->arguments()) {
-                  EOObject param{"write"};
-                  string postfix = GetPostfix(arg->getType());
-                  if (!postfix.empty()) {
-                    param.name += "-as-" + postfix;
-                  }
-                  EOObject address{"address"};
-                  address.nested.emplace_back("global-ram");
-                  EOObject add{"plus"};
-                  add.nested.emplace_back("empty-local-position");
-                  add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
-                  address.nested.push_back(add);
-                  param.nested.push_back(address);
-                  param.nested.push_back(GetStmtEOObject(arg));
-                  shift += var_sizes[i];
-                  // maybe it will work with param.
-                  i = i == var_sizes.size() - 1 ? i : i + 1;
-                  call.nested.push_back(param);
-                }
-              }
-              if (op != nullptr) {
-                // TODO This code don't released
-                EOObject call_ptr{"call", EOObjectType::EO_LITERAL};
-                EOObject func_ptr_value{"read-as-ptr", EOObjectType::EO_LITERAL};
-                auto  var{transpiler.glob_.GetVarById(varDecl)};
-                func_ptr_value.nested.push_back(var.value);
-                call_ptr.nested.push_back(func_ptr_value);
-                call_ptr.nested.push_back(
-                  transpiler.func_manager_.GetFunctionCall(func_decl, shift));
-                call.nested.push_back(call_ptr);
-                QualType qual_type = op->getType();
-                std::string postfix = GetTypeName(qual_type);
-                if (postfix != "undefinedtype") {
-                  EOObject read_ret{"read"};
-                  EOObject ret_val{"return"};
-                  read_ret.nested.push_back(ret_val);
-                  if (qual_type->isRecordType() || qual_type->isArrayType()) {
-                    read_ret.nested.emplace_back(to_string(var_sizes[0]),
-                                                EOObjectType::EO_LITERAL);
-                  } else {
-                    read_ret.name += "-as-" + postfix;
-                  }
-                  call.nested.push_back(read_ret);
-                } else {
-                  call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-                }
-              }
-            }
-          } else {
-            // TEST
-            std::cout << "pointer_type is other type" << "\n";
-          }
-        }
-
-        return call;
-        // return call_ptr;
-      }
-    }
-    // TODO This code don't released
+  if (op == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-
-//   if (func_decl->isCXXClassMember() || func_decl->isCXXInstanceMember()) {
-//     return EOObject{EOObjectType::EO_PLUG};
-//   }
-
   // TEST
-  std::cout << "it is direct function call\n";
+  //std::cout << "NamArgs = " << op->getNumArgs() << "\n";
 
-  if (op != nullptr && func_decl != nullptr) {
+  auto *func_decl = op->getDirectCallee();
+  if (func_decl != nullptr) {  // The direct function call generation
+    // TEST
+    // std::cout << "it is direct function call\n";
+
     for (auto *VD : func_decl->parameters()) {
       TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
       size_t type_size = type_info.Width / byte_size;
       var_sizes.push_back(type_size);
     }
-  }
-  size_t shift = 0;
-  int i = 0;
-  if (op != nullptr && op->getNumArgs() <= var_sizes.size()) {
-    for (const auto *arg : op->arguments()) {
-      EOObject param{"write"};
-      string postfix = GetPostfix(arg->getType());
-      if (!postfix.empty()) {
-        param.name += "-as-" + postfix;
+    size_t shift = 0;
+    int i = 0;
+    if (op->getNumArgs() <= var_sizes.size()) {
+      for (const auto *arg : op->arguments()) {
+        const clang::Decl *arg_decl = arg->getReferencedDeclOfCallee();
+//         auto arg_type = arg->getType();
+//         TypeInfo arg_type_info = arg_decl->getASTContext().getTypeInfo(arg_type);
+//         size_t type_size = arg_type_info.Width / byte_size;
+//         var_sizes.push_back(type_size);
+        EOObject param{"write"};
+        string postfix = GetPostfix(arg->getType());
+        if (!postfix.empty()) {
+          param.name += "-as-" + postfix;
+        }
+        EOObject address{"address"};
+        address.nested.emplace_back("global-ram");
+        EOObject add{"plus"};
+        add.nested.emplace_back("empty-local-position");
+        add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
+        address.nested.push_back(add);
+        param.nested.push_back(address);
+        param.nested.push_back(GetStmtEOObject(arg));
+//         shift += type_size;
+        shift += var_sizes[i];
+        // maybe it will work with param.
+        i = (i == var_sizes.size() - 1 ? i : i + 1);
+        call.nested.push_back(param);
+        // TEST
+        std::cout << "i = " << i << "\n";
+        std::cout << "var_sizes.size() - 1 = " << var_sizes.size() - 1 << "\n";
       }
-      EOObject address{"address"};
-      address.nested.emplace_back("global-ram");
-      EOObject add{"plus"};
-      add.nested.emplace_back("empty-local-position");
-      add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
-      address.nested.push_back(add);
-      param.nested.push_back(address);
-      param.nested.push_back(GetStmtEOObject(arg));
-      shift += var_sizes[i];
-      // maybe it will work with param.
-      i = i == var_sizes.size() - 1 ? i : i + 1;
-      call.nested.push_back(param);
     }
-  }
-  if (op != nullptr) {
     call.nested.push_back(
       transpiler.func_manager_.GetFunctionCall(func_decl, shift));
     QualType qual_type = op->getType();
@@ -1159,9 +1042,139 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     } else {
       call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
     }
+    return call;
+  } else if (func_decl == nullptr) { // it is not direct function call
+    // The function call using pointer
+    auto func_ptr_decl = op->getCalleeDecl();
+    if (func_ptr_decl == nullptr) {
+      return EOObject{EOObjectType::EO_PLUG};
+    }
+    if (func_ptr_decl->getKind() == clang::Decl::Var) {
+      const clang::VarDecl *varDecl = clang::dyn_cast<clang::VarDecl>(func_ptr_decl);
+      auto func_ptr_qualtype{varDecl->getType()};
+      if(func_ptr_qualtype->isFunctionPointerType() == true) {
+        // TEST
+        std::cout << "it is function call using pointer\n";
+        // TEST
+        std::string func_ptr_name{func_ptr_qualtype.getAsString()};
+        std::cout << "func_ptr_name = " << func_ptr_name << "\n";
+        std::cout << "varDecl = " << varDecl->getNameAsString() << "\n";
+        const clang::PointerType *pt = varDecl->getType()->getAs<clang::PointerType>();
+        // TEST
+        std::cout << "pt = " << pt << "\n";
+        const clang::FunctionType *ft = pt->getPointeeType()->getAs<clang::FunctionType>();
+        if (ft != nullptr) {
+          clang::QualType pointee_type = func_ptr_qualtype->getPointeeType();
+          std::string retTypeName = ft->getReturnType().getAsString();
+          // TEST
+          std::cout << "retTypeName = " << retTypeName << "\n";
+          if (pointee_type->isFunctionNoProtoType()) {
+            // TEST
+            std::cout << "pointer_type is not prototype" << "\n";
+          } else if (pointee_type->isFunctionProtoType()) {
+            // TEST
+            std::cout << "pointer_type is prototype" << "\n";
+            const clang::FunctionProtoType *fpt = pt->getPointeeType()->getAs<clang::FunctionProtoType>();
+            std::cout << "fpt = " << fpt << "\n";
+            if (fpt != nullptr) {
+              auto paramsCount = fpt->getNumParams();
+              // TEST
+              std::cout << "NumParams for function pointer call = " << paramsCount << "\n";
+              for (size_t i = 0; i < paramsCount; ++i) {
+                  clang::QualType paramType = fpt->getParamType(i);
+                  std::string paramTypeName = paramType.getAsString();
+                  // TEST
+                  std::cout << "paramTypeName[" << i << "] = " << paramTypeName << "\n";
+              }
+              size_t shift = 0;
+              int i = 0;
+              for (const auto *arg : op->arguments()) {
+                auto arg_type = arg->getType();
+                std::cout << "arg_type\n";
+                const clang::Decl *arg_decl = arg->getReferencedDeclOfCallee();
+                size_t type_size;
+                if (arg_decl != nullptr) {
+                  std::cout << "arg_decl = " << arg_decl << "\n";
+                  clang::ASTContext &ast_context = arg_decl->getASTContext();
+                  std::cout << "ast_context\n";
+                  TypeInfo arg_type_info = ast_context.getTypeInfo(arg_type);
+                  std::cout << "arg_type_info\n";
+                  type_size = arg_type_info.Width / byte_size;
+                  std::cout << "type_size = " << type_size << "\n";
+                } else {
+                  type_size = 8;
+                }
+
+                var_sizes.push_back(type_size);
+                // TEST
+                // std::cout << "type_size = " << type_size << "\n";
+
+                EOObject param{"write"};
+                string postfix = GetPostfix(arg_type);
+                if (!postfix.empty()) {
+                  param.name += "-as-" + postfix;
+                }
+                EOObject address{"address"};
+                address.nested.emplace_back("global-ram");
+                EOObject add{"plus"};
+                add.nested.emplace_back("empty-local-position");
+                add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
+                address.nested.push_back(add);
+                param.nested.push_back(address);
+                EOObject eo_object = GetStmtEOObject(arg);
+                param.nested.push_back(eo_object);
+                shift += type_size;
+                // TEST
+                std::cout << "shift = " << shift << "\n";
+                i = (i == var_sizes.size() - 1 ? i : i + 1);
+                call.nested.push_back(param);
+              }
+              EOObject call_ptr{"call", EOObjectType::EO_LITERAL};
+              EOObject func_ptr_value{"read-as-ptr", EOObjectType::EO_LITERAL};
+              // TEST Out
+              std::cout << "varDecl = " << varDecl->getNameAsString() << "\n";
+              auto  var{transpiler.glob_.GetVarById(varDecl)};
+              // TEST Out
+              std::cout << "EO Name = " << var.alias << "\n";
+              func_ptr_value.nested.emplace_back(var.alias);
+              call_ptr.nested.push_back(func_ptr_value);
+              call_ptr.nested.emplace_back("empty-local-position");
+              call_ptr.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
+              call.nested.push_back(call_ptr);
+
+              QualType qual_type = op->getType();
+              std::string postfix = GetTypeName(qual_type);
+              if (postfix != "undefinedtype") {
+                EOObject read_ret{"read"};
+                EOObject ret_val{"return"};
+                read_ret.nested.push_back(ret_val);
+                if (qual_type->isRecordType() || qual_type->isArrayType()) {
+                  read_ret.nested.emplace_back(to_string(var_sizes[0]),
+                                              EOObjectType::EO_LITERAL);
+                } else {
+                  read_ret.name += "-as-" + postfix;
+                }
+                call.nested.push_back(read_ret);
+              } else {
+                call.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+              }
+            }
+          } else {
+            // TEST
+            std::cout << "pointer_type is other type" << "\n";
+          }
+        }
+      }
+      return call;
+    }
+    // TODO This code don't released
+    return EOObject{EOObjectType::EO_PLUG};
   }
 
-  return call;
+//   if (func_decl->isCXXClassMember() || func_decl->isCXXInstanceMember()) {
+//     return EOObject{EOObjectType::EO_PLUG};
+//   }
+
 }
 
 EOObject GetPrintfCallEOObject(const CallExpr *op) {
@@ -1609,49 +1622,50 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     return EOObject{EOObjectType::EO_EMPTY};
   }
   try {
-    // TEST
-    // std::cout << "Start GetEODeclRefExpr\n";
-
     const auto *val = op->getFoundDecl();
-    if (val->getKind() == clang::Decl::EnumConstant) {
+    auto decl_kind = val->getKind();
+    if (decl_kind == clang::Decl::EnumConstant) {
+      // TEST Out
+      std::cout << "it is EnumConstant\n";
       const auto *id = dyn_cast<EnumConstantDecl>(val);
       const auto &var = transpiler.enum_manager_.GetConstantById(id);
       return EOObject{std::to_string(var->value), EOObjectType::EO_LITERAL};
     }
-    // TEST
-    // std::cout << "GetEODeclRefExpr: It is not Enum\n";
-
-    const auto *id = dyn_cast<VarDecl>(val);
-    /*    if (id->isStaticLocal()) {
-          auto var = ProcessVariable(id, "s-" + id->getName().str(), 8);
-          return EOObject{var.alias};
-        }*/
-    const auto &var = transpiler.glob_.GetVarById(id);
-    // TEST output
-    // std::cout << "It is var " << id->getName().str() << "\n";
-    clang::QualType qual_type = id->getType();
-    // TEST output
-    // std::cout << "Size of variable = " << var.size << "\n";
-    // std::cout << "QualType as string = " << qual_type.getAsString() << "\n";
-
-    const clang::Type *type = qual_type.getTypePtrOrNull();
-    if (type == nullptr) {
-      // TEST
-      // std::cout << "Type = nullptr\n";
-      return EOObject{EOObjectType::EO_PLUG};
+    if (decl_kind == clang::Decl::Var) {
+      std::cout << "it is Decl::Var\n";
+      const auto *id = dyn_cast<VarDecl>(val);
+      const auto &var = transpiler.glob_.GetVarById(id);
+      clang::QualType qual_type = id->getType();
+      const clang::Type *type = qual_type.getTypePtrOrNull();
+      if (type == nullptr) {
+        return EOObject{EOObjectType::EO_PLUG};
+      }
+      if (type->isArrayType()) {
+        // TEST output
+        // std::cout << "It is array type which used as pointer\n";
+        EOObject array_as_ptr{"addr-of"};
+        array_as_ptr.nested.emplace_back(var.alias);
+        return array_as_ptr;
+      } else if (type->isFunctionPointerType()) {
+        // TEST
+        std::cout << "It is Function Pointer Type\n";
+        return EOObject{var.alias};
+      } else if (type->isFunctionType()) {
+        // TEST
+        std::cout << "It is Function Type\n";
+        return EOObject{EOObjectType::EO_PLUG};
+  //       return EOObject{var.alias};
+      }
+      return EOObject{var.alias};
     }
-    if (type->isArrayType()) {
-      // TEST output
-      // std::cout << "It is array type which used as pointer\n";
-      EOObject array_as_ptr{"addr-of"};
-      array_as_ptr.nested.emplace_back(var.alias);
-      return array_as_ptr;
-    } else if (type->isFunctionPointerType()) {
-      // TEST
-      // std::cout << "It is Function Pointer Type\n";
-      return EOObject{EOObjectType::EO_PLUG};
+    if (decl_kind == clang::Decl::Function) {
+      std::cout << "it is Decl::Function\n";
+      const auto *id = dyn_cast<FunctionDecl>(val);
+      std::string function_name = transpiler.func_manager_.GetEOFunctionName(id);
+      std::cout << "function_name = " << function_name << "\n";
+      auto func_index  = transpiler.func_manager_.GetMapIndex(function_name);
+      return EOObject{std::to_string(func_index), EOObjectType::EO_LITERAL};
     }
-    return EOObject{var.alias};
   } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
   }

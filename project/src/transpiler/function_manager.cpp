@@ -111,6 +111,23 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
   return EOObject(EOObjectType::EO_PLUG);
 }
 
+//------------------------------------------------------------------------------
+std::string FunctionManager::GetEOFunctionName(const clang::FunctionDecl *FD) const {
+  auto res_def = std::find_if(
+      definitions.begin(), definitions.end(),
+      [&FD](const FunctionDefinition &decl) { return decl.FD == FD; });
+  if (res_def != definitions.end()) {
+    return res_def->name;
+  }
+  auto res_decl = std::find_if(
+      declarations.begin(), declarations.end(),
+      [&FD](const FunctionDeclaration &decl) { return decl.FD == FD; });
+  if (res_decl != declarations.end()) {
+    return res_decl->name;
+  }
+  return "no-function-name";
+}
+
 __attribute__((unused)) void FunctionManager::TestOut() {
   if (!declarations.empty()) {
     std::cout << "Declarations:\n";
