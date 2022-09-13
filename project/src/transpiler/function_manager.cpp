@@ -70,7 +70,8 @@ void FunctionManager::AddToMap(std::string func_name) {
 //------------------------------------------------------------------------------
 void FunctionManager::ReverseMapToArrayMap() {
   for(const auto &func_pair: func_name_map) {
-    func_name_map_as_array[func_pair.second] = func_pair.first;
+    func_name_map_as_array[func_pair.second] = func_pair.first
+                + " param-start param-size";
   }
 }
 //------------------------------------------------------------------------------

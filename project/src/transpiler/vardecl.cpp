@@ -54,14 +54,9 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   clang::QualType qual_type = VD->getType();
   clang::TypeInfo type_info = VD->getASTContext().getTypeInfo(qual_type);
   auto type_size = type_info.Width / byte_size;
-<<<<<<< HEAD
-  // TEST
-  // std::cout << "type_size = " << type_size << "\n";
-=======
   if (qual_type->isFloatingType() && type_size == 4) {
     type_size = 8;  // 8 bytes for float32.
   }
->>>>>>> master
 
   std::string str_type{"c_" + GetTypeName(VD->getType())};
   auto storage_class = VD->getStorageClass();

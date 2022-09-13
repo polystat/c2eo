@@ -1169,7 +1169,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
                 call.nested.push_back(param);
               }
               EOObject call_ptr{"call", EOObjectType::EO_LITERAL};
-              EOObject func_ptr_value{"read-as-ptr", EOObjectType::EO_LITERAL};
+              EOObject func_ptr_value{"read-as-ptr"};
               // TEST Out
               std::cout << "varDecl = " << varDecl->getNameAsString() << "\n";
               auto  var{transpiler.glob_.GetVarById(varDecl)};
