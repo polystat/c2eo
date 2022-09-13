@@ -113,7 +113,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list);
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
                                        size_t shift);
 
-vector<EOObject> PrecessRecordTypes(CompoundStmt *CS);
+// vector<EOObject> PrecessRecordTypes(CompoundStmt *CS);
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params);
 
@@ -214,8 +214,6 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   shift = transpiler.glob_.GetFreeSpacePointer();
   size_t param_memory_size = GetParamMemorySize(FD->parameters());
   vector<Variable> all_param = ProcessFunctionParams(FD->parameters(), shift);
-  vector<EOObject> all_types = PrecessRecordTypes(func_body);
-
   vector<Variable> all_local;
   ProcessFunctionLocalVariables(func_body, all_local, shift + param_memory_size,
                                 false);
@@ -241,9 +239,6 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   for (const auto &param : all_param) {
     func_body_eo.nested.push_back(param.GetAddress(transpiler.glob_.name_));
   }
-  for (const auto &var : all_types) {
-    func_body_eo.nested.push_back(var);
-  }
   for (const auto &var : all_local) {
     if (var.id->isStaticLocal()) {
       continue;
@@ -262,31 +257,6 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   transpiler.glob_.RemoveAllUsed(all_local);
 
   return func_body_eo;
-}
-
-vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
-  vector<EOObject> local_type_decls;
-  for (auto *stmt : CS->body()) {
-    Stmt::StmtClass stmt_class = stmt->getStmtClass();
-    if (stmt_class == Stmt::DeclStmtClass) {
-      auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
-      if (decl_stmt != nullptr) {
-        for (auto *decl : decl_stmt->decls()) {
-          Decl::Kind decl_kind = decl->getKind();
-          if (decl_kind == Decl::Kind::Record) {
-            auto *record_decl = dyn_cast<RecordDecl>(decl);
-            auto types = ProcessRecordType(record_decl, true);
-            for (auto &type : types) {
-              auto eo_objs = type.GetEORecordDecl();
-              local_type_decls.insert(local_type_decls.end(), eo_objs.begin(),
-                                      eo_objs.end());
-            }
-          }
-        }
-      }
-    }
-  }
-  return local_type_decls;
 }
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
@@ -395,6 +365,14 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
         auto *VD = dyn_cast<VarDecl>(decl);
         result.nested.push_back(
             transpiler.glob_.GetVarById(VD).GetInitializer());
+      } else if (decl->getKind() == Decl::Kind::Record) {
+        auto *record_decl = dyn_cast<RecordDecl>(decl);
+        auto types = ProcessRecordType(record_decl, true);
+        for (auto &type : types) {
+          auto eo_objs = type.GetEORecordDecl();
+          result.nested.insert(result.nested.end(), eo_objs.begin(),
+                               eo_objs.end());
+        }
       }
     }
     return result;
@@ -516,7 +494,6 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 }
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
-  //  list->dump();
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
@@ -559,9 +536,6 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           qualType->getAsRecordDecl()->getID(), std::get<0>(*recElement)));
       elementTypeName = GetTypeName(std::get<1>(*recElement));
-      //      std::cerr << "=======\n" << elementTypeName << "\n-\n";
-      //      recElement->second.first.dump();
-      //      std::cerr << "=======\n\n";
     }
     EOObject value = GetStmtEOObject(*element);
     if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
@@ -845,7 +819,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   for (int i = 0; i < depth && i < dims->size(); ++i) {
     dim_size *= dims->at(i);
   }
-
+  op->dump();
+  std::cerr << 813 << ' ' << dim_size << "\n\n";
   if (op != nullptr) {
     for (const auto *base_ch : op->getBase()->children()) {
       auto index_name = GetStmtEOObject(op->getIdx());

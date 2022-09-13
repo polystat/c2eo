@@ -37,12 +37,14 @@
 
 std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
                                           bool is_local) {
+  std::cerr << RD->getID() << '\n';
   if (RD == nullptr) {
     return {};
   }
   extern UnitTranspiler transpiler;
   std::vector<RecordType> types;
-  RecordType *existed = transpiler.record_manager_.GetById(RD->getID());
+  int64_t id = RD->getID();
+  RecordType *existed = transpiler.record_manager_.GetById(id);
   if (existed != nullptr) {
     return {};
   }
@@ -59,7 +61,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
   } else {
     name += std::to_string(reinterpret_cast<uint64_t>(RD));
   }
-
+  name += std::to_string(id);
   uint64_t size = 0;
 
   std::vector<std::tuple<std::string, clang::QualType, size_t>> fields;
@@ -94,7 +96,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
       }
     }
   }
-  types.push_back(transpiler.record_manager_.Add(RD->getID(), name, size,
+  types.push_back(transpiler.record_manager_.Add(id, name, size,
                                                  fields, is_local));
   return types;
 }
