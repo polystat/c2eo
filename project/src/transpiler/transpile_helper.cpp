@@ -940,7 +940,11 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
         if (arr->isConstantArrayType()) {
           const auto *const_arr = dyn_cast<clang::ConstantArrayType>(qt);
           auto qelem_qt = const_arr->getElementType();
-          sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qelem_qt).Width / byte_size;
+          sz = decl_ref_expr->getDecl()
+                   ->getASTContext()
+                   .getTypeInfo(qelem_qt)
+                   .Width /
+               byte_size;
         }
       } else {
         sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
