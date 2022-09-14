@@ -537,7 +537,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
               ->getElementType();
     }
     elementTypeName = GetTypeName(elementQualType);
-    elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
+    elementSize *= context->getTypeInfo(elementQualType).Width / byte_size;
   } else if (qualType->isRecordType()) {
     auto *recordType = transpiler.record_manager_.GetById(
         qualType->getAsRecordDecl()->getID());
@@ -932,10 +932,20 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
         continue;
       }
       auto qt = decl_ref_expr->getType();
+      auto n = decl_ref_expr->getStmtClassName();
       EOObject arr_name = GetStmtEOObject(op->getBase());
-      size_t sz =
-          decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
-          byte_size;
+      size_t sz;
+      if (qt->isArrayType()) {
+        const auto *arr = qt->getAsArrayTypeUnsafe();
+        if (arr->isConstantArrayType()) {
+          const auto *const_arr = dyn_cast<clang::ConstantArrayType>(qt);
+          auto qelem_qt = const_arr->getElementType();
+          sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qelem_qt).Width / byte_size;
+        }
+      } else {
+        sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
+             byte_size;
+      }
       return std::make_pair(sz, arr_name);
     }
     if (stmt_class == Stmt::ArraySubscriptExprClass) {
