@@ -915,8 +915,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   for (int i = 0; i < depth && i < dims->size(); ++i) {
     dim_size *= dims->at(i);
   }
-  op->dump();
-  std::cerr << 813 << ' ' << dim_size << "\n\n";
+//  op->dump();
+//  std::cerr << 813 << ' ' << dim_size << "\n\n";
   if (op != nullptr) {
     for (const auto *base_ch : op->getBase()->children()) {
       auto index_name = GetStmtEOObject(op->getIdx());
@@ -1040,7 +1040,7 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
                       ->size;
       return std::make_pair(sz, arr_name);
     }
-    std::cerr << base_ch->getStmtClassName() << "\n\n";
+//    std::cerr << base_ch->getStmtClassName() << "\n\n";
   }
   return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
 }
