@@ -5,10 +5,10 @@ test()
 	return s.x;
 }
 
-#include <stdio.h>
+//#include <stdio.h>
 int main()
 {
 	int x = test();
-	printf("%d\n", x);
+//	printf("%d\n", x);
 	return x;
 }
