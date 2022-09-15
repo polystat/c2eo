@@ -151,8 +151,8 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
-EOObject GetInitArrayEOObject(const clang::InitListExpr *pExpr, QualType type);
-EOObject GetInitRecordEOObject(const clang::InitListExpr *pExpr, QualType type);
+EOObject GetInitArrayEOObject(const clang::InitListExpr *list, QualType type);
+EOObject GetInitRecordEOObject(const clang::InitListExpr *list, QualType type);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -499,7 +499,8 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   if (qualType->isArrayType()) {
     return GetInitArrayEOObject(list, qualType);
-  } else if (qualType->isRecordType()) {
+  }
+  if (qualType->isRecordType()) {
     return GetInitRecordEOObject(list, qualType);
   }
   return EOObject(EOObjectType::EO_PLUG);
@@ -507,9 +508,9 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
 EOObject GetInitRecordEOObject(const clang::InitListExpr *list,
                                QualType qualType) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  auto recordID = qualType->getAsRecordDecl();
+  auto *recordID = qualType->getAsRecordDecl();
   auto *recordType = transpiler.record_manager_.GetById(recordID->getID());
-  if (!recordType) {
+  if (recordType == nullptr) {
     auto types = ProcessRecordType(recordID, true);
     for (auto &type : types) {
       auto eo_objs = type.GetEORecordDecl();
