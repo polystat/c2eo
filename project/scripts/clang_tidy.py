@@ -99,7 +99,7 @@ class ClangTidy(object):
                 result[tools.EXCEPTION][log_data][unit['file']] = set()
                 continue
 
-            for line in unit['inspection_result'].stdout.split('\n'):
+            for line in unit['inspection_result'].stdout.splitlines():
                 if any(warning in line for warning in self.ignored_inspection_warnings):
                     continue
 

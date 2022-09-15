@@ -117,7 +117,7 @@ class Tests(object):
         timeout = 60
         try:
             outs, errs = process.communicate(timeout=timeout)
-            errs = errs.split('\n')
+            errs = errs.splitlines()
             unit['result_eo_file'].write_text(outs + '\n'.join(errs[:-2]))
             unit["eo_test_time"] = float(errs[-2])
         except subprocess.TimeoutExpired:

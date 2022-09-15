@@ -153,7 +153,7 @@ def pprint(*data: str | list, slowly: bool = False, status: str = INFO, end: str
     for token in data or ['']:
         if type(token) == list:
             token = ''.join(map(str, token))
-        for line in str(token).split('\n'):
+        for line in str(token).splitlines():
             status_str = f'[{get_status(status)}] ' if status else ''
             print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
@@ -203,7 +203,7 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
                 if status == EXCEPTION and message.count('\n') > 2:
                     pprint_status_result(file_places, status, message.rstrip(), max_lines=10)
                 else:
-                    pprint_status_result(' '.join(message.rstrip().split('\n')), status, file_places)
+                    pprint_status_result(' '.join(message.rstrip().splitlines()), status, file_places)
                 print()
             summary.append(f'{str(status).capitalize()}s: {count}')
         elif status == ERROR:
@@ -239,7 +239,7 @@ def pprint_separation_line() -> None:
 
 def pprint_truncated_data(data: list[str] | str, max_lines: int) -> None:
     if type(data) == str:
-        data = '\n'.join(data.split('\n')[:max_lines])
+        data = '\n'.join(data.splitlines()[:max_lines])
     else:
         data = data[:max_lines]
     pprint(data, slowly=True, status='')

@@ -139,7 +139,7 @@ class Transpiler(object):
         eo_file = Path(f'{unit["full_name"]}.eo')
         transpile_cmd = f'{self.codecov_arg} time -f "%e" ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
-        result.stdout, result.stderr = result.stdout.split('\n'), result.stderr.split('\n')
+        result.stdout, result.stderr = result.stdout.splitlines(), result.stderr.splitlines()
         self.files_handled_count += 1
         unit['transpilation_time'] = float(result.stderr[-2])
         unit['transpilation_file_size'] = unit['prepared_c_file'].with_suffix(
