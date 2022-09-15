@@ -27,7 +27,6 @@ SOFTWARE.
 import sys
 import time
 import argparse
-import resource
 import subprocess
 import re as regex
 from os import chdir
@@ -67,12 +66,12 @@ class Transpiler(object):
         self.result_dir_name = settings.get_setting('result_dir_name')
         self.run_sh_code = settings.get_meta_code('run.sh')
         self.run_sh_replace = settings.get_setting('run_sh_replace')
-        self.transpilation_units: list[dict[str, str | Path | CompletedProcess]] = []
+        self.transpilation_units: list[dict[str, str | Path | CompletedProcess | float]] = []
         self.replaced_path = self.path_to_c_files.parent
         self.files_handled_count = 0
         self.ignored_transpilation_warnings = settings.get_setting('ignored_transpilation_warnings') or []
 
-    def transpile(self) -> (list[dict[str, str | Path | CompletedProcess]], dict[str, dict[str, set[str]]]):
+    def transpile(self) -> (list[dict[str, str | Path | CompletedProcess | float]], dict[str, dict[str, set[str]]]):
         start_time = time.time()
         self.build_c2eo()
         tools.pprint('\nTranspilation start\n', slowly=True)
@@ -136,13 +135,16 @@ class Transpiler(object):
         self.transpilation_units = list(filter(lambda x: x not in skip_units, self.transpilation_units))
         return skips
 
-    def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess]) -> None:
+    def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
         eo_file = Path(f'{unit["full_name"]}.eo')
-        transpile_cmd = f'{self.codecov_arg} ./c2eo {unit["prepared_c_file"]} {eo_file}'
-        time_start = resource.getrusage(resource.RUSAGE_CHILDREN)[0]
+        transpile_cmd = f'{self.codecov_arg} time -f "%e" ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
-        time_end = resource.getrusage(resource.RUSAGE_CHILDREN)[0]
+        result.stdout, result.stderr = result.stdout.split('\n'), result.stderr.split('\n')
         self.files_handled_count += 1
+        unit['transpilation_time'] = float(result.stderr[-2])
+        unit['transpilation_file_size'] = unit['prepared_c_file'].with_suffix(
+            '.c.i').stat().st_size / 1024.0  # bytes -> kbytes
+        unit['transpilation_speed'] = unit['transpilation_time'] / unit['transpilation_file_size']
         unit['transpilation_result'] = result
         unit['eo_file'] = eo_file.resolve()
         unit['rel_eo_file'] = unit['rel_c_path'] / f'{unit["name"]}.eo'
@@ -173,14 +175,16 @@ class Transpiler(object):
             unit['src_eo_file'] = unit['src_eo_path'] / f'{unit["name"]}.eo'
         tools.remove_empty_dirs(self.path_to_eo_src)
 
-    def create_plug_file(self, unit: dict[str, str | Path | CompletedProcess], message: str) -> None:
+    def create_plug_file(self, unit: dict[str, str | Path | CompletedProcess | float], message: str) -> None:
         plug = regex.sub('<file_name>', unit['full_name'], self.plug_code)
         plug = regex.sub('<exception_message>', message, plug)
         unit['eo_file'].write_text(plug)
 
-    def group_transpilation_results(self) -> dict[str, set[str] | dict[str, dict[str, set[str]]]]:
-        result = {tools.PASS: set([unit['unique_name'] for unit in self.transpilation_units]), tools.NOTE: {},
-                  tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}}
+    def group_transpilation_results(self) -> dict[
+        str, set[str] | dict[str, dict[str, set[str]]] | list[dict[str, str | Path | CompletedProcess | float]]]:
+        result = {tools.PASS: set({unit['unique_name'] for unit in self.transpilation_units}), tools.NOTE: {},
+                  tools.WARNING: {}, tools.ERROR: {}, tools.EXCEPTION: {}, tools.SKIP: {},
+                  tools.TIME: self.transpilation_units}
         tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
         for unit in self.transpilation_units:
             exception_message = check_unit_exception(unit)
@@ -190,7 +194,7 @@ class Transpiler(object):
                 if unit['unique_name'] not in result[tools.EXCEPTION][exception_message]:
                     result[tools.EXCEPTION][exception_message][unit['unique_name']] = set()
 
-            for line in unit['transpilation_result'].stderr.split('\n'):
+            for line in unit['transpilation_result'].stderr:
                 line = line.lower()
                 if any(warning in line for warning in self.ignored_transpilation_warnings):
                     continue
@@ -281,10 +285,10 @@ def add_return_code_to_eo_file(eo_file: Path) -> None:
         f.writelines(data[aliases_count:])
 
 
-def check_unit_exception(unit: dict[str, str | Path | CompletedProcess]) -> str:
+def check_unit_exception(unit: dict[str, str | Path | CompletedProcess | float]) -> str:
     exception_message = ''
     if unit['transpilation_result'].returncode:
-        exception_message = '\n'.join(unit['transpilation_result'].stderr.split('\n')[-3:-1])
+        exception_message = '\n'.join(unit['transpilation_result'].stderr[-4:-2])  # exception lines
     elif not unit['eo_file'].exists():
         exception_message = 'was generated empty EO file'
     elif unit['eo_file'].stat().st_size == 0:

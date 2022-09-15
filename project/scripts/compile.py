@@ -46,7 +46,7 @@ class Compiler(object):
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
-        self.transpilation_units: list[dict[str, str | Path | CompletedProcess]] = []
+        self.transpilation_units: list[dict[str, str | Path | CompletedProcess | float]] = []
 
     def compile(self) -> Transpiler.transpile:
         start_time = time.time()

@@ -52,7 +52,7 @@ class Tests(object):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
         self.run_sh_replace = settings.get_setting('run_sh_replace')
-        self.transpilation_units: list[dict[str, str | Path | CompletedProcess]] = []
+        self.transpilation_units: list[dict[str, str | Path | CompletedProcess | float]] = []
         self.test_handled_count = 0
 
     def test(self) -> bool:
@@ -66,6 +66,7 @@ class Tests(object):
                 results = list(threads.imap_unordered(compare_test_results, self.transpilation_units))
             result = group_comparison_results(results)
             result[tools.SKIP] = skip_result
+            result[tools.TIME] = self.transpilation_units
             tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
             _is_failed = len(result[tools.ERROR]) + len(result[tools.EXCEPTION]) > 0
             tools.pprint_result('TEST', tests_count, int(time.time() - start_time), result, _is_failed)
@@ -87,7 +88,7 @@ class Tests(object):
         chdir(original_path)
         tools.pprint(on_the_next_line=True)
 
-    def get_result_for_c_file(self, unit: dict[str, str | Path | CompletedProcess]) -> None:
+    def get_result_for_c_file(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
         compiled_file = unit['result_path'] / f'{unit["name"]}.out'
         unit['result_c_file'] = unit['result_path'] / f'{unit["name"]}-c.txt'
         compile_cmd = ['clang', unit['c_file'], '-o', compiled_file, '-Wno-everything']
@@ -108,17 +109,21 @@ class Tests(object):
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
-    def get_result_for_eo_file(self, unit: dict[str, str | Path | CompletedProcess]) -> None:
-        command = regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split()
+    def get_result_for_eo_file(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
+        cmd = ['time', '-f', '%e']
+        cmd.extend(regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split())
         unit['result_eo_file'] = unit['result_path'] / f'{unit["name"]}-eo.txt'
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         timeout = 60
         try:
             outs, errs = process.communicate(timeout=timeout)
-            unit['result_eo_file'].write_text(outs + errs)
+            errs = errs.split('\n')
+            unit['result_eo_file'].write_text(outs + '\n'.join(errs[:-2]))
+            unit["eo_test_time"] = float(errs[-2])
         except subprocess.TimeoutExpired:
             process.kill()
             unit['result_eo_file'].write_text(f'exception: execution time EO file exceeded {timeout} seconds\n')
+            unit["eo_test_time"] = float(timeout)
         finally:
             self.test_handled_count += 1
             tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
@@ -169,7 +174,7 @@ def compare_lines(c_data: list[str], eo_data: list[str]) -> (bool, list[str]):
     return is_equal, log_data
 
 
-def group_comparison_results(results: list[dict[str, str | Path | CompletedProcess], bool, bool, list[str]]) -> \
+def group_comparison_results(results: list[dict[str, str | Path | CompletedProcess | float], bool, bool, list[str]]) -> \
         dict[str, set[str | str, str] | dict[str, dict[str, set[str]]]]:
     result = {tools.PASS: set(), tools.ERROR: set(), tools.EXCEPTION: {}}
     tools.pprint('Getting results\n', slowly=True)
@@ -186,7 +191,7 @@ def group_comparison_results(results: list[dict[str, str | Path | CompletedProce
     return result
 
 
-def compare_test_results(unit: dict[str, str | Path | CompletedProcess]) -> (
+def compare_test_results(unit: dict[str, str | Path | CompletedProcess | float]) -> (
         dict[str, str | CompletedProcess], bool, bool, list[str]):
     with open(unit['result_c_file'], 'r') as f:
         c_data = f.readlines()
