@@ -102,13 +102,10 @@ class EOBuilder(object):
         tools.pprint('\nCheck version of compiled eo objects\n')
         data = []
         with open(self.path_to_foreign_objects) as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                data.append(row)
-        for package in data:
-            if package['version'] not in ['*.*.*', '0.0.0']:
-                compare = tools.version_compare(self.current_version, package['version'])
-                if compare <= 0:
+            for package in csv.DictReader(f):
+                if package['version'] in ['*.*.*', '0.0.0']:
+                    continue
+                if tools.version_compare(self.current_version, package['version']) == 0:
                     return True
         return False
 

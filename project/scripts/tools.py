@@ -65,10 +65,11 @@ EXCEPTION = 'EXCEPTION'
 PASS = 'PASS'
 NOTE = 'NOTE'
 SKIP = 'SKIP'
+TIME = 'TIME'
 
 statuses = {INFO: f'{BBlue}{INFO}{IWhite}', WARNING: f'{BPurple}{WARNING}{IWhite}', ERROR: f'{BRed}{ERROR}{IWhite}',
             EXCEPTION: f'{BRed}{EXCEPTION}{IWhite}', PASS: f'{BGreen}{PASS}{IWhite}', NOTE: f'{BYellow}{NOTE}{IWhite}',
-            SKIP: f'{BCyan}{SKIP}{IWhite}'}
+            SKIP: f'{BCyan}{SKIP}{IWhite}', TIME: f'{BIWhite}{TIME}{IWhite}'}
 
 separation_line = f'{BIWhite}{"-" * 108}{IWhite}'
 
@@ -210,12 +211,26 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
                 pprint_status_result(test_name, ERROR, log_data)
                 print()
             summary.append(f'{str(status).capitalize()}s: {len(result[status])}')
+        elif status == TIME:
+            pprint_time_result(result[status])
+
     pprint()
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}' if is_failed else f'{BGreen}{header} SUCCESS{IWhite}')
     total_time = f'Total time: {total_seconds // 60:02}:{total_seconds % 60:02} min'
     finished_at = f'Finished at: {strftime("%a, %d %b %Y %H:%M:%S", localtime())}'
     pprint_header(f'{", ".join(summary)}\n{total_time}\n{finished_at}')
+
+
+def pprint_time_result(transpilation_units):
+    if 'eo_test_time' in transpilation_units[0]:
+        data = [f'{u["unique_name"]}: {u["eo_test_time"]:.2f}s' for u in sorted(transpilation_units, key=lambda x: x["eo_test_time"])]
+        pprint_status_result('Test time measurement for each test:', TIME, log_data=', '.join(data))
+    else:
+        data = [f'{u["unique_name"]}({u["transpilation_time"]:.3f}s {u["transpilation_file_size"]:.3f}kb {u["transpilation_speed"]:.3f}s/kb)'
+                for u in sorted(transpilation_units, key=lambda x: x['transpilation_speed'])]
+        pprint_status_result('Transpilation time measurement for each file:', TIME, log_data=', '.join(data))
+    print()
 
 
 def pprint_separation_line() -> None:
