@@ -47,20 +47,20 @@ class Csmith(object):
         self.generated_files_count = 0
 
     def generate(self) -> None:
-        tools.pprint('\nMaking the dir:', slowly=True)
+        tools.pprint('\n', 'Making the dir:', slowly=True)
         if self.path_to_generate.exists():
             tools.clear_dir_by_patterns(self.path_to_generate, {'*.c', '*.h'})
         else:
             self.path_to_generate.mkdir(exist_ok=True)
-        tools.pprint('\nCopying runtime files into the dir:', slowly=True)
+        tools.pprint('\n', 'Copying runtime files into the dir:', slowly=True)
         for file in tools.search_files_by_patterns(self.path_to_csmith_runtime, {'*.h'}, print_files=True):
             shutil.copy(file, self.path_to_generate)
         chdir(self.path_to_generate)
-        tools.pprint('\nRunning generating files:\n', slowly=True)
+        tools.pprint('\n', 'Running generating files:', '\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
             results = list(threads.imap_unordered(self.generate_file, range(self.files_count)))
-        tools.pprint('\nGenerated files: ', on_the_next_line=True)
+        tools.pprint('\n', 'Generated files: ', on_the_next_line=True)
         for file_name, code in sorted(results, key=lambda x: x[0]):
             print(f'{file_name}:\n\n', code)
 

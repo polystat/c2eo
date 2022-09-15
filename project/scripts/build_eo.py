@@ -49,16 +49,16 @@ class EOBuilder(object):
         self.error_result = {}
 
     def build(self) -> (set[dict], dict):
-        tools.pprint('Compilation start\n')
+        tools.pprint('Compilation start', '\n')
         original_path = Path.cwd()
         chdir(self.path_to_eo_project)
         can_recompile = self.is_recompilation()
         if can_recompile:
-            cmd, _ = ['mvn'], tools.pprint('\nRecompilation eo project starts')
+            cmd, _ = ['mvn'], tools.pprint('\n', 'Recompilation eo project starts')
         else:
-            cmd, _ = ['mvn', 'clean'], tools.pprint('Full eo project compilation starts\n')
+            cmd, _ = ['mvn', 'clean'], tools.pprint('Full eo project compilation starts', '\n')
         cmd.extend(['compile', '-D', 'jansi.force=true', '-D' 'style.color=always'])
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
+        process = subprocess.Popen('echo', stdout=subprocess.PIPE, text=True)
         for line in process.stdout:
             if line:
                 print(line.rstrip())
@@ -92,14 +92,14 @@ class EOBuilder(object):
         tools.pprint()
         if difference:
             tools.pprint('EO project files are incompatible', status=tools.WARNING)
-            tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
+            tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}', '\n')
             return False
 
         tools.pprint('EO project files are compatible', status=tools.PASS)
         return True
 
     def is_actual_object_version(self) -> bool:
-        tools.pprint('\nCheck version of compiled eo objects\n')
+        tools.pprint('\n', 'Check version of compiled eo objects', '\n')
         with open(self.path_to_foreign_objects) as f:
             for package in csv.DictReader(f):
                 if package['version'] in ['*.*.*', '0.0.0']:

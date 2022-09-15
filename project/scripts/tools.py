@@ -101,10 +101,8 @@ def clear_dir_by_patterns(path: Path, file_patterns: set[str], recursive: bool =
     pprint('Files removed')
 
 
-def compare_files(file1: Path, file2: Path) -> bool:
-    if file1.exists() and file2.exists():
-        return file1.read_text(encoding=ISO_8859_1) == file2.read_text(encoding=ISO_8859_1)
-    return False
+def compare_files_content(file1: Path, file2: Path) -> bool:
+    return file1.exists() and file2.exists() and file1.read_bytes() == file2.read_bytes()
 
 
 def cpu_count() -> int:
@@ -188,6 +186,7 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
             if result[status]:
                 pprint_status_result(', '.join(sorted(result[status], key=str.casefold)), status=status, log_data='')
             summary.append(f'Passed: {len(result[status])}')
+            print()
         elif status in [NOTE, WARNING, EXCEPTION, SKIP] or (status == ERROR and type(result[status]) == dict):
             count = 0
             for message, files in sorted(result[status].items(), key=lambda x: x[0].casefold()):

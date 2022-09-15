@@ -73,12 +73,12 @@ class Tests(object):
             return _is_failed
 
     def get_result_for_tests(self) -> None:
-        tools.pprint('\nRunning C tests:\n', slowly=True)
+        tools.pprint('\n', 'Running C tests:', '\n', slowly=True)
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             list(threads.imap_unordered(self.get_result_for_c_file, self.transpilation_units))
         tools.pprint(on_the_next_line=True)
-        tools.pprint('\nRunning EO tests:\n', slowly=True)
+        tools.pprint('\n', 'Running EO tests:', '\n', slowly=True)
         self.test_handled_count = 0
         original_path = Path.cwd()
         chdir(self.path_to_eo_project)
@@ -110,23 +110,24 @@ class Tests(object):
         tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
     def get_result_for_eo_file(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
-        cmd = ['time', '-f', '%e']
-        cmd.extend(regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split())
         unit['result_eo_file'] = unit['result_path'] / f'{unit["name"]}-eo.txt'
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        timeout = 60
-        try:
-            outs, errs = process.communicate(timeout=timeout)
-            errs = errs.splitlines()
-            unit['result_eo_file'].write_text(outs + '\n'.join(errs[:-2]))
-            unit["eo_test_time"] = float(errs[-2])
-        except subprocess.TimeoutExpired:
-            process.kill()
-            unit['result_eo_file'].write_text(f'exception: execution time EO file exceeded {timeout} seconds\n')
-            unit["eo_test_time"] = float(timeout)
-        finally:
-            self.test_handled_count += 1
-            tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
+        unit["eo_test_time"] = 0.0
+        if not unit['result_eo_file'].exists() or unit['result_eo_file'].stat().st_ctime < unit['eo_file'].stat().st_ctime:
+            cmd = ['time', '-f', '%e']
+            cmd.extend(regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split())
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            timeout = 60
+            try:
+                outs, errs = process.communicate(timeout=timeout)
+                errs = errs.splitlines()
+                unit['result_eo_file'].write_text(outs + '\n'.join(errs[:-1]))
+                unit["eo_test_time"] = float(errs[-1])
+            except subprocess.TimeoutExpired:
+                process.kill()
+                unit['result_eo_file'].write_text(f'exception: execution time EO file exceeded {timeout} seconds\n')
+                unit["eo_test_time"] = float(timeout)
+        self.test_handled_count += 1
+        tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
 
 def compare_files(c_data: list[str], eo_data: list[str]) -> (bool, bool, list[str]):
@@ -177,7 +178,7 @@ def compare_lines(c_data: list[str], eo_data: list[str]) -> (bool, list[str]):
 def group_comparison_results(results: list[dict[str, str | Path | CompletedProcess | float], bool, bool, list[str]]) -> \
         dict[str, set[str | str, str] | dict[str, dict[str, set[str]]]]:
     result = {tools.PASS: set(), tools.ERROR: set(), tools.EXCEPTION: {}}
-    tools.pprint('Getting results\n', slowly=True)
+    tools.pprint('\n', 'Getting results', '\n', slowly=True)
     for unit, is_except, is_equal, log_data in results:
         if is_except:
             log_data = ''.join(log_data)
