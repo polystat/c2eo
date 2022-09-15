@@ -75,7 +75,7 @@ class Transpiler(object):
         start_time = time.time()
         self.build_c2eo()
         tools.pprint('\nTranspilation start\n', slowly=True)
-        clean_before_transpilation.main(self.path_to_c_files)
+        clean_before_transpilation.main(self.path_to_c_files, '*.alias  *-eo.c')
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
         with tools.thread_pool() as threads:

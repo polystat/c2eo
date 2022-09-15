@@ -89,25 +89,25 @@ class Tests(object):
         tools.pprint(on_the_next_line=True)
 
     def get_result_for_c_file(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
-        compiled_file = unit['result_path'] / f'{unit["name"]}.out'
         unit['result_c_file'] = unit['result_path'] / f'{unit["name"]}-c.txt'
-        compile_cmd = ['clang', unit['c_file'], '-o', compiled_file, '-Wno-everything']
-        try:
-            subprocess.run(compile_cmd, check=True, capture_output=True, text=True)
-        except subprocess.CalledProcessError as exc:
-            unit['result_c_file'].write_text(exc.stderr)
-        else:
-            process = subprocess.Popen([compiled_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            timeout = 10
+        if not unit['result_c_file'].exists() or unit['result_c_file'].stat().st_ctime < unit['c_file'].stat().st_ctime:
+            compiled_file = unit['result_path'] / f'{unit["name"]}.out'
+            compile_cmd = ['clang', unit['c_file'], '-o', compiled_file, '-Wno-everything']
             try:
-                outs, errs = process.communicate(timeout=timeout)
-                unit['result_c_file'].write_text(outs + errs + str(process.returncode))
-            except subprocess.TimeoutExpired:
-                process.kill()
-                unit['result_c_file'].write_text(f'exception: execution time of C file exceeded {timeout} seconds\n')
-        finally:
-            self.test_handled_count += 1
-            tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
+                subprocess.run(compile_cmd, check=True, capture_output=True, text=True)
+            except subprocess.CalledProcessError as exc:
+                unit['result_c_file'].write_text(exc.stderr)
+            else:
+                process = subprocess.Popen([compiled_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                timeout = 10
+                try:
+                    outs, errs = process.communicate(timeout=timeout)
+                    unit['result_c_file'].write_text(outs + errs + str(process.returncode))
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    unit['result_c_file'].write_text(f'exception: execution time of C file exceeded {timeout} seconds\n')
+        self.test_handled_count += 1
+        tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
     def get_result_for_eo_file(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
         cmd = ['time', '-f', '%e']

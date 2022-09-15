@@ -100,7 +100,6 @@ class EOBuilder(object):
 
     def is_actual_object_version(self) -> bool:
         tools.pprint('\nCheck version of compiled eo objects\n')
-        data = []
         with open(self.path_to_foreign_objects) as f:
             for package in csv.DictReader(f):
                 if package['version'] in ['*.*.*', '0.0.0']:
