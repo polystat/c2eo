@@ -101,10 +101,8 @@ def clear_dir_by_patterns(path: Path, file_patterns: set[str], recursive: bool =
     pprint('Files removed')
 
 
-def compare_files(file1: Path, file2: Path) -> bool:
-    if file1.exists() and file2.exists():
-        return file1.read_text(encoding=ISO_8859_1) == file2.read_text(encoding=ISO_8859_1)
-    return False
+def compare_files_content(file1: Path, file2: Path) -> bool:
+    return file1.exists() and file2.exists() and file1.read_bytes() == file2.read_bytes()
 
 
 def cpu_count() -> int:
@@ -153,7 +151,7 @@ def pprint(*data: str | list, slowly: bool = False, status: str = INFO, end: str
     for token in data or ['']:
         if type(token) == list:
             token = ''.join(map(str, token))
-        for line in str(token).split('\n'):
+        for line in str(token).splitlines():
             status_str = f'[{get_status(status)}] ' if status else ''
             print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
@@ -188,6 +186,7 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
             if result[status]:
                 pprint_status_result(', '.join(sorted(result[status], key=str.casefold)), status=status, log_data='')
             summary.append(f'Passed: {len(result[status])}')
+            print()
         elif status in [NOTE, WARNING, EXCEPTION, SKIP] or (status == ERROR and type(result[status]) == dict):
             count = 0
             for message, files in sorted(result[status].items(), key=lambda x: x[0].casefold()):
@@ -203,7 +202,7 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
                 if status == EXCEPTION and message.count('\n') > 2:
                     pprint_status_result(file_places, status, message.rstrip(), max_lines=10)
                 else:
-                    pprint_status_result(' '.join(message.rstrip().split('\n')), status, file_places)
+                    pprint_status_result(' '.join(message.rstrip().splitlines()), status, file_places)
                 print()
             summary.append(f'{str(status).capitalize()}s: {count}')
         elif status == ERROR:
@@ -239,7 +238,7 @@ def pprint_separation_line() -> None:
 
 def pprint_truncated_data(data: list[str] | str, max_lines: int) -> None:
     if type(data) == str:
-        data = '\n'.join(data.split('\n')[:max_lines])
+        data = '\n'.join(data.splitlines()[:max_lines])
     else:
         data = data[:max_lines]
     pprint(data, slowly=True, status='')

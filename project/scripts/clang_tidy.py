@@ -54,13 +54,13 @@ class ClangTidy(object):
 
     def inspect(self) -> bool:
         start_time = time.time()
-        tools.pprint('\nInspection start\n')
+        tools.pprint('\n', 'Inspection start', '\n')
         self.generate_compile_commands()
         patterns = set(settings.get_setting('code_file_patterns'))
         code_files = tools.search_files_by_patterns(self.path_to_code_files, patterns, filters=self.filters,
                                                     recursive=True, print_files=True)
         self.files_count = len(code_files)
-        tools.pprint('\nInspect files:\n', slowly=True)
+        tools.pprint('\n', 'Inspect files:', '\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
             self.results = list(threads.imap_unordered(self.inspect_file, code_files))
@@ -90,7 +90,7 @@ class ClangTidy(object):
     def group_inspection_results(self) -> dict[str, set[str] | dict[str, [dict[str, set[str]]]]]:
         result = {tools.PASS: {unit['file'] for unit in self.results}, tools.NOTE: {}, tools.WARNING: {},
                   tools.ERROR: {}, tools.EXCEPTION: {}}
-        tools.pprint('\nGetting results\n', slowly=True, on_the_next_line=True)
+        tools.pprint('\n', 'Getting results', '\n', slowly=True, on_the_next_line=True)
         for unit in self.results:
             if unit['inspection_result'].returncode:
                 log_data = ''.join(unit['inspection_result'].stderr)
@@ -99,7 +99,7 @@ class ClangTidy(object):
                 result[tools.EXCEPTION][log_data][unit['file']] = set()
                 continue
 
-            for line in unit['inspection_result'].stdout.split('\n'):
+            for line in unit['inspection_result'].stdout.splitlines():
                 if any(warning in line for warning in self.ignored_inspection_warnings):
                     continue
 

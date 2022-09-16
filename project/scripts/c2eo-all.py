@@ -36,7 +36,7 @@ if __name__ == '__main__':
     if not path_to_c_files.exists():
         exit('This path does not exist')
 
-    clean_before_transpilation.main(path_to_c_files)
+    clean_before_transpilation.main(path_to_c_files, '*.alias *-eo.c *.eo *.out *.log *.txt *.i')
     path_to_c2eo = Path('../bin/c2eo').resolve()
     c_files = path_to_c_files.rglob('*.c')
     for c_file in c_files:
