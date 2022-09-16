@@ -16,4 +16,4 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(src/transpiler)
 
 #todo: if u_test or rultor
-#add_subdirectory(tests/unit_tests)
+add_subdirectory(tests/unit_tests)
