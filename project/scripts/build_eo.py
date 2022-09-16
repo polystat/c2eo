@@ -47,18 +47,18 @@ class EOBuilder(object):
         self.transpilation_units = transpilation_units
         self.errors = set()
         self.error_result = {}
-
-    def build(self) -> (set[dict], dict):
-        tools.pprint('Compilation start', '\n')
         original_path = Path.cwd()
         chdir(self.path_to_eo_project)
-        can_recompile = self.is_recompilation()
-        if can_recompile:
-            cmd, _ = ['mvn'], tools.pprint('\n', 'Recompilation eo project starts')
-        else:
-            cmd, _ = ['mvn', 'clean'], tools.pprint('Full eo project compilation starts', '\n')
-        cmd.extend(['compile', '-D', 'jansi.force=true', '-D' 'style.color=always'])
-        process = subprocess.Popen('echo', stdout=subprocess.PIPE, text=True)
+        self.can_recompile = self.is_recompilation()
+        chdir(original_path)
+
+    def build(self) -> (set[dict], dict):
+        original_path = Path.cwd()
+        chdir(self.path_to_eo_project)
+        cmd = ['mvn'] if self.can_recompile else ['mvn', 'clean']
+        cmd.extend(['compile', '-D', 'jansi.force=true', '-D', 'style.color=always'])
+        tools.pprint('\n', ' '.join(cmd), '\n')
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
         for line in process.stdout:
             if line:
                 print(line.rstrip())

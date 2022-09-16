@@ -50,6 +50,7 @@ class Tests(object):
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src')
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
+        self.path_to_eo_coperators = settings.get_setting('path_to_eo_coperators')
         self.run_sh_cmd = settings.get_meta_code('run.sh', read_as_lines=True)[2].rstrip()
         self.run_sh_replace = settings.get_setting('run_sh_replace')
         self.transpilation_units: list[dict[str, str | Path | CompletedProcess | float]] = []
@@ -77,14 +78,18 @@ class Tests(object):
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             list(threads.imap_unordered(self.get_result_for_c_file, self.transpilation_units))
+        tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
         tools.pprint(on_the_next_line=True)
+
+        self.last_coperators_ctime = max(x.stat().st_ctime for x in tools.search_files_by_patterns(self.path_to_eo_coperators, {'*.eo'}))
         tools.pprint('\n', 'Running EO tests:', '\n', slowly=True)
-        self.test_handled_count = 0
         original_path = Path.cwd()
         chdir(self.path_to_eo_project)
+        self.test_handled_count = 0
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             list(threads.imap_unordered(self.get_result_for_eo_file, self.transpilation_units))
+        tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
         chdir(original_path)
         tools.pprint(on_the_next_line=True)
 
@@ -112,7 +117,13 @@ class Tests(object):
     def get_result_for_eo_file(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
         unit['result_eo_file'] = unit['result_path'] / f'{unit["name"]}-eo.txt'
         unit["eo_test_time"] = 0.0
-        if not unit['result_eo_file'].exists() or unit['result_eo_file'].stat().st_ctime < unit['eo_file'].stat().st_ctime:
+        if unit['result_eo_file'].exists():
+            result_eo_ctime = unit['result_eo_file'].stat().st_ctime
+            is_old_result = result_eo_ctime < unit['eo_file'].stat().st_ctime or result_eo_ctime < self.last_coperators_ctime
+        else:
+            is_old_result = True
+
+        if is_old_result:
             cmd = ['time', '-f', '%e']
             cmd.extend(regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split())
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)

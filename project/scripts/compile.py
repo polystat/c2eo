@@ -54,7 +54,10 @@ class Compiler(object):
                                                            self.need_to_prepare_c_code,
                                                            self.need_to_generate_codecov).transpile()
         if self.transpilation_units:
-            errors, error_result = EOBuilder(self.transpilation_units).build()
+            builder = EOBuilder(self.transpilation_units)
+            if not builder.can_recompile:
+                tools.clear_dir_by_patterns(self.path_to_tests, {'*-eo.txt'}, recursive=True)
+            errors, error_result = builder.build()
             passes = {unit['unique_name'] for unit in self.transpilation_units} - errors
             result = {tools.PASS: passes, tools.ERROR: error_result, tools.SKIP: skip_result}
             tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))

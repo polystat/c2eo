@@ -88,6 +88,7 @@ class Transpiler(object):
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             list(threads.imap_unordered(self.start_transpilation, self.transpilation_units))
+        tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
         result = self.group_transpilation_results()
         result[tools.SKIP] = skip_result
         tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
@@ -140,7 +141,6 @@ class Transpiler(object):
         transpile_cmd = f'{self.codecov_arg} time -f "%e" ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         result.stdout, result.stderr = result.stdout.splitlines(), result.stderr.splitlines()
-        self.files_handled_count += 1
         unit['transpilation_time'] = float(result.stderr[-1])
         unit['transpilation_file_size'] = unit['prepared_c_file'].with_suffix(
             '.c.i').stat().st_size / 1024.0  # bytes -> kbytes
@@ -150,6 +150,7 @@ class Transpiler(object):
         unit['rel_eo_file'] = unit['rel_c_path'] / f'{unit["name"]}.eo'
         if not result.returncode:
             add_return_code_to_eo_file(eo_file)
+        self.files_handled_count += 1
         tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
 
     def prepare_c_file(self, c_file: Path) -> (Path, Path):
