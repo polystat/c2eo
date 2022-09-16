@@ -1053,9 +1053,8 @@ EOObject GetEOReturnValue(const CallExpr *op) {
       read_ret.name += "-as-" + postfix;
     }
     return read_ret;
-  } else {
-    return EOObject{"TRUE", EOObjectType::EO_LITERAL};
   }
+  return EOObject{"TRUE", EOObjectType::EO_LITERAL};
 }
 
 EOObject GetFunctionCallEOObject(const CallExpr *op) {
@@ -1067,7 +1066,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   }
   // TEST
   // std::cout << "NamArgs = " << op->getNumArgs() << "\n";
-  auto *func_decl = op->getDirectCallee();
+  const auto *func_decl = op->getDirectCallee();
   // ======= The function call =======
   if (func_decl != nullptr) {  // The direct function call generation
     size_t shift = GetEOParamsList(op, call);
@@ -1077,18 +1076,16 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     return call;
   }
   // ======= The function call using pointer =======
-  auto func_ptr_decl = op->getCalleeDecl();
+  const auto *func_ptr_decl = op->getCalleeDecl();
   if (func_ptr_decl == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   if (func_ptr_decl->getKind() == clang::Decl::Var) {
-    const clang::VarDecl *varDecl =
+    const auto *varDecl =
         clang::dyn_cast<clang::VarDecl>(func_ptr_decl);
     auto func_ptr_qualtype{varDecl->getType()};
-    if (func_ptr_qualtype->isFunctionPointerType() == true) {
-      const clang::PointerType *pt =
-          varDecl->getType()->getAs<clang::PointerType>();
-      clang::QualType pointee_type = func_ptr_qualtype->getPointeeType();
+    if (func_ptr_qualtype->isFunctionPointerType()) {
+      auto pointee_type = func_ptr_qualtype->getPointeeType();
       if (pointee_type->isFunctionNoProtoType() ||
           pointee_type->isFunctionProtoType()) {
         size_t shift = GetEOParamsList(op, call);
@@ -1590,11 +1587,13 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       EOObject array_as_ptr{"addr-of"};
       array_as_ptr.nested.emplace_back(var.alias);
       return array_as_ptr;
-    } else if (type->isFunctionPointerType()) {
+    }
+    if (type->isFunctionPointerType()) {
       // TEST
       // std::cout << "It is Function Pointer Type\n";
       return EOObject{var.alias};
-    } else if (type->isFunctionType()) {
+    }
+    if (type->isFunctionType()) {
       // TEST
       // std::cout << "It is Function Type\n";
       return EOObject{EOObjectType::EO_PLUG};

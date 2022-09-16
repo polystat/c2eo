@@ -90,20 +90,18 @@ void UnitTranspiler::GenerateResult() {
     for (const auto &ext_func_name : ext_obj_to_find) {
       if (func_name != ext_func_name) {
         continue;
-      } else {
-        find_flag = true;
-        break;
       }
+      find_flag = true;
+      break;
     }
     if (!find_flag) {
       for (const auto &func : func_manager_.GetAllEoDefinitions()) {
         std::string func_def_name = func.postfix;
         if (func_name != func_def_name) {
           continue;
-        } else {
-          find_flag = true;
-          break;
         }
+        find_flag = true;
+        break;
       }
     }
     if (!find_flag) {
@@ -169,7 +167,7 @@ void UnitTranspiler::SetPackageName(std::string package_name) {
   package_name_ = std::move(package_name);
 }
 
-void UnitTranspiler::SetPathName(std::string path_name) {
+void UnitTranspiler::SetPathName(std::string &path_name) {
   path_name_ = path_name;
 }
 

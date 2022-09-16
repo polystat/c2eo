@@ -53,7 +53,7 @@ class UnitTranspiler {
 
   void SetPackageName(std::string package_name);
   //   static void SetPathName(std::string path_name);
-  void SetPathName(std::string path_name);
+  void SetPathName(std::string &path_name);
   // std::vector<EOObject>
 
   void GenerateMeta();
