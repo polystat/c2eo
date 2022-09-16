@@ -1476,8 +1476,9 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   if (op_code ==
       clang::UnaryOperatorKind::UO_Plus) {  // UNARY_OPERATION(Plus, "+")
     operation = "pos";
-  } else if (op_code == clang::UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus,
-                                                               // "-")
+  } else if (op_code ==
+             clang::UnaryOperatorKind::UO_Minus) {  // UNARY_OPERATION(Minus,
+                                                    // "-")
     operation = "neg";
   } else if (op_code ==
              clang::UnaryOperatorKind::UO_Not) {  // UNARY_OPERATION(Not, "~")
@@ -1486,11 +1487,13 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
              clang::UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot, "!")
     operation = "not";
     // "__real expr"/"__imag expr" Extension.
-  } else if (op_code == clang::UnaryOperatorKind::UO_Real) {  // UNARY_OPERATION(Real,
-                                                              // "__real")
+  } else if (op_code ==
+             clang::UnaryOperatorKind::UO_Real) {  // UNARY_OPERATION(Real,
+                                                   // "__real")
     operation = "real";
-  } else if (op_code == clang::UnaryOperatorKind::UO_Imag) {  // UNARY_OPERATION(Imag,
-                                                              // "__imag")
+  } else if (op_code ==
+             clang::UnaryOperatorKind::UO_Imag) {  // UNARY_OPERATION(Imag,
+                                                   // "__imag")
     operation = "imag";
     // __extension__ marker.
   } else if (op_code == clang::UnaryOperatorKind::
