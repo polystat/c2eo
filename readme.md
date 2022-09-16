@@ -128,24 +128,24 @@ $ cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/
 ```
 3. [clang-tidy](https://packages.ubuntu.com/en/bionic/clang-tidy)
 ```bash
-$ cd project/srcipts
+$ cd project/scripts
 $ python3 clang_tidy.py
 ```
 4. [gcc.c-torture](https://github.com/polystat/c2eo/releases/download/0.1.16/gcc.c-torture.tar.gz)
 ```bash
-$ cd project/srcipts
+$ cd project/scripts
 $ python3 transpile.py <your_path_to_the_folder>/gcc.c-torture -s gcc -n
 ```
 
 5. [c-testcuite](https://github.com/polystat/c2eo/releases/download/0.1.16/c-testcuite.tar.gz)
 ```bash
-$ cd project/srcipts
+$ cd project/scripts
 $ python3 test.py -p <your_path_to_the_folder>/c-testcuite -s testcuite -n
 ```
 
 6. test
 ```bash
-$ cd project/srcipts
+$ cd project/scripts
 $ python3 test.py -s test
 ```
 
@@ -356,7 +356,7 @@ Let's take the following C code as an example:
 double z = 3.14;
 ```
 
-In EO, we represent the global memory space as a copy of [ram](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of 8 bytes inside `ram` at the very begginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
+In EO, we represent the global memory space as a copy of [ram](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/system/ram.eo) object, which we call `global`. Thus, the variable `z` would be accessed as a block of 8 bytes inside `ram` at the very beginning, since it's the first variable seen. For example, to change the value of `z` we write 8 bytes to the 0th position of `global`:
 
 ```java
 ram > global
