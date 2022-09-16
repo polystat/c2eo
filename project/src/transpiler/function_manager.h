@@ -26,6 +26,7 @@
 #define PROJECT_SRC_TRANSPILER_FUNCTION_MANAGER_H_
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -59,7 +60,7 @@ struct FunctionManager {
   void AddEoObject(const EOObject &func);
 
   void AddToMap(std::string func_name);
-  int GetMapIndex(std::string func_name) {return func_name_map[func_name];}
+  int GetMapIndex(std::string func_name) { return func_name_map[func_name]; }
   void ReverseMapToArrayMap();
 
   const std::vector<EOObject> &GetAllEoDefinitions();
@@ -70,7 +71,10 @@ struct FunctionManager {
 
   std::map<int, std::string> &GetFuncArray();
 
-  void SetNameCount(int value) {name_count = value;}
+  void SetNameCount(int value) { name_count = value; }
+
+  const std::vector<FunctionDeclaration> &GetAllFuncDeclarations();
+  const std::vector<FunctionDefinition> &GetAllFuncDefinitions();
 
   __attribute__((unused)) void TestOut();
 

@@ -41,9 +41,9 @@ __attribute__((unused)) void ArrayToBytes(__attribute__((unused))
                                           std::string &string);
 
 EOObject InitValueEOObj(const VarDecl *VD, bool is_init);
+
 Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
                          size_t shift) {
-
   // TEST Out of ProcessVariable input
   // std::cout << "ProcessVariable\n";
 

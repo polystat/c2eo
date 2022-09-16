@@ -35,10 +35,10 @@
 
 class UnitTranspiler {
  public:
-//   UnitTranspiler() = default;
-   UnitTranspiler() {
-     func_manager_.SetNameCount(0);
-     func_manager_.AddToMap("null-function");
+  //   UnitTranspiler() = default;
+  UnitTranspiler() {
+    func_manager_.SetNameCount(0);
+    func_manager_.AddToMap("null-function");
   }
 
   // MemoryManager glob_{"global-ram", 8}, ret_{"return-ram"};
