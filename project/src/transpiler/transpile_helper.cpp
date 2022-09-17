@@ -1016,7 +1016,14 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
   size_t shift = 0;
   for (const auto *arg : op->arguments()) {
     auto arg_type = arg->getType();
-    size_t type_size = GetTypeSize(arg_type);
+    size_t type_size = 0;
+    if (arg_type->isPointerType()) {
+      type_size = 8;
+      // TEST
+      // std::cout << "it is Pointer Type\n";
+    } else {
+      type_size = GetTypeSize(arg_type);
+    }
     EOObject param{"write"};
     string postfix = GetPostfix(arg_type);
     if (!postfix.empty()) {
