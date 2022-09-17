@@ -59,8 +59,8 @@ struct FunctionManager {
   void AddDeclaration(const FunctionDeclaration &func_decl);
   void AddEoObject(const EOObject &func);
 
-  void AddToMap(std::string func_name);
-  int GetMapIndex(std::string func_name) { return func_name_map[func_name]; }
+  void AddToMap(std::string *func_name);
+  int GetMapIndex(std::string *func_name) { return func_name_map[*func_name]; }
   void ReverseMapToArrayMap();
 
   const std::vector<EOObject> &GetAllEoDefinitions();
@@ -82,7 +82,7 @@ struct FunctionManager {
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;
   std::vector<EOObject> functions;
-  std::map<const std::string, int> func_name_map;
+  std::map<std::string, int> func_name_map;
   std::map<int, std::string> func_name_map_as_array;
   int name_count;
 };

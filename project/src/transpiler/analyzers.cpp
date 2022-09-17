@@ -58,7 +58,7 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
     func_name = "f-" + func_name;
   }
   // Add the function name to func_name_map if it is new name
-  transpiler.func_manager_.AddToMap(func_name);
+  transpiler.func_manager_.AddToMap(&func_name);
 
   auto is_definition = FD->isThisDeclarationADefinition();
   if (is_definition) {

@@ -38,7 +38,8 @@ class UnitTranspiler {
   //   UnitTranspiler() = default;
   UnitTranspiler() {
     func_manager_.SetNameCount(0);
-    func_manager_.AddToMap("null-function");
+    std::string tmp_str{"null-function"};
+    func_manager_.AddToMap(&tmp_str);
   }
 
   // MemoryManager glob_{"global-ram", 8}, ret_{"return-ram"};

@@ -1570,7 +1570,7 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       std::string function_name =
           transpiler.func_manager_.GetEOFunctionName(id);
       // std::cout << "function_name = " << function_name << "\n";
-      auto func_index = transpiler.func_manager_.GetMapIndex(function_name);
+      auto func_index = transpiler.func_manager_.GetMapIndex(&function_name);
       return EOObject{std::to_string(func_index), EOObjectType::EO_LITERAL};
     }
     const auto *id = dyn_cast<VarDecl>(val);

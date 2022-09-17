@@ -59,12 +59,12 @@ void FunctionManager::AddEoObject(const EOObject &func) {
   functions.push_back(func);
 }
 //------------------------------------------------------------------------------
-void FunctionManager::AddToMap(std::string func_name) {
-  if (func_name_map.find(func_name) == func_name_map.end()) {
-    if (func_name == "f-printf") {
+void FunctionManager::AddToMap(std::string *func_name) {
+  if (func_name_map.find(*func_name) == func_name_map.end()) {
+    if (*func_name == "f-printf") {
       func_name_map["printf"] = name_count++;
     } else {
-      func_name_map[func_name] = name_count++;
+      func_name_map[*func_name] = name_count++;
     }
   }
 }
