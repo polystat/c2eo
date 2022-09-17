@@ -1081,8 +1081,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   if (func_ptr_decl->getKind() == clang::Decl::Var) {
-    const auto *varDecl =
-        clang::dyn_cast<clang::VarDecl>(func_ptr_decl);
+    const auto *varDecl = clang::dyn_cast<clang::VarDecl>(func_ptr_decl);
     auto func_ptr_qualtype{varDecl->getType()};
     if (func_ptr_qualtype->isFunctionPointerType()) {
       auto pointee_type = func_ptr_qualtype->getPointeeType();
