@@ -82,7 +82,7 @@ struct FunctionManager {
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;
   std::vector<EOObject> functions;
-  std::map<std::string, int> func_name_map;
+  std::map<const std::string, int> func_name_map;
   std::map<int, std::string> func_name_map_as_array;
   int name_count;
 };
