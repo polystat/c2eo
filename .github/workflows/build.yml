@@ -183,10 +183,21 @@ jobs:
           make
 
       - name: Generating tests
-        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 1000
+        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 100
         
       - name: Transpilation
         run: cd ./project/scripts && python3 transpile.py ../tests/main/csmith -n || true
+
+      - name: Clean test directory
+        run: cd ./project/scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
+
+      - name: Make archive from csmith tests
+        run:  tar -cf csmith.tar.gz ./project/tests/main/csmith
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: csmith
+          path: csmith.tar.gz
 
   unit-tests:
     needs: [cpp-lint, clang-format]

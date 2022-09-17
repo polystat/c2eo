@@ -59,10 +59,7 @@ class Csmith(object):
         tools.pprint('\n', 'Running generating files:', '\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
-            results = list(threads.imap_unordered(self.generate_file, range(self.files_count)))
-        tools.pprint('\n', 'Generated files: ', on_the_next_line=True)
-        for file_name, code in sorted(results, key=lambda x: x[0]):
-            print(f'{file_name}:\n\n', code)
+            list(threads.imap_unordered(self.generate_file, range(self.files_count)))
 
     def generate_file(self, number: int) -> (str, list[str]):
         result = subprocess.run(f'{self.path_to_csmith} {self.csmith_args}', shell=True, text=True, capture_output=True)
