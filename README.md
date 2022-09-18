@@ -183,7 +183,7 @@ To use this script, make sure you have the following packages installed:
 ```bash
 $ pip3 install git_config pgpy s3cmd
 $ apt install md5deep reprepro gcc cmake dpkg wget tar s3cmd -y
-# for the latest version of the cmake package, try:
+# for the latest version of the cmake package, tr:
 $ pip3 install cmake
 ```
 
