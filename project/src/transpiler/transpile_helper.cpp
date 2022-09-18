@@ -333,6 +333,11 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return EOObject(EOObjectType::EO_PLUG);
   }
   Stmt::StmtClass stmt_class = stmt->getStmtClass();
+
+  // TEST
+  const char *stmt_class_name =  stmt->getStmtClassName();
+  std::cout << "Statement Class Name = " << stmt_class_name << "\n";
+
   if (stmt_class == Stmt::BinaryOperatorClass) {
     const auto *op = dyn_cast<BinaryOperator>(stmt);
     return GetBinaryStmtEOObject(op);
@@ -1015,6 +1020,12 @@ EOObject GetMemberExprEOObject(const MemberExpr *op) {
 size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
   size_t shift = 0;
   for (const auto *arg : op->arguments()) {
+    // TEST
+    std::cout << "Begin GetEOParamsList\n";
+    if (arg == nullptr) {
+      call.nested.push_back(EOObject{EOObjectType::EO_PLUG});
+      return shift;
+    }
     auto arg_type = arg->getType();
     size_t type_size = 0;
     if (arg_type->isPointerType()) {
@@ -1024,6 +1035,8 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
     } else {
       type_size = GetTypeSize(arg_type);
     }
+    // TEST
+    std::cout << "Checkpoint 01 GetEOParamsList\n";
     EOObject param{"write"};
     string postfix = GetPostfix(arg_type);
     if (!postfix.empty()) {
@@ -1036,9 +1049,15 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
     add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
     address.nested.push_back(add);
     param.nested.push_back(address);
+    // TEST
+    std::cout << "Checkpoint 02 GetEOParamsList\n";
     param.nested.push_back(GetStmtEOObject(arg));
+    // TEST
+    std::cout << "Checkpoint 03 GetEOParamsList\n";
     shift += type_size;
     call.nested.push_back(param);
+    // TEST
+    std::cout << "End GetEOParamsList\n";
   }
   return shift;
 }
@@ -1073,9 +1092,14 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   }
   // TEST
   // std::cout << "NamArgs = " << op->getNumArgs() << "\n";
+  auto expr_class = op->getStmtClass();
   const auto *func_decl = op->getDirectCallee();
   // ======= The function call =======
   if (func_decl != nullptr) {  // The direct function call generation
+    // TEST
+    // auto func_name{func_decl->getNameAsString()};
+    // std::cout << "It is Direct Function Call " << func_name << "\n";
+
     size_t shift = GetEOParamsList(op, call);
     call.nested.push_back(
         transpiler.func_manager_.GetFunctionCall(func_decl, shift));
@@ -1561,6 +1585,8 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
   if (op == nullptr) {
     return EOObject{EOObjectType::EO_EMPTY};
   }
+  // TEST
+  std::cout << "GetEODeclRefExpr Checkpoint 01\n";
   try {
     const auto *val = op->getFoundDecl();
     auto decl_kind = val->getKind();
@@ -1605,7 +1631,11 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{EOObjectType::EO_PLUG};
       //       return EOObject{var.alias};
     }
-    return EOObject{var.alias};
+    // TEST
+    std::cout << "GetEODeclRefExpr Checkpoint 02\n";
+    EOObject other_object{var.alias};
+    std::cout << "GetEODeclRefExpr Checkpoint 03\n";
+    return other_object;
   } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
   }
@@ -1745,6 +1775,10 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
 
 uint64_t GetTypeSize(QualType qual_type) {
   const clang::Type *type_ptr = qual_type.getTypePtr();
+  if (type_ptr == nullptr) {
+    std::cout << "Incorrect Type Pointer\n";
+    return 0;
+  }
   TypeInfo type_info = context->getTypeInfo(type_ptr);
   uint64_t type_size = type_info.Width;
 
@@ -1754,7 +1788,6 @@ uint64_t GetTypeSize(QualType qual_type) {
     uint64_t pointer_type_size = pointer_type_info.Width;
     return pointer_type_size / byte_size;
   }
-
   return type_size / byte_size;
 }
 
@@ -1766,7 +1799,6 @@ uint64_t GetSizeOfType(QualType qual_type) {
   if (type_ptr->isPointerType()) {
     return 8;  // Size of any pointer == 8 byte
   }
-
   return type_size / byte_size;
 }
 

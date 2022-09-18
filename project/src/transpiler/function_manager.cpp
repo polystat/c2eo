@@ -119,7 +119,15 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
                              EOObjectType::EO_LITERAL);
     return call;
   }
-  return EOObject(EOObjectType::EO_PLUG);
+  // Kernigan default declaration
+  auto func_name{FD->getNameAsString()};
+  EOObject call("f-" + func_name);
+  call.prefix = "root";
+  call.nested.emplace_back("empty-local-position");
+  call.nested.emplace_back(std::to_string(param_size),
+                            EOObjectType::EO_LITERAL);
+  return call;
+  // return EOObject(EOObjectType::EO_PLUG);
 }
 
 //------------------------------------------------------------------------------
