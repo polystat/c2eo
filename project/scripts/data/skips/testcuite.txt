@@ -16,7 +16,6 @@
 00149: TODO pointers on structures
 00197: TODO static variables
 00026: TODO arithmetics
-00143: TODO Tom Duff switch
 00076, 00109, 00144, 00183: TODO ternary operator
 00200: TODO shift
 00010, 00051, 00129, 00199, 00207, 00213: goto
@@ -28,3 +27,4 @@
 00205: java code too large
 00025, 00180, 00179: using str functions
 00214: using __builtin_expect
+00143: unsupported Tom Duff's switch

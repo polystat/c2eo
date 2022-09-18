@@ -65,10 +65,11 @@ EXCEPTION = 'EXCEPTION'
 PASS = 'PASS'
 NOTE = 'NOTE'
 SKIP = 'SKIP'
+TIME = 'TIME'
 
 statuses = {INFO: f'{BBlue}{INFO}{IWhite}', WARNING: f'{BPurple}{WARNING}{IWhite}', ERROR: f'{BRed}{ERROR}{IWhite}',
             EXCEPTION: f'{BRed}{EXCEPTION}{IWhite}', PASS: f'{BGreen}{PASS}{IWhite}', NOTE: f'{BYellow}{NOTE}{IWhite}',
-            SKIP: f'{BCyan}{SKIP}{IWhite}'}
+            SKIP: f'{BCyan}{SKIP}{IWhite}', TIME: f'{BIWhite}{TIME}{IWhite}'}
 
 separation_line = f'{BIWhite}{"-" * 108}{IWhite}'
 
@@ -100,10 +101,8 @@ def clear_dir_by_patterns(path: Path, file_patterns: set[str], recursive: bool =
     pprint('Files removed')
 
 
-def compare_files(file1: Path, file2: Path) -> bool:
-    if file1.exists() and file2.exists():
-        return file1.read_text(encoding=ISO_8859_1) == file2.read_text(encoding=ISO_8859_1)
-    return False
+def compare_files_content(file1: Path, file2: Path) -> bool:
+    return file1.exists() and file2.exists() and file1.read_bytes() == file2.read_bytes()
 
 
 def cpu_count() -> int:
@@ -152,7 +151,7 @@ def pprint(*data: str | list, slowly: bool = False, status: str = INFO, end: str
     for token in data or ['']:
         if type(token) == list:
             token = ''.join(map(str, token))
-        for line in str(token).split('\n'):
+        for line in str(token).splitlines():
             status_str = f'[{get_status(status)}] ' if status else ''
             print(f'{IWhite}{status_str}{line}', end=end)
             if slowly:
@@ -187,6 +186,7 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
             if result[status]:
                 pprint_status_result(', '.join(sorted(result[status], key=str.casefold)), status=status, log_data='')
             summary.append(f'Passed: {len(result[status])}')
+            print()
         elif status in [NOTE, WARNING, EXCEPTION, SKIP] or (status == ERROR and type(result[status]) == dict):
             count = 0
             for message, files in sorted(result[status].items(), key=lambda x: x[0].casefold()):
@@ -202,7 +202,7 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
                 if status == EXCEPTION and message.count('\n') > 2:
                     pprint_status_result(file_places, status, message.rstrip(), max_lines=10)
                 else:
-                    pprint_status_result(' '.join(message.rstrip().split('\n')), status, file_places)
+                    pprint_status_result(' '.join(message.rstrip().splitlines()), status, file_places)
                 print()
             summary.append(f'{str(status).capitalize()}s: {count}')
         elif status == ERROR:
@@ -210,6 +210,9 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
                 pprint_status_result(test_name, ERROR, log_data)
                 print()
             summary.append(f'{str(status).capitalize()}s: {len(result[status])}')
+        elif status == TIME:
+            pprint_time_result(result[status])
+
     pprint()
     pprint_separation_line()
     pprint(f'{BRed}{header} FAILED{IWhite}' if is_failed else f'{BGreen}{header} SUCCESS{IWhite}')
@@ -218,13 +221,24 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
     pprint_header(f'{", ".join(summary)}\n{total_time}\n{finished_at}')
 
 
+def pprint_time_result(transpilation_units):
+    if 'eo_test_time' in transpilation_units[0]:
+        data = [f'{u["unique_name"]}: {u["eo_test_time"]:.2f}s' for u in sorted(transpilation_units, key=lambda x: x["eo_test_time"])]
+        pprint_status_result('Test time measurement for each test:', TIME, log_data=', '.join(data))
+    else:
+        data = [f'{u["unique_name"]}({u["transpilation_time"]:.3f}s {u["transpilation_file_size"]:.3f}kb {u["transpilation_speed"]:.3f}s/kb)'
+                for u in sorted(transpilation_units, key=lambda x: x['transpilation_speed'])]
+        pprint_status_result('Transpilation time measurement for each file:', TIME, log_data=', '.join(data))
+    print()
+
+
 def pprint_separation_line() -> None:
     pprint(separation_line, slowly=True)
 
 
 def pprint_truncated_data(data: list[str] | str, max_lines: int) -> None:
     if type(data) == str:
-        data = '\n'.join(data.split('\n')[:max_lines])
+        data = '\n'.join(data.splitlines()[:max_lines])
     else:
         data = data[:max_lines]
     pprint(data, slowly=True, status='')
