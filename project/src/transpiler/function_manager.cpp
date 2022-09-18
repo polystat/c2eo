@@ -125,7 +125,7 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
   call.prefix = "root";
   call.nested.emplace_back("empty-local-position");
   call.nested.emplace_back(std::to_string(param_size),
-                            EOObjectType::EO_LITERAL);
+                           EOObjectType::EO_LITERAL);
   return call;
   // return EOObject(EOObjectType::EO_PLUG);
 }

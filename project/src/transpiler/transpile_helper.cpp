@@ -335,7 +335,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   Stmt::StmtClass stmt_class = stmt->getStmtClass();
 
   // TEST
-  const char *stmt_class_name =  stmt->getStmtClassName();
+  const char *stmt_class_name = stmt->getStmtClassName();
   std::cout << "Statement Class Name = " << stmt_class_name << "\n";
 
   if (stmt_class == Stmt::BinaryOperatorClass) {
