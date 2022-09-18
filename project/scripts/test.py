@@ -124,7 +124,7 @@ class Tests(object):
             is_old_result = True
 
         if is_old_result:
-            cmd = ['time', '-f', '%e']
+            cmd = ['/usr/bin/time', '-f', '%e']
             cmd.extend(regex.sub(self.run_sh_replace, unit['full_name'].replace('-', '_'), self.run_sh_cmd).split())
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             timeout = 60
