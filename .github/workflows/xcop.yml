@@ -1,12 +1,8 @@
----
 name: xcop
+
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_call:
+
 jobs:
   xcop:
     runs-on: ubuntu-20.04
