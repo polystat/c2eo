@@ -1,0 +1,28 @@
+name: codecov
+
+on:
+  workflow_call:
+
+jobs:  
+  codecov:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+ 
+      - run: mkdir project/bin/
+
+      - name: Download test main codecov report
+        uses: actions/download-artifact@v3
+        with:
+          name: main
+          path: project/bin/
+
+      - name: Download testcuite codecov report
+        uses: actions/download-artifact@v3
+        with:
+          name: testcuite
+          path: project/bin/
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./project/bin/main/codecov.txt,./project/bin/testcuite/codecov.txt
