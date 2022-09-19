@@ -1541,7 +1541,7 @@ EOObject GetEOStringToCharArray(const EOObject &object,
     EOObject addr{"plus"};
     addr.nested.push_back(object);
     EOObject shift{"times"};
-    shift.nested.emplace_back(to_string(i));
+    shift.nested.emplace_back(to_string(i - 1));
     shift.nested.emplace_back("1");
     addr.nested.emplace_back(shift);
     eoChar.nested.push_back(addr);
