@@ -14,6 +14,7 @@
 00154: TODO array of structure
 00149: TODO pointers on structures
 00197: TODO static variables
+00026: TODO arithmetics
 00076, 00109, 00144, 00183: TODO ternary operator
 00200: TODO shift
 00010, 00051, 00129, 00199, 00207, 00213: goto
