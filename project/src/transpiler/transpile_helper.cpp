@@ -1548,7 +1548,7 @@ EOObject GetEOStringToCharArray(const EOObject &object,
     if (i + 1 == strValue.length()) {
       eoChar.nested.emplace_back("0");
     } else {
-      eoChar.nested.emplace_back(to_string(int(strValue[i])));
+      eoChar.nested.emplace_back(to_string(static_cast<int>(strValue[i])));
     }
     eoList.nested.push_back(eoChar);
   }
