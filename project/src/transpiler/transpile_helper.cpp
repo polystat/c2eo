@@ -151,6 +151,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
+EOObject GetEOStringToCharArray(const EOObject &object, const string &strValue);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -516,7 +517,6 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 }
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
-  //  list->dump();
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
@@ -759,6 +759,8 @@ EOObject GetCastEOObject(const CastExpr *op) {
                         ->size),
           EOObjectType::EO_LITERAL);
 
+    } else if (type == "string") {
+      read.name += "-as-ptr";
     } else {
       read.name += "-as-" + type;
     }
@@ -1097,20 +1099,36 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
         }
       }
       printf.nested.push_back(param);
-    } else if (idx <= formats.size() && !formats[idx - 1].empty() &&
-               param.type != EOObjectType::EO_LITERAL) {
-      // TEST out
-      // std::cout << "formats[" << (idx - 1) << "] = " << formats[idx - 1] <<
-      // "\n";
-      EOObject cast{formats[idx - 1]};
-      EOObject addr{"address"};
-      EOObject ram{"global-ram"};
-      addr.nested.push_back(ram);
-      addr.nested.push_back(param);
-      cast.nested.push_back(addr);
-      printf.nested.push_back(cast);
+    } else if (idx <= formats.size() && !formats[idx - 1].empty()) {
+      if (param.type != EOObjectType::EO_LITERAL) {
+        EOObject cast{formats[idx - 1]};
+        EOObject addr{"address"};
+        EOObject ram{"global-ram"};
+        addr.nested.push_back(ram);
+        addr.nested.push_back(param);
+        cast.nested.push_back(addr);
+        printf.nested.push_back(cast);
+      } else if (formats[idx - 1] == "as-char") {
+        EOObject cast{formats[idx - 1]};
+        cast.nested.push_back(param);
+        printf.nested.push_back(cast);
+      } else {
+        printf.nested.push_back(param);
+      }
     } else {
       printf.nested.push_back(param);
+    }
+    idx++;
+  }
+  while (idx <= formats.size()) {
+    if (formats[idx - 1] == "as-char") {
+      EOObject cast{formats[idx - 1]};
+      cast.nested.emplace_back(to_string(0));
+      printf.nested.push_back(cast);
+    } else if (formats[idx - 1] == "read-as-string") {
+      printf.nested.emplace_back("\"\"");
+    } else {
+      printf.nested.emplace_back(to_string(0));
     }
     idx++;
   }
@@ -1502,13 +1520,39 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   if (left != nullptr) {
     QualType qual_type = left->getType();
     if (!qual_type->isRecordType()) {
-      binary_op.name += "-as-" + GetTypeName(left->getType());
+      string type = GetTypeName(left->getType());
+      if (type == "string") {
+        return GetEOStringToCharArray(
+            GetStmtEOObject(left), GetStmtEOObject(p_operator->getRHS()).name);
+      }
+      binary_op.name += "-as-" + type;
     }
     binary_op.nested.emplace_back(GetStmtEOObject(left));
     binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
     return binary_op;
   }
   return EOObject{EOObjectType::EO_PLUG};
+}
+EOObject GetEOStringToCharArray(const EOObject &object,
+                                const string &strValue) {
+  EOObject eoList{"*", EOObjectType::EO_EMPTY};
+  for (int i = 1; i < strValue.length(); i++) {
+    EOObject eoChar{"write-as-int8"};
+    EOObject addr{"plus"};
+    addr.nested.push_back(object);
+    EOObject shift{"times"};
+    shift.nested.emplace_back(to_string(i - 1));
+    shift.nested.emplace_back("1");
+    addr.nested.emplace_back(shift);
+    eoChar.nested.push_back(addr);
+    if (i + 1 == strValue.length()) {
+      eoChar.nested.emplace_back("0");
+    } else {
+      eoChar.nested.emplace_back(to_string(static_cast<int>(strValue[i])));
+    }
+    eoList.nested.push_back(eoChar);
+  }
+  return eoList;
 }
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
