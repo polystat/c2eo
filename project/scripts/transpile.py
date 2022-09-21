@@ -62,6 +62,9 @@ class Transpiler(object):
         self.path_to_eo_project = settings.get_setting('path_to_eo_project')
         self.path_to_eo_src = settings.get_setting('path_to_eo_src').resolve()
         self.path_to_eo_external = settings.get_setting('path_to_eo_external').resolve()
+        self.path_to_eo_coperators = settings.get_setting('path_to_eo_coperators')
+        self.path_to_eo_lib_coperators = settings.get_setting('path_to_eo_lib_coperators')
+        self.path_to_eo_lib_pom = settings.get_setting('path_to_eo_lib_pom')
         self.plug_code = settings.get_meta_code('plug')
         self.result_dir_name = settings.get_setting('result_dir_name')
         self.run_sh_code = settings.get_meta_code('run.sh')
@@ -96,8 +99,8 @@ class Transpiler(object):
         tools.pprint_result('TRANSPILE', tests_count, int(time.time() - start_time), result, is_failed)
         if is_failed:
             exit('transpilation failed')
-
-        self.remove_unused_eo_files()
+        self.prepare_eo_project()
+        self.remove_unused_eo_src_files()
         self.move_transpiled_files()
         self.move_aliases()
         tools.pprint('\n', 'Transpilation done', '\n')
@@ -165,7 +168,7 @@ class Transpiler(object):
             f.writelines(data)
         return prepared_c_file, result_path
 
-    def remove_unused_eo_files(self) -> None:
+    def remove_unused_eo_src_files(self) -> None:
         src_eo_names = tools.search_files_by_patterns(self.path_to_eo_src, {'*.eo'}, recursive=True)
         src_eo_names = {Path(str(x).replace(str(self.path_to_eo_src), '').lstrip(os_sep)) for x in src_eo_names}
         transpiled_eo_names = {x['rel_eo_file'] for x in self.transpilation_units}
@@ -214,6 +217,22 @@ class Transpiler(object):
         for status in [tools.EXCEPTION]:
             result[tools.PASS] -= set(file for value in result[status].values() for file in value.keys())
         return result
+
+    def prepare_eo_project(self):
+        self.path_to_eo_project.mkdir(parents=True, exist_ok=True)
+        self.path_to_eo_src.mkdir(parents=True, exist_ok=True)
+        self.path_to_eo_coperators.mkdir(parents=True, exist_ok=True)
+        copyfile(self.path_to_eo_lib_pom, self.path_to_eo_project / self.path_to_eo_lib_pom.name)
+        lib_coperators = tools.search_files_by_patterns(self.path_to_eo_lib_coperators, {'*.eo'})
+        project_coperators = tools.search_files_by_patterns(self.path_to_eo_coperators, {'*.eo'})
+        for eo_lib_file in lib_coperators:
+            eo_project_file = self.path_to_eo_coperators / eo_lib_file.name
+            if not tools.compare_files_content(eo_lib_file, eo_project_file):
+                copyfile(eo_lib_file, eo_project_file)
+        lib_coperators = set(map(lambda x: x.name, lib_coperators))
+        project_coperators = set(map(lambda x: x.name, project_coperators))
+        for file in project_coperators - lib_coperators:
+            file.unlink()
 
     def move_transpiled_files(self) -> None:
         difference = []

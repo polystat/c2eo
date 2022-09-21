@@ -94,8 +94,7 @@ fabric.properties
 **/target**
 
 # EO project files
-result/eo/c2eo/src/
-result/eo/c2eo/external/
+result/**/*
 project/**/global.eo
 *.glob
 *.stat
