@@ -138,7 +138,7 @@ class Transpiler(object):
 
     def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
         eo_file = Path(f'{unit["full_name"]}.eo')
-        transpile_cmd = f'{self.codecov_arg} time -f "%e" ./c2eo {unit["prepared_c_file"]} {eo_file}'
+        transpile_cmd = f'{self.codecov_arg} /usr/bin/time -f "%e" ./c2eo {unit["prepared_c_file"]} {eo_file}'
         result = subprocess.run(transpile_cmd, shell=True, capture_output=True, text=True)
         result.stdout, result.stderr = result.stdout.splitlines(), result.stderr.splitlines()
         unit['transpilation_time'] = float(result.stderr[-1])

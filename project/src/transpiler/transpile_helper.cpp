@@ -335,8 +335,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   Stmt::StmtClass stmt_class = stmt->getStmtClass();
 
   // TEST
-  const char *stmt_class_name = stmt->getStmtClassName();
-  std::cout << "Statement Class Name = " << stmt_class_name << "\n";
+  // const char *stmt_class_name = stmt->getStmtClassName();
+  // std::cout << "Statement Class Name = " << stmt_class_name << "\n";
 
   if (stmt_class == Stmt::BinaryOperatorClass) {
     const auto *op = dyn_cast<BinaryOperator>(stmt);
@@ -423,8 +423,13 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetMemberExprEOObject(op);
   }
   if (stmt_class == Stmt::ArraySubscriptExprClass) {
+    // TEST
+    std::cout
+        << "GetStmtEOObject: stmt_class == Stmt::ArraySubscriptExprClass\n";
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     std::vector<uint64_t> dims;
+    // TEST
+    // !!std::cout << "GetStmtEOObject: before GetArraySubscriptExprEOObject\n";
     return GetArraySubscriptExprEOObject(op, &dims, 0);
   }
   if (stmt_class == Stmt::ForStmtClass) {
@@ -841,13 +846,31 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
                                        std::vector<uint64_t> *dims,
                                        size_t depth) {
+  // TEST
+  // !!std::cout << "GetArraySubscriptExprEOObject: op = " << op << "\n";
+  //   auto op_type = op->getType();
+  //   auto op_typestr = op_type->;
+  //   getNameAsString()
   std::vector<uint64_t> tmp_dims;
   auto decl_info = getMultiDimArrayTypeSize(op, &tmp_dims);
+  // TEST
+  // !!std::cout << "GetArraySubscriptExprEOObject: tmp_dims.size() = "
+  // !!<< tmp_dims.size() << "\n";
   if (tmp_dims.size() > dims->size()) {
     dims = &tmp_dims;
   }
+  // TEST
+  // !!std::cout << "GetArraySubscriptExprEOObject: dims->size() = " <<
+  // dims->size()
+  // !!<< "\n";
 
   uint64_t dim_size = decl_info.first;  // current dimension size.
+  // TEST
+  // !!std::cout << "GetArraySubscriptExprEOObject: dim_size = " << dim_size <<
+  // "\n";
+  //   if(dim_size == 0) {
+  //     return EOObject{EOObjectType::EO_PLUG};
+  //   }
 
   for (int i = 0; i < depth && i < dims->size(); ++i) {
     dim_size *= dims->at(i);
@@ -865,6 +888,9 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
 
       auto stmt_class = base_ch->getStmtClass();
       if (stmt_class == Stmt::ArraySubscriptExprClass) {
+        // TEST
+        // !! "GetArraySubscriptExprEOObject: stmt_class == "
+        "Stmt::ArraySubscriptExprClass\n";
         EOObject add_shift{"plus"};
 
         const auto *arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
@@ -892,8 +918,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
       if (stmt_class == Stmt::DeclRefExprClass) {
         if (depth == 0) {
           // TEST
-          // std::cout << "(Stmt::DeclRefExprClass || Stmt::MemberExprClass) &&
-          // depth == 0\n";
+          // !!std::cout << "Stmt::DeclRefExprClass && depth == 0\n";
           EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(curr_shift);
@@ -907,8 +932,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
       } else if (stmt_class == Stmt::MemberExprClass) {
         if (depth == 0) {
           // TEST
-          // std::cout << "(Stmt::DeclRefExprClass || Stmt::MemberExprClass) &&
-          // depth == 0\n";
+          // !!std::cout << "Stmt::MemberExprClass && depth == 0\n";
           EOObject final_write{"plus"};
           final_write.nested.emplace_back(decl_info.second);
           final_write.nested.emplace_back(curr_shift);
@@ -928,14 +952,23 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
 
 std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
     const ArraySubscriptExpr *op, std::vector<uint64_t> *dims) {
+  // TEST
+  // std::cout << "getMultiDimArrayTypeSize: started\n";
   if (op == nullptr) {
     return std::make_pair(0, EOObject{EOObjectType::EO_PLUG});
   }
   for (const auto *base_ch : op->getBase()->children()) {
+    // TEST
+    // std::cout << "getMultiDimArrayTypeSize: for loop...\n";
     auto stmt_class = base_ch->getStmtClass();
     if (stmt_class == Stmt::DeclRefExprClass) {
+      // TEST
+      std::cout
+          << "getMultiDimArrayTypeSize: stmt_class == Stmt::DeclRefExprClass\n";
       const auto *decl_ref_expr = dyn_cast<DeclRefExpr>(base_ch);
       if (decl_ref_expr == nullptr) {
+        // TEST
+        // std::cout << "getMultiDimArrayTypeSize: decl_ref_expr == nullptr\n";
         continue;
       }
       auto qt = decl_ref_expr->getType();
@@ -946,6 +979,9 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       return std::make_pair(sz, arr_name);
     }
     if (stmt_class == Stmt::ArraySubscriptExprClass) {
+      // TEST
+      // std::cout << "getMultiDimArrayTypeSize: stmt_class ==
+      // Stmt::ArraySubscriptExprClass\n";
       const auto *arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
       if (arr_sub_expr == nullptr) {
         continue;
@@ -961,27 +997,44 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       return getMultiDimArrayTypeSize(arr_sub_expr, dims);
     }
     if (stmt_class == Stmt::MemberExprClass) {
+      // TEST
+      // std::cout << "getMultiDimArrayTypeSize: stmt_class ==
+      // Stmt::MemberExprClass\n";
       const auto *memb_expr = dyn_cast<MemberExpr>(base_ch);
       if (memb_expr == nullptr) {
+        // TEST
+        // std::cout << "getMultiDimArrayTypeSize: memb_expr == nullptr\n";
         continue;
       }
       const auto *child = dyn_cast<Expr>(*memb_expr->child_begin());
       if (child == nullptr) {
+        // TEST
+        // std::cout << "getMultiDimArrayTypeSize: child == nullptr\n";
         continue;
       }
       QualType qual_type = child->getType();
+      // Где-то здесь должен пойти дальнейший разбор выражения...
       EOObject arr_name = GetStmtEOObject(op->getBase());
-      size_t sz = transpiler.record_manager_
-                      .GetById(qual_type->getAsRecordDecl()->getID())
-                      ->size;
+      size_t sz = 0;
+      if (qual_type->isPointerType()) {
+        //|| qual_type->isArrayType())
+        sz = 8;
+      } else {
+        sz = GetTypeSize(qual_type);
+      }
+      // TEST
+      // std::cout << "getMultiDimArrayTypeSize: sz = " << sz << "\n";
       return std::make_pair(sz, arr_name);
     }
+    return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
     std::cerr << base_ch->getStmtClassName() << "\n\n";
   }
   return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
+  // TEST
+  // !!std::cout << "GetMemberExprEOObject: start\n";
   EOObject member{"plus"};
   if (op == nullptr) {
     return member;
@@ -1021,9 +1074,9 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
   size_t shift = 0;
   for (const auto *arg : op->arguments()) {
     // TEST
-    std::cout << "Begin GetEOParamsList\n";
+    // std::cout << "Begin GetEOParamsList\n";
     if (arg == nullptr) {
-      call.nested.push_back(EOObject{EOObjectType::EO_PLUG});
+      call.nested.emplace_back(EOObject{EOObjectType::EO_PLUG});
       return shift;
     }
     auto arg_type = arg->getType();
@@ -1035,8 +1088,6 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
     } else {
       type_size = GetTypeSize(arg_type);
     }
-    // TEST
-    std::cout << "Checkpoint 01 GetEOParamsList\n";
     EOObject param{"write"};
     string postfix = GetPostfix(arg_type);
     if (!postfix.empty()) {
@@ -1049,15 +1100,11 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
     add.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
     address.nested.push_back(add);
     param.nested.push_back(address);
-    // TEST
-    std::cout << "Checkpoint 02 GetEOParamsList\n";
     param.nested.push_back(GetStmtEOObject(arg));
-    // TEST
-    std::cout << "Checkpoint 03 GetEOParamsList\n";
     shift += type_size;
     call.nested.push_back(param);
     // TEST
-    std::cout << "End GetEOParamsList\n";
+    // std::cout << "End GetEOParamsList\n";
   }
   return shift;
 }
@@ -1092,7 +1139,6 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
   }
   // TEST
   // std::cout << "NamArgs = " << op->getNumArgs() << "\n";
-  auto expr_class = op->getStmtClass();
   const auto *func_decl = op->getDirectCallee();
   // ======= The function call =======
   if (func_decl != nullptr) {  // The direct function call generation
@@ -1585,8 +1631,6 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
   if (op == nullptr) {
     return EOObject{EOObjectType::EO_EMPTY};
   }
-  // TEST
-  std::cout << "GetEODeclRefExpr Checkpoint 01\n";
   try {
     const auto *val = op->getFoundDecl();
     auto decl_kind = val->getKind();
@@ -1631,10 +1675,7 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{EOObjectType::EO_PLUG};
       //       return EOObject{var.alias};
     }
-    // TEST
-    std::cout << "GetEODeclRefExpr Checkpoint 02\n";
     EOObject other_object{var.alias};
-    std::cout << "GetEODeclRefExpr Checkpoint 03\n";
     return other_object;
   } catch (std::invalid_argument &) {
     return EOObject{EOObjectType::EO_PLUG};
@@ -1776,7 +1817,7 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
 uint64_t GetTypeSize(QualType qual_type) {
   const clang::Type *type_ptr = qual_type.getTypePtr();
   if (type_ptr == nullptr) {
-    std::cout << "Incorrect Type Pointer\n";
+    // !!std::cout << "Incorrect Type Pointer\n";
     return 0;
   }
   TypeInfo type_info = context->getTypeInfo(type_ptr);
