@@ -14,6 +14,7 @@ int main() {
   int64 result;
   result = 0;
   printf("%lld\n", result);
+//   result = min(5, 2);
 
   return 0;
 }

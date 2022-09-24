@@ -25,6 +25,7 @@
 #include "src/transpiler/function_manager.h"
 
 #include <iostream>
+#include <map>
 #include <vector>
 
 #include "src/transpiler/transpile_helper.h"
@@ -57,12 +58,40 @@ void FunctionManager::AddDeclaration(const FunctionDeclaration &func_decl) {
 void FunctionManager::AddEoObject(const EOObject &func) {
   functions.push_back(func);
 }
-
+//------------------------------------------------------------------------------
+void FunctionManager::AddToMap(std::string *func_name) {
+  if (func_name_map.find(*func_name) == func_name_map.end()) {
+    if (*func_name == "f-printf") {
+      func_name_map["printf"] = name_count++;
+    } else {
+      func_name_map[*func_name] = name_count++;
+    }
+  }
+}
+//------------------------------------------------------------------------------
+void FunctionManager::ReverseMapToArrayMap() {
+  for (const auto &func_pair : func_name_map) {
+    func_name_map_as_array[func_pair.second] = func_pair.first;
+  }
+}
 //------------------------------------------------------------------------------
 const std::vector<EOObject> &FunctionManager::GetAllEoDefinitions() {
   return functions;
 }
-
+//------------------------------------------------------------------------------
+const std::vector<FunctionDeclaration>
+    &FunctionManager::GetAllFuncDeclarations() {
+  return declarations;
+}
+//------------------------------------------------------------------------------
+const std::vector<FunctionDefinition>
+    &FunctionManager::GetAllFuncDefinitions() {
+  return definitions;
+}
+//------------------------------------------------------------------------------
+std::map<int, std::string> &FunctionManager::GetFuncArray() {
+  return func_name_map_as_array;
+}
 //------------------------------------------------------------------------------
 EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
                                           size_t param_size) const {
@@ -90,7 +119,33 @@ EOObject FunctionManager::GetFunctionCall(const clang::FunctionDecl *FD,
                              EOObjectType::EO_LITERAL);
     return call;
   }
-  return EOObject(EOObjectType::EO_PLUG);
+  // Kernigan default declaration
+  auto func_name{FD->getNameAsString()};
+  EOObject call("f-" + func_name);
+  call.prefix = "root";
+  call.nested.emplace_back("empty-local-position");
+  call.nested.emplace_back(std::to_string(param_size),
+                           EOObjectType::EO_LITERAL);
+  return call;
+  // return EOObject(EOObjectType::EO_PLUG);
+}
+
+//------------------------------------------------------------------------------
+std::string FunctionManager::GetEOFunctionName(
+    const clang::FunctionDecl *FD) const {
+  auto res_def = std::find_if(
+      definitions.begin(), definitions.end(),
+      [&FD](const FunctionDefinition &decl) { return decl.FD == FD; });
+  if (res_def != definitions.end()) {
+    return res_def->name;
+  }
+  auto res_decl = std::find_if(
+      declarations.begin(), declarations.end(),
+      [&FD](const FunctionDeclaration &decl) { return decl.FD == FD; });
+  if (res_decl != declarations.end()) {
+    return res_decl->name;
+  }
+  return "no-function-name";
 }
 
 __attribute__((unused)) void FunctionManager::TestOut() {
@@ -109,5 +164,17 @@ __attribute__((unused)) void FunctionManager::TestOut() {
     }
   } else {
     std::cout << "No function definitions\n";
+  }
+  if (!func_name_map.empty()) {
+    std::cout << "Function names in map:\n";
+    for (const auto &func_pair : func_name_map) {
+      std::cout << func_pair.first << "[" << func_pair.second << "]\n";
+    }
+    std::cout << "Function names in array:\n";
+    for (const auto &func_pair : func_name_map_as_array) {
+      std::cout << func_pair.first << ": " << func_pair.second << "\n";
+    }
+  } else {
+    std::cout << "No names in function map\n";
   }
 }

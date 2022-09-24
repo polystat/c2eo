@@ -26,6 +26,7 @@
 #define PROJECT_SRC_TRANSPILER_FUNCTION_MANAGER_H_
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -58,10 +59,22 @@ struct FunctionManager {
   void AddDeclaration(const FunctionDeclaration &func_decl);
   void AddEoObject(const EOObject &func);
 
+  void AddToMap(std::string *func_name);
+  int GetMapIndex(std::string *func_name) { return func_name_map[*func_name]; }
+  void ReverseMapToArrayMap();
+
   const std::vector<EOObject> &GetAllEoDefinitions();
 
   EOObject GetFunctionCall(const clang::FunctionDecl *FD,
                            size_t param_size) const;
+  std::string GetEOFunctionName(const clang::FunctionDecl *FD) const;
+
+  std::map<int, std::string> &GetFuncArray();
+
+  void SetNameCount(int value) { name_count = value; }
+
+  const std::vector<FunctionDeclaration> &GetAllFuncDeclarations();
+  const std::vector<FunctionDefinition> &GetAllFuncDefinitions();
 
   __attribute__((unused)) void TestOut();
 
@@ -69,6 +82,9 @@ struct FunctionManager {
   std::vector<FunctionDefinition> definitions;
   std::vector<FunctionDeclaration> declarations;
   std::vector<EOObject> functions;
+  std::map<std::string, int> func_name_map;
+  std::map<int, std::string> func_name_map_as_array;
+  int name_count;
 };
 
 #endif  // PROJECT_SRC_TRANSPILER_FUNCTION_MANAGER_H_

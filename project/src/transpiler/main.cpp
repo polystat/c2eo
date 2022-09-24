@@ -123,7 +123,7 @@ int main(int argc, const char **argv) {
   if (pos != std::string::npos) {
     path_name = filename.substr(0, pos + 1);
   }
-  UnitTranspiler::SetPathName(path_name);
+  transpiler.SetPathName(path_name);
 
   int parser_argc = parser_arg_count;
   auto expected_parser = CommonOptionsParser::create(
