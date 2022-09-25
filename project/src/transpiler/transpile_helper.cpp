@@ -1644,7 +1644,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         uint64_t type_size = 0;
         if (item_type->isCharType()) {
           constData.name += "-as-string";
-          type_size = eoRight.name.length() - 2;
+          type_size = eoRight.name.length() - 1;
         } else {
           constData.name += "-as-" + GetTypeName(item_type);
           const clang::Type *type_ptr = item_type.getTypePtr();

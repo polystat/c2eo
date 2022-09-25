@@ -31,7 +31,9 @@
 #include <utility>
 
 #include "src/transpiler/transpile_helper.h"
-
+//#include "unit_transpiler.h"
+//extern UnitTranspiler transpiler;
+//extern clang::ASTContext *context;
 Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
                             const std::string &type, const std::string &alias,
                             EOObject value, std::string local_name,
@@ -194,11 +196,64 @@ EOObject Variable::GetInitializer() const {
     // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   } else {
-    // Probably just emplace value.
-    res.nested.emplace_back(value);
+    res.nested.push_back(value);
   }
   return res;
 }
+//EOObject Variable::GetInitializer() const {
+//  if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
+//    return ReplaceEmpty(value, {alias, EOObjectType::EO_LITERAL});
+//  }
+//  if (!is_initialized) {
+//    return EOObject(EOObjectType::EO_EMPTY);
+//  }
+//  EOObject res("write");
+//  EOObject constData{"write"};
+//  EOObject _value = value;
+//  if (type_postfix == "ptr" && value.nested.empty()) {
+//    clang::QualType item_type =
+//        llvm::dyn_cast<clang::PointerType>(id->getType())->getPointeeType();
+//    std::string element_type_postfix = GetTypeName(item_type);
+//    if (element_type_postfix != "undefinedtype") {
+//      uint64_t type_size = 0;
+//      if (item_type->isCharType()) {
+//        constData.name += "-as-string";
+//        type_size = value.name.length() - 1;
+//      } else {
+//        constData.name += "-as-" + GetTypeName(item_type);
+//        const clang::Type *type_ptr = item_type.getTypePtr();
+//        clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
+//        type_size = type_info.Width;
+//      }
+//      EOObject address{"address"};
+//      address.nested.emplace_back("global-ram");
+//      address.nested.emplace_back(
+//          std::to_string(transpiler.glob_.GetFreeSpacePointer()));
+//      transpiler.glob_.ShiftFreeSpacePointer(type_size);
+//      constData.nested.push_back(address);
+//      constData.nested.push_back(value);
+//      _value = EOObject{"addr-of"};
+//      _value.nested.push_back(address);
+//    }
+//  }
+//  if (!type_postfix.empty()) {
+//    res.name += "-as-" + type_postfix;
+//  }
+//  res.nested.emplace_back(alias);
+//  if (value.type == EOObjectType::EO_PLUG) {
+//    // Probably just emplace value.
+//    res.nested.emplace_back(EOObjectType::EO_PLUG);
+//  } else {
+//    res.nested.push_back(_value);
+//  }
+//  if (constData.nested.empty()) {
+//    return res;
+//  }
+//  EOObject ret{EOObjectType::EO_EMPTY};
+//  ret.nested.push_back(constData);
+//  ret.nested.push_back(res);
+//  return ret;
+//}
 
 EOObject Variable::GetAddress(const std::string &mem_name) const {
   EOObject address("address", alias);
