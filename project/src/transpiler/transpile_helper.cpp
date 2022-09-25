@@ -1635,10 +1635,10 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   if (left != nullptr) {
     QualType qual_type = left->getType();
-    EOObject eoLeft = GetStmtEOObject(left);
     EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
     if (qual_type->isPointerType() && eoRight.nested.empty()) {
-      QualType item_type = dyn_cast<clang::PointerType>(qual_type)->getPointeeType();
+      QualType item_type =
+          dyn_cast<clang::PointerType>(qual_type)->getPointeeType();
       uint64_t type_size = 0;
       if (item_type->isCharType()) {
         constData.name += "-as-string";
@@ -1664,7 +1664,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
     if (!qual_type->isRecordType()) {
       binary_op.name += "-as-" + GetTypeName(qual_type);
     }
-    binary_op.nested.emplace_back(eoLeft);
+    binary_op.nested.emplace_back(GetStmtEOObject(left));
     binary_op.nested.push_back(eoRight);
     if (constData.nested.empty()) {
       return binary_op;
@@ -1942,7 +1942,7 @@ std::string GetTypeName(QualType qual_type) {
   }
   if (type_ptr->ConstantArray) {
     const auto *const arr_type = dyn_cast<clang::ConstantArrayType>(type_ptr);
-    if (arr_type->getElementType()->isCharType()) {
+    if (arr_type != nullptr && arr_type->getElementType()->isCharType()) {
       str += "string";
       return str;
     }
