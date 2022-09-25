@@ -152,7 +152,6 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
-EOObject GetEOStringToCharArray(const EOObject &object, const string &strValue);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -1632,43 +1631,42 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   EOObject binary_op{"write"};
+  EOObject constData{"write"};
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   if (left != nullptr) {
     QualType qual_type = left->getType();
-    if (!qual_type->isRecordType()) {
-      string type = GetTypeName(left->getType());
-      if (type == "string") {
-        return GetEOStringToCharArray(
-            GetStmtEOObject(left), GetStmtEOObject(p_operator->getRHS()).name);
+    EOObject eoLeft = GetStmtEOObject(left);
+    EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
+    if (qual_type->isPointerType() && eoRight.nested.empty()) {
+
+      QualType item_type = dyn_cast<clang::PointerType>(qual_type)->getPointeeType();
+      if (item_type->isCharType()) {
+        constData.name += "-as-string";
+      } else {
+        constData.name += "-as-" + GetTypeName(item_type);
       }
-      binary_op.name += "-as-" + type;
+      EOObject address{"address"};
+      address.nested.emplace_back("global-ram");
+      address.nested.emplace_back("160"); //todo
+      constData.nested.push_back(address);
+      constData.nested.push_back(eoRight);
+      eoRight = EOObject{"addr-of"};
+      eoRight.nested.push_back(address);
     }
-    binary_op.nested.emplace_back(GetStmtEOObject(left));
-    binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
-    return binary_op;
+    if (!qual_type->isRecordType()) {
+      binary_op.name += "-as-" + GetTypeName(qual_type);
+    }
+    binary_op.nested.emplace_back(eoLeft);
+    binary_op.nested.push_back(eoRight);
+    if (constData.nested.empty()) {
+      return binary_op;
+    }
+    EOObject res{EOObjectType::EO_EMPTY};
+    res.nested.push_back(constData);
+    res.nested.push_back(binary_op);
+    return res;
   }
   return EOObject{EOObjectType::EO_PLUG};
-}
-EOObject GetEOStringToCharArray(const EOObject &object,
-                                const string &strValue) {
-  EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  for (int i = 1; i < strValue.length(); i++) {
-    EOObject eoChar{"write-as-int8"};
-    EOObject addr{"plus"};
-    addr.nested.push_back(object);
-    EOObject shift{"times"};
-    shift.nested.emplace_back(to_string(i - 1));
-    shift.nested.emplace_back("1");
-    addr.nested.emplace_back(shift);
-    eoChar.nested.push_back(addr);
-    if (i + 1 == strValue.length()) {
-      eoChar.nested.emplace_back("0");
-    } else {
-      eoChar.nested.emplace_back(to_string(static_cast<int>(strValue[i])));
-    }
-    eoList.nested.push_back(eoChar);
-  }
-  return eoList;
 }
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
@@ -1931,13 +1929,15 @@ std::string GetTypeName(QualType qual_type) {
   }
 
   if (type_ptr->isPointerType()) {
-    const auto *const ptr_type = dyn_cast<clang::PointerType>(type_ptr);
-    if (ptr_type != nullptr && ptr_type->getPointeeType()->isCharType()) {
-      str += "string";
-    } else {
-      str += "ptr";
-    }
+    str += "ptr";
     return str;
+  }
+  if (type_ptr->ConstantArray) {
+    const auto *const arr_type = dyn_cast<clang::ConstantArrayType>(type_ptr);
+    if (arr_type->getElementType()->isCharType()) {
+      str += "string";
+      return str;
+    }
   }
 
   if (type_ptr->isFloatingType()) {
