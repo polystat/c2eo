@@ -1639,17 +1639,18 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
     if (qual_type->isPointerType() && eoRight.nested.empty()) {
       QualType item_type =
           dyn_cast<clang::PointerType>(qual_type)->getPointeeType();
-      uint64_t type_size = 0;
-      if (item_type->isCharType()) {
-        constData.name += "-as-string";
-        type_size = eoRight.name.length() - 2;
-      } else {
-        constData.name += "-as-" + GetTypeName(item_type);
-        const clang::Type *type_ptr = item_type.getTypePtr();
-        TypeInfo type_info = context->getTypeInfo(type_ptr);
-        type_size = type_info.Width;
-      }
-      {
+      string type_postfix = GetTypeName(item_type);
+      if (type_postfix != "undefinedtype") {
+        uint64_t type_size = 0;
+        if (item_type->isCharType()) {
+          constData.name += "-as-string";
+          type_size = eoRight.name.length() - 2;
+        } else {
+          constData.name += "-as-" + GetTypeName(item_type);
+          const clang::Type *type_ptr = item_type.getTypePtr();
+          TypeInfo type_info = context->getTypeInfo(type_ptr);
+          type_size = type_info.Width;
+        }
         EOObject address{"address"};
         address.nested.emplace_back("global-ram");
         address.nested.emplace_back(
