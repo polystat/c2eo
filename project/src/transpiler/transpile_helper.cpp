@@ -853,6 +853,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
   //   auto op_typestr = op_type->;
   //   getNameAsString()
   std::vector<uint64_t> tmp_dims;
+//  size_t ptr_size = dims->empty() ? 0 : dims->at(dims->size() - 1);
   auto decl_info = getMultiDimArrayTypeSize(op, &tmp_dims);
   // TEST
   // !!std::cout << "GetArraySubscriptExprEOObject: tmp_dims.size() = "
@@ -973,10 +974,35 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
         continue;
       }
       auto qt = decl_ref_expr->getType();
+      auto n = decl_ref_expr->getStmtClassName();
       EOObject arr_name = GetStmtEOObject(op->getBase());
-      size_t sz =
-          decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
-          byte_size;
+      size_t sz;
+      if (qt->isPointerType()) {
+        sz = 8;
+      } else {
+        sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
+             byte_size;
+      }
+//      else if (qt->isArrayType()) {
+//        const auto *c_arr = dyn_cast<clang::ConstantArrayType>(qt);
+//        auto elem_qt = c_arr->getElementType();
+//        sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(elem_qt).Width /
+//             byte_size;
+//      }
+
+//      sz = decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
+//           byte_size;
+//      if (qt->isPointerType()) {
+//        sz = GetTypeSize(qt);
+//        const auto *pt = qt.getTypePtr()->getPointeeType()->getAs<clang::ParenType>();
+//        if (pt != nullptr) {
+//          if (pt->getInnerType()->isArrayType()) {
+//            const auto *ca = dyn_cast<clang::ConstantArrayType>(pt->getInnerType());
+//            auto eqt = ca->getElementType();
+//            sz = GetTypeSize(eqt);
+//          }
+//        }
+//      }
       return std::make_pair(sz, arr_name);
     }
     if (stmt_class == Stmt::ArraySubscriptExprClass) {
@@ -991,8 +1017,13 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
       if (qt->isArrayType()) {
         const auto *arr = qt->getAsArrayTypeUnsafe();
         if (arr->isConstantArrayType()) {
-          const auto *const_arr = dyn_cast<clang::ConstantArrayType>(qt);
-          dims->emplace_back(const_arr->getSize().getLimitedValue());
+          const auto *const_arr = dyn_cast<clang::ConstantArrayType>(arr);
+          if (const_arr == nullptr) {
+            dims->emplace_back(1);
+          } else {
+            auto x = const_arr->getSize().getLimitedValue();
+            dims->emplace_back(const_arr->getSize().getLimitedValue());
+          }
         }
       }
       return getMultiDimArrayTypeSize(arr_sub_expr, dims);
@@ -1871,6 +1902,8 @@ uint64_t GetTypeSize(QualType qual_type) {
     return 0;
   }
   TypeInfo type_info = context->getTypeInfo(type_ptr);
+  auto s = type_ptr->getTypeClassName();
+  auto v = type_info.Align;
   uint64_t type_size = type_info.Width;
 
   if (type_ptr->isPointerType()) {
