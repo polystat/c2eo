@@ -1638,20 +1638,28 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
     EOObject eoLeft = GetStmtEOObject(left);
     EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
     if (qual_type->isPointerType() && eoRight.nested.empty()) {
-
       QualType item_type = dyn_cast<clang::PointerType>(qual_type)->getPointeeType();
+      uint64_t type_size = 0;
       if (item_type->isCharType()) {
         constData.name += "-as-string";
+        type_size = eoRight.name.length() - 2;
       } else {
         constData.name += "-as-" + GetTypeName(item_type);
+        const clang::Type *type_ptr = item_type.getTypePtr();
+        TypeInfo type_info = context->getTypeInfo(type_ptr);
+        type_size = type_info.Width;
       }
-      EOObject address{"address"};
-      address.nested.emplace_back("global-ram");
-      address.nested.emplace_back("160"); //todo
-      constData.nested.push_back(address);
-      constData.nested.push_back(eoRight);
-      eoRight = EOObject{"addr-of"};
-      eoRight.nested.push_back(address);
+      {
+        EOObject address{"address"};
+        address.nested.emplace_back("global-ram");
+        address.nested.emplace_back(
+            to_string(transpiler.glob_.GetFreeSpacePointer()));
+        transpiler.glob_.ShiftFreeSpacePointer(type_size);
+        constData.nested.push_back(address);
+        constData.nested.push_back(eoRight);
+        eoRight = EOObject{"addr-of"};
+        eoRight.nested.push_back(address);
+      }
     }
     if (!qual_type->isRecordType()) {
       binary_op.name += "-as-" + GetTypeName(qual_type);

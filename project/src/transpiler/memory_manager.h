@@ -90,6 +90,8 @@ class MemoryManager {
 
   [[nodiscard]] size_t GetFreeSpacePointer() const;
 
+  void ShiftFreeSpacePointer(uint64_t shift);
+
   const Variable &GetVarById(const clang::VarDecl *id) const;
 
   [[nodiscard]] std::vector<Variable>::const_iterator begin() const;
