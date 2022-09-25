@@ -57,19 +57,15 @@ path_to_csmith: ../../../csmith/src/
 path_to_csmith_runtime: ../../../csmith/runtime/
 path_to_eo: eo/
 path_to_eo_external: ../../result/eo/c2eo/external/
+path_to_eo_coperators: ../../result/eo/c2eo/coperators/
+path_to_eo_lib_coperators: ../eo-lib/coperators/
+path_to_eo_lib_pom: ../eo-lib/pom.xml
 path_to_eo_parse: target/01-parse/
 path_to_eo_project: ../../result/
 path_to_eo_src: ../../result/eo/c2eo/src/
 path_to_foreign_objects: target/eo/foreign.csv
 path_to_meta: data/meta/
 path_to_tests: ../tests/main/
-patterns_for_cleaning:
-- '*.alias'
-- '*-eo.c'
-- '*.eo'
-- '*.out'
-- '*.log'
-- '*.txt'
-- '*.i'
+cleaning_patterns: '*.alias *-eo.c *.eo *.out *.log *.txt *.i'
 result_dir_name: c2eo-result
 run_sh_replace: <object_name>

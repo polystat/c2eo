@@ -41,9 +41,16 @@ __attribute__((unused)) void ArrayToBytes(__attribute__((unused))
                                           std::string &string);
 
 EOObject InitValueEOObj(const VarDecl *VD, bool is_init);
+
 Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
                          size_t shift) {
+  // TEST Out of ProcessVariable input
+  // std::cout << "ProcessVariable\n";
+
   auto var_name = VD->getNameAsString();
+  // TEST
+  // std::cout << "var_name = " << var_name << "\n";
+
   clang::QualType qual_type = VD->getType();
   clang::TypeInfo type_info = VD->getASTContext().getTypeInfo(qual_type);
   auto type_size = type_info.Width / byte_size;
@@ -88,6 +95,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   return transpiler.glob_.Add(VD, type_size, str_type, "l-" + var_name,
                               initial_value, local_name, shift, VD->hasInit());
 }
+
 EOObject InitValueEOObj(const VarDecl *VD, bool is_init) {
   if (is_init) {
     return InitValueAnalysis(VD);
@@ -123,6 +131,9 @@ EOObject InitValueAnalysis(const VarDecl *VD) {
 
 EOObject InitZeroValueAnalysis(const VarDecl *VD) {
   auto qual_type = VD->getType();
+  // TEST
+  // std::cout << "InitZeroValueAnalysis - start\n";
+
   const auto *type_ptr = qual_type.getTypePtr();
   std::string str;
   if (type_ptr->isIntegerType() || type_ptr->isBooleanType() ||

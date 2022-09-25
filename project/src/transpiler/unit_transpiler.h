@@ -35,7 +35,12 @@
 
 class UnitTranspiler {
  public:
-  UnitTranspiler() = default;
+  //   UnitTranspiler() = default;
+  UnitTranspiler() {
+    func_manager_.SetNameCount(0);
+    std::string tmp_str{"null-function"};
+    func_manager_.AddToMap(&tmp_str);
+  }
 
   // MemoryManager glob_{"global-ram", 8}, ret_{"return-ram"};
   MemoryManager glob_{"global-ram"}, ret_{"return-ram"};
@@ -48,7 +53,8 @@ class UnitTranspiler {
   std::set<std::string> used_external_objects_;
 
   void SetPackageName(std::string package_name);
-  static void SetPathName(std::string path_name);
+  //   static void SetPathName(std::string path_name);
+  void SetPathName(std::string &path_name);
   // std::vector<EOObject>
 
   void GenerateMeta();

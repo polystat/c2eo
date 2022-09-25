@@ -9,8 +9,19 @@ on:
     - cron:  '0 23 * * *'
 
 jobs:
+  xcop:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: g4s8/xcop-action@master
 
-  cpp-lint:
+  pdd:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: g4s8/pdd-action@master
+
+  cpplint:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -18,7 +29,7 @@ jobs:
       - name: Install cpplint
         run: sudo pip install cpplint
 
-      - name: Cpp-lint
+      - name: Cpplint
         run: cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/**
 
   clang-format:
@@ -34,7 +45,7 @@ jobs:
           fallback-style: 'Google'
 
   clang-tidy:
-    needs: [cpp-lint, clang-format]
+    needs: [cpplint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -56,7 +67,7 @@ jobs:
         run: cd ./project/scripts && python3 clang_tidy.py
 
   gcc-c-torture:
-    needs: [cpp-lint, clang-format]
+    needs: [cpplint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -86,7 +97,7 @@ jobs:
         run: cd ./project/scripts && python3 transpile.py ../../gcc.c-torture -s gcc -n
 
   c-testcuite:
-    needs: [cpp-lint, clang-format]
+    needs: [cpplint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -126,8 +137,8 @@ jobs:
           name: testcuite
           path: project/bin/codecov.txt
 
-  test:
-    needs: [cpp-lint, clang-format]
+  test_main:
+    needs: [cpplint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -158,7 +169,7 @@ jobs:
           path: project/bin/codecov.txt
 
   csmith:
-    needs: [cpp-lint, clang-format]
+    needs: [cpplint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -183,13 +194,24 @@ jobs:
           make
 
       - name: Generating tests
-        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 1000
+        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 100
         
       - name: Transpilation
-        run: cd ./project/scripts && python3 transpile.py ../tests/main/csmith -n
+        run: cd ./project/scripts && python3 transpile.py ../tests/main/csmith -n || true
+
+      - name: Clean test directory
+        run: cd ./project/scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
+
+      - name: Make archive from csmith tests
+        run:  tar -cf csmith.tar.gz ./project/tests/main/csmith
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: csmith
+          path: csmith.tar.gz
 
   unit-tests:
-    needs: [cpp-lint, clang-format]
+    needs: [cpplint, clang-format]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
@@ -212,16 +234,23 @@ jobs:
         run: cd ./project/bin/ && ./unit_tests --gtest_filter=*
 
   codecov:
-    needs: [clang-tidy, gcc-c-torture, c-testcuite, test, unit-tests]
+    needs: [clang-tidy, gcc-c-torture, c-testcuite, test_main, unit-tests]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
  
       - run: mkdir project/bin/
 
-      - name: Download codecov report
+      - name: Download test main codecov report
         uses: actions/download-artifact@v3
         with:
+          name: main
+          path: project/bin/
+
+      - name: Download testcuite codecov report
+        uses: actions/download-artifact@v3
+        with:
+          name: testcuite
           path: project/bin/
 
       - uses: codecov/codecov-action@v3

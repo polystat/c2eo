@@ -47,17 +47,17 @@ class EOBuilder(object):
         self.transpilation_units = transpilation_units
         self.errors = set()
         self.error_result = {}
-
-    def build(self) -> (set[dict], dict):
-        tools.pprint('Compilation start\n')
         original_path = Path.cwd()
         chdir(self.path_to_eo_project)
-        can_recompile = self.is_recompilation()
-        if can_recompile:
-            cmd, _ = ['mvn'], tools.pprint('\nRecompilation eo project starts')
-        else:
-            cmd, _ = ['mvn', 'clean'], tools.pprint('Full eo project compilation starts\n')
-        cmd.extend(['compile', '-D', 'jansi.force=true', '-D' 'style.color=always'])
+        self.can_recompile = self.is_recompilation()
+        chdir(original_path)
+
+    def build(self) -> (set[dict], dict):
+        original_path = Path.cwd()
+        chdir(self.path_to_eo_project)
+        cmd = ['mvn'] if self.can_recompile else ['mvn', 'clean']
+        cmd.extend(['compile', '-D', 'jansi.force=true', '-D', 'style.color=always'])
+        tools.pprint('\n', ' '.join(cmd), '\n')
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
         for line in process.stdout:
             if line:
@@ -92,23 +92,19 @@ class EOBuilder(object):
         tools.pprint()
         if difference:
             tools.pprint('EO project files are incompatible', status=tools.WARNING)
-            tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}\n')
+            tools.pprint(f'The following files may have been deleted: {sorted(difference, key=str.casefold)}', '\n')
             return False
 
         tools.pprint('EO project files are compatible', status=tools.PASS)
         return True
 
     def is_actual_object_version(self) -> bool:
-        tools.pprint('\nCheck version of compiled eo objects\n')
-        data = []
+        tools.pprint('\n', 'Check version of compiled eo objects', '\n')
         with open(self.path_to_foreign_objects) as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                data.append(row)
-        for package in data:
-            if package['version'] not in ['*.*.*', '0.0.0']:
-                compare = tools.version_compare(self.current_version, package['version'])
-                if compare <= 0:
+            for package in csv.DictReader(f):
+                if package['version'] in ['*.*.*', '0.0.0']:
+                    continue
+                if tools.version_compare(self.current_version, package['version']) == 0:
                     return True
         return False
 

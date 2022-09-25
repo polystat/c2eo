@@ -41,6 +41,7 @@ std::ostream &operator<<(std::ostream &os, UnitTranspiler unit) {
 
 void UnitTranspiler::GenerateResult() {
   EOObject body(EOObjectType::EO_ABSTRACT);
+
   body.arguments.emplace_back("args...");
   body.postfix = "global";
   body.nested.emplace_back("$", "root");
@@ -70,10 +71,49 @@ void UnitTranspiler::GenerateResult() {
       }
     }
   }
-
   for (const auto &func : func_manager_.GetAllEoDefinitions()) {
     body.nested.push_back(func);
   }
+
+  // call function generation
+  func_manager_.ReverseMapToArrayMap();
+  // TEST tmp out to see functions
+  // func_manager_.TestOut();
+  EOObject call{"[index param-start param-size] > call",
+                EOObjectType::EO_LITERAL};
+  EOObject index_of{"at. > @", EOObjectType::EO_LITERAL};
+  EOObject star{"*", EOObjectType::EO_LITERAL};
+  for (const auto &func_element : func_manager_.GetFuncArray()) {
+    std::string func_name{func_element.second};
+    bool find_flag = false;
+    auto ext_obj_to_find = FindAllExternalObjects(body);
+    for (const auto &ext_func_name : ext_obj_to_find) {
+      if (func_name != ext_func_name) {
+        continue;
+      }
+      find_flag = true;
+      break;
+    }
+    if (!find_flag) {
+      for (const auto &func : func_manager_.GetAllEoDefinitions()) {
+        std::string func_def_name = func.postfix;
+        if (func_name != func_def_name) {
+          continue;
+        }
+        find_flag = true;
+        break;
+      }
+    }
+    if (!find_flag) {
+      func_name = "null-function";
+    }
+    star.nested.emplace_back(func_name + " param-start param-size",
+                             EOObjectType::EO_LITERAL);
+  }
+  index_of.nested.push_back(star);
+  index_of.nested.emplace_back("index", EOObjectType::EO_LITERAL);
+  call.nested.push_back(index_of);
+  body.nested.push_back(call);
 
   EOObject init_seq("seq", "@");
   for (const auto &var : glob_) {
@@ -97,6 +137,8 @@ void UnitTranspiler::GenerateResult() {
   std::stringstream result;
 
   used_external_objects_ = FindAllExternalObjects(body);
+  // Null Function Alias Creating
+  result << "+alias c2eo.coperators.null-function\n";
   for (const auto &ext_obj : used_external_objects_) {
     if (known_types.find(ext_obj) == known_types.end()) {
       std::string alias;
@@ -125,8 +167,8 @@ void UnitTranspiler::SetPackageName(std::string package_name) {
   package_name_ = std::move(package_name);
 }
 
-void UnitTranspiler::SetPathName(std::string path_name) {
-  path_name = std::move(path_name);
+void UnitTranspiler::SetPathName(std::string &path_name) {
+  path_name_ = path_name;
 }
 
 void UnitTranspiler::GenerateMeta() { generate_meta_ = true; }

@@ -4,7 +4,7 @@ int
 test()
 {
 	if (x != 3)
-		return 0;
+		return 3;
 
 	x = 0;
 	return x;
