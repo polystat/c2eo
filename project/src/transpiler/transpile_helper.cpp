@@ -1646,20 +1646,22 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
           constData.name += "-as-string";
           type_size = eoRight.name.length() - 1;
         } else {
-          constData.name += "-as-" + GetTypeName(item_type);
+          constData.name += "-as-" + type_postfix;
           const clang::Type *type_ptr = item_type.getTypePtr();
           TypeInfo type_info = context->getTypeInfo(type_ptr);
           type_size = type_info.Width;
         }
-        EOObject address{"address"};
-        address.nested.emplace_back("global-ram");
-        address.nested.emplace_back(
-            to_string(transpiler.glob_.GetFreeSpacePointer()));
-        transpiler.glob_.ShiftFreeSpacePointer(type_size);
-        constData.nested.push_back(address);
-        constData.nested.push_back(eoRight);
-        eoRight = EOObject{"addr-of"};
-        eoRight.nested.push_back(address);
+        {
+          EOObject address{"address"};
+          address.nested.emplace_back("global-ram");
+          address.nested.emplace_back(
+              to_string(transpiler.glob_.GetFreeSpacePointer()));
+          transpiler.glob_.ShiftFreeSpacePointer(type_size);
+          constData.nested.push_back(address);
+          constData.nested.push_back(eoRight);
+          eoRight = EOObject{"addr-of"};
+          eoRight.nested.push_back(address);
+        }
       }
     }
     if (!qual_type->isRecordType()) {
