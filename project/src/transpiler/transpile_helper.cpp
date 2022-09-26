@@ -1943,9 +1943,9 @@ std::string GetTypeName(QualType qual_type) {
     str += "ptr";
     return str;
   }
-  if (type_ptr->ConstantArray) {
+  if (type_ptr->isConstantArrayType()) {
     const auto *const arr_type = dyn_cast<clang::ConstantArrayType>(type_ptr);
-    if (arr_type != nullptr && arr_type->getElementType()->isCharType()) {
+    if (arr_type->getElementType()->isCharType()) {
       str += "string";
       return str;
     }
