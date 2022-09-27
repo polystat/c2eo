@@ -344,6 +344,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 :x: [Not implemented](#not-implemented):
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
+- [bitwise fields](#bitwise-fields)
 
 ### :heavy_check_mark: Implemented:
 
@@ -1106,3 +1107,9 @@ int main() {
   printf("Average of 1, 2, 3 = %f\n",    average(3,  1, 2, 3));
 }
 ```
+
+### Bitwise fields
+
+In the C language, bitwise fields can be formed as structures. They provide access to
+individual bits of signed and unsigned numbers. EO does not support bitwise fields. Therefore,
+their direct implementation is impossible.
