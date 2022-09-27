@@ -119,7 +119,8 @@ class ClangTidy(object):
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='script for checking code files using Clang-Tidy')
+    _parser = argparse.ArgumentParser(description='script for checking code files using Clang-Tidy',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_code_files', default=settings.get_setting('path_to_code_files'),
                          metavar='PATH', help='the relative path from the scripts folder to the code files folder')

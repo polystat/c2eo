@@ -81,7 +81,8 @@ class Tests(object):
         tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
         tools.pprint(on_the_next_line=True)
 
-        self.last_coperators_ctime = max(x.stat().st_ctime for x in tools.search_files_by_patterns(self.path_to_eo_coperators, {'*.eo'}))
+        ctimes = [x.stat().st_ctime for x in tools.search_files_by_patterns(self.path_to_eo_coperators, {'*.eo'})]
+        self.last_coperators_ctime = max(ctimes)
         tools.pprint('\n', 'Running EO tests:', '\n', slowly=True)
         original_path = Path.cwd()
         chdir(self.path_to_eo_project)
@@ -110,7 +111,8 @@ class Tests(object):
                     unit['result_c_file'].write_text(outs + errs + str(process.returncode))
                 except subprocess.TimeoutExpired:
                     process.kill()
-                    unit['result_c_file'].write_text(f'exception: execution time of C file exceeded {timeout} seconds\n')
+                    exception_msg = f'exception: execution time of C file exceeded {timeout} seconds\n'
+                    unit['result_c_file'].write_text(exception_msg)
         self.test_handled_count += 1
         tools.print_progress_bar(self.test_handled_count, len(self.transpilation_units))
 
@@ -119,7 +121,8 @@ class Tests(object):
         unit["eo_test_time"] = 0.0
         if unit['result_eo_file'].exists():
             result_eo_ctime = unit['result_eo_file'].stat().st_ctime
-            is_old_result = result_eo_ctime < unit['eo_file'].stat().st_ctime or result_eo_ctime < self.last_coperators_ctime
+            eo_file_ctime = unit['eo_file'].stat().st_ctime
+            is_old_result = result_eo_ctime < eo_file_ctime or result_eo_ctime < self.last_coperators_ctime
         else:
             is_old_result = True
 
@@ -217,7 +220,8 @@ def compare_test_results(unit: dict[str, str | Path | CompletedProcess | float])
 
 def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(description='the script for testing the correctness of the execution of '
-                                                  'translated files from C to EO')
+                                                  'translated files from C to EO',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
                          help='the relative path from the scripts folder to the tests folder')

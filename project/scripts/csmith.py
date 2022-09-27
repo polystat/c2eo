@@ -71,7 +71,8 @@ class Csmith(object):
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for generating csmith testsuite for c2eo transpiler')
+    _parser = argparse.ArgumentParser(description='the script for generating csmith testsuite for c2eo transpiler',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('path_to_generate', metavar='PATH',
                          help='the relative path from the scripts folder to the generating folder')

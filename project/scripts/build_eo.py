@@ -23,9 +23,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
 import sys
 import csv
+import argparse
 import subprocess
 from os import chdir
 from os import sep as os_sep
@@ -120,7 +120,15 @@ class EOBuilder(object):
                 return
 
 
+def create_parser() -> argparse.ArgumentParser:
+    _parser = argparse.ArgumentParser(description='the script for building eo project in the result dir',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    return _parser
+
+
 if __name__ == '__main__':
     assert sys.version_info >= (3, 10)
     tools.move_to_script_dir(Path(sys.argv[0]))
+    parser = create_parser()
+    namespace = parser.parse_args()
     EOBuilder([]).build()
