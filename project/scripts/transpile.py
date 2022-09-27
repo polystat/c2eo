@@ -331,7 +331,8 @@ def prepare_c_code(data: list[str]) -> None:
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for translating C files to the EO files')
+    _parser = argparse.ArgumentParser(description='the script for translating C files to the EO files',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('path_to_c_files', metavar='PATH',
                          help='the relative path from the scripts folder to the folder with c files')

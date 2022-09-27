@@ -30,7 +30,6 @@ import clean_before_transpilation
 from os import chdir
 from pathlib import Path
 
-
 if __name__ == '__main__':
     path_to_c_files = Path(sys.argv[1]).resolve()
     if not path_to_c_files.exists():

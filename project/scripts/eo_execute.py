@@ -63,7 +63,8 @@ def execute(path_to_eo_file: Path):
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for executing eo files')
+    _parser = argparse.ArgumentParser(description='the script for executing eo files',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_eo_file', metavar='PATH',
                          help='the relative path from the scripts folder to the eo file')

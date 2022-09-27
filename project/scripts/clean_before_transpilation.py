@@ -24,7 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-
 import sys
 import argparse
 from pathlib import Path
@@ -44,7 +43,8 @@ def main(path_to_files: Path, cleaning_patterns) -> None:
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for cleaning the folder from temporary files')
+    _parser = argparse.ArgumentParser(description='the script for cleaning the folder from c2eo transpiled files',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_files', metavar='PATH', default=settings.get_setting('path_to_tests'),
                          help='the relative path from the scripts folder to the c files folder')

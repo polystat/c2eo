@@ -87,7 +87,7 @@ $ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA
 $ tar -xvf llvm-clang.tar.gz
 ```
 
-It is assumed that the `llvm-clang` dir is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/3f687397f245658ee4ec14583b20fe114c873b15/project/src/transpiler/CMakeLists.txt#L7).
+It is assumed that the `llvm-clang` dir is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/master/project/src/transpiler/CMakeLists.txt#L6).
 
 Formally speaking, this is where the preparation can be completed. However, in order to fully work with the project, testing and executing the translated code, you need to study the [EO compiler project](https://github.com/objectionary/eo) and fulfill its necessary requirements. After that, it will be possible to proceed with further steps.
 
@@ -318,7 +318,7 @@ Then you have to upload `./repository/dists` and `./repository/pool` to [c2eo.po
 C is a _system-level procedural_ programming language with direct access to the underlying hardware architecture elements, such as memory and registers. EO, on the other hand is a _high-level object-oriented_ language. There are a number of non-trivial mechanisms of translating constructs from the former to the latter, which are explained below:
 
 :heavy_check_mark: [Implemented](#implemented):
-- [basic data types: double, int, bool](#direct-memory-access-for-basic-data-types)
+- [basic data types: double, int, bool, char, string](#direct-memory-access-for-basic-data-types)
 - [const](#const)
 - [arrays](#arrays)
 - [structures](#structures)
@@ -338,13 +338,12 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [operators](#operators)
 
 :hammer: In progress:
-- [bit operators (inconsistent implementation in the EO)](#bit-operators)
-- [char, uint64, float (not supported by EO)](#basic-types)
+- [uint64, float (not supported by EO)](#basic-types)
+- [pointers on function](#pointers-on-function)
 
 :x: [Not implemented](#not-implemented):
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
-- [pointers on function](#pointers-on-function)
 
 ### :heavy_check_mark: Implemented:
 
@@ -648,7 +647,7 @@ strncpy str2 st1 8
 
 ### If-else
 
-In EO, we have an analog of an [if-else](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/if.eo) object, so we just convert without any significant changes.
+In EO, we have an analog of an [if-else](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if.eo) object, so we just convert without any significant changes.
 
 ```c
 if (condition) {
@@ -876,28 +875,35 @@ The table of all C operators and similar objects in the EO.
 
 С|EO
 -|-
-+|[add](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/add.eo)
--|[sub](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/sub.eo)
-*|[mul](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/mul.eo)
-/|[div](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/div.eo)
-=|[write](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/write.eo)
-%|[mod](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/mod.eo)
-==|[eq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/eq.eo)
-!=|[neq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/neq.eo)
-<|[less](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/less.eo)
-<=|[leq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/leq.eo)
-\>|[greater](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/greater.eo)
-\>=|[geq](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/geq.eo)
-&&|[and](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/and.eo)
-\|\||[or](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/or.eo)
-!|[not](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/not.eo)
--x|[neg](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/neg.eo)
-++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/pre-inc-int64.eo)
-x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/post-inc-int64.eo)
---x|[pre-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/pre-dec-int64.eo)
-x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/post-dec-int64.eo)
-(double)|[as-float64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-float64.eo)
-(long long int)|[as-int64](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/as-int64.eo)
++|[plus](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/plus.eo)
+-|[minus](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/minus.eo)
+*|[times](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/times.eo)
+*|[write\|read-as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/read-as-int64.eo)
+/|[div](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/div.eo)
+=|[write-as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/write-as-int64.eo)
+%|[mod](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/mod.eo)
+-x|[neg](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/neg.eo)
+++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pre-inc-int64.eo)
+x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/post-inc-int64.eo)
+--x|[pre-dec-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pre-dec-int64.eo)
+x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/post-dec-int64.eo)
+==|[eq](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/eq.eo)
+!=|[neq](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/neq.eo)
+<|[lt](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/lt.eo)
+<=|[lte](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/lte.eo)
+\>|[gt](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/gt.eo)
+\>=|[gte](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/gte.eo)
+&&|[and](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/and.eo)
+\|\||[or](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/or.eo)
+!|[not](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/not.eo)
+&|[bit-and](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-and.eo)
+&|[addr-of](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/addr-of.eo)
+\||[bit-or](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-or.eo)
+^|[bit-xor](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-xor.eo)
+~|[bit-not](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-not.eo)
+<<|[shift-right](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/shift-right.eo)
+\>>|[shift-left](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/shift-left.eo)
+(type casting)|[as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/as-int64.eo)
 
 ```c
 x += 10;
@@ -911,28 +917,109 @@ x.write (x.add 10)
 
 ### In progress
 
+### Pointers on function
+
+> Source: https://stackoverflow.com/questions/840501/how-do-function-pointers-in-c-work
+
+Let's start with a basic function which we will be pointing to:
+
+```c
+int addInt(int n, int m) {
+  return n + m;
+}
+```
+
+First thing, let's define a pointer to a function which receives 2 ints and returns an int:
+
+```c
+int (*functionPtr)(int, int);
+```
+
+Now we can safely point to our function:
+
+```c
+functionPtr = &addInt;
+```
+
+In EO we generate special object `call` with array for storing all function call:
+
+```java
+[index param-start param-size] > call
+    at. > @
+      *
+        <function_name_1> param-start param-size
+        addInt param-start param-size // our function has an index of 1
+        ...        
+        <function_name_n_n> param-start param-size
+      index
+```
+
+Now, if we want to assign the function to a pointer, we replace this expression with a specific index value of this function in our array
+
+```java
+write-as-ptr functionPtr 1
+```
+
+Now that we have a pointer to the function, let's use it:
+
+```c
+int sum = (*functionPtr)(2, 3); // sum == 5
+```
+
+```java
+... // before calling the function, we place its arguments in memory
+write-as-int32
+  sum
+  call
+    param-start 
+    param-size
+    read-as-ptr functionPtr // return 1
+```
+
+> Current development at this stage
+
+Passing the pointer to another function is basically the same:
+
+```c
+int add2to3(int (*functionPtr)(int, int)) {
+  return (*functionPtr)(2, 3);
+}
+```
+
+We can use function pointers in return values as well (try to keep up, it gets messy):
+
+```c
+// this is a function called functionFactory which receives parameter n
+// and returns a pointer to another function which receives two ints
+// and it returns another int
+int (*functionFactory(int n))(int, int) {
+  printf("Got parameter %d", n);
+  int (*functionPtr)(int, int) = &addInt;
+  return functionPtr;
+}
+```
+
+But it's much nicer to use a typedef:
+
+```c
+typedef int (*myFuncDef)(int, int);
+// note that the typedef name is indeed myFuncDef
+
+myFuncDef functionFactory(int n) {
+  printf("Got parameter %d", n);
+  myFuncDef functionPtr = &addInt;
+  return functionPtr;
+}
+```
+
 ### Basic types
 
 Some types are not yet implemented due to problems with working with bytes in the EO.
 
 ```c
-char a = '1';
 float b = 4.0;
 unsigned long long int c = 10223372036854775807;
 ```
-
-### Bit operators
-
-Some operators are not yet implemented due to problems with working with bytes in the EO.
-
-C|EO
--|-
-&|[bit-and](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-and.eo)
-\||[bit-or](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-or.eo)
-^|[bit-xor](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-xor.eo)
-~|[bit-not](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/bit-not.eo)
-<<|[shift-right](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-right.eo)
-\>>|[shift-left](https://github.com/polystat/c2eo/tree/master/result/eo/c2eo/coperators/shift-left.eo)
 
 ### Not implemented
 
@@ -1016,69 +1103,5 @@ double average(int num,...) {
 int main() {
   printf("Average of 1, 2, 3, 4 = %f\n", average(4,  1, 2, 3, 4));
   printf("Average of 1, 2, 3 = %f\n",    average(3,  1, 2, 3));
-}
-```
-
-### Pointers on function
-
-> Source: https://stackoverflow.com/questions/840501/how-do-function-pointers-in-c-work
-
-Let's start with a basic function which we will be pointing to:
-
-```c
-int addInt(int n, int m) {
-  return n + m;
-}
-```
-
-First thing, let's define a pointer to a function which receives 2 ints and returns an int:
-
-```c
-int (*functionPtr)(int, int);
-```
-
-Now we can safely point to our function:
-
-```c
-functionPtr = &addInt;
-```
-
-Now that we have a pointer to the function, let's use it:
-
-```c
-int sum = (*functionPtr)(2, 3); // sum == 5
-```
-
-Passing the pointer to another function is basically the same:
-
-```c
-int add2to3(int (*functionPtr)(int, int)) {
-  return (*functionPtr)(2, 3);
-}
-```
-
-We can use function pointers in return values as well (try to keep up, it gets messy):
-
-```c
-// this is a function called functionFactory which receives parameter n
-// and returns a pointer to another function which receives two ints
-// and it returns another int
-int (*functionFactory(int n))(int, int) {
-  printf("Got parameter %d", n);
-  int (*functionPtr)(int, int) = &addInt;
-  return functionPtr;
-}
-```
-
-But it's much nicer to use a typedef:
-
-```c
-typedef int (*myFuncDef)(int, int);
-// note that the typedef name is indeed myFuncDef
-
-myFuncDef functionFactory(int n) {
-  printf("Got parameter %d", n);
-  myFuncDef functionPtr = &addInt;
-  return functionPtr;
 }
 ```

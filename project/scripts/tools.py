@@ -223,11 +223,13 @@ def pprint_result(header: str, total_tests: int, total_seconds: int,
 
 def pprint_time_result(transpilation_units):
     if 'eo_test_time' in transpilation_units[0]:
-        data = [f'{u["unique_name"]}: {u["eo_test_time"]:.2f}s' for u in sorted(transpilation_units, key=lambda x: x["eo_test_time"])]
+        data = [f'{u["unique_name"]}: {u["eo_test_time"]:.2f}s' for u in
+                sorted(transpilation_units, key=lambda x: x["eo_test_time"])]
         pprint_status_result('Test time measurement for each test:', TIME, log_data=', '.join(data))
     else:
-        data = [f'{u["unique_name"]}({u["transpilation_time"]:.3f}s {u["transpilation_file_size"]:.3f}kb {u["transpilation_speed"]:.3f}s/kb)'
-                for u in sorted(transpilation_units, key=lambda x: x['transpilation_speed'])]
+        data = [
+            f'{u["unique_name"]}({u["transpilation_time"]:.3f}s {u["transpilation_file_size"]:.3f}kb {u["transpilation_speed"]:.3f}s/kb)'
+            for u in sorted(transpilation_units, key=lambda x: x['transpilation_speed'])]
         pprint_status_result('Transpilation time measurement for each file:', TIME, log_data=', '.join(data))
     print()
 

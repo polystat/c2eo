@@ -56,7 +56,8 @@ def main(path_to_c2eo_build: Path, cmake_cmd: str = 'cmake ..') -> None:
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for building c2eo in the specified directory')
+    _parser = argparse.ArgumentParser(description='the script for building c2eo in the specified directory',
+                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_c2eo_build', default=settings.get_setting('path_to_c2eo_build'),
                          metavar='PATH', help='the relative path from the scripts folder to the build folder')
