@@ -882,6 +882,7 @@ The table of all C operators and similar objects in the EO.
 /|[div](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/div.eo)
 =|[write-as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/write-as-int64.eo)
 %|[mod](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/mod.eo)
++x|[pos](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pos.eo)
 -x|[neg](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/neg.eo)
 ++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pre-inc-int64.eo)
 x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/post-inc-int64.eo)
