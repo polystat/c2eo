@@ -49,4 +49,5 @@ pr88904: Unknown statement GCCAsmStmt segfault at address 0x0 while tool run
 20000917-1: Unknown statement StmtExpr segfault at address 0x0 while tool run
 limits-blockid, limits-externalid, limits-externdecl: too much handling time
 limits-caselabels: exceeded the number of cases allowed by the c standard
-921215-1: bad C standard
+921215-1: Function inside function does not comply with the С standard
+20020604-1: Float semantics are not IEEEdouble

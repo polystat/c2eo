@@ -39,7 +39,7 @@ def main(path_to_files: Path, cleaning_patterns) -> None:
         path_to_files = path_to_files.parent
     tools.clear_dir_by_patterns(path_to_files, cleaning_patterns, recursive=True)
     tools.remove_empty_dirs(path_to_files)
-    tools.clear_dir_by_patterns(settings.get_setting('path_to_c2eo_transpiler'), {'*.eo'})
+    tools.clear_dir_by_patterns(settings.get_setting('path_to_c2eo_transpiler'), {'*.eo', '*.alias'})
 
 
 def create_parser() -> argparse.ArgumentParser:
