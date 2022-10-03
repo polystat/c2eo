@@ -24,7 +24,6 @@
 
 #include "src/transpiler/record_manager.h"
 
-#include <map>
 #include <tuple>
 #include <vector>
 

@@ -41,7 +41,7 @@ __attribute__((unused)) void ArrayToBytes(__attribute__((unused))
                                           std::string &string);
 
 EOObject InitValueEOObj(const VarDecl *VD, bool is_init);
-
+extern UnitTranspiler transpiler;
 Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
                          size_t shift) {
   // TEST Out of ProcessVariable input
@@ -57,8 +57,8 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   if (qual_type->isFloatingType() && type_size == 4) {
     type_size = 8;  // 8 bytes for float32.
   }
-
-  std::string str_type{"c_" + GetTypeName(VD->getType())};
+  TypeSimpl* typeInfo = transpiler.type_manger_.Add(VD->getType());
+  std::string str_type{"c_" + typeInfo->name};
   auto storage_class = VD->getStorageClass();
   auto static_local = VD->isStaticLocal();
   auto ext_storage = VD->hasExternalStorage();

@@ -32,6 +32,7 @@
 #include "src/transpiler/memory_manager.h"
 #include "src/transpiler/record_manager.h"
 #include "string"
+#include "type_manager.h"
 
 class UnitTranspiler {
  public:
@@ -46,6 +47,7 @@ class UnitTranspiler {
   MemoryManager glob_{"global-ram"}, ret_{"return-ram"};
   FunctionManager func_manager_;
   RecordManager record_manager_;
+  TypeManger type_manger_;
   EnumManager enum_manager_;
   friend std::ostream &operator<<(std::ostream &os, UnitTranspiler unit);
 

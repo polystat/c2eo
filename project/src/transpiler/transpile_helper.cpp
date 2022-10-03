@@ -133,9 +133,9 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
 EOObject GetSeqForBodyEOObject(const Stmt *p_stmt);
 
-uint64_t GetTypeSize(QualType qual_type);
-
-uint64_t GetSizeOfType(QualType qual_type);
+// uint64_t GetTypeSize(QualType qual_type);
+//
+// uint64_t GetSizeOfType(QualType qual_type);
 
 EOObject GetCastEOObject(const CastExpr *op);
 
@@ -547,8 +547,9 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
           llvm::dyn_cast<clang::ConstantArrayType>(elementQualType)
               ->getElementType();
     }
-    elementTypeName = GetTypeName(elementQualType);
-    elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(elementQualType);
+    elementTypeName = typeInfo->name;
+    elementSize *= typeInfo->GetSizeOfType();
   } else if (qualType->isRecordType()) {
     auto *recordType = transpiler.record_manager_.GetById(
         qualType->getAsRecordDecl()->getID());
@@ -569,7 +570,9 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     } else if (qualType->isRecordType()) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           qualType->getAsRecordDecl()->getID(), std::get<0>(*recElement)));
-      elementTypeName = GetTypeName(std::get<1>(*recElement));
+      TypeSimpl *typeInfo =
+          transpiler.type_manger_.Add(std::get<1>(*recElement));
+      elementTypeName = typeInfo->name;
       //      std::cerr << "=======\n" << elementTypeName << "\n-\n";
       //      recElement->second.first.dump();
       //      std::cerr << "=======\n\n";
@@ -759,7 +762,8 @@ EOObject GetCastEOObject(const CastExpr *op) {
   }
   auto cast_kind = op->getCastKind();
   QualType qual_type = op->getType();
-  string type = GetTypeName(qual_type);
+  TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type);
+  string type = typeInfo->name;
   if (cast_kind == clang::CK_LValueToRValue) {
     EOObject read{"read"};
     read.nested.push_back(GetStmtEOObject(*op->child_begin()));
@@ -1021,7 +1025,8 @@ std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
         //|| qual_type->isArrayType())
         sz = 8;
       } else {
-        sz = GetTypeSize(qual_type);
+        TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type);
+        sz = typeInfo->GetSizeOfType();
       }
       // TEST
       // std::cout << "getMultiDimArrayTypeSize: sz = " << sz << "\n";
@@ -1087,7 +1092,8 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
       // TEST
       // std::cout << "it is Pointer Type\n";
     } else {
-      type_size = GetTypeSize(arg_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(arg_type);
+      type_size = typeInfo->GetSizeOfType();
     }
     EOObject param{"write"};
     string postfix = GetPostfix(arg_type);
@@ -1112,10 +1118,11 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
 
 EOObject GetEOReturnValue(const CallExpr *op) {
   QualType ret_type = op->getType();
-  size_t type_size = GetTypeSize(ret_type);
+  TypeSimpl *typeInfo = transpiler.type_manger_.Add(ret_type);
+  size_t type_size = typeInfo->GetSizeOfType();
   // TEST
   // std::cout << "Return type_size = " << type_size << "\n";
-  std::string postfix = GetTypeName(ret_type);
+  std::string postfix = typeInfo->name;
   if (postfix != "undefinedtype") {
     EOObject read_ret{"read"};
     EOObject ret_val{"return"};
@@ -1286,7 +1293,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     const clang::Type *type1 = qual_type1.getTypePtrOrNull();
     if (type1->isArrayType() || type1->isPointerType()) {
       // set size of pointer shift
-      uint64_t type_size = GetTypeSize(qual_type1);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type1);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       // TEST type size output
       // std::cout << "Size of type = " << type_size << "\n";
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
@@ -1307,7 +1315,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     const clang::Type *type1 = qual_type1.getTypePtrOrNull();
     if (type1->isArrayType() || type1->isPointerType()) {
       // set size of pointer shift
-      uint64_t type_size = GetTypeSize(qual_type1);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type1);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       // TEST type size output
       // std::cout << "Size of type = " << type_size << "\n";
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
@@ -1351,7 +1360,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
     //     if (!qual_type->isRecordType()) {
     //       eo_object.name += "-as-" + GetTypeName(qual_type);
     if (!qual_type1->isRecordType()) {
-      eo_object.name += "-as-" + GetTypeName(qual_type1);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type1);
+      eo_object.name += "-as-" + typeInfo->name;
     } else {
       eo_object.nested.emplace_back(
           to_string(transpiler.record_manager_
@@ -1387,7 +1397,8 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     const clang::Type *type1 = qual_type1.getTypePtrOrNull();
     if (type1->isArrayType() || type1->isPointerType()) {
       // set size of pointer shift
-      uint64_t type_size = GetTypeSize(qual_type1);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type1);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       // TEST type size output
       // std::cout << "Size of type = " << type_size << "\n";
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
@@ -1407,7 +1418,8 @@ EOObject GetBinaryStmtEOObject(const BinaryOperator *p_operator) {
     const clang::Type *type2 = qual_type2.getTypePtrOrNull();
     if (type1->isArrayType() || type1->isPointerType()) {
       // set size of pointer shift
-      uint64_t type_size = GetTypeSize(qual_type1);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type1);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       // TEST type size output
       // std::cout << "Size of type = " << type_size << "\n";
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
@@ -1492,13 +1504,15 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   // [C99 6.5.2.4] Postfix increment and decrement
   if (op_code ==
       clang::UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc, "++")
-    std::string postfix = GetTypeName(p_operator->getType());
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(p_operator->getType());
+    std::string postfix = typeInfo->name;
     EOObject variable{"post-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     QualType result_type = p_operator->getType();
     if (result_type->isPointerType()) {
       QualType arg_type = p_operator->getType();
-      uint64_t type_size = GetTypeSize(arg_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(arg_type);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
@@ -1506,13 +1520,15 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   }
   if (op_code ==
       clang::UnaryOperatorKind::UO_PostDec) {  // UNARY_OPERATION(PostDec, "--")
-    std::string postfix = GetTypeName(p_operator->getType());
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(p_operator->getType());
+    std::string postfix = typeInfo->name;
     EOObject variable{"post-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     QualType result_type = p_operator->getType();
     if (result_type->isPointerType()) {
       QualType arg_type = p_operator->getType();
-      uint64_t type_size = GetTypeSize(arg_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(arg_type);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
@@ -1521,13 +1537,15 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   }
   if (op_code ==
       clang::UnaryOperatorKind::UO_PreInc) {  // UNARY_OPERATION(PreInc, "++")
-    std::string postfix = GetTypeName(p_operator->getType());
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(p_operator->getType());
+    std::string postfix = typeInfo->name;
     EOObject variable{"pre-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     QualType result_type = p_operator->getType();
     if (result_type->isPointerType()) {
       QualType arg_type = p_operator->getType();
-      uint64_t type_size = GetTypeSize(arg_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(arg_type);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
@@ -1535,13 +1553,15 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   }
   if (op_code ==
       clang::UnaryOperatorKind::UO_PreDec) {  // UNARY_OPERATION(PreDec, "--")
-    std::string postfix = GetTypeName(p_operator->getType());
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(p_operator->getType());
+    std::string postfix = typeInfo->name;
     EOObject variable{"pre-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     QualType result_type = p_operator->getType();
     if (result_type->isPointerType()) {
       QualType arg_type = p_operator->getType();
-      uint64_t type_size = GetTypeSize(arg_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(arg_type);
+      uint64_t type_size = typeInfo->GetSizeOfBaseType();
       EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
       variable.nested.push_back(value);
     }
@@ -1616,7 +1636,8 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   if (p_expr->isArgumentType()) {
     // Argument isTtype
     QualType qual_type = p_expr->getTypeOfArgument();
-    auto type_size = GetSizeOfType(qual_type);
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type);
+    uint64_t type_size = typeInfo->GetSizeOfType();
     std::string str_val{std::to_string(type_size)};
     return EOObject{str_val, EOObjectType::EO_LITERAL};
   }
@@ -1624,7 +1645,8 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   const auto *p_size_expr = p_expr->getArgumentExpr();
   QualType expr_type = p_size_expr->getType();
   //   auto expr_type_size = GetTypeSize(expr_type);
-  auto expr_type_size = GetSizeOfType(expr_type);
+  TypeSimpl *typeInfo = transpiler.type_manger_.Add(expr_type);
+  uint64_t expr_type_size = typeInfo->GetSizeOfType();
   std::string str_val{std::to_string(expr_type_size)};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
@@ -1639,7 +1661,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
     if (qual_type->isPointerType() && eoRight.nested.empty()) {
       QualType item_type =
           dyn_cast<clang::PointerType>(qual_type)->getPointeeType();
-      string type_postfix = GetTypeName(item_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(item_type);
+      string type_postfix = typeInfo->name;
       if (type_postfix != "undefinedtype") {
         uint64_t type_size = 0;
         if (item_type->isCharType()) {
@@ -1665,7 +1688,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
       }
     }
     if (!qual_type->isRecordType()) {
-      binary_op.name += "-as-" + GetTypeName(qual_type);
+      TypeSimpl *typeInfo = transpiler.type_manger_.Add(qual_type);
+      binary_op.name += "-as-" + typeInfo->name;
     }
     binary_op.nested.emplace_back(GetStmtEOObject(left));
     binary_op.nested.push_back(eoRight);
@@ -1748,7 +1772,8 @@ EOObject GetAssignmentOperationOperatorEOObject(
   }
   QualType qual_type = left->getType();
   if (!qual_type->isRecordType()) {
-    binary_op.name += "-as-" + GetTypeName(left->getType());
+    TypeSimpl *typeInfo = transpiler.type_manger_.Add(left->getType());
+    binary_op.name += "-as-" + typeInfo->name;
   }
   binary_op.nested.emplace_back(GetStmtEOObject(left));
   binary_op.nested.push_back(GetCompoundAssignEOObject(p_operator));
@@ -1867,34 +1892,33 @@ EOObject GetSeqForBodyEOObject(const Stmt *p_stmt) {
   return seq;
 }
 
-uint64_t GetTypeSize(QualType qual_type) {
-  const clang::Type *type_ptr = qual_type.getTypePtr();
-  if (type_ptr == nullptr) {
-    // !!std::cout << "Incorrect Type Pointer\n";
-    return 0;
-  }
-  TypeInfo type_info = context->getTypeInfo(type_ptr);
-  uint64_t type_size = type_info.Width;
+// uint64_t GetTypeSize(QualType qual_type) {
+//   const clang::Type *type_ptr = qual_type.getTypePtr();
+//   if (type_ptr == nullptr) {
+//     return 0;
+//   }
+//   TypeInfo type_info = context->getTypeInfo(type_ptr);
+//   uint64_t type_size = type_info.Width;
+//
+//   if (type_ptr->isPointerType()) {
+//     const clang::Type *pointer_type =
+//     type_ptr->getPointeeType().getTypePtr(); TypeInfo pointer_type_info =
+//     context->getTypeInfo(pointer_type); uint64_t pointer_type_size =
+//     pointer_type_info.Width; return pointer_type_size / byte_size;
+//   }
+//   return type_size / byte_size;
+// }
 
-  if (type_ptr->isPointerType()) {
-    const clang::Type *pointer_type = type_ptr->getPointeeType().getTypePtr();
-    TypeInfo pointer_type_info = context->getTypeInfo(pointer_type);
-    uint64_t pointer_type_size = pointer_type_info.Width;
-    return pointer_type_size / byte_size;
-  }
-  return type_size / byte_size;
-}
-
-uint64_t GetSizeOfType(QualType qual_type) {
-  const clang::Type *type_ptr = qual_type.getTypePtr();
-  TypeInfo type_info = context->getTypeInfo(type_ptr);
-  uint64_t type_size = type_info.Width;
-
-  if (type_ptr->isPointerType()) {
-    return 8;  // Size of any pointer == 8 byte
-  }
-  return type_size / byte_size;
-}
+// uint64_t GetSizeOfType(QualType qual_type) {
+//   const clang::Type *type_ptr = qual_type.getTypePtr();
+//   TypeInfo type_info = context->getTypeInfo(type_ptr);
+//   uint64_t type_size = type_info.Width;
+//
+//   if (type_ptr->isPointerType()) {
+//     return 8;  // Size of any pointer == 8 byte
+//   }
+//   return type_size / byte_size;
+// }
 
 std::string GetPostfix(QualType qual_type) {
   const clang::Type *type_ptr = qual_type.getTypePtr();
@@ -1926,61 +1950,6 @@ std::string GetPostfix(QualType qual_type) {
     return str;
   }
   return "";
-}
-
-std::string GetTypeName(QualType qual_type) {
-  const clang::Type *type_ptr = qual_type.getTypePtr();
-  TypeInfo type_info = context->getTypeInfo(type_ptr);
-  uint64_t type_size = type_info.Width;
-  std::string str;
-
-  if (type_ptr->isBooleanType()) {
-    str += "bool";
-    return str;
-  }
-
-  if (type_ptr->isPointerType()) {
-    str += "ptr";
-    return str;
-  }
-  if (type_ptr->isConstantArrayType()) {
-    const auto *const arr_type = dyn_cast<clang::ConstantArrayType>(type_ptr);
-    if (arr_type->getElementType()->isCharType()) {
-      str += "string";
-      return str;
-    }
-  }
-
-  if (type_ptr->isFloatingType()) {
-    str += "float" + std::to_string(type_size);
-    return str;
-  }
-
-  if (!type_ptr->isSignedIntegerType()) {
-    str += "u";
-  }
-  if (type_ptr->isIntegerType()) {
-    str += "int" + std::to_string(type_size);
-    return str;
-  }
-
-  if (type_ptr->isUnionType()) {
-    str = "un-";
-  }
-  if (type_ptr->isStructureType()) {
-    str = "st-";
-  }
-  if (type_ptr->isUnionType() || type_ptr->isStructureType()) {
-    RecordDecl *RD = type_ptr->getAsRecordDecl();
-    if (RD->hasNameForLinkage()) {
-      str += RD->getNameAsString();
-    } else {
-      str += std::to_string(reinterpret_cast<uint64_t>(RD));
-    }
-    return str;
-  }
-
-  return "undefinedtype";
 }
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj) {

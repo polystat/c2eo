@@ -213,7 +213,8 @@ EOObject Variable::GetInitializer() const {
   if (type_postfix == "ptr" && value.nested.empty()) {
     clang::QualType item_type =
         llvm::dyn_cast<clang::PointerType>(id->getType())->getPointeeType();
-    std::string element_type_postfix = GetTypeName(item_type);
+    TypeSimpl* typeInfo = transpiler.type_manger_.Add(item_type);
+    std::string element_type_postfix = typeInfo->name;
     if (element_type_postfix != "undefinedtype") {
       uint64_t type_size = 0;
       if (item_type->isCharType()) {

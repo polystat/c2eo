@@ -25,13 +25,10 @@
 #include "src/transpiler/recorddecl.h"
 
 #include <algorithm>
-#include <map>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
-#include "src/transpiler/transpile_helper.h"
 #include "src/transpiler/unit_transpiler.h"
 #include "src/transpiler/vardecl.h"
 

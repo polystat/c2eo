@@ -38,8 +38,6 @@
 #include "llvm/Support/CommandLine.h"
 #include "src/transpiler/eo_object.h"
 
-std::string GetTypeName(clang::QualType qual_type);
-
 std::string GetPostfix(clang::QualType qual_type);
 
 EOObject GetFunctionBody(const clang::FunctionDecl *FD);

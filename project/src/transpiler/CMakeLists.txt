@@ -50,7 +50,7 @@ set(SOURCE_FILES
         tracer.cpp
         process_variables.cpp
         enumdecl.cpp
-        enum_manager.cpp)
+        enum_manager.cpp type_manager.cpp type_manager.h)
 
 # add_executable(recvisitor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})
