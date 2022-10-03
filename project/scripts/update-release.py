@@ -110,7 +110,7 @@ def make_deb(date, deb_name):
         for path in libs_set:
             try_shell(f'cp {path} usr/lib')
             try_shell(f'cp {path[:-3]} usr/lib')
-    try_shell('cp ../../license.txt DEBIAN/copyright')
+    try_shell('cp ../../LICENSE.txt DEBIAN/copyright')
     with open('DEBIAN/control', 'w') as control_file:
         for key in control[deb_name].keys():
             print(f'{key}: {control[deb_name][key]}', file=control_file)
