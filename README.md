@@ -792,7 +792,7 @@ goto
       condition
       seq
         ...
-        break
+        continue
         ...
         TRUE
 ```
