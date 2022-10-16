@@ -5,8 +5,8 @@
 #include "type_manager.h"
 
 #include "clang/AST/ASTContext.h"
+#include "transpile_helper.h"
 #include "vardecl.h"
-extern clang::ASTContext* context;
 TypeSimpl* TypeManger::GetById(int64_t id) {
   for (const auto& ts : types) {
     if (ts->id == id) {
@@ -16,18 +16,18 @@ TypeSimpl* TypeManger::GetById(int64_t id) {
   return nullptr;
 }
 TypeSimpl* TypeManger::Add(clang::QualType qual_type) {
-  const clang::Type* type_ptr = qual_type.getTypePtr();
-  if (type_ptr == nullptr) {
-    return nullptr;
-  }
-  auto id = (int64_t)type_ptr;
+  auto id = (int64_t)&qual_type;
   TypeSimpl* existType = GetById(id);
   if (existType != nullptr) {
     return existType;
   }
+  const clang::Type* type_ptr = qual_type.getTypePtr();
+  if (type_ptr == nullptr) {
+    return nullptr;
+  }
   TypeSimpl* ts;
   ts->id = id;
-  clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
+  clang::TypeInfo type_info = getContext()->getTypeInfo(type_ptr);
   ts->size = type_info.Width;
   if (type_ptr->isPointerType()) {
     ts->size = 8 * byte_size;  // Size of any pointer == 8 byte

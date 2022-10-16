@@ -51,13 +51,12 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   // TEST
   // std::cout << "var_name = " << var_name << "\n";
 
-  clang::QualType qual_type = VD->getType();
-  clang::TypeInfo type_info = VD->getASTContext().getTypeInfo(qual_type);
-  auto type_size = type_info.Width / byte_size;
-  if (qual_type->isFloatingType() && type_size == 4) {
+  TypeSimpl* typeInfo = transpiler.type_manger_.Add(VD->getType());
+  auto type_size = typeInfo->GetSizeOfType();
+  if (typeInfo->name == "float32") {
     type_size = 8;  // 8 bytes for float32.
   }
-  TypeSimpl* typeInfo = transpiler.type_manger_.Add(VD->getType());
+
   std::string str_type{"c_" + typeInfo->name};
   auto storage_class = VD->getStorageClass();
   auto static_local = VD->isStaticLocal();

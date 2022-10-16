@@ -211,20 +211,16 @@ EOObject Variable::GetInitializer() const {
   EOObject constData{"write"};
   EOObject _value = value;
   if (type_postfix == "ptr" && value.nested.empty()) {
-    clang::QualType item_type =
-        llvm::dyn_cast<clang::PointerType>(id->getType())->getPointeeType();
-    TypeSimpl* typeInfo = transpiler.type_manger_.Add(item_type);
+    TypeSimpl* typeInfo = transpiler.type_manger_.Add(id->getType())->subType;
     std::string element_type_postfix = typeInfo->name;
     if (element_type_postfix != "undefinedtype") {
       uint64_t type_size = 0;
-      if (item_type->isCharType()) {
+      if (element_type_postfix == "char") {
         constData.name += "-as-string";
         type_size = value.name.length() - 1;
       } else {
         constData.name += "-as-" + element_type_postfix;
-        const clang::Type *type_ptr = item_type.getTypePtr();
-        clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
-        type_size = type_info.Width;
+        type_size = typeInfo->GetSizeOfType();
       }
       {
         EOObject address{"address"};

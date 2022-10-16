@@ -155,6 +155,10 @@ EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
+clang::ASTContext* getContext() {
+    return context;
+}
+
 std::string Escaped(const std::string &input) {
   std::string output;
   output.reserve(input.size());

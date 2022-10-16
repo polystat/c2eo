@@ -50,4 +50,6 @@ EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias);
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj);
 
+clang::ASTContext* getContext();
+
 #endif  // PROJECT_SRC_TRANSPILER_TRANSPILE_HELPER_H_
