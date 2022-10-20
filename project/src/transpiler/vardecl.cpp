@@ -31,14 +31,15 @@
 
 using clang::VarDecl;
 
-EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl& typeInfo);
+EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl &typeInfo);
 
 __attribute__((unused)) void ArrayToBytes(__attribute__((unused))
                                           clang::Stmt *stmt,
                                           size_t size, const VarDecl *p_decl,
                                           std::string &string);
 
-EOObject InitValueEOObj(const VarDecl *VD, bool is_init, const TypeSimpl& typeInfo);
+EOObject InitValueEOObj(const VarDecl *VD, bool is_init,
+                        const TypeSimpl &typeInfo);
 
 Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
                          size_t shift) {
@@ -50,7 +51,6 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   TypeSimpl typeInfo =
       transpiler.type_manger_.Add(VD->getType().getTypePtrOrNull());
 
-
   auto storage_class = VD->getStorageClass();
   auto static_local = VD->isStaticLocal();
   auto ext_storage = VD->hasExternalStorage();
@@ -61,16 +61,14 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
 
   if (global_storage && !ext_storage && !static_local &&
       (storage_class != clang::SC_Static)) {
-    return transpiler.glob_.Add(VD, typeInfo, "g-" + var_name,
-                                initial_value);
+    return transpiler.glob_.Add(VD, typeInfo, "g-" + var_name, initial_value);
   }
   if (global_storage && !ext_storage) {
-    return transpiler.glob_.Add(VD, typeInfo, "s-" + var_name,
-                                initial_value);
+    return transpiler.glob_.Add(VD, typeInfo, "s-" + var_name, initial_value);
   }
   if (global_storage) {
-    return transpiler.glob_.AddExternal(VD, typeInfo,
-                                        "e-" + var_name, initial_value);
+    return transpiler.glob_.AddExternal(VD, typeInfo, "e-" + var_name,
+                                        initial_value);
   }
   // its local variable!
 
@@ -79,22 +77,22 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   }
   const auto *PD = llvm::dyn_cast<clang::ParmVarDecl>(VD);
   if (PD != nullptr) {
-    return transpiler.glob_.Add(VD, typeInfo, "p-" + var_name,
-                                initial_value, local_name, shift,
-                                VD->hasInit());
+    return transpiler.glob_.Add(VD, typeInfo, "p-" + var_name, initial_value,
+                                local_name, shift, VD->hasInit());
   }
-  return transpiler.glob_.Add(VD, typeInfo, "l-" + var_name,
-                              initial_value, local_name, shift, VD->hasInit());
+  return transpiler.glob_.Add(VD, typeInfo, "l-" + var_name, initial_value,
+                              local_name, shift, VD->hasInit());
 }
 
-EOObject InitValueEOObj(const VarDecl *VD, bool is_init, const TypeSimpl& typeInfo) {
+EOObject InitValueEOObj(const VarDecl *VD, bool is_init,
+                        const TypeSimpl &typeInfo) {
   if (is_init) {
     return InitValueAnalysis(VD, typeInfo);
   }
   return {"0", EOObjectType::EO_LITERAL};
 }
 
-EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl& typeInfo) {
+EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl &typeInfo) {
   auto size = typeInfo.GetSizeOfType();
   clang::APValue *init_val = VD->evaluateValue();
   if (init_val == nullptr) {
@@ -116,4 +114,3 @@ EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl& typeInfo) {
   }
   return {str, EOObjectType::EO_LITERAL};
 }
-
