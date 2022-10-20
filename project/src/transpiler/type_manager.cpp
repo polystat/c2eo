@@ -36,12 +36,15 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
     ts.name = ts.GetTypeName(type_ptr);
     const clang::Type* sub_type_ptr = GetSubType(type_ptr);
 
-    if (sub_type_ptr!= nullptr) {
+    if (sub_type_ptr != nullptr) {
       Add(sub_type_ptr);
       ts.subTypeId = (int64_t)sub_type_ptr;
     }
   }
   types.push_back(ts);
+//  std::cerr << ts.id << ' ' << ts.name << '\n';
+//  type_ptr->dump();
+//  std::cerr << '\n';
   return ts;
 }
 const clang::Type* TypeManger::GetSubType(const clang::Type* type_ptr) {
@@ -65,6 +68,7 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
     return str;
   }
   if (type_ptr->isConstantArrayType()) {
+    isArray = true;
     const auto* const arr_type =
         clang::dyn_cast<clang::ConstantArrayType>(type_ptr);
     if (arr_type->getElementType()->isCharType()) {
@@ -96,6 +100,7 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
     str = "st-";
   }
   if (type_ptr->isUnionType() || type_ptr->isStructureType()) {
+    isRecord = true;
     clang::RecordDecl* RD = type_ptr->getAsRecordDecl();
     recordId = (int64_t)RD->getID();
     if (RD->hasNameForLinkage()) {

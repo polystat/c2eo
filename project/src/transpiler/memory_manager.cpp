@@ -32,7 +32,7 @@
 
 #include "src/transpiler/transpile_helper.h"
 
-Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl& typeInfo,
+Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
                             const std::string &alias, EOObject value,
                             std::string local_name, size_t shift,
                             bool is_initialized) {
@@ -155,8 +155,8 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   EOObject res("write");
-  if (typeInfo.name != "undefinedtype" && typeInfo.name != "array" &&
-      typeInfo.name.find('-') == std::string::npos) {
+  if (typeInfo.name != "undefinedtype" && !typeInfo.isArray &&
+      !typeInfo.isRecord) {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);

@@ -535,15 +535,16 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  TypeSimpl typeInfo = transpiler.type_manger_.Add(
-      list->getType().getTypePtrOrNull());
+  TypeSimpl typeInfo =
+      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull());
   std::vector<EOObject> inits;
-  std::string elementTypeName;
+  TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
   size_t elementSize = 0;
-  if (typeInfo.name == "array") {
-    elementSize = typeInfo.GetSizeOfBaseType();
-  } else if (typeInfo.recordId != -1) {
+  if (typeInfo.isArray) {
+    elementType = transpiler.type_manger_.GetById(typeInfo.subTypeId);
+    elementSize = elementType.GetSizeOfType();
+  } else if (typeInfo.isRecord) {
     auto *recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
     recElement = recordType->fields.begin();
   }
@@ -553,16 +554,18 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     EOObject shiftedAlias{"plus"};
     shiftedAlias.nested.emplace_back("list-init-name",
                                      EOObjectType::EO_TEMPLATE);
-    if (typeInfo.name == "array") {
+    if (typeInfo.isArray) {
       EOObject newShift{"times"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
       newShift.nested.emplace_back(to_string(elementSize),
                                    EOObjectType::EO_LITERAL);
       shiftedAlias.nested.push_back(newShift);
-    } else if (typeInfo.recordId != -1) {
+    } else if (typeInfo.isRecord) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           typeInfo.recordId, std::get<0>(*recElement)));
-      elementTypeName = std::get<1>(*recElement).name;
+      elementType = std::get<1>(*recElement);
+//    } else {
+//      std::cout << typeInfo.id << ' ' << typeInfo.name << '\n';
     }
     EOObject value = GetStmtEOObject(*element);
     if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
@@ -571,14 +574,14 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
                            newValue.nested.end());
     } else {
       EOObject res("write");
-      if (!elementTypeName.empty() && elementTypeName != "array") {
-        res.name += "-as-" + elementTypeName;
+      if (!elementType.name.empty()) {
+        res.name += "-as-" + elementType.name;
       }
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
       eoList.nested.push_back(res);
     }
-    if (typeInfo.recordId != -1) {
+    if (typeInfo.isRecord) {
       recElement++;
     }
   }
