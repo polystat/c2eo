@@ -32,10 +32,10 @@
 
 #include "src/transpiler/transpile_helper.h"
 
-Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
-                            const std::string &type, const std::string &alias,
-                            EOObject value, std::string local_name,
-                            size_t shift, bool is_initialized) {
+Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl& typeInfo,
+                            const std::string &alias, EOObject value,
+                            std::string local_name, size_t shift,
+                            bool is_initialized) {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res != variables_.end()) {
@@ -48,56 +48,26 @@ Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
     unique_alias = alias;
   }
   duplicates[alias]++;
-  std::string type_postfix = type.substr(2);
-  // TODO(nkchuykin) char!?
-  if (!((type_postfix.length() < 3 ||
-         (type_postfix.substr(0, 3) != "st-" &&
-          type_postfix.substr(0, 3) !=
-              "un-"))  // TODO(nkchuykin) recordDecl check
-        && type_postfix != "undefinedtype" && type_postfix != "char")) {
-    type_postfix = "";
-  }
-  Variable var = {id,
-                  pointer_,
-                  size,
-                  type,
-                  std::move(unique_alias),
-                  std::move(value),
-                  std::move(local_name),
-                  shift,
-                  type_postfix,
+  Variable var = {id, pointer_, typeInfo, std::move(unique_alias),
+                  std::move(value), std::move(local_name), shift,
+                  //                  type_postfix,
                   is_initialized};
   // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
     var.value.name = "plug";
   }
   variables_.push_back(var);
-  pointer_ += size;
+  pointer_ += typeInfo.GetSizeOfType();
   return var;
 }
 
 Variable MemoryManager::AddExternal(
-    const clang::VarDecl *id, size_t size, const std::string &type,
-    std::string alias, EOObject value, std::string local_name, size_t shift,
+    const clang::VarDecl *id, TypeSimpl typeInfo, std::string alias,
+    EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
-  std::string type_postfix = type.substr(2);
-  // TODO(nkchuykin) char!?
-  if (!((type_postfix.length() < 3 ||
-         (type_postfix.substr(0, 3) != "st-" &&
-          type_postfix.substr(0, 3) !=
-              "un-"))  // TODO(nkchuykin) recordDecl check
-        && type_postfix != "undefinedtype" && type_postfix != "char")) {
-    type_postfix = "";
-  }
-  Variable var = {id,
-                  some_non_zero_position,
-                  size,
-                  type,
-                  std::move(alias),
-                  std::move(value),
-                  std::move(local_name),
-                  shift,
-                  type_postfix,
+  Variable var = {id, some_non_zero_position, typeInfo, std::move(alias),
+                  std::move(value), std::move(local_name), shift,
+                  //                  type_postfix,
                   false};
   // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
@@ -157,7 +127,7 @@ EOObject MemoryManager::GetEOObject() const {
 void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
   for (const auto &var : all_local) {
     auto var_in_memory = find(variables_.begin(), variables_.end(), var);
-    pointer_ -= var_in_memory->size;
+    pointer_ -= var_in_memory->typeInfo.GetSizeOfType();
     variables_.erase(var_in_memory);
   }
 }
@@ -185,8 +155,9 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   EOObject res("write");
-  if (!type_postfix.empty()) {
-    res.name += "-as-" + type_postfix;
+  if (typeInfo.name != "undefinedtype" &&
+      typeInfo.name.find('-') == std::string::npos) {
+    res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);
   if (value.type == EOObjectType::EO_PLUG) {

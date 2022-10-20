@@ -43,14 +43,13 @@ static const int eight_bytes = 8;
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
 #include "src/transpiler/eo_object.h"
+#include "type_manager.h"
 
 // Representation of a simple variable stored in RAM
 struct Variable {
   const clang::VarDecl *id;
   size_t position;
-  size_t size;
-  // like c-int64
-  std::string type;
+  TypeSimpl typeInfo;
   // bool isCustomType = false;
   // like g-x
   std::string alias;
@@ -58,8 +57,6 @@ struct Variable {
   // address of local memory start in global
   std::string local_pointer;
   size_t shift;
-  // only -int64
-  std::string type_postfix;
   bool is_initialized;
 
   bool operator==(const Variable &var) const;
@@ -75,13 +72,12 @@ class MemoryManager {
                                           size_t start_pointer = 8)
       : name_(std::move(name)), pointer_(start_pointer) {}
 
-  Variable Add(const clang::VarDecl *id, size_t size, const std::string &type,
+  Variable Add(const clang::VarDecl *id, const TypeSimpl& typeInfo,
                const std::string &alias, EOObject value,
                std::string local_name = "", size_t shift = 0,
                bool is_initialized = true);
 
-  Variable AddExternal(const clang::VarDecl *id, size_t size,
-                       const std::string &type, std::string alias,
+  Variable AddExternal(const clang::VarDecl *id, TypeSimpl typeInfo, std::string alias,
                        EOObject value, std::string local_name = "",
                        size_t shift = 0,
                        __attribute__((unused)) bool is_initialized = false);
