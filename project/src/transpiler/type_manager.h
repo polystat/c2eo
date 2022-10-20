@@ -22,8 +22,8 @@
 * SOFTWARE.
 */
 
-#ifndef PROJECT_SRC_TRANSPILER_TYPE_Manager_H_
-#define PROJECT_SRC_TRANSPILER_TYPE_Manager_H_
+#ifndef PROJECT_SRC_TRANSPILER_TYPE_MANAGER_H_
+#define PROJECT_SRC_TRANSPILER_TYPE_MANAGER_H_
 
 #include <cstdint>
 #include <string>

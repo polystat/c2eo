@@ -59,8 +59,8 @@ EnumType ProcessEnumDecl(const clang::EnumDecl *ED) {
       if (enum_const_decl == nullptr) {
         return {};
       }
-      TypeSimpl typeInfo =
-          transpiler.type_manger_.Add(enum_const_decl->getType().getTypePtrOrNull());
+      TypeSimpl typeInfo = transpiler.type_manger_.Add(
+          enum_const_decl->getType().getTypePtrOrNull());
       size = typeInfo.GetSizeOfType();
       std::string name = "c-" + enum_const_decl->getNameAsString();
       int64_t value = enum_const_decl->getInitVal().getExtValue();

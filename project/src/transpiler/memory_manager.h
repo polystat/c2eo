@@ -43,7 +43,7 @@ static const int eight_bytes = 8;
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
 #include "src/transpiler/eo_object.h"
-#include "type_manager.h"
+#include "src/transpiler/type_manager.h"
 
 // Representation of a simple variable stored in RAM
 struct Variable {
@@ -72,14 +72,14 @@ class MemoryManager {
                                           size_t start_pointer = 8)
       : name_(std::move(name)), pointer_(start_pointer) {}
 
-  Variable Add(const clang::VarDecl *id, const TypeSimpl& typeInfo,
+  Variable Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
                const std::string &alias, EOObject value,
                std::string local_name = "", size_t shift = 0,
                bool is_initialized = true);
 
-  Variable AddExternal(const clang::VarDecl *id, TypeSimpl typeInfo, std::string alias,
-                       EOObject value, std::string local_name = "",
-                       size_t shift = 0,
+  Variable AddExternal(const clang::VarDecl *id, TypeSimpl typeInfo,
+                       std::string alias, EOObject value,
+                       std::string local_name = "", size_t shift = 0,
                        __attribute__((unused)) bool is_initialized = false);
 
   bool Empty();
