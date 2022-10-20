@@ -47,10 +47,9 @@ struct RecordType {
 };
 
 struct RecordManager {
-  RecordType Add(
-      int64_t id, std::string name, size_t size,
-      std::vector<std::tuple<std::string, TypeSimpl, size_t>> fields,
-      bool is_local);
+  RecordType Add(int64_t id, std::string name, size_t size,
+                 std::vector<std::tuple<std::string, TypeSimpl, size_t>> fields,
+                 bool is_local);
   RecordType *GetById(int64_t id);
   [[nodiscard]] std::vector<RecordType>::const_iterator begin() const;
   [[nodiscard]] std::vector<RecordType>::const_iterator end() const;

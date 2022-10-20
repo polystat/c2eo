@@ -564,8 +564,8 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           typeInfo.recordId, std::get<0>(*recElement)));
       elementType = std::get<1>(*recElement);
-//    } else {
-//      std::cout << typeInfo.id << ' ' << typeInfo.name << '\n';
+      //    } else {
+      //      std::cout << typeInfo.id << ' ' << typeInfo.name << '\n';
     }
     EOObject value = GetStmtEOObject(*element);
     if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
