@@ -536,22 +536,13 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   TypeSimpl typeInfo = transpiler.type_manger_.Add(
-      list->getType().getTypePtrOrNull());  //.getDesugaredType(*context);
+      list->getType().getTypePtrOrNull());
   std::vector<EOObject> inits;
   std::string elementTypeName;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
   size_t elementSize = 0;
   if (typeInfo.name == "array") {
-    TypeSimpl elementTypeInfo =
-        transpiler.type_manger_.GetById(typeInfo.subTypeId);
-    elementSize = 1;
-    while (elementTypeInfo.name == "array") {
-      elementSize *= elementTypeInfo.GetSizeOfType();
-      elementTypeInfo = elementTypeInfo =
-          transpiler.type_manger_.GetById(typeInfo.subTypeId);
-    }
-    elementTypeName = elementTypeInfo.name;
-    elementSize *= elementTypeInfo.GetSizeOfType();
+    elementSize = typeInfo.GetSizeOfBaseType();
   } else if (typeInfo.recordId != -1) {
     auto *recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
     recElement = recordType->fields.begin();
@@ -580,7 +571,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
                            newValue.nested.end());
     } else {
       EOObject res("write");
-      if (!elementTypeName.empty()) {
+      if (!elementTypeName.empty() && elementTypeName != "array") {
         res.name += "-as-" + elementTypeName;
       }
       res.nested.emplace_back(shiftedAlias);

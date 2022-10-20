@@ -34,15 +34,24 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
       ts.size = 8 * byte_size;  // Size of any pointer == 8 byte
     }
     ts.name = ts.GetTypeName(type_ptr);
-    if (type_ptr->isConstantArrayType() || type_ptr->isPointerType()) {
-      ts.subTypeId = Add(type_ptr->getPointeeOrArrayElementType()).id;
+    const clang::Type* sub_type_ptr = GetSubType(type_ptr);
+
+    if (sub_type_ptr!= nullptr) {
+      Add(sub_type_ptr);
+      ts.subTypeId = (int64_t)sub_type_ptr;
     }
   }
   types.push_back(ts);
-  if (types.empty()) {
-    return {};
-  };
-  return types.back();
+  return ts;
+}
+const clang::Type* TypeManger::GetSubType(const clang::Type* type_ptr) {
+  if (type_ptr->isPointerType()) {
+    return type_ptr->getPointeeType().getTypePtr();
+  }
+  if (type_ptr->isConstantArrayType()) {
+    return type_ptr->getArrayElementTypeNoTypeQual();
+  }
+  return nullptr;
 }
 std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   std::string str;
@@ -103,7 +112,8 @@ uint64_t TypeSimpl::GetSizeOfType() const {
   if (name == "float32" || name == "ptr") {
     return 8;  // 8 bytes for float32.
   }
-  return size / byte_size; }
+  return size / byte_size;
+}
 uint64_t TypeSimpl::GetSizeOfBaseType() const {
   if (subTypeId != -1) {
     extern UnitTranspiler transpiler;

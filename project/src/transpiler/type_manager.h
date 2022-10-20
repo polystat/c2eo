@@ -30,6 +30,7 @@ struct TypeManger {
 
  private:
   std::vector<TypeSimpl> types;
+  const clang::Type* GetSubType(const clang::Type* pType);
 };
 
 #endif  // PROJECT_SRC_TRANSPILER_TYPE_Manager_H

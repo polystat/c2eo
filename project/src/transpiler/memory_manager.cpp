@@ -155,7 +155,7 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   EOObject res("write");
-  if (typeInfo.name != "undefinedtype" &&
+  if (typeInfo.name != "undefinedtype" && typeInfo.name != "array" &&
       typeInfo.name.find('-') == std::string::npos) {
     res.name += "-as-" + typeInfo.name;
   }
