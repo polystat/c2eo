@@ -230,7 +230,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   size_t local_static_size = 0;
   for (const auto &var : all_local) {
     if (var.id->isStaticLocal()) {
-      local_static_size += var.size;
+      local_static_size += var.typeInfo.GetSizeOfType();
     }
   }
   size_t free_pointer =
@@ -535,29 +535,25 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  clang::QualType qualType = list->getType().getDesugaredType(*context);
+  TypeSimpl typeInfo = transpiler.type_manger_.Add(
+      list->getType().getTypePtrOrNull());  //.getDesugaredType(*context);
   std::vector<EOObject> inits;
   std::string elementTypeName;
-  std::vector<std::tuple<std::string, clang::QualType, size_t>>::iterator
-      recElement;
+  std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
   size_t elementSize = 0;
-  if (qualType->isArrayType()) {
-    clang::QualType elementQualType =
-        llvm::dyn_cast<clang::ConstantArrayType>(qualType)->getElementType();
+  if (typeInfo.name == "array") {
+    TypeSimpl elementTypeInfo =
+        transpiler.type_manger_.GetById(typeInfo.subTypeId);
     elementSize = 1;
-    while (elementQualType->isArrayType()) {
-      const auto *cat =
-          llvm::dyn_cast<clang::ConstantArrayType>(elementQualType);
-      elementSize *= cat->getSize().getLimitedValue();
-      elementQualType =
-          llvm::dyn_cast<clang::ConstantArrayType>(elementQualType)
-              ->getElementType();
+    while (elementTypeInfo.name == "array") {
+      elementSize *= elementTypeInfo.GetSizeOfType();
+      elementTypeInfo = elementTypeInfo =
+          transpiler.type_manger_.GetById(typeInfo.subTypeId);
     }
-    elementTypeName = GetTypeName(elementQualType);
-    elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
-  } else if (qualType->isRecordType()) {
-    auto *recordType = transpiler.record_manager_.GetById(
-        qualType->getAsRecordDecl()->getID());
+    elementTypeName = elementTypeInfo.name;
+    elementSize *= elementTypeInfo.GetSizeOfType();
+  } else if (typeInfo.recordId != -1) {
+    auto *recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
     recElement = recordType->fields.begin();
   }
   int i = 0;
@@ -566,19 +562,16 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     EOObject shiftedAlias{"plus"};
     shiftedAlias.nested.emplace_back("list-init-name",
                                      EOObjectType::EO_TEMPLATE);
-    if (qualType->isArrayType()) {
+    if (typeInfo.name == "array") {
       EOObject newShift{"times"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
       newShift.nested.emplace_back(to_string(elementSize),
                                    EOObjectType::EO_LITERAL);
       shiftedAlias.nested.push_back(newShift);
-    } else if (qualType->isRecordType()) {
+    } else if (typeInfo.recordId != -1) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
-          qualType->getAsRecordDecl()->getID(), std::get<0>(*recElement)));
-      elementTypeName = GetTypeName(std::get<1>(*recElement));
-      //      std::cerr << "=======\n" << elementTypeName << "\n-\n";
-      //      recElement->second.first.dump();
-      //      std::cerr << "=======\n\n";
+          typeInfo.recordId, std::get<0>(*recElement)));
+      elementTypeName = std::get<1>(*recElement).name;
     }
     EOObject value = GetStmtEOObject(*element);
     if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
@@ -594,7 +587,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       res.nested.emplace_back(value);
       eoList.nested.push_back(res);
     }
-    if (qualType->isRecordType()) {
+    if (typeInfo.recordId != -1) {
       recElement++;
     }
   }
@@ -1286,29 +1279,10 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   auto eo_opd2 = GetStmtEOObject(opd2);
   auto qual_type1 = opd1->getType();
 
-  if (op_code == clang::BinaryOperatorKind::BO_AddAssign) {
-    operation = "plus";
-    // is 1st pointer or array?
-    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
-    if (type1->isArrayType() || type1->isPointerType()) {
-      // set size of pointer shift
-      uint64_t type_size = GetTypeSize(qual_type1);
-      // TEST type size output
-      // std::cout << "Size of type = " << type_size << "\n";
-      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
-      // second Operand must be integer expression else C-error
-      EOObject mult{"times"};
-      mult.nested.push_back(eo_opd2);
-      mult.nested.push_back(value);
-      EOObject read_op{"read-as-ptr"};
-      read_op.nested.push_back(eo_opd1);
-      EOObject binary_op{operation};
-      binary_op.nested.push_back(read_op);
-      binary_op.nested.push_back(mult);
-      return binary_op;
-    }
-  } else if (op_code == clang::BinaryOperatorKind::BO_SubAssign) {
-    operation = "minus";
+  if (op_code == clang::BinaryOperatorKind::BO_AddAssign ||
+      op_code == clang::BinaryOperatorKind::BO_SubAssign) {
+    operation =
+        (op_code == clang::BinaryOperatorKind::BO_AddAssign) ? "plus" : "minus";
     // is 1st pointer or array?
     const clang::Type *type1 = qual_type1.getTypePtrOrNull();
     if (type1->isArrayType() || type1->isPointerType()) {
