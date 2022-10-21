@@ -404,6 +404,14 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
         auto *VD = dyn_cast<VarDecl>(decl);
         result.nested.push_back(
             transpiler.glob_.GetVarById(VD).GetInitializer());
+      } else if (decl->getKind() == Decl::Kind::Record) {
+        auto *record_decl = dyn_cast<RecordDecl>(decl);
+        auto types = ProcessRecordType(record_decl, true);
+        for (auto &type : types) {
+          auto eo_objs = type.GetEORecordDecl();
+          result.nested.insert(result.nested.end(), eo_objs.begin(),
+                               eo_objs.end());
+        }
       }
     }
     return result;
@@ -431,7 +439,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
     std::vector<uint64_t> dims;
     // TEST
-    // !!std::cout << "GetStmtEOObject: before GetArraySubscriptExprEOObject\n";
+    // !!std::cout << "GetStmtEOObject: before
+    // GetArraySubscriptExprEOObject\n";
     return GetArraySubscriptExprEOObject(op /*, &dims, 0*/);
   }
   if (stmt_class == Stmt::ForStmtClass) {
@@ -883,7 +892,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
 //  if (tmp_dims.size() > dims->size()) {
 //    dims = &tmp_dims;
 //  }
-//  uint64_t dim_size = transpiler.type_manger_.Add(op->getType().getTypePtr())
+//  uint64_t dim_size =
+//  transpiler.type_manger_.Add(op->getType().getTypePtr())
 //                          .GetSizeOfType();  // current dimension size.
 //  //  for (int i = 0; i < depth && i < dims->size(); ++i) {
 //  //    dim_size *= dims->at(i);
@@ -1467,7 +1477,8 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
 
   // [C99 6.5.2.4] Postfix increment and decrement
   if (op_code ==
-      clang::UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc, "++")
+      clang::UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc,
+                                               // "++")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-inc-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -1481,7 +1492,8 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
     return variable;
   }
   if (op_code ==
-      clang::UnaryOperatorKind::UO_PostDec) {  // UNARY_OPERATION(PostDec, "--")
+      clang::UnaryOperatorKind::UO_PostDec) {  // UNARY_OPERATION(PostDec,
+                                               // "--")
     std::string postfix = GetTypeName(p_operator->getType());
     EOObject variable{"post-dec-" + postfix};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -1550,7 +1562,8 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
              clang::UnaryOperatorKind::UO_Not) {  // UNARY_OPERATION(Not, "~")
     operation = "bit-not";
   } else if (op_code ==
-             clang::UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot, "!")
+             clang::UnaryOperatorKind::UO_LNot) {  // UNARY_OPERATION(LNot,
+                                                   // "!")
     operation = "not";
     // "__real expr"/"__imag expr" Extension.
   } else if (op_code ==

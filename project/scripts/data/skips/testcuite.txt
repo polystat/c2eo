@@ -9,7 +9,6 @@
 00058: TODO pointer on char
 00078, 00217: TODO pointer on function
 00137, 00138, 00219: TODO define function
-00053: TODO structures
 00091: TODO array in structure
 00149: TODO pointers on structures
 00197: TODO static variables
