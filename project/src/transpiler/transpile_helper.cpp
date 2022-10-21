@@ -579,7 +579,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       EOObject newValue = ReplaceEmpty(value, shiftedAlias);
       eoList.nested.insert(eoList.nested.end(), newValue.nested.begin(),
                            newValue.nested.end());
-    } else {
+    } else if (!elementType.isRecord && !elementType.isArray) {
       EOObject res("write");
       if (!elementType.name.empty()) {
         res.name += "-as-" + elementType.name;

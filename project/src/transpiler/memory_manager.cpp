@@ -149,6 +149,7 @@ void MemoryManager::SetExtEqGlob() {
 }
 
 void MemoryManager::ShiftFreeSpacePointer(uint64_t shift) { pointer_ += shift; }
+
 EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
     return ReplaceEmpty(value, {alias, EOObjectType::EO_LITERAL});
