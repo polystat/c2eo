@@ -122,12 +122,7 @@ EOObject GetMemberExprEOObject(const MemberExpr *opr);
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
-EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);  //,
-//                                       std::vector<uint64_t> *dims,
-//                                       size_t depth);
-
-// std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
-//     const ArraySubscriptExpr *op, std::vector<uint64_t> *dims);
+EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
 
 EOObject GetForStmtEOObject(const ForStmt *p_stmt);
 
@@ -433,15 +428,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return GetMemberExprEOObject(op);
   }
   if (stmt_class == Stmt::ArraySubscriptExprClass) {
-    // TEST
-    std::cout
-        << "GetStmtEOObject: stmt_class == Stmt::ArraySubscriptExprClass\n";
     const auto *op = dyn_cast<ArraySubscriptExpr>(stmt);
-    std::vector<uint64_t> dims;
-    // TEST
-    // !!std::cout << "GetStmtEOObject: before
-    // GetArraySubscriptExprEOObject\n";
-    return GetArraySubscriptExprEOObject(op /*, &dims, 0*/);
+    return GetArraySubscriptExprEOObject(op);
   }
   if (stmt_class == Stmt::ForStmtClass) {
     const auto *op = dyn_cast<ForStmt>(stmt);
@@ -846,197 +834,21 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   auto index_name = GetStmtEOObject(op->getIdx());
   uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
-  EOObject globAddr{"address"};
-  globAddr.nested.emplace_back("global-ram");
+  //  EOObject globAddr{"address"};
+  //  globAddr.nested.emplace_back("global-ram");
   EOObject addr{"plus"};
   addr.nested.emplace_back(GetStmtEOObject(op->getBase()));
   EOObject shift{"times"};
   shift.nested.emplace_back(index_name);
   shift.nested.emplace_back(std::to_string(dim_size), EOObjectType::EO_LITERAL);
   addr.nested.emplace_back(shift);
-  globAddr.nested.emplace_back(addr);
-  return globAddr;
+  //  globAddr.nested.emplace_back(addr);
+  //  auto stmt_class = op->getStmtClass();
+  //  if (stmt_class == Stmt::DeclRefExprClass) {
+  //    return globAddr;
+  //  }
+  return addr;
 }
-// EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
-//                                        std::vector<uint64_t> *dims,
-//                                        size_t depth) {
-//
-//   /*
-//    std::vector<uint64_t> tmp_dims;
-//
-// auto index_name = GetStmtEOObject(op->getIdx());
-// uint64_t dim_size = transpiler.type_manger_.Add(op->getType().getTypePtr())
-//                         .GetSizeOfType();
-// EOObject addr{"address"};
-// addr.nested.emplace_back("global-ram");
-// addr.nested.emplace_back(final_write);
-// EOObject shift{"times"};
-// shift.nested.emplace_back(index_name);
-// shift.nested.emplace_back(std::to_string(dim_size),
-//                           EOObjectType::EO_LITERAL);
-//
-// auto decl_info = getMultiDimArrayTypeSize(op, &tmp_dims);
-// if (tmp_dims.size() > dims->size()) {
-//   dims = &tmp_dims;
-// }
-//    */
-//
-//
-//   std::vector<uint64_t> tmp_dims;
-////  op->getBase()->dump();
-////  std::cerr << '\n';
-////  op->getType()->dump();
-////  std::cerr << "=========\n";
-//  auto index_name = GetStmtEOObject(op->getIdx());
-//  auto decl_info = getMultiDimArrayTypeSize(op, &tmp_dims);
-//  if (tmp_dims.size() > dims->size()) {
-//    dims = &tmp_dims;
-//  }
-//  uint64_t dim_size =
-//  transpiler.type_manger_.Add(op->getType().getTypePtr())
-//                          .GetSizeOfType();  // current dimension size.
-//  //  for (int i = 0; i < depth && i < dims->size(); ++i) {
-//  //    dim_size *= dims->at(i);
-//  //  }
-//
-//  if (op != nullptr) {
-//    for (const auto *base_ch : op->getBase()->children()) {
-//      auto index_name = GetStmtEOObject(op->getIdx());
-//
-//      EOObject curr_shift{"times"};
-//      EOObject type_size_obj{std::to_string(dim_size),
-//                             EOObjectType::EO_LITERAL};
-//      curr_shift.nested.emplace_back(index_name);
-//      curr_shift.nested.emplace_back(type_size_obj);
-//
-//      auto stmt_class = base_ch->getStmtClass();
-//      if (stmt_class == Stmt::ArraySubscriptExprClass) {
-//        EOObject add_shift{"plus"};
-//
-//        const auto *arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
-//        EOObject next_shift =
-//            GetArraySubscriptExprEOObject(arr_sub_expr, dims, depth + 1);
-//
-//        add_shift.nested.emplace_back(curr_shift);
-//        add_shift.nested.emplace_back(next_shift);
-//
-//        if (depth == 0) {
-//          EOObject final_write{"plus"};
-//          final_write.nested.emplace_back(decl_info.second);
-//          final_write.nested.emplace_back(add_shift);
-//          //           return final_write;
-//          EOObject addr{"address"};
-//          EOObject glob_ram{"global-ram"};
-//          addr.nested.emplace_back(glob_ram);
-//          addr.nested.emplace_back(final_write);
-//          return addr;
-//        }
-//        return add_shift;
-//      }
-//      if (stmt_class == Stmt::DeclRefExprClass) {
-//        if (depth == 0) {
-//          EOObject final_write{"plus"};
-//          final_write.nested.emplace_back(decl_info.second);
-//          final_write.nested.emplace_back(curr_shift);
-//          //           return final_write;
-//          EOObject addr{"address"};
-//          EOObject glob_ram{"global-ram"};
-//          addr.nested.emplace_back(glob_ram);
-//          addr.nested.emplace_back(final_write);
-//          return addr;
-//        }
-//      } else if (stmt_class == Stmt::MemberExprClass) {
-//        if (depth == 0) {
-//          EOObject final_write{"plus"};
-//          final_write.nested.emplace_back(decl_info.second);
-//          final_write.nested.emplace_back(curr_shift);
-//          return final_write;
-//        }
-//      }
-//      return curr_shift;
-//    }
-//  }
-//  return EOObject{EOObjectType::EO_PLUG};
-//}
-//
-// std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
-//    const ArraySubscriptExpr *op, std::vector<uint64_t> *dims) {
-//  if (op == nullptr) {
-//    return std::make_pair(0, EOObject{EOObjectType::EO_PLUG});
-//  }
-//  for (const auto *base_ch : op->getBase()->children()) {
-//    auto stmt_class = base_ch->getStmtClass();
-//    if (stmt_class == Stmt::DeclRefExprClass) {
-//      // TEST
-//      //      std::cout
-//      //          << "getMultiDimArrayTypeSize: stmt_class ==
-//      //          Stmt::DeclRefExprClass\n";
-//      const auto *decl_ref_expr = dyn_cast<DeclRefExpr>(base_ch);
-//      if (decl_ref_expr == nullptr) {
-//        // TEST
-//        // std::cout << "getMultiDimArrayTypeSize: decl_ref_expr ==
-//        nullptr\n"; continue;
-//      }
-//      auto qt = decl_ref_expr->getType();
-//      EOObject arr_name = GetStmtEOObject(op->getBase());
-//      size_t sz =
-//          decl_ref_expr->getDecl()->getASTContext().getTypeInfo(qt).Align /
-//          byte_size;
-//      return std::make_pair(sz, arr_name);
-//    }
-//    if (stmt_class == Stmt::ArraySubscriptExprClass) {
-//      // TEST
-//      // std::cout << "getMultiDimArrayTypeSize: stmt_class ==
-//      // Stmt::ArraySubscriptExprClass\n";
-//      const auto *arr_sub_expr = dyn_cast<ArraySubscriptExpr>(base_ch);
-//      if (arr_sub_expr == nullptr) {
-//        continue;
-//      }
-//      auto qt = arr_sub_expr->getType();
-//      if (qt->isArrayType()) {
-//        const auto *arr = qt->getAsArrayTypeUnsafe();
-//        if (arr->isConstantArrayType()) {
-//          const auto *const_arr = dyn_cast<clang::ConstantArrayType>(qt);
-//          dims->emplace_back(const_arr->getSize().getLimitedValue());
-//        }
-//      }
-//      return getMultiDimArrayTypeSize(arr_sub_expr, dims);
-//    }
-//    if (stmt_class == Stmt::MemberExprClass) {
-//      // TEST
-//      // std::cout << "getMultiDimArrayTypeSize: stmt_class ==
-//      // Stmt::MemberExprClass\n";
-//      const auto *memb_expr = dyn_cast<MemberExpr>(base_ch);
-//      if (memb_expr == nullptr) {
-//        // TEST
-//        // std::cout << "getMultiDimArrayTypeSize: memb_expr == nullptr\n";
-//        continue;
-//      }
-//      const auto *child = dyn_cast<Expr>(*memb_expr->child_begin());
-//      if (child == nullptr) {
-//        // TEST
-//        // std::cout << "getMultiDimArrayTypeSize: child == nullptr\n";
-//        continue;
-//      }
-//      QualType qual_type = child->getType();
-//      // Где-то здесь должен пойти дальнейший разбор выражения...
-//      EOObject arr_name = GetStmtEOObject(op->getBase());
-//      size_t sz = 0;
-//      if (qual_type->isPointerType()) {
-//        //|| qual_type->isArrayType())
-//        sz = 8;
-//      } else {
-//        sz = GetTypeSize(qual_type);
-//      }
-//      // TEST
-//      // std::cout << "getMultiDimArrayTypeSize: sz = " << sz << "\n";
-//      return std::make_pair(sz, arr_name);
-//    }
-//    return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
-//    //    std::cerr << base_ch->getStmtClassName() << "\n\n";
-//  }
-//  return std::make_pair(0, EOObject{"plug", EOObjectType::EO_PLUG});
-//}
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
   // TEST
@@ -1719,12 +1531,12 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     const auto &var = transpiler.glob_.GetVarById(id);
     clang::QualType qual_type = id->getType();
     const clang::Type *type = qual_type.getTypePtrOrNull();
+    //    TypeSimpl typeInfo =
+    //    transpiler.type_manger_.Add(id->getType().getTypePtrOrNull());
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
-    if (type->isArrayType()) {
-      // TEST output
-      // std::cout << "It is array type which used as pointer\n";
+    if (type->isPointerType()) {
       EOObject array_as_ptr{"addr-of"};
       array_as_ptr.nested.emplace_back(var.alias);
       return array_as_ptr;
