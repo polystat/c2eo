@@ -1636,7 +1636,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         }
       }
     }
-    if (!typeInfo.isRecord) {
+    if (!typeInfo.isRecord && !typeInfo.isArray) {
       binary_op.name += "-as-" + typeInfo.name;
     }
     binary_op.nested.emplace_back(GetStmtEOObject(left));

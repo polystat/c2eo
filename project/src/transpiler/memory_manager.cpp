@@ -184,7 +184,7 @@ EOObject Variable::GetInitializer() const {
       }
     }
   }
-  if (!typeInfo.name.empty()) {
+  if (!typeInfo.name.empty() && !typeInfo.isRecord && !typeInfo.isArray) {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);
