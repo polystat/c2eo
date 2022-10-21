@@ -160,14 +160,17 @@ EOObject Variable::GetInitializer() const {
   EOObject constData{"write"};
   EOObject _value = value;
   if (typeInfo.name == "ptr" && value.nested.empty()) {
-    TypeSimpl element_type = transpiler.type_manger_.GetById(typeInfo.subTypeId);
+    TypeSimpl element_type =
+        transpiler.type_manger_.GetById(typeInfo.subTypeId);
     if (element_type.name != "undefinedtype") {
       uint64_t type_size = 0;
       if (element_type.name == "int8") {
         constData.name += "-as-string";
         type_size = value.name.length() - 1;
       } else {
-        constData.name += "-as-" + element_type.name;
+        if (!element_type.isRecord && !element_type.isArray) {
+          constData.name += "-as-" + element_type.name;
+        }
         type_size = typeInfo.GetSizeOfType();
       }
       {
@@ -184,7 +187,8 @@ EOObject Variable::GetInitializer() const {
       }
     }
   }
-  if (!typeInfo.name.empty() && !typeInfo.isRecord && !typeInfo.isArray) {
+  if (typeInfo.name != "undefinedtype" && !typeInfo.isRecord &&
+      !typeInfo.isArray) {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);

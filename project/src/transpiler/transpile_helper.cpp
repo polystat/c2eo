@@ -1613,21 +1613,23 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
     EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
     if (typeInfo.name == "ptr" && eoRight.nested.empty()) {
       TypeSimpl item_type = transpiler.type_manger_.GetById(typeInfo.subTypeId);
-      string type_postfix = typeInfo.name;
-      if (type_postfix != "undefinedtype") {
+      if (item_type.name != "undefinedtype") {
         uint64_t type_size = 0;
         if (item_type.name == "int8") {
           constData.name += "-as-string";
           type_size = eoRight.name.length() - 1;
         } else {
-          constData.name += "-as-" + type_postfix;
+          if (!item_type.isRecord && !item_type.isArray) {
+            constData.name += "-as-" + item_type.name;
+          }
           type_size = item_type.GetSizeOfType();
         }
         {
           EOObject address{"address"};
           address.nested.emplace_back("global-ram");
           address.nested.emplace_back(
-              to_string(transpiler.glob_.GetFreeSpacePointer()));
+              to_string(transpiler.glob_.GetFreeSpacePointer()),
+              EOObjectType::EO_LITERAL);
           transpiler.glob_.ShiftFreeSpacePointer(type_size);
           constData.nested.push_back(address);
           constData.nested.push_back(eoRight);
@@ -1636,7 +1638,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         }
       }
     }
-    if (!typeInfo.isRecord && !typeInfo.isArray) {
+    if (!typeInfo.isRecord && !typeInfo.isArray &&
+        typeInfo.name != "undefinedtype") {
       binary_op.name += "-as-" + typeInfo.name;
     }
     binary_op.nested.emplace_back(GetStmtEOObject(left));
