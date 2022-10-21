@@ -66,9 +66,9 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
     }
   }
   types.push_back(ts);
-  //  std::cerr << ts.id << ' ' << ts.name << '\n';
-  //  type_ptr->dump();
-  //  std::cerr << '\n';
+  std::cerr << ts.id << ' ' << ts.name << ' ' << ts.size / byte_size << '\n';
+  type_ptr->dump();
+  std::cerr << '\n';
   return ts;
 }
 const clang::Type* TypeManger::GetSubType(const clang::Type* type_ptr) {
