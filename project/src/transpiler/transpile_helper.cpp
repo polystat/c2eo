@@ -295,9 +295,9 @@ vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params) {
   size_t res = 0;
   for (auto *VD : params) {
-    TypeInfo type_info = VD->getASTContext().getTypeInfo(VD->getType());
-    size_t type_size = type_info.Width / byte_size;
-    res += type_size;
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(VD->getType().getTypePtr());
+    res += typeInfo.GetSizeOfType();
   }
   return res;
 }
@@ -751,16 +751,15 @@ EOObject GetCastEOObject(const CastExpr *op) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   auto cast_kind = op->getCastKind();
-  QualType qual_type = op->getType();
-  string type = GetTypeName(qual_type);
+  TypeSimpl typeInfo = transpiler.type_manger_.Add(op->getType().getTypePtr());
+  string type = typeInfo.name;
   if (cast_kind == clang::CK_LValueToRValue) {
     EOObject read{"read"};
     read.nested.push_back(GetStmtEOObject(*op->child_begin()));
-    if (qual_type->isRecordType()) {
+    if (typeInfo.isRecord) {
       read.nested.emplace_back(
-          to_string(transpiler.record_manager_
-                        .GetById(qual_type->getAsRecordDecl()->getID())
-                        ->size),
+          to_string(
+              transpiler.record_manager_.GetById(typeInfo.recordId)->size),
           EOObjectType::EO_LITERAL);
 
     } else if (type == "string") {
@@ -1605,20 +1604,50 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   EOObject binary_op{"write"};
+  EOObject constData{"write"};
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   if (left != nullptr) {
-    QualType qual_type = left->getType();
-    if (!qual_type->isRecordType()) {
-      string type = GetTypeName(left->getType());
-      if (type == "string") {
-        return GetEOStringToCharArray(
-            GetStmtEOObject(left), GetStmtEOObject(p_operator->getRHS()).name);
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(left->getType().getTypePtr());
+    //    QualType qual_type = left->getType();
+    EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
+    if (typeInfo.name == "ptr" && eoRight.nested.empty()) {
+      TypeSimpl item_type = transpiler.type_manger_.GetById(typeInfo.subTypeId);
+      string type_postfix = typeInfo.name;
+      if (type_postfix != "undefinedtype") {
+        uint64_t type_size = 0;
+        if (item_type.name == "int8") {
+          constData.name += "-as-string";
+          type_size = eoRight.name.length() - 1;
+        } else {
+          constData.name += "-as-" + type_postfix;
+          type_size = item_type.GetSizeOfType();
+        }
+        {
+          EOObject address{"address"};
+          address.nested.emplace_back("global-ram");
+          address.nested.emplace_back(
+              to_string(transpiler.glob_.GetFreeSpacePointer()));
+          transpiler.glob_.ShiftFreeSpacePointer(type_size);
+          constData.nested.push_back(address);
+          constData.nested.push_back(eoRight);
+          eoRight = EOObject{"addr-of"};
+          eoRight.nested.push_back(address);
+        }
       }
-      binary_op.name += "-as-" + type;
+    }
+    if (!typeInfo.isRecord) {
+      binary_op.name += "-as-" + typeInfo.name;
     }
     binary_op.nested.emplace_back(GetStmtEOObject(left));
-    binary_op.nested.push_back(GetStmtEOObject(p_operator->getRHS()));
-    return binary_op;
+    binary_op.nested.push_back(eoRight);
+    if (constData.nested.empty()) {
+      return binary_op;
+    }
+    EOObject res{EOObjectType::EO_EMPTY};
+    res.nested.push_back(constData);
+    res.nested.push_back(binary_op);
+    return res;
   }
   return EOObject{EOObjectType::EO_PLUG};
 }

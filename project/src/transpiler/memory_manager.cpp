@@ -31,7 +31,8 @@
 #include <utility>
 
 #include "src/transpiler/transpile_helper.h"
-
+#include "src/transpiler/unit_transpiler.h"
+extern UnitTranspiler transpiler;
 Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
                             const std::string &alias, EOObject value,
                             std::string local_name, size_t shift,
@@ -147,6 +148,7 @@ void MemoryManager::SetExtEqGlob() {
   }
 }
 
+void MemoryManager::ShiftFreeSpacePointer(uint64_t shift) { pointer_ += shift; }
 EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
     return ReplaceEmpty(value, {alias, EOObjectType::EO_LITERAL});
@@ -155,8 +157,34 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   EOObject res("write");
-  if (typeInfo.name != "undefinedtype" && !typeInfo.isArray &&
-      !typeInfo.isRecord) {
+  EOObject constData{"write"};
+  EOObject _value = value;
+  if (typeInfo.name == "ptr" && value.nested.empty()) {
+    TypeSimpl element_type = transpiler.type_manger_.GetById(typeInfo.subTypeId);
+    if (element_type.name != "undefinedtype") {
+      uint64_t type_size = 0;
+      if (element_type.name == "int8") {
+        constData.name += "-as-string";
+        type_size = value.name.length() - 1;
+      } else {
+        constData.name += "-as-" + element_type.name;
+        type_size = typeInfo.GetSizeOfType();
+      }
+      {
+        EOObject address{"address"};
+        address.nested.emplace_back("global-ram");
+        address.nested.emplace_back(
+            std::to_string(transpiler.glob_.GetFreeSpacePointer()),
+            EOObjectType::EO_LITERAL);
+        transpiler.glob_.ShiftFreeSpacePointer(type_size);
+        constData.nested.push_back(address);
+        constData.nested.push_back(value);
+        _value = EOObject{"addr-of"};
+        _value.nested.push_back(address);
+      }
+    }
+  }
+  if (!typeInfo.name.empty()) {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);
@@ -164,10 +192,15 @@ EOObject Variable::GetInitializer() const {
     // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   } else {
-    // Probably just emplace value.
-    res.nested.emplace_back(value);
+    res.nested.push_back(_value);
   }
-  return res;
+  if (constData.nested.empty()) {
+    return res;
+  }
+  EOObject ret{EOObjectType::EO_EMPTY};
+  ret.nested.push_back(constData);
+  ret.nested.push_back(res);
+  return ret;
 }
 
 EOObject Variable::GetAddress(const std::string &mem_name) const {

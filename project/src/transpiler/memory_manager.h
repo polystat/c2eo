@@ -100,6 +100,8 @@ class MemoryManager {
 
   void SetExtEqGlob();
 
+  void ShiftFreeSpacePointer(uint64_t shift);
+
  private:
   // index of first free byte in memory
   size_t pointer_ = eight_bytes;
