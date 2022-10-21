@@ -42,7 +42,7 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
   if (type_ptr == nullptr) {
     return {};
   }
-  auto id = (int64_t)type_ptr;
+  auto id = reinterpret_cast<intptr_t>(type_ptr);
   TypeSimpl existType = GetById(id);
   if (existType.id != -1) {
     return existType;
@@ -52,23 +52,20 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
     ts = TypeSimpl(id, Add(type_ptr->getUnqualifiedDesugaredType()));
   } else {
     ts.id = id;
-    clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
+    const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
     ts.size = type_info.Width;
     if (type_ptr->isPointerType()) {
-      ts.size = 8 * byte_size;  // Size of any pointer == 8 byte
+      ts.size = 8UL * byte_size;  // Size of any pointer == 8 byte
     }
     ts.name = ts.GetTypeName(type_ptr);
     const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-
     if (sub_type_ptr != nullptr) {
-      Add(sub_type_ptr);
-      ts.subTypeId = (int64_t)sub_type_ptr;
+      ts.subTypeId = Add(sub_type_ptr).id;
     }
   }
   types.push_back(ts);
-//  std::cerr << ts.id << ' ' << ts.name << ' ' << ts.size / byte_size << '\n';
-//  type_ptr->dump();
-//  std::cerr << '\n';
+  //  std::cerr << ts.id << ' ' << ts.name << ' ' << ts.size / byte_size <<
+  //  '\n'; type_ptr->dump(); std::cerr << '\n';
   return ts;
 }
 const clang::Type* TypeManger::GetSubType(const clang::Type* type_ptr) {
@@ -81,6 +78,9 @@ const clang::Type* TypeManger::GetSubType(const clang::Type* type_ptr) {
   return nullptr;
 }
 std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
+  if (type_ptr == nullptr) {
+    return "undefinedtype";
+  }
   std::string str;
   if (type_ptr->isBooleanType()) {
     str += "bool";
@@ -93,12 +93,15 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   }
   if (type_ptr->isConstantArrayType()) {
     isArray = true;
-    const auto* const arr_type =
+    const auto* array_type =
         clang::dyn_cast<clang::ConstantArrayType>(type_ptr);
-    if (arr_type->getElementType()->isCharType()) {
-      str += "string";
-      return str;
-    } else {
+    if (array_type != nullptr) {
+      const clang::Type* element_type =
+          array_type->getElementType().getTypePtrOrNull();
+      if (element_type != nullptr && element_type->isCharType()) {
+        str += "string";
+        return str;
+      }
       str += "array";
       return str;
     }
@@ -126,7 +129,7 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   if (type_ptr->isUnionType() || type_ptr->isStructureType()) {
     isRecord = true;
     clang::RecordDecl* RD = type_ptr->getAsRecordDecl();
-    recordId = (int64_t)RD->getID();
+    recordId = RD->getID();
     if (RD->hasNameForLinkage()) {
       str += RD->getNameAsString();
     } else {

@@ -66,7 +66,7 @@ Variable MemoryManager::AddExternal(
     const clang::VarDecl *id, TypeSimpl typeInfo, std::string alias,
     EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
-  Variable var = {id, some_non_zero_position, typeInfo, std::move(alias),
+  Variable var = {id, some_non_zero_position, std::move(typeInfo), std::move(alias),
                   std::move(value), std::move(local_name), shift,
                   //                  type_postfix,
                   false};

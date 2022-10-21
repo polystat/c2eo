@@ -69,7 +69,7 @@ struct TypeManger {
 
  private:
   std::vector<TypeSimpl> types;
-  const clang::Type* GetSubType(const clang::Type* pType);
+  static const clang::Type* GetSubType(const clang::Type* type_ptr);
 };
 
 #endif  // PROJECT_SRC_TRANSPILER_TYPE_MANAGER_H_
