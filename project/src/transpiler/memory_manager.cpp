@@ -49,9 +49,13 @@ Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
     unique_alias = alias;
   }
   duplicates[alias]++;
-  Variable var = {id, pointer_, typeInfo, std::move(unique_alias),
-                  std::move(value), std::move(local_name), shift,
-                  //                  type_postfix,
+  Variable var = {id,
+                  pointer_,
+                  typeInfo,
+                  std::move(unique_alias),
+                  std::move(value),
+                  std::move(local_name),
+                  shift,
                   is_initialized};
   // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
@@ -66,9 +70,13 @@ Variable MemoryManager::AddExternal(
     const clang::VarDecl *id, TypeSimpl typeInfo, std::string alias,
     EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
-  Variable var = {id, some_non_zero_position, std::move(typeInfo), std::move(alias),
-                  std::move(value), std::move(local_name), shift,
-                  //                  type_postfix,
+  Variable var = {id,
+                  some_non_zero_position,
+                  std::move(typeInfo),
+                  std::move(alias),
+                  std::move(value),
+                  std::move(local_name),
+                  shift,
                   false};
   // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
