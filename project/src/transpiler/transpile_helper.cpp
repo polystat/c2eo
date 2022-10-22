@@ -147,7 +147,6 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
-EOObject GetEOStringToCharArray(const EOObject &object, const string &strValue);
 EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
@@ -831,21 +830,22 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   return for_stmt;
 }
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
+  // todo:1
   auto index_name = GetStmtEOObject(op->getIdx());
   uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
-  //  EOObject globAddr{"address"};
-  //  globAddr.nested.emplace_back("global-ram");
+  EOObject globAddr{"address"};
+  globAddr.nested.emplace_back("global-ram");
   EOObject addr{"plus"};
   addr.nested.emplace_back(GetStmtEOObject(op->getBase()));
   EOObject shift{"times"};
   shift.nested.emplace_back(index_name);
   shift.nested.emplace_back(std::to_string(dim_size), EOObjectType::EO_LITERAL);
   addr.nested.emplace_back(shift);
-  //  globAddr.nested.emplace_back(addr);
+  globAddr.nested.emplace_back(addr);
   //  auto stmt_class = op->getStmtClass();
   //  if (stmt_class == Stmt::DeclRefExprClass) {
-  //    return globAddr;
+  return globAddr;
   //  }
   return addr;
 }
@@ -1482,27 +1482,6 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
-EOObject GetEOStringToCharArray(const EOObject &object,
-                                const string &strValue) {
-  EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  for (int i = 1; i < strValue.length(); i++) {
-    EOObject eoChar{"write-as-int8"};
-    EOObject addr{"plus"};
-    addr.nested.push_back(object);
-    EOObject shift{"times"};
-    shift.nested.emplace_back(to_string(i - 1));
-    shift.nested.emplace_back("1");
-    addr.nested.emplace_back(shift);
-    eoChar.nested.push_back(addr);
-    if (i + 1 == strValue.length()) {
-      eoChar.nested.emplace_back("0");
-    } else {
-      eoChar.nested.emplace_back(to_string(static_cast<int>(strValue[i])));
-    }
-    eoList.nested.push_back(eoChar);
-  }
-  return eoList;
-}
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
   if (op == nullptr) {
@@ -1531,12 +1510,12 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     const auto &var = transpiler.glob_.GetVarById(id);
     clang::QualType qual_type = id->getType();
     const clang::Type *type = qual_type.getTypePtrOrNull();
-    TypeSimpl typeInfo =
-        transpiler.type_manger_.Add(id->getType().getTypePtrOrNull());
+    //    TypeSimpl typeInfo =
+    //        transpiler.type_manger_.Add(id->getType().getTypePtrOrNull());
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
-    //    if (typeInfo.name == "string") {
+    //    if (type->isArrayType() || type->isPointerType()) { //todo:1
     //      EOObject array_as_ptr{"addr-of"};
     //      array_as_ptr.nested.emplace_back(var.alias);
     //      return array_as_ptr;
