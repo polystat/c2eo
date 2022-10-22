@@ -1536,11 +1536,11 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
-    if (type->isPointerType()) {
-      EOObject array_as_ptr{"addr-of"};
-      array_as_ptr.nested.emplace_back(var.alias);
-      return array_as_ptr;
-    }
+//    if (type->isPointerType()) {
+//      EOObject array_as_ptr{"addr-of"};
+//      array_as_ptr.nested.emplace_back(var.alias);
+//      return array_as_ptr;
+//    }
     if (type->isFunctionPointerType()) {
       // TEST
       // std::cout << "It is Function Pointer Type\n";
