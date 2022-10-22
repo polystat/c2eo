@@ -1531,12 +1531,12 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     const auto &var = transpiler.glob_.GetVarById(id);
     clang::QualType qual_type = id->getType();
     const clang::Type *type = qual_type.getTypePtrOrNull();
-    //    TypeSimpl typeInfo =
-    //    transpiler.type_manger_.Add(id->getType().getTypePtrOrNull());
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(id->getType().getTypePtrOrNull());
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
-    //    if (type->isPointerType()) {
+    //    if (typeInfo.name == "string") {
     //      EOObject array_as_ptr{"addr-of"};
     //      array_as_ptr.nested.emplace_back(var.alias);
     //      return array_as_ptr;
