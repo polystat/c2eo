@@ -1254,8 +1254,16 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
 EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
   std::ostringstream ss{};
   if (p_literal != nullptr) {
+    // TEST out
+    std::cout << "Checkout 01\n";
     llvm::APFloat an_float = p_literal->getValue();
-    ss << std::fixed << an_float.convertToDouble();
+    std::cout << "Checkout 02\n";
+    if (&an_float.getSemantics() == (const llvm::fltSemantics *)&an_float.APFloatBase::IEEEdouble()) {
+      ss << std::fixed << an_float.convertToDouble();
+    } else {
+      ss << std::fixed << an_float.convertToFloat();
+    }
+    std::cout << "Checkout 03\n";
   }
   return {ss.str(), EOObjectType::EO_LITERAL};
 }
