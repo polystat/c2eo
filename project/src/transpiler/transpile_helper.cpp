@@ -830,7 +830,8 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   return for_stmt;
 }
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
-  // todo:1
+  op->dump();
+  std::cerr << '\n';
   auto index_name = GetStmtEOObject(op->getIdx());
   uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
@@ -843,11 +844,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   shift.nested.emplace_back(std::to_string(dim_size), EOObjectType::EO_LITERAL);
   addr.nested.emplace_back(shift);
   globAddr.nested.emplace_back(addr);
-  //  auto stmt_class = op->getStmtClass();
-  //  if (stmt_class == Stmt::DeclRefExprClass) {
   return globAddr;
-  //  }
-  return addr;
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
@@ -1069,7 +1066,8 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
     std::cout << "Checkout 01\n";
     llvm::APFloat an_float = p_literal->getValue();
     std::cout << "Checkout 02\n";
-    if (&an_float.getSemantics() == (const llvm::fltSemantics *)&an_float.APFloatBase::IEEEdouble()) {
+    if (&an_float.getSemantics() ==
+        (const llvm::fltSemantics *)&an_float.APFloatBase::IEEEdouble()) {
       ss << std::fixed << an_float.convertToDouble();
     } else {
       ss << std::fixed << an_float.convertToFloat();
@@ -1523,11 +1521,11 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
-    //    if (type->isArrayType() || type->isPointerType()) { //todo:1
-    //      EOObject array_as_ptr{"addr-of"};
-    //      array_as_ptr.nested.emplace_back(var.alias);
-    //      return array_as_ptr;
-    //    }
+    if (type->isArrayType()) {
+      EOObject array_as_ptr{"addr-of"};
+      array_as_ptr.nested.emplace_back(var.alias);
+      return array_as_ptr;
+    }
     if (type->isFunctionPointerType()) {
       // TEST
       // std::cout << "It is Function Pointer Type\n";
