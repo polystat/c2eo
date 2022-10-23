@@ -7,7 +7,7 @@
 00208: TODO struct initialization with str
 00175: TODO printf char
 00058: TODO pointer on char
-00078, 00217: TODO pointer on function
+00217: TODO pointer on function
 00137, 00138, 00219: TODO define function
 00053: TODO structures
 00091, 00148: TODO array in structure
@@ -15,7 +15,6 @@
 00149: TODO pointers on structures
 00197: TODO static variables
 00026: TODO arithmetics
-00200: TODO shift
 00010, 00051, 00129, 00199, 00207, 00213: goto
 00174: using math.h
 00186: using sprintf
