@@ -873,16 +873,17 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   auto index_name = GetStmtEOObject(op->getIdx());
   uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
-  EOObject globAddr{"address"};
-  globAddr.nested.emplace_back("global-ram");
+//  EOObject globAddr{"address"};
+//  globAddr.nested.emplace_back("global-ram");
   EOObject addr{"plus"};
   addr.nested.emplace_back(GetStmtEOObject(op->getBase()));
   EOObject shift{"times"};
   shift.nested.emplace_back(index_name);
   shift.nested.emplace_back(std::to_string(dim_size), EOObjectType::EO_LITERAL);
   addr.nested.emplace_back(shift);
-  globAddr.nested.emplace_back(addr);
-  return globAddr;
+//  globAddr.nested.emplace_back(addr);
+//  return globAddr;
+  return addr;
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
@@ -1560,9 +1561,12 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
       return EOObject{EOObjectType::EO_PLUG};
     }
     if (type->isArrayType()) {
+      EOObject globAddr{"address"};
+      globAddr.nested.emplace_back("global-ram");
       EOObject array_as_ptr{"addr-of"};
       array_as_ptr.nested.emplace_back(var.alias);
-      return array_as_ptr;
+      globAddr.nested.emplace_back(array_as_ptr);
+      return globAddr;
     }
     if (type->isFunctionPointerType()) {
       // TEST
