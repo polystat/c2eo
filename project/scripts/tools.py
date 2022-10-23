@@ -116,7 +116,7 @@ def get_status(status: str) -> str:
 def is_equal_float_strs(str_num1: str, str_num2: str) -> bool:
     str_num1, str_num2 = str_num1.replace(',', '.'), str_num2.replace(',', '.')
     try:
-        return math.isclose(float(str_num1), float(str_num2), rel_tol=1e-08)
+        return math.isclose(float(str_num1), float(str_num2), rel_tol=1e-08, abs_tol=1e-4)
     except ValueError:
         return False
 
