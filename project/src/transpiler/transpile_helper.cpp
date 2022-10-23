@@ -749,7 +749,8 @@ EOObject GetCastEOObject(const CastExpr *op) {
   string type = typeInfo.name;
   if (cast_kind == clang::CK_LValueToRValue) {
     EOObject read{"read"};
-    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
+    EOObject value = GetStmtEOObject(*op->child_begin());
+    read.nested.emplace_back(value);
     if (typeInfo.isRecord) {
       read.nested.emplace_back(
           to_string(
@@ -758,8 +759,10 @@ EOObject GetCastEOObject(const CastExpr *op) {
 
     } else if (type == "string") {
       read.name += "-as-ptr";
+      //      read.name = "addr-of";
     } else {
       read.name += "-as-" + type;
+      (*op->child_begin())->dump();
     }
     return read;
   }
@@ -768,6 +771,15 @@ EOObject GetCastEOObject(const CastExpr *op) {
     EOObject cast{"as-" + type};
     cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
     return cast;
+  }
+  if (cast_kind == clang::CK_NullToPointer ||
+      cast_kind == clang::CK_IntegralToPointer) {
+    EOObject ptr{"read-as-ptr"};  // addr-of?
+    EOObject address{"address"};
+    address.nested.emplace_back("global-ram");
+    address.nested.emplace_back(GetStmtEOObject(*op->child_begin()));
+    ptr.nested.emplace_back(address);
+    return ptr;
   }
   //  if (cast_kind == clang::CK_ArrayToPointerDecay &&
   //      (*op->child_begin())->getStmtClass() !=
@@ -830,8 +842,6 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   return for_stmt;
 }
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
-  op->dump();
-  std::cerr << '\n';
   auto index_name = GetStmtEOObject(op->getIdx());
   uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
