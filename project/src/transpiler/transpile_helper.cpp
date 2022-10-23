@@ -567,8 +567,37 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       eoList.nested.insert(eoList.nested.end(), newValue.nested.begin(),
                            newValue.nested.end());
     } else if (!elementType.isRecord && !elementType.isArray) {
+      EOObject constData{"write"};
       EOObject res("write");
-      if (!elementType.name.empty()) {
+      if (elementType.name == "ptr" && value.nested.empty()) {
+        TypeSimpl item_type = transpiler.type_manger_.GetById(elementType.subTypeId);
+        if (item_type.name != "undefinedtype") {
+          uint64_t type_size = 0;
+          if (item_type.name == "int8") {
+            constData.name += "-as-string";
+            type_size = value.name.length() - 1;
+          } else {
+            if (!item_type.isRecord && !item_type.isArray) {
+              constData.name += "-as-" + item_type.name;
+            }
+            type_size = item_type.GetSizeOfType();
+          }
+          {
+            EOObject address{"address"};
+            address.nested.emplace_back("global-ram");
+            address.nested.emplace_back(
+                to_string(transpiler.glob_.GetFreeSpacePointer()),
+                EOObjectType::EO_LITERAL);
+            transpiler.glob_.ShiftFreeSpacePointer(type_size);
+            constData.nested.push_back(address);
+            constData.nested.push_back(value);
+            value = EOObject{"addr-of"};
+            value.nested.push_back(address);
+          }
+        }
+        eoList.nested.push_back(constData);
+      }
+      if (elementType.name != "undefinedtype") {
         res.name += "-as-" + elementType.name;
       }
       res.nested.emplace_back(shiftedAlias);
@@ -759,10 +788,8 @@ EOObject GetCastEOObject(const CastExpr *op) {
 
     } else if (type == "string") {
       read.name += "-as-ptr";
-      //      read.name = "addr-of";
     } else {
       read.name += "-as-" + type;
-      (*op->child_begin())->dump();
     }
     return read;
   }
