@@ -148,7 +148,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
 EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt);
-bool IsNestedObjectsContainLabel(const EOObject &object, const char *label);
+bool IsLeftNestedObjectsContainLabel(const EOObject &object, const char *label);
 const Expr *GetPureStmtNode(const Expr *pExpr);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
@@ -888,8 +888,8 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   //  std::cerr << '\n';
   const TypeSimpl typeInfo = transpiler.type_manger_.Add(type);
   if ((typeInfo.name == "ptr" ||
-       IsNestedObjectsContainLabel(addr, "addr-of")) &&
-      !IsNestedObjectsContainLabel(addr, "global-ram")) {
+       IsLeftNestedObjectsContainLabel(addr, "addr-of")) &&
+      !IsLeftNestedObjectsContainLabel(addr, "address")) {
     EOObject globAddr{"address"};
     globAddr.nested.emplace_back("global-ram");
     globAddr.nested.emplace_back(addr);
@@ -906,17 +906,15 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
 //   }
 //   return pExpr;
 // }
-bool IsNestedObjectsContainLabel(const EOObject &object, const char *label) {
+bool IsLeftNestedObjectsContainLabel(const EOObject &object,
+                                     const char *label = "") {
   if (object.name == label) {
     return true;
   }
   if (object.nested.empty()) {
     return false;
   }
-  return std::any_of(object.nested.begin(), object.nested.end(),
-                     [label](const EOObject &subObject) {
-                       return IsNestedObjectsContainLabel(subObject, label);
-                     });
+  return IsLeftNestedObjectsContainLabel(object.nested[0], label);
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
