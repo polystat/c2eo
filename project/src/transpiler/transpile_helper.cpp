@@ -1259,7 +1259,7 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
     llvm::APFloat an_float = p_literal->getValue();
     std::cout << "Checkout 02\n";
     if (&an_float.getSemantics() ==
-        (const llvm::fltSemantics *)&an_float.APFloatBase::IEEEdouble()) {
+        static_cast<const llvm::fltSemantics *>(&llvm::APFloat::IEEEdouble())) {
       ss << std::fixed << an_float.convertToDouble();
     } else {
       ss << std::fixed << an_float.convertToFloat();
