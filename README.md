@@ -317,7 +317,7 @@ Then you have to upload `./repository/dists` and `./repository/pool` to [c2eo.po
 
 C is a _system-level procedural_ programming language with direct access to the underlying hardware architecture elements, such as memory and registers. EO, on the other hand is a _high-level object-oriented_ language. There are a number of non-trivial mechanisms of translating constructs from the former to the latter, which are explained below:
 
-:heavy_check_mark: [Implemented](#implemented):
+:heavy_check_mark: [Implemented](#heavy_check_mark-implemented):
 - [basic data types: double, int, bool, char, string](#direct-memory-access-for-basic-data-types)
 - [const](#const)
 - [arrays](#arrays)
@@ -337,11 +337,11 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [switch case default](#switch-case-default)
 - [operators](#operators)
 
-:hammer: In progress:
+:warning: [Partially implemented](#warning-partially-implemented):
 - [uint64, float (not supported by EO)](#basic-types)
 - [pointers on function](#pointers-on-function)
 
-:x: [Not implemented](#not-implemented):
+:x: [Not implemented](#x-not-implemented):
 - [goto and labels](#goto-and-labels)
 - [calling functions with variable number of arguments](#calling-functions-with-variable-number-of-arguments)
 - [bitwise fields](#bitwise-fields)
@@ -917,7 +917,30 @@ For assignment operations, we generate the following constructs
 x.write (x.add 10)
 ```
 
-### In progress
+### :warning: Partially implemented:
+
+### Basic types
+
+In EO, an implementation of at least 8 bytes is used to store floating-point numbers. At the moment, full support for numbers with fewer bytes is not possible. So far, to work with such numbers, we also use 8 bytes for storage.
+
+```c
+float b = 5.0; // 4 bytes
+```
+
+```java
+write-as-float32 b 5.0 // 8 bytes
+```
+
+At the moment, the largest type in EO is int64, there is no support for uint64 numbers and it crashes with an error at the compilation stage. The current implementation supports numbers in the range of type uint56
+
+```c
+unsigned long long int c = 10223372036854775807;
+```
+
+```java
+write-as-uint64 c 10223372036854775807
+// [COMPILATION EXCEPTION] the number is too high
+```
 
 ### Pointers on function
 
@@ -1014,16 +1037,7 @@ myFuncDef functionFactory(int n) {
 }
 ```
 
-### Basic types
-
-Some types are not yet implemented due to problems with working with bytes in the EO.
-
-```c
-float b = 4.0;
-unsigned long long int c = 10223372036854775807;
-```
-
-### Not implemented
+### :x: Not implemented
 
 ### Goto and labels
 
@@ -1081,10 +1095,10 @@ stateDiagram-v2
     if_3 --> F: False
     F --> [*]
 ```
- 
+
 ### Calling functions with variable number of arguments
 
-Also in C it is possible to call a function with a variable number of arguments.
+Also in C it is possible to call a function with a variable number of arguments. The main problem for the implementation in EO is the use in C and special libraries (`va_start, va_end and itc.`) for reading arguments in such functions.
 
 ```c
 double average(int num,...) {
@@ -1111,5 +1125,17 @@ int main() {
 ### Bitwise fields
 
 In the C language, bitwise fields can be formed as structures. They provide access to
-individual bits of signed and unsigned numbers. EO does not support bitwise fields. Therefore,
-their direct implementation is impossible.
+individual bits of signed and unsigned numbers. EO does not support bits, so their direct implementation is impossible.
+
+```c
+ // memory-optimized date storage structure
+struct date {
+  unsigned int day: 5; // the maximum value of days is 31, so we need 5 bits for this
+  unsigned int month: 4; // the maximum value of months us 12, so weed 4 bits for this
+  unsigned int year;
+};
+
+struct date d = {15, 7, 2022};
+printf("Date size is: %lu bytes\n", sizeof(d)); // 8 bytes instead 12
+printf("Date is %d.%d.%d", d.day, d.month, d.year); // 15.7.2022
+```

@@ -194,7 +194,7 @@ jobs:
           make
 
       - name: Generating tests
-        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 100
+        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 70
         
       - name: Transpilation
         run: cd ./project/scripts && python3 transpile.py ../tests/main/csmith -n || true
