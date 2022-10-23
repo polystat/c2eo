@@ -160,8 +160,8 @@ void TraceOutFunctionDecl(const clang::FunctionDecl *FD) {
   if (FD == nullptr) {
     std::cout << "  Incorrect pointer_ to definition\n";
   } else {
-    clang::DeclarationNameInfo decl_name_info{FD->getNameInfo()};
-    std::string func_name{decl_name_info.getAsString()};
+    const clang::DeclarationNameInfo decl_name_info{FD->getNameInfo()};
+    const std::string func_name{decl_name_info.getAsString()};
     std::cout << func_name << ": ";
     std::cout.flush();
 

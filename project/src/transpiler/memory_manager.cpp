@@ -144,7 +144,7 @@ void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
 void MemoryManager::SetExtEqGlob() {
   for (auto &var : variables_) {
     if (var.alias.substr(0, 2) == "e-") {
-      std::string real_name = var.alias.substr(2, var.alias.size());
+      const std::string real_name = var.alias.substr(2, var.alias.size());
       auto place = std::find_if(variables_.begin(), variables_.end(),
                                 [real_name](const Variable &x) {
                                   return x.alias == "g-" + real_name;
@@ -169,7 +169,7 @@ EOObject Variable::GetInitializer() const {
   EOObject constData{"write"};
   EOObject _value = value;
   if (typeInfo.name == "ptr" && value.nested.empty()) {
-    TypeSimpl element_type =
+    const TypeSimpl element_type =
         transpiler.type_manger_.GetById(typeInfo.subTypeId);
     if (element_type.name != "undefinedtype") {
       uint64_t type_size = 0;

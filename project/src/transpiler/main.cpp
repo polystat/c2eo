@@ -92,9 +92,9 @@ int main(int argc, const char **argv) {
     return -1;
   }
 
-  std::string new_in_file_name{std::string(argv[1]) + ".i"};
-  std::string ppc_command{"clang -E " + std::string(argv[1]) +
-                          std::string(" > ") + new_in_file_name};
+  const std::string new_in_file_name{std::string(argv[1]) + ".i"};
+  const std::string ppc_command{"clang -E " + std::string(argv[1]) +
+                                std::string(" > ") + new_in_file_name};
   const char *ppc = ppc_command.c_str();
   system(ppc);
 

@@ -82,7 +82,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
       } else {
         field_name = "field" + std::to_string(field->getID());
       }
-      TypeSimpl typeInfo =
+      const TypeSimpl typeInfo =
           transpiler.type_manger_.Add(field->getType().getTypePtrOrNull());
       fields.emplace_back(field_name, typeInfo, shift);
 

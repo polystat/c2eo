@@ -48,7 +48,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   extern UnitTranspiler transpiler;
   auto var_name = VD->getNameAsString();
   // TEST
-  TypeSimpl typeInfo =
+  const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(VD->getType().getTypePtrOrNull());
 
   auto storage_class = VD->getStorageClass();
@@ -57,7 +57,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   auto global_storage = VD->hasGlobalStorage();
   auto is_init = VD->hasInit();
   // std::string str_value;
-  EOObject initial_value = InitValueEOObj(VD, is_init, typeInfo);
+  const EOObject initial_value = InitValueEOObj(VD, is_init, typeInfo);
 
   if (global_storage && !ext_storage && !static_local &&
       (storage_class != clang::SC_Static)) {
@@ -73,7 +73,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   // its local variable!
 
   if (local_name.empty()) {
-    return {};
+    return Variable();
   }
   const auto *PD = llvm::dyn_cast<clang::ParmVarDecl>(VD);
   if (PD != nullptr) {

@@ -52,7 +52,7 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
   TraceOutFunctionDecl(FD);  // Test output of the function content
 #endif
 
-  clang::DeclarationNameInfo decl_name_info{FD->getNameInfo()};
+  const clang::DeclarationNameInfo decl_name_info{FD->getNameInfo()};
   std::string func_name{decl_name_info.getAsString()};
   if (func_name != "main") {
     func_name = "f-" + func_name;
@@ -62,13 +62,13 @@ void FuncDeclAnalyzer::run(const MatchFinder::MatchResult &result) {
 
   auto is_definition = FD->isThisDeclarationADefinition();
   if (is_definition) {
-    FunctionDefinition func_def{FD, func_name};
+    const FunctionDefinition func_def{FD, func_name};
     transpiler.func_manager_.AddDefinition(func_def);
 
-    EOObject eo_func_def = func_def.GetEoObject();
+    const EOObject eo_func_def = func_def.GetEoObject();
     transpiler.func_manager_.AddEoObject(eo_func_def);
   } else {
-    FunctionDeclaration func_decl{FD, func_name};
+    const FunctionDeclaration func_decl{FD, func_name};
     transpiler.func_manager_.AddDeclaration(func_decl);
   }
 }

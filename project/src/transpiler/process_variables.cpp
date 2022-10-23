@@ -68,7 +68,7 @@ void ProcessDoStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                  DoStmt *do_stmt, bool process_only_static);
 void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                Stmt *stmt, bool process_only_static) {
-  Stmt::StmtClass stmt_class = stmt->getStmtClass();
+  const Stmt::StmtClass stmt_class = stmt->getStmtClass();
   if (stmt_class == Stmt::DeclStmtClass) {
     auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
     ProcessDeclStmt(shift, all_local, decl_stmt, process_only_static);
@@ -212,14 +212,14 @@ void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt *CS,
     return;
   }
   for (auto *stmt : CS->body()) {
-    Stmt::StmtClass stmt_class = stmt->getStmtClass();
+    const Stmt::StmtClass stmt_class = stmt->getStmtClass();
     if (stmt_class == Stmt::DeclStmtClass) {
       auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
       if (decl_stmt == nullptr) {
         continue;
       }
       for (auto *decl : decl_stmt->decls()) {
-        Decl::Kind decl_kind = decl->getKind();
+        const Decl::Kind decl_kind = decl->getKind();
         if (decl_kind == Decl::Var) {
           auto *var_decl = dyn_cast<VarDecl>(decl);
           if (var_decl != nullptr && !var_decl->isStaticLocal()) {
@@ -237,7 +237,7 @@ void ProcessDeclStmt(size_t shift, vector<Variable> &all_local,
     return;
   }
   for (auto *decl : decl_stmt->decls()) {
-    Decl::Kind decl_kind = decl->getKind();
+    const Decl::Kind decl_kind = decl->getKind();
     if (decl_kind == Decl::Var) {
       auto *var_decl = dyn_cast<VarDecl>(decl);
       if (var_decl != nullptr) {

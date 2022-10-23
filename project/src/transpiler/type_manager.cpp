@@ -36,11 +36,11 @@ TypeSimpl TypeManger::GetById(int64_t id) {
       return ts;
     }
   }
-  return {};
+  return TypeSimpl();
 }
 TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
   if (type_ptr == nullptr) {
-    return {};
+    return TypeSimpl();
   }
   auto id = reinterpret_cast<intptr_t>(type_ptr);
   TypeSimpl existType = GetById(id);

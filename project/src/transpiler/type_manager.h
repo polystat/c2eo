@@ -40,9 +40,9 @@ struct TypeSimpl {
   int64_t recordId = -1;
   bool isArray = false;
   bool isRecord = false;
-  TypeSimpl(int64_t _id = -1, std::string _name = "", size_t _size = 0,
-            int64_t _subType = -1, int64_t _recordId = -1,
-            bool _isArray = false, bool _isRecord = false)
+  explicit TypeSimpl(int64_t _id = -1, std::string _name = "", size_t _size = 0,
+                     int64_t _subType = -1, int64_t _recordId = -1,
+                     bool _isArray = false, bool _isRecord = false)
       : id(_id),
         name(std::move(_name)),
         size(_size),

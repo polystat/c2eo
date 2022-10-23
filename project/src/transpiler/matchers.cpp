@@ -33,14 +33,15 @@ using clang::ast_matchers::varDecl;
 
 void AddFuncDeclMatcher(MatchFinder &finder) {
   static FuncDeclAnalyzer func_decl_analyzer;
-  static DeclarationMatcher func_decl_matcher = functionDecl().bind("funcDecl");
+  static const DeclarationMatcher func_decl_matcher =
+      functionDecl().bind("funcDecl");
 
   finder.addMatcher(func_decl_matcher, &func_decl_analyzer);
 }
 
 void AddRecordDeclMatcher(MatchFinder &finder) {
   static RecordDeclAnalyzer record_decl_analyzer;
-  static DeclarationMatcher record_decl_matcher =
+  static const DeclarationMatcher record_decl_matcher =
       recordDecl().bind("recordDecl");
 
   finder.addMatcher(record_decl_matcher, &record_decl_analyzer);
@@ -48,7 +49,7 @@ void AddRecordDeclMatcher(MatchFinder &finder) {
 
 void AddDeclBaseVarGlobalMemoryMatcher(MatchFinder &finder) {
   static DeclBaseVarGlobalMemoryAnalyzer decl_base_var_global_memory_analyzer;
-  static DeclarationMatcher decl_base_var_global_memory_matcher =
+  static const DeclarationMatcher decl_base_var_global_memory_matcher =
       varDecl().bind("declBaseVarGlobalMemory");
 
   finder.addMatcher(decl_base_var_global_memory_matcher,
@@ -57,7 +58,8 @@ void AddDeclBaseVarGlobalMemoryMatcher(MatchFinder &finder) {
 
 void AddEnumDeclMatcher(MatchFinder &finder) {
   static EnumDeclAnalyzer enum_decl_analyzer;
-  static DeclarationMatcher enum_decl_matcher = enumDecl().bind("enumDecl");
+  static const DeclarationMatcher enum_decl_matcher =
+      enumDecl().bind("enumDecl");
 
   finder.addMatcher(enum_decl_matcher, &enum_decl_analyzer);
 }
