@@ -570,7 +570,8 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       EOObject constData{"write"};
       EOObject res("write");
       if (elementType.name == "ptr" && value.nested.empty()) {
-        TypeSimpl item_type = transpiler.type_manger_.GetById(elementType.subTypeId);
+        TypeSimpl item_type =
+            transpiler.type_manger_.GetById(elementType.subTypeId);
         if (item_type.name != "undefinedtype") {
           uint64_t type_size = 0;
           if (item_type.name == "int8") {
