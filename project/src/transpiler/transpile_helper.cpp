@@ -148,6 +148,8 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
 EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
 EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt);
+bool IsNestedObjectsContainLabel(const EOObject &object, const char *label);
+const Expr *GetPureStmtNode(const Expr *pExpr);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -809,13 +811,8 @@ EOObject GetCastEOObject(const CastExpr *op) {
     ptr.nested.emplace_back(address);
     return ptr;
   }
-  //  if (cast_kind == clang::CK_ArrayToPointerDecay &&
-  //      (*op->child_begin())->getStmtClass() !=
-  //      clang::Stmt::StringLiteralClass) {
-  //    EOObject read{"read"};
-  //    if (type != "ptr") {
-  //      read.name += "-as-" + type;
-  //    }
+  //  if (cast_kind == clang::CK_ArrayToPointerDecay) {
+  //    EOObject read{"addr-of"};
   //    read.nested.push_back(GetStmtEOObject(*op->child_begin()));
   //    return read;
   //  }
@@ -873,17 +870,49 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   auto index_name = GetStmtEOObject(op->getIdx());
   uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
-//  EOObject globAddr{"address"};
-//  globAddr.nested.emplace_back("global-ram");
   EOObject addr{"plus"};
-  addr.nested.emplace_back(GetStmtEOObject(op->getBase()));
+  const Expr *expr = op->getBase();
+  //  const Expr *pureExpr = GetPureStmtNode(expr);
+  addr.nested.emplace_back(GetStmtEOObject(expr));
   EOObject shift{"times"};
   shift.nested.emplace_back(index_name);
   shift.nested.emplace_back(std::to_string(dim_size), EOObjectType::EO_LITERAL);
   addr.nested.emplace_back(shift);
-//  globAddr.nested.emplace_back(addr);
-//  return globAddr;
+
+  const clang::Type *type = expr->IgnoreCasts()->getType().getTypePtrOrNull();
+  //  op->dump();
+  //  std::cerr << "-----\n";
+  //  type->dump();
+  //  std::cerr << '\n';
+  TypeSimpl typeInfo = transpiler.type_manger_.Add(type);
+  if ((typeInfo.name == "ptr" ||
+       IsNestedObjectsContainLabel(addr, "addr-of")) &&
+      !IsNestedObjectsContainLabel(addr, "global-ram")) {
+    EOObject globAddr{"address"};
+    globAddr.nested.emplace_back("global-ram");
+    globAddr.nested.emplace_back(addr);
+    return globAddr;
+  }
   return addr;
+}
+// const Expr *GetPureStmtNode(const Expr *pExpr) {
+//   Stmt::StmtClass stmt_class = pExpr->getStmtClass();
+//   if (stmt_class >= clang::Stmt::firstCastExprConstant &&
+//       stmt_class <= clang::Stmt::lastCastExprConstant) {
+//     const auto *op = dyn_cast<CastExpr>(pExpr);
+//     return op.
+//   }
+//   return pExpr;
+// }
+bool IsNestedObjectsContainLabel(const EOObject &object, const char *label) {
+  if (object.name == label) return true;
+  if (object.nested.empty()) return false;
+  for (auto subElement : object.nested) {
+    if (IsNestedObjectsContainLabel(subElement, label)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 EOObject GetMemberExprEOObject(const MemberExpr *op) {
@@ -1560,13 +1589,16 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
+    //    if (type->isPointerType()) {
+    //      EOObject globAddr{"address"};
+    //      globAddr.nested.emplace_back("global-ram");
+    //      globAddr.nested.emplace_back(var.alias);
+    //      return globAddr;
+    //    }
     if (type->isArrayType()) {
-      EOObject globAddr{"address"};
-      globAddr.nested.emplace_back("global-ram");
       EOObject array_as_ptr{"addr-of"};
       array_as_ptr.nested.emplace_back(var.alias);
-      globAddr.nested.emplace_back(array_as_ptr);
-      return globAddr;
+      return array_as_ptr;
     }
     if (type->isFunctionPointerType()) {
       // TEST
