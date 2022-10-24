@@ -1659,26 +1659,13 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
+
 EOObject GetEOStringToCharArray(const EOObject &object,
                                 const string &strValue) {
-  EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  for (int i = 1; i < strValue.length(); i++) {
-    EOObject eoChar{"write-as-int8"};
-    EOObject addr{"plus"};
-    addr.nested.push_back(object);
-    EOObject shift{"times"};
-    shift.nested.emplace_back(to_string(i - 1));
-    shift.nested.emplace_back("1");
-    addr.nested.emplace_back(shift);
-    eoChar.nested.push_back(addr);
-    if (i + 1 == strValue.length()) {
-      eoChar.nested.emplace_back("0");
-    } else {
-      eoChar.nested.emplace_back(to_string(static_cast<int>(strValue[i])));
-    }
-    eoList.nested.push_back(eoChar);
-  }
-  return eoList;
+  EOObject write_str{"write-as-string"};
+  write_str.nested.push_back(object);
+  write_str.nested.emplace_back(strValue, EOObjectType::EO_LITERAL);
+  return write_str;
 }
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
