@@ -73,7 +73,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   // its local variable!
 
   if (local_name.empty()) {
-    return Variable();
+    return {};
   }
   const auto *PD = llvm::dyn_cast<clang::ParmVarDecl>(VD);
   if (PD != nullptr) {

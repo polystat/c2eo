@@ -64,7 +64,7 @@ struct TypeSimpl {
 };
 
 struct TypeManger {
-  TypeSimpl Add(const clang::Type* type_ptr);
+  TypeSimpl Add(const clang::Type* q_type);
   TypeSimpl GetById(int64_t id);
 
  private:

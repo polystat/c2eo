@@ -5,17 +5,16 @@
 00173: TODO printf with char pointer
 00175: TODO printf char
 00058: TODO pointer on char
-00078, 00217: TODO pointer on function
+00217: TODO pointer on function
 00137, 00138, 00219: TODO define function
 00149: TODO pointers on structures
 00197: TODO static variables
-00200: TODO shift
 00010, 00051, 00129, 00199, 00207, 00213: goto
 00174: using math.h
 00186: using sprintf
 00187: using stdio.h for work with files
 00041: too slow eo code
-00040, 00104, 00181, 00182: uint64 is unsupported
+00040, 00104, 00182: uint64 is unsupported
 00205: java code too large
 00025, 00180, 00179: using str functions
 00214: using __builtin_expect

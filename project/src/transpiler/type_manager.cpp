@@ -31,7 +31,7 @@
 #include "src/transpiler/vardecl.h"
 extern clang::ASTContext* context;
 TypeSimpl TypeManger::GetById(int64_t id) {
-  for (const auto& ts : types) {
+  for (auto& ts : types) {
     if (ts.id == id) {
       return ts;
     }
@@ -52,16 +52,20 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
     ts = TypeSimpl(id, Add(type_ptr->getUnqualifiedDesugaredType()));
   } else {
     ts.id = id;
-    const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
-    ts.size = type_info.Width;
-    if (type_ptr->isPointerType()) {
-      ts.size = 8UL * byte_size;  // Size of any pointer == 8 byte
-    }
     ts.name = ts.GetTypeName(type_ptr);
-    const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-    if (sub_type_ptr != nullptr) {
-      ts.subTypeId = Add(sub_type_ptr).id;
+    if (ts.name != "undefinedtype") {
+      type_ptr->dump();
+      std::cerr << '\n';
+      const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
+      ts.size = type_info.Width;
+    } else {
+      ts.size = 0;
     }
+    if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
+      ts.name += std::to_string(ts.size);
+    }
+    const clang::Type* sub_type_ptr = GetSubType(type_ptr);
+    ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
   }
   types.push_back(ts);
   return ts;
@@ -106,7 +110,7 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   }
 
   if (type_ptr->isFloatingType()) {
-    str += "float" + std::to_string(size);
+    str += "float";
     return str;
   }
 
@@ -114,7 +118,7 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
     str += "u";
   }
   if (type_ptr->isIntegerType()) {
-    str += "int" + std::to_string(size);
+    str += "int";
     return str;
   }
 
@@ -139,6 +143,9 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   return "undefinedtype";
 }
 uint64_t TypeSimpl::GetSizeOfType() const {
+  if (size == -1) {
+    throw std::invalid_argument("size has not been determined");
+  }
   if (name == "float32" || name == "ptr") {
     return 8;  // 8 bytes for float32.
   }
