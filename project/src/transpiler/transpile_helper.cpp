@@ -226,7 +226,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   func_body_eo.nested.push_back(local_start);
   size_t local_static_size = 0;
   for (const auto &var : all_local) {
-    if (var.id->isStaticLocal()) {
+    if (var.id != nullptr && var.id->isStaticLocal()) {
       local_static_size +=
           transpiler.type_manger_.GetById(var.typeInfoID).GetSizeOfType();
     }
@@ -246,7 +246,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
     func_body_eo.nested.push_back(var);
   }
   for (const auto &var : all_local) {
-    if (var.id->isStaticLocal()) {
+    if (var.id != nullptr && var.id->isStaticLocal()) {
       continue;
     }
     func_body_eo.nested.push_back(var.GetAddress(transpiler.glob_.name_));
@@ -542,10 +542,10 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
   size_t elementSize = 0;
-  if (typeInfo.isArray) {
+  if (typeInfo.typeStyle == ComplexType::ARRAY) {
     elementType = transpiler.type_manger_.GetById(typeInfo.subTypeId);
     elementSize = elementType.GetSizeOfType();
-  } else if (typeInfo.isRecord) {
+  } else if (typeInfo.typeStyle == ComplexType::RECORD) {
     auto *recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
     recElement = recordType->fields.begin();
   }
@@ -555,13 +555,13 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     EOObject shiftedAlias{"plus"};
     shiftedAlias.nested.emplace_back("list-init-name",
                                      EOObjectType::EO_TEMPLATE);
-    if (typeInfo.isArray) {
+    if (typeInfo.typeStyle == ComplexType::ARRAY) {
       EOObject newShift{"times"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
       newShift.nested.emplace_back(to_string(elementSize),
                                    EOObjectType::EO_LITERAL);
       shiftedAlias.nested.push_back(newShift);
-    } else if (typeInfo.isRecord) {
+    } else if (typeInfo.typeStyle == ComplexType::RECORD) {
       shiftedAlias.nested.emplace_back(transpiler.record_manager_.GetShiftAlias(
           typeInfo.recordId, std::get<0>(*recElement)));
       elementType = std::get<1>(*recElement);
@@ -571,7 +571,8 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       EOObject newValue = ReplaceEmpty(value, shiftedAlias);
       eoList.nested.insert(eoList.nested.end(), newValue.nested.begin(),
                            newValue.nested.end());
-    } else if (!elementType.isRecord && !elementType.isArray) {
+    } else if (elementType.typeStyle != ComplexType::RECORD &&
+               elementType.typeStyle != ComplexType::ARRAY) {
       EOObject constData{"write"};
       EOObject res("write");
       if (elementType.name == "ptr" && value.nested.empty()) {
@@ -583,7 +584,8 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
             constData.name += "-as-string";
             type_size = value.name.length() - 1;
           } else {
-            if (!item_type.isRecord && !item_type.isArray) {
+            if (item_type.typeStyle != ComplexType::RECORD &&
+                item_type.typeStyle != ComplexType::ARRAY) {
               constData.name += "-as-" + item_type.name;
             }
             type_size = item_type.GetSizeOfType();
@@ -610,7 +612,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       res.nested.emplace_back(value);
       eoList.nested.push_back(res);
     }
-    if (typeInfo.isRecord) {
+    if (typeInfo.typeStyle == ComplexType::RECORD) {
       recElement++;
     }
   }
@@ -787,7 +789,7 @@ EOObject GetCastEOObject(const CastExpr *op) {
     EOObject read{"read"};
     const EOObject value = GetStmtEOObject(*op->child_begin());
     read.nested.emplace_back(value);
-    if (typeInfo.isRecord) {
+    if (typeInfo.typeStyle == ComplexType::RECORD) {
       read.nested.emplace_back(
           to_string(
               transpiler.record_manager_.GetById(typeInfo.recordId)->size),
@@ -1530,7 +1532,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
           constData.name += "-as-string";
           type_size = eoRight.name.length() - 1;
         } else {
-          if (!item_type.isRecord && !item_type.isArray) {
+          if (item_type.typeStyle != ComplexType::RECORD &&
+              item_type.typeStyle != ComplexType::ARRAY) {
             constData.name += "-as-" + item_type.name;
           }
           type_size = item_type.GetSizeOfType();
@@ -1549,8 +1552,9 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         }
       }
     }
-    if (!typeInfo.isRecord &&
-        !(typeInfo.isArray && typeInfo.name != "string") &&
+    if (typeInfo.typeStyle != ComplexType::RECORD &&
+        !(typeInfo.typeStyle == ComplexType::ARRAY &&
+          typeInfo.name != "string") &&
         typeInfo.name != "undefinedtype") {
       binary_op.name += "-as-" + typeInfo.name;
     }

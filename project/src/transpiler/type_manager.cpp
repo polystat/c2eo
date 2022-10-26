@@ -45,13 +45,14 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
   if (type_ptr == nullptr) {
     return TypeSimpl();
   }
+  type_ptr->dump();
   auto id = reinterpret_cast<intptr_t>(type_ptr);
   TypeSimpl existType = GetById(id, true);
   if (existType.id != -1) {
-    if (addSubs) {
-      const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-      Add(sub_type_ptr, addSubs);
-    }
+    //    if (addSubs) {
+    //      const clang::Type* sub_type_ptr = GetSubType(type_ptr);
+    //      Add(sub_type_ptr, addSubs);
+    //    }
     return existType;
   }
   TypeSimpl ts;
@@ -64,21 +65,26 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
       type_ptr->dump();
       std::cerr << '\n';
     }
-    if (!type_ptr->isVoidType()) {
-      const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
-      ts.size = type_info.Width;
-    } else {
+    if (type_ptr->isAggregateType()) {
+      ts.typeStyle = ComplexType::AGGREGATE;
       ts.size = 0;
-    }
-    if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
-      if (!type_ptr->isBooleanType()) {
-        ts.name += std::to_string(ts.size);
+    } else {
+      if (!type_ptr->isVoidType() && !type_ptr->isAggregateType()) {
+        const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
+        ts.size = type_info.Width;
+      } else {
+        ts.size = 0;
       }
-    }
-    const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-    ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
-    if (addSubs) {
+      if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
+        if (!type_ptr->isBooleanType()) {
+          ts.name += std::to_string(ts.size);
+        }
+      }
+      const clang::Type* sub_type_ptr = GetSubType(type_ptr);
+      ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
+      //      if (addSubs) {
       Add(sub_type_ptr, addSubs);
+      //      }
     }
   }
   types.push_back(ts);
@@ -104,11 +110,12 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   }
 
   if (type_ptr->isPointerType()) {
+    typeStyle = ComplexType::POINTER;
     str += "ptr";
     return str;
   }
   if (type_ptr->isConstantArrayType()) {
-    isArray = true;
+    typeStyle = ComplexType::ARRAY;
     const auto* array_type =
         clang::dyn_cast<clang::ConstantArrayType>(type_ptr);
     if (array_type != nullptr) {
@@ -143,7 +150,7 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
     str = "st-";
   }
   if (type_ptr->isUnionType() || type_ptr->isStructureType()) {
-    isRecord = true;
+    typeStyle = ComplexType::RECORD;
     clang::RecordDecl* RD = type_ptr->getAsRecordDecl();
     recordId = RD->getID();
     if (RD->hasNameForLinkage()) {

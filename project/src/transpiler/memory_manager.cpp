@@ -116,6 +116,11 @@ std::string int_to_hex(T i) {
 }
 
 const Variable &MemoryManager::GetVarById(const clang::VarDecl *id) const {
+  //  TypeSimpl typeInfo =
+  //  transpiler.type_manger_.Add(id->getType().getTypePtrOrNull()); if
+  //  (typeInfo.id==-1){
+  //    return ;
+  //  }
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
@@ -136,9 +141,11 @@ EOObject MemoryManager::GetEOObject() const {
 void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
   for (const auto &var : all_local) {
     auto var_in_memory = find(variables_.begin(), variables_.end(), var);
-    pointer_ -= transpiler.type_manger_.GetById(var_in_memory->typeInfoID)
-                    .GetSizeOfType();
-    variables_.erase(var_in_memory);
+    if (var_in_memory != variables_.end()) {
+      pointer_ -= transpiler.type_manger_.GetById(var_in_memory->typeInfoID)
+                      .GetSizeOfType();
+      variables_.erase(var_in_memory);
+    }
   }
 }
 
@@ -179,7 +186,8 @@ EOObject Variable::GetInitializer() const {
         constData.name += "-as-string";
         type_size = value.name.length() - 1;
       } else {
-        if (!element_type.isRecord && !element_type.isArray) {
+        if (element_type.typeStyle != ComplexType::RECORD &&
+            element_type.typeStyle != ComplexType::ARRAY) {
           constData.name += "-as-" + element_type.name;
         }
         type_size = typeInfo.GetSizeOfType();
@@ -198,8 +206,10 @@ EOObject Variable::GetInitializer() const {
       }
     }
   }
-  if (typeInfo.name != "undefinedtype" && !typeInfo.isRecord &&
-      !(typeInfo.isArray && typeInfo.name != "string")) {
+  if (typeInfo.name != "undefinedtype" &&
+      typeInfo.typeStyle != ComplexType::RECORD &&
+      !(typeInfo.typeStyle == ComplexType::ARRAY &&
+        typeInfo.name != "string")) {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);
