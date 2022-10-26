@@ -65,7 +65,7 @@ struct TypeSimpl {
 
 struct TypeManger {
   TypeSimpl Add(const clang::Type* type_ptr, bool addSubs = false);
-  TypeSimpl GetById(int64_t id);
+  TypeSimpl GetById(int64_t id, bool isNew = false);
 
  private:
   std::vector<TypeSimpl> types;

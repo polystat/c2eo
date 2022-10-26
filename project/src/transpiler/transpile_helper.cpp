@@ -227,7 +227,8 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   size_t local_static_size = 0;
   for (const auto &var : all_local) {
     if (var.id->isStaticLocal()) {
-      local_static_size += var.typeInfo.GetSizeOfType();
+      local_static_size +=
+          transpiler.type_manger_.GetById(var.typeInfoID).GetSizeOfType();
     }
   }
   const size_t free_pointer =
@@ -536,7 +537,7 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull(), true);
+      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull());
   const std::vector<EOObject> inits;
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
@@ -1095,7 +1096,7 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
         }
       }
       printf.nested.push_back(param);
-    } else if (idx <= formats.size() && !formats[idx - 1].empty()) {
+    } else if (idx > 0 && idx <= formats.size() && !formats[idx - 1].empty()) {
       if (param.type != EOObjectType::EO_LITERAL) {
         EOObject cast{formats[idx - 1]};
         EOObject addr{"address"};
@@ -1112,6 +1113,9 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
         printf.nested.push_back(param);
       }
     } else {
+      //      if (idx == 0) {
+      //        op->dump();
+      //      }
       printf.nested.push_back(param);
     }
     idx++;

@@ -30,20 +30,23 @@
 #include "src/transpiler/unit_transpiler.h"
 #include "src/transpiler/vardecl.h"
 extern clang::ASTContext* context;
-TypeSimpl TypeManger::GetById(int64_t id) {
+TypeSimpl TypeManger::GetById(int64_t id, bool isNew) {
   for (auto& ts : types) {
     if (ts.id == id) {
       return ts;
     }
   }
-  return TypeSimpl();
+  if (isNew) {
+    return TypeSimpl();
+  }
+  throw std::invalid_argument("size has not been determined");
 }
 TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
   if (type_ptr == nullptr) {
     return TypeSimpl();
   }
   auto id = reinterpret_cast<intptr_t>(type_ptr);
-  TypeSimpl existType = GetById(id);
+  TypeSimpl existType = GetById(id, true);
   if (existType.id != -1) {
     if (addSubs) {
       const clang::Type* sub_type_ptr = GetSubType(type_ptr);
@@ -64,10 +67,15 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
       ts.size = 0;
     }
     if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
-      ts.name += std::to_string(ts.size);
+      if (!type_ptr->isBooleanType()) {
+        ts.name += std::to_string(ts.size);
+      }
     }
     const clang::Type* sub_type_ptr = GetSubType(type_ptr);
     ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
+    if (addSubs) {
+      Add(sub_type_ptr);
+    }
   }
   types.push_back(ts);
   return ts;

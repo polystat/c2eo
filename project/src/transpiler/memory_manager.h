@@ -49,7 +49,7 @@ static const int eight_bytes = 8;
 struct Variable {
   const clang::VarDecl *id;
   size_t position;
-  TypeSimpl typeInfo;
+  int64_t typeInfoID;
   // bool isCustomType = false;
   // like g-x
   std::string alias;
@@ -72,12 +72,12 @@ class MemoryManager {
                                           size_t start_pointer = 8)
       : name_(std::move(name)), pointer_(start_pointer) {}
 
-  Variable Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
+  Variable Add(const clang::VarDecl *id, const int64_t typeInfoID,
                const std::string &alias, EOObject value,
                std::string local_name = "", size_t shift = 0,
                bool is_initialized = true);
 
-  Variable AddExternal(const clang::VarDecl *id, TypeSimpl typeInfo,
+  Variable AddExternal(const clang::VarDecl *id, const int64_t typeInfoID,
                        std::string alias, EOObject value,
                        std::string local_name = "", size_t shift = 0,
                        __attribute__((unused)) bool is_initialized = false);

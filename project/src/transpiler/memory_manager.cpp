@@ -33,7 +33,7 @@
 #include "src/transpiler/transpile_helper.h"
 #include "src/transpiler/unit_transpiler.h"
 extern UnitTranspiler transpiler;
-Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
+Variable MemoryManager::Add(const clang::VarDecl *id, const int64_t typeInfoID,
                             const std::string &alias, EOObject value,
                             std::string local_name, size_t shift,
                             bool is_initialized) {
@@ -51,7 +51,7 @@ Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
   duplicates[alias]++;
   Variable var = {id,
                   pointer_,
-                  typeInfo,
+                  typeInfoID,
                   std::move(unique_alias),
                   std::move(value),
                   std::move(local_name),
@@ -62,17 +62,17 @@ Variable MemoryManager::Add(const clang::VarDecl *id, const TypeSimpl &typeInfo,
     var.value.name = "plug";
   }
   variables_.push_back(var);
-  pointer_ += typeInfo.GetSizeOfType();
+  pointer_ += transpiler.type_manger_.GetById(typeInfoID).GetSizeOfType();
   return var;
 }
 
 Variable MemoryManager::AddExternal(
-    const clang::VarDecl *id, TypeSimpl typeInfo, std::string alias,
+    const clang::VarDecl *id, const int64_t typeInfoID, std::string alias,
     EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
   Variable var = {id,
                   some_non_zero_position,
-                  std::move(typeInfo),
+                  typeInfoID,
                   std::move(alias),
                   std::move(value),
                   std::move(local_name),
@@ -136,7 +136,8 @@ EOObject MemoryManager::GetEOObject() const {
 void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
   for (const auto &var : all_local) {
     auto var_in_memory = find(variables_.begin(), variables_.end(), var);
-    pointer_ -= var_in_memory->typeInfo.GetSizeOfType();
+    pointer_ -= transpiler.type_manger_.GetById(var_in_memory->typeInfoID)
+                    .GetSizeOfType();
     variables_.erase(var_in_memory);
   }
 }
@@ -168,6 +169,7 @@ EOObject Variable::GetInitializer() const {
   EOObject res("write");
   EOObject constData{"write"};
   EOObject _value = value;
+  TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
   if (typeInfo.name == "ptr" && value.nested.empty()) {
     const TypeSimpl element_type =
         transpiler.type_manger_.GetById(typeInfo.subTypeId);
