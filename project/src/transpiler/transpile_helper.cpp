@@ -537,7 +537,7 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull());
+      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull(), true);
   const std::vector<EOObject> inits;
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
@@ -1518,7 +1518,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   if (left != nullptr) {
     const TypeSimpl typeInfo =
-        transpiler.type_manger_.Add(left->getType().getTypePtr());
+        transpiler.type_manger_.Add(left->getType().getTypePtr(), true);
     //    QualType qual_type = left->getType();
     EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
     if (typeInfo.name == "ptr" && eoRight.nested.empty()) {
@@ -1549,7 +1549,8 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         }
       }
     }
-    if (!typeInfo.isRecord && !typeInfo.isArray &&
+    if (!typeInfo.isRecord &&
+        !(typeInfo.isArray && typeInfo.name != "string") &&
         typeInfo.name != "undefinedtype") {
       binary_op.name += "-as-" + typeInfo.name;
     }

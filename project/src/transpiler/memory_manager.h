@@ -72,12 +72,12 @@ class MemoryManager {
                                           size_t start_pointer = 8)
       : name_(std::move(name)), pointer_(start_pointer) {}
 
-  Variable Add(const clang::VarDecl *id, const int64_t typeInfoID,
+  Variable Add(const clang::VarDecl *id, int64_t typeInfoID,
                const std::string &alias, EOObject value,
                std::string local_name = "", size_t shift = 0,
                bool is_initialized = true);
 
-  Variable AddExternal(const clang::VarDecl *id, const int64_t typeInfoID,
+  Variable AddExternal(const clang::VarDecl *id, int64_t typeInfoID,
                        std::string alias, EOObject value,
                        std::string local_name = "", size_t shift = 0,
                        __attribute__((unused)) bool is_initialized = false);

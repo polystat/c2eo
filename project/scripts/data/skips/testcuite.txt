@@ -6,7 +6,7 @@
 00175: TODO printf char
 00058: TODO pointer on char
 00217: TODO pointer on function
-00137, 00138, 00219: TODO define function
+00138, 00219: TODO define function
 00149: TODO pointers on structures
 00197: TODO static variables
 00010, 00051, 00129, 00199, 00207, 00213: goto

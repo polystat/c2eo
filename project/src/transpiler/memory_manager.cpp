@@ -33,7 +33,7 @@
 #include "src/transpiler/transpile_helper.h"
 #include "src/transpiler/unit_transpiler.h"
 extern UnitTranspiler transpiler;
-Variable MemoryManager::Add(const clang::VarDecl *id, const int64_t typeInfoID,
+Variable MemoryManager::Add(const clang::VarDecl *id, int64_t typeInfoID,
                             const std::string &alias, EOObject value,
                             std::string local_name, size_t shift,
                             bool is_initialized) {
@@ -67,7 +67,7 @@ Variable MemoryManager::Add(const clang::VarDecl *id, const int64_t typeInfoID,
 }
 
 Variable MemoryManager::AddExternal(
-    const clang::VarDecl *id, const int64_t typeInfoID, std::string alias,
+    const clang::VarDecl *id, int64_t typeInfoID, std::string alias,
     EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
   Variable var = {id,
@@ -199,7 +199,7 @@ EOObject Variable::GetInitializer() const {
     }
   }
   if (typeInfo.name != "undefinedtype" && !typeInfo.isRecord &&
-      !typeInfo.isArray) {
+      !(typeInfo.isArray && typeInfo.name != "string")) {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);

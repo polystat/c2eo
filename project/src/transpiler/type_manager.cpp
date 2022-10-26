@@ -50,7 +50,7 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
   if (existType.id != -1) {
     if (addSubs) {
       const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-      Add(sub_type_ptr);
+      Add(sub_type_ptr, addSubs);
     }
     return existType;
   }
@@ -60,7 +60,11 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
   } else {
     ts.id = id;
     ts.name = ts.GetTypeName(type_ptr);
-    if (ts.name != "undefinedtype") {
+    if (ts.name == "undefinedtype") {
+      type_ptr->dump();
+      std::cerr << '\n';
+    }
+    if (!type_ptr->isVoidType()) {
       const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
       ts.size = type_info.Width;
     } else {
@@ -74,7 +78,7 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
     const clang::Type* sub_type_ptr = GetSubType(type_ptr);
     ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
     if (addSubs) {
-      Add(sub_type_ptr);
+      Add(sub_type_ptr, addSubs);
     }
   }
   types.push_back(ts);
@@ -149,6 +153,11 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
     }
     return str;
   }
+  //  if (type_ptr->isFunctionType()) {
+  //    str += "function";
+  //    return str;
+  //  }
+  //  std::cerr << type_ptr->getTypeClassName() << '\n';
 
   return "undefinedtype";
 }
