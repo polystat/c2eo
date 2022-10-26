@@ -417,7 +417,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<CallExpr>(stmt);
     if (op->getDirectCallee() != nullptr &&
         op->getDirectCallee()->getNameInfo().getAsString() == "printf") {
-      return GetPrintfCallEOObject(op);
+      EOObject eo = GetPrintfCallEOObject(op);
+      return eo;
     }
     return GetFunctionCallEOObject(op);
   }
@@ -535,7 +536,7 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull());
+      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull(), true);
   const std::vector<EOObject> inits;
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;

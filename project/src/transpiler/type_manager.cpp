@@ -38,13 +38,17 @@ TypeSimpl TypeManger::GetById(int64_t id) {
   }
   return TypeSimpl();
 }
-TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
+TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
   if (type_ptr == nullptr) {
     return TypeSimpl();
   }
   auto id = reinterpret_cast<intptr_t>(type_ptr);
   TypeSimpl existType = GetById(id);
   if (existType.id != -1) {
+    if (addSubs) {
+      const clang::Type* sub_type_ptr = GetSubType(type_ptr);
+      Add(sub_type_ptr);
+    }
     return existType;
   }
   TypeSimpl ts;
@@ -54,8 +58,6 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
     ts.id = id;
     ts.name = ts.GetTypeName(type_ptr);
     if (ts.name != "undefinedtype") {
-      type_ptr->dump();
-      std::cerr << '\n';
       const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
       ts.size = type_info.Width;
     } else {
