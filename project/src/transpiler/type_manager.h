@@ -37,7 +37,7 @@ enum class ComplexType {
   ARRAY,
   RECORD,
   POINTER,
-  AGGREGATE,
+  PHANTOM,
 };
 struct TypeSimpl {
   int64_t id;
@@ -68,7 +68,7 @@ struct TypeSimpl {
 };
 
 struct TypeManger {
-  TypeSimpl Add(const clang::Type* type_ptr, bool addSubs = false);
+  TypeSimpl Add(const clang::Type* type_ptr);
   TypeSimpl GetById(int64_t id, bool isNew = false);
 
  private:

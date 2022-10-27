@@ -537,7 +537,7 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull(), true);
+      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull());
   const std::vector<EOObject> inits;
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
@@ -605,8 +605,15 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
         }
         eoList.nested.push_back(constData);
       }
-      if (elementType.name != "undefinedtype") {
+      if (elementType.name != "undefinedtype" && !elementType.name.empty() &&
+          typeInfo.typeStyle != ComplexType::RECORD &&
+          !(typeInfo.typeStyle == ComplexType::ARRAY &&
+            typeInfo.name != "string")) {
         res.name += "-as-" + elementType.name;
+      } else if (elementType.name.empty()) {
+//        std::cerr << type_ptr << ' ' << typeInfo.id << ' ' << typeInfo.name
+//                  << ' ' << typeInfo.size << '\n'
+//                  << '\n';
       }
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
@@ -1520,7 +1527,7 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
   if (left != nullptr) {
     const TypeSimpl typeInfo =
-        transpiler.type_manger_.Add(left->getType().getTypePtr(), true);
+        transpiler.type_manger_.Add(left->getType().getTypePtr());
     //    QualType qual_type = left->getType();
     EOObject eoRight = GetStmtEOObject(p_operator->getRHS());
     if (typeInfo.name == "ptr" && eoRight.nested.empty()) {

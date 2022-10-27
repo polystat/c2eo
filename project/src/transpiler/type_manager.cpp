@@ -41,18 +41,13 @@ TypeSimpl TypeManger::GetById(int64_t id, bool isNew) {
   }
   throw std::invalid_argument("size has not been determined");
 }
-TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
+TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
   if (type_ptr == nullptr) {
     return TypeSimpl();
   }
-  type_ptr->dump();
   auto id = reinterpret_cast<intptr_t>(type_ptr);
   TypeSimpl existType = GetById(id, true);
   if (existType.id != -1) {
-    //    if (addSubs) {
-    //      const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-    //      Add(sub_type_ptr, addSubs);
-    //    }
     return existType;
   }
   TypeSimpl ts;
@@ -61,12 +56,13 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
   } else {
     ts.id = id;
     ts.name = ts.GetTypeName(type_ptr);
-    if (ts.name == "undefinedtype") {
-      type_ptr->dump();
-      std::cerr << '\n';
-    }
-    if (type_ptr->isAggregateType()) {
-      ts.typeStyle = ComplexType::AGGREGATE;
+    //    if (ts.name == "undefinedtype") {
+    //      type_ptr->dump();
+    //      std::cerr << '\n';
+    //    }
+    if (ts.typeStyle == ComplexType::RECORD && type_ptr->isAggregateType() &&
+        !type_ptr->isStandardLayoutType()) {
+      ts.typeStyle = ComplexType::PHANTOM;
       ts.size = 0;
     } else {
       if (!type_ptr->isVoidType() && !type_ptr->isAggregateType()) {
@@ -82,9 +78,7 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr, bool addSubs) {
       }
       const clang::Type* sub_type_ptr = GetSubType(type_ptr);
       ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
-      //      if (addSubs) {
-      Add(sub_type_ptr, addSubs);
-      //      }
+      Add(sub_type_ptr);
     }
   }
   types.push_back(ts);

@@ -49,7 +49,7 @@ Variable ProcessVariable(const VarDecl *VD, const std::string &local_name,
   auto var_name = VD->getNameAsString();
   // TEST
   const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(VD->getType().getTypePtrOrNull(), true);
+      transpiler.type_manger_.Add(VD->getType().getTypePtrOrNull());
 
   auto storage_class = VD->getStorageClass();
   auto static_local = VD->isStaticLocal();
