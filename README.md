@@ -931,15 +931,20 @@ float b = 5.0; // 4 bytes
 write-as-float32 b 5.0 // 8 bytes
 ```
 
-At the moment, the largest type in EO is int64, there is no support for uint64 numbers and it crashes with an error at the compilation stage. The current implementation supports numbers in the range of type uint56
+At the moment, the largest type in EO is int64, there is no support for uint64 numbers and it crashes with an error at the compilation stage. The current our implementation supports numbers in the range of type uint63 (the first bit is always 0 for correct translation to int).
 
 ```c
-unsigned long long int c = 10223372036854775807;
+unsigned long long int c = 18446744073709551615; // max uint64 value
+
+unsigned long long int c = 9223372036854775807; // max int64 value
 ```
 
 ```java
-write-as-uint64 c 10223372036854775807
 // [COMPILATION EXCEPTION] the number is too high
+write-as-uint64 c 10223372036854775807
+
+// correct
+write-as-uint64 d 9223372036854775807
 ```
 
 ### Pointers on function
