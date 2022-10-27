@@ -616,9 +616,10 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
             typeInfo.name != "string")) {
         res.name += "-as-" + elementType.name;
       } else if (elementType.name.empty()) {
-//        std::cerr << type_ptr << ' ' << typeInfo.id << ' ' << typeInfo.name
-//                  << ' ' << typeInfo.size << '\n'
-//                  << '\n';
+        //        std::cerr << type_ptr << ' ' << typeInfo.id << ' ' <<
+        //        typeInfo.name
+        //                  << ' ' << typeInfo.size << '\n'
+        //                  << '\n';
       }
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
