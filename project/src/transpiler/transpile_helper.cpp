@@ -122,9 +122,7 @@ EOObject GetMemberExprEOObject(const MemberExpr *opr);
 
 EOObject GetEODeclRefExpr(const DeclRefExpr *op);
 
-EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
-                                       std::vector<uint64_t> *dims,
-                                       size_t depth);
+EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op);
 
 std::pair<uint64_t, EOObject> getMultiDimArrayTypeSize(
     const ArraySubscriptExpr *op, std::vector<uint64_t> *dims);
