@@ -4,5 +4,5 @@
 
 [a b] > write-as-uint64
   seq > @
-    a.write (b.as-bytes.slice 1 7)
+    a.write b
     read-as-uint64 a

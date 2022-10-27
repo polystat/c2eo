@@ -1,4 +1,4 @@
 +package c2eo.coperators
 
 [a] > read-as-uint64
-  (00-.concat (a.read 7)).as-int > @
+  ((a.read 8).and 7F-FF-FF-FF-FF-FF-FF-FF).as-int > @
