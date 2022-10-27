@@ -1291,29 +1291,10 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
   auto eo_opd2 = GetStmtEOObject(opd2);
   auto qual_type1 = opd1->getType();
 
-  if (op_code == clang::BinaryOperatorKind::BO_AddAssign) {
-    operation = "plus";
-    // is 1st pointer or array?
-    const clang::Type *type1 = qual_type1.getTypePtrOrNull();
-    if (type1->isArrayType() || type1->isPointerType()) {
-      // set size of pointer shift
-      uint64_t type_size = GetTypeSize(qual_type1);
-      // TEST type size output
-      // std::cout << "Size of type = " << type_size << "\n";
-      EOObject value{std::to_string(type_size), EOObjectType::EO_LITERAL};
-      // second Operand must be integer expression else C-error
-      EOObject mult{"times"};
-      mult.nested.push_back(eo_opd2);
-      mult.nested.push_back(value);
-      EOObject read_op{"read-as-ptr"};
-      read_op.nested.push_back(eo_opd1);
-      EOObject binary_op{operation};
-      binary_op.nested.push_back(read_op);
-      binary_op.nested.push_back(mult);
-      return binary_op;
-    }
-  } else if (op_code == clang::BinaryOperatorKind::BO_SubAssign) {
-    operation = "minus";
+  if (op_code == clang::BinaryOperatorKind::BO_AddAssign ||
+      op_code == clang::BinaryOperatorKind::BO_SubAssign) {
+    operation =
+        op_code == clang::BinaryOperatorKind::BO_AddAssign ? "plus" : "minus";
     // is 1st pointer or array?
     const clang::Type *type1 = qual_type1.getTypePtrOrNull();
     if (type1->isArrayType() || type1->isPointerType()) {
