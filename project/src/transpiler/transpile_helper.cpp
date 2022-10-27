@@ -336,7 +336,6 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     return EOObject(EOObjectType::EO_PLUG);
   }
   const Stmt::StmtClass stmt_class = stmt->getStmtClass();
-
   // TEST
   // const char *stmt_class_name = stmt->getStmtClassName();
   // std::cout << "Statement Class Name = " << stmt_class_name << "\n";
@@ -1177,8 +1176,17 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
       return EOObject{str_val, EOObjectType::EO_LITERAL};
     }
     const uint64_t val = an_int.getZExtValue();
-    const std::string str_val{std::to_string(val)};
-    return EOObject{str_val, EOObjectType::EO_LITERAL};
+    if (val >= (1UL << 63)) {
+      EOObject plus{"plus"};
+      EOObject times{"times"};
+      times.nested.emplace_back(std::to_string(val / (1UL << 32)));
+      times.nested.emplace_back(std::to_string((1UL << 32)));
+      plus.nested.push_back(times);
+      plus.nested.emplace_back(std::to_string(val % (1UL << 32)));
+    } else {
+      const std::string str_val{std::to_string(val)};
+      return EOObject{str_val, EOObjectType::EO_LITERAL};
+    }
   }
   return EOObject{EOObjectType::EO_PLUG};
 }
@@ -1236,14 +1244,8 @@ EOObject GetCompoundAssignEOObject(const CompoundAssignOperator *p_operator) {
 
   EOObject binary_op{operation};
   EOObject eo_object{"read"};
-  //   Expr *left = dyn_cast<Expr>(p_operator->getLHS());
-  //   if (left != nullptr) {
   if (opd1 != nullptr) {
-    //     QualType qual_type = left->getType();
-    //     eo_object.nested.push_back(GetStmtEOObject(left));
     eo_object.nested.push_back(eo_opd1);
-    //     if (!qual_type->isRecordType()) {
-    //       eo_object.name += "-as-" + GetTypeName(qual_type);
     if (!qual_type1->isRecordType()) {
       eo_object.name += "-as-" + GetTypeName(qual_type1);
     } else {
