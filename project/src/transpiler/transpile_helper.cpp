@@ -475,7 +475,8 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
-    std::string value = Escaped(op->getString().str());
+    //    op->getCharByteWidth() is important and can be > 1
+    std::string value = Escaped(op->getBytes().str());
     // TODO(nchuykin) remove lines below after fixing printf EOObject
     value = std::regex_replace(value, std::regex("%[lh]{1,2}"), "%");
     value = std::regex_replace(value, std::regex("%u"), "%d");
@@ -609,13 +610,13 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
         eoList.nested.push_back(constData);
       }
       if (elementType.name != "undefinedtype" && !elementType.name.empty() &&
-          typeInfo.typeStyle != ComplexType::RECORD &&
-          !(typeInfo.typeStyle == ComplexType::ARRAY &&
-            typeInfo.name != "string")) {
+          elementType.typeStyle != ComplexType::RECORD &&
+          !(elementType.typeStyle == ComplexType::ARRAY &&
+            elementType.name != "string")) {
         res.name += "-as-" + elementType.name;
-      } else if (elementType.name.empty()) {
-        //        std::cerr << type_ptr << ' ' << typeInfo.id << ' ' <<
-        //        typeInfo.name
+      } else /*if (elementType.name.empty())*/ {
+        //        list->dump();
+        //        std::cerr << ' ' << typeInfo.id << ' ' << typeInfo.name
         //                  << ' ' << typeInfo.size << '\n'
         //                  << '\n';
       }

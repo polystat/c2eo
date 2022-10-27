@@ -65,20 +65,20 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
       ts.typeStyle = ComplexType::PHANTOM;
       ts.size = 0;
     } else {
-      if (!type_ptr->isVoidType() && !type_ptr->isAggregateType()) {
-        const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
-        ts.size = type_info.Width;
-      } else {
-        ts.size = 0;
-      }
+      const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
+      ts.size = type_info.Width;
       if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
         if (!type_ptr->isBooleanType()) {
           ts.name += std::to_string(ts.size);
         }
       }
       const clang::Type* sub_type_ptr = GetSubType(type_ptr);
-      ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
-      Add(sub_type_ptr);
+      if (sub_type_ptr != nullptr) {
+        ts.subTypeId = reinterpret_cast<intptr_t>(sub_type_ptr);
+        Add(sub_type_ptr);
+      } else {
+        ts.subTypeId = -1;
+      }
     }
   }
   types.push_back(ts);
