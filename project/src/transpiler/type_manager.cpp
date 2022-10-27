@@ -60,11 +60,14 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
     //      type_ptr->dump();
     //      std::cerr << '\n';
     //    }
-    if (ts.typeStyle == ComplexType::RECORD && type_ptr->isAggregateType() &&
-        !type_ptr->isStandardLayoutType()) {
+    if ((ts.typeStyle == ComplexType::RECORD && type_ptr->isAggregateType() &&
+         !type_ptr->isStandardLayoutType()) ||
+        type_ptr->isEnumeralType()) {
       ts.typeStyle = ComplexType::PHANTOM;
       ts.size = 0;
     } else {
+      type_ptr->dump();
+      std::cerr << '\n';
       const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
       ts.size = type_info.Width;
       if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
