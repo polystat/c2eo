@@ -1176,10 +1176,10 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
       return EOObject{str_val, EOObjectType::EO_LITERAL};
     }
     const uint64_t val = an_int.getZExtValue();
-    if (val > 9223372036854775808ULL) { // 2^63
+    if (val > 9223372036854775808ULL) {  // 2^63
       EOObject plus{"plus"};
       EOObject times{"times"};
-      const uint64_t base = 4294967296L; // 2^32
+      const uint64_t base = 4294967296L;  // 2^32
       times.nested.emplace_back(std::to_string(val / base));
       times.nested.emplace_back(std::to_string(base));
       plus.nested.push_back(times);
