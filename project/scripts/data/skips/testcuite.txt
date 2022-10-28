@@ -1,5 +1,5 @@
 00204: TODO segfault at address 0x0 while tool run
-00087, 00089, 00124, 00189, 00209, 00210, 00216: TODO segfault at address 0x10 while tool run
+00087, 00089, 00124, 00189, 00210, 00216: TODO segfault at address 0x10 while tool run
 00150: TODO /home/maksim/llvm-clang/llvm/include/llvm/Support/Casting.h:104: static bool llvm::isa_impl_cl<To, const From*>::doit(const From*) [with To = clang::TranslationUnitDecl; From = clang::Decl]: Assertion `Val && "isa<> used on a null pointer"' failed. exception: SIGABRT with code -6 while tool run
 00220: TODO /home/maksim/Projects/c2eo/project/src/transpiler/../../../llvm-clang/clang/include/clang/AST/Expr.h:1840: llvm::StringRef clang::StringLiteral::getString() const: Assertion `getCharByteWidth() == 1 && "This function is used in places that assume strings use char"' failed. exception: SIGABRT with code -6 while tool run
 00173: TODO printf with char pointer

@@ -187,7 +187,8 @@ EOObject Variable::GetInitializer() const {
         type_size = value.name.length() - 1;
       } else {
         if (element_type.typeStyle != ComplexType::RECORD &&
-            element_type.typeStyle != ComplexType::ARRAY) {
+            element_type.typeStyle != ComplexType::ARRAY &&
+            element_type.typeStyle != ComplexType::PHANTOM) {
           constData.name += "-as-" + element_type.name;
         }
         type_size = typeInfo.GetSizeOfType();
