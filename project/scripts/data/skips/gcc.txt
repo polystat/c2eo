@@ -1,6 +1,6 @@
 limits-blockid, limits-externalid, limits-externdecl.c, limits-pointer, pr46534: time limit
 
-960405-1, 960513-1, va-arg-5, stdarg-1, regstack-1, fp-cmp-3, va-arg-6, pr44942, pr35043, 960215-1, pr36332, pr39228, 20020413-1, 20030914-1, 20080502-1, 20040208-1, cdivchkld, stdarg-2, inf-3, 20080628-1, pr48641, inf-2, complex-7: float llvm::detail::IEEEFloat::convertToFloat() const: Assertion `semantics == (const llvm::fltSemantics*)&semIEEEsingle && "Float semantics are not IEEEsingle"' failed.
+20010226-1, complex-1, 20010605-2, 960405-1, 960513-1, va-arg-5, stdarg-1, regstack-1, fp-cmp-3, va-arg-6, pr44942, pr35043, 960215-1, pr36332, pr39228, 20020413-1, 20030914-1, 20080502-1, 20040208-1, cdivchkld, stdarg-2, inf-3, 20080628-1, pr48641, inf-2, complex-7: float llvm::detail::IEEEFloat::convertToFloat() const: Assertion `semantics == (const llvm::fltSemantics*)&semIEEEsingle && "Float semantics are not IEEEsingle"' failed.
 20001018-1, 950613-1, pr29128, pr72742, pr47427, comp-goto-1, arith-rand, arith-rand-ll, 20070129, pr84960, pr84960, pr78559, 20111208-1, 20020304-1, 920728-1: element with id not found
 
 limits-caselabels: Command terminated by signal 11
