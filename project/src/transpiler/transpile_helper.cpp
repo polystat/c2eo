@@ -1012,20 +1012,21 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
 }
 
 EOObject GetEOReturnValue(const CallExpr *op) {
-  const QualType ret_type = op->getType();
-  const size_t type_size = GetTypeSize(ret_type);
+  TypeSimpl typeInfo =
+      transpiler.type_manger_.Add(op->getType().getTypePtrOrNull());
+  const size_t type_size = typeInfo.GetSizeOfBaseType();  // todo check?
   // TEST
   // std::cout << "Return type_size = " << type_size << "\n";
-  const std::string postfix = GetTypeName(ret_type);
-  if (postfix != "undefinedtype") {
+  if (typeInfo.name != "undefinedtype" && !typeInfo.name.empty()) {
     EOObject read_ret{"read"};
     const EOObject ret_val{"return"};
     read_ret.nested.push_back(ret_val);
-    if (ret_type->isRecordType() || ret_type->isArrayType()) {
+    if (typeInfo.typeStyle == ComplexType::RECORD ||
+        typeInfo.typeStyle == ComplexType::ARRAY) {
       read_ret.nested.emplace_back(to_string(type_size),
                                    EOObjectType::EO_LITERAL);
     } else {
-      read_ret.name += "-as-" + postfix;
+      read_ret.name += "-as-" + typeInfo.name;
     }
     return read_ret;
   }
