@@ -539,9 +539,8 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  const clang::Type* type_ptr = list->getType().getTypePtrOrNull();
-  const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(type_ptr);
+  const clang::Type *type_ptr = list->getType().getTypePtrOrNull();
+  const TypeSimpl typeInfo = transpiler.type_manger_.Add(type_ptr);
   const std::vector<EOObject> inits;
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
@@ -552,7 +551,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   } else if (typeInfo.typeStyle == ComplexType::RECORD) {
     auto *recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
     if (recordType == nullptr) {
-      clang::RecordDecl* RD = type_ptr->getAsRecordDecl();
+      clang::RecordDecl *RD = type_ptr->getAsRecordDecl();
       ProcessRecordType(RD, false);
       recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
       list->dump();
@@ -986,7 +985,8 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
       call.nested.emplace_back(EOObjectType::EO_PLUG);
       return shift;
     }
-    TypeSimpl typeInfo = transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
     size_t type_size = typeInfo.GetSizeOfType();
     EOObject param{"write"};
     const string postfix = typeInfo.name;
