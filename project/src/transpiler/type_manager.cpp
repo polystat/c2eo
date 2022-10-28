@@ -56,18 +56,10 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
   } else {
     ts.id = id;
     ts.name = ts.GetTypeName(type_ptr);
-    //    if (ts.name == "undefinedtype") {
-    //      type_ptr->dump();
-    //      std::cerr << '\n';
-    //    }
-    if ((ts.typeStyle == ComplexType::RECORD && type_ptr->isAggregateType() &&
-         !type_ptr->isStandardLayoutType()) ||
-        type_ptr->isEnumeralType()) {
+    if (!type_ptr->isScalarType()) {
       ts.typeStyle = ComplexType::PHANTOM;
       ts.size = 0;
     } else {
-      type_ptr->dump();
-      std::cerr << '\n';
       const clang::TypeInfo type_info = context->getTypeInfo(type_ptr);
       ts.size = type_info.Width;
       if (type_ptr->isIntegerType() || type_ptr->isFloatingType()) {
@@ -161,7 +153,8 @@ std::string TypeSimpl::GetTypeName(const clang::Type* type_ptr) {
   //    str += "function";
   //    return str;
   //  }
-  //  std::cerr << type_ptr->getTypeClassName() << '\n';
+  //  std::cerr << type_ptr->getTypeClassName()
+  //  << '\n';
 
   return "undefinedtype";
 }
