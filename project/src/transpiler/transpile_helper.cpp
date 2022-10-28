@@ -1525,7 +1525,8 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   }
   // Argument is Expr
   const auto *p_size_expr = p_expr->getArgumentExpr();
-  TypeSimpl typeInfo = transpiler.type_manger_.Add(p_size_expr->getType().getTypePtrOrNull());
+  TypeSimpl typeInfo =
+      transpiler.type_manger_.Add(p_size_expr->getType().getTypePtrOrNull());
   const std::string str_val{std::to_string(typeInfo.GetSizeOfType())};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
 }
