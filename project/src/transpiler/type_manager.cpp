@@ -56,7 +56,7 @@ TypeSimpl TypeManger::Add(const clang::Type* type_ptr) {
   } else {
     ts.id = id;
     ts.name = ts.GetTypeName(type_ptr);
-    if (!type_ptr->isScalarType()) {
+    if (!type_ptr->isScalarType() && !type_ptr->isStandardLayoutType()) {
       ts.typeStyle = ComplexType::PHANTOM;
       ts.size = 0;
     } else {

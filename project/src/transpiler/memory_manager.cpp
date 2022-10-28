@@ -206,10 +206,10 @@ EOObject Variable::GetInitializer() const {
       }
     }
   }
-  if (typeInfo.name != "undefinedtype" &&
-      typeInfo.typeStyle != ComplexType::RECORD &&
-      !(typeInfo.typeStyle == ComplexType::ARRAY &&
-        typeInfo.name != "string")) {
+  if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
+       typeInfo.typeStyle != ComplexType::RECORD &&
+       typeInfo.typeStyle != ComplexType::ARRAY) ||
+      typeInfo.name == "string") {
     res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);
