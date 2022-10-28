@@ -608,10 +608,10 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
         }
         eoList.nested.push_back(constData);
       }
-      if (elementType.name != "undefinedtype" && !elementType.name.empty() &&
-          elementType.typeStyle != ComplexType::RECORD &&
-          !(elementType.typeStyle == ComplexType::ARRAY &&
-            elementType.name != "string")) {
+      if ((elementType.name != "undefinedtype" && !elementType.name.empty() &&
+           elementType.typeStyle != ComplexType::RECORD &&
+           elementType.typeStyle != ComplexType::ARRAY) ||
+          elementType.name == "string") {
         res.name += "-as-" + elementType.name;
       } else /*if (elementType.name.empty())*/ {
         //        list->dump();
@@ -1176,13 +1176,14 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
       return EOObject{str_val, EOObjectType::EO_LITERAL};
     }
     const uint64_t val = an_int.getZExtValue();
-    if (val >= (1UL << 63)) {
+    if (val > 9223372036854775808ULL) { // 2^63
       EOObject plus{"plus"};
       EOObject times{"times"};
-      times.nested.emplace_back(std::to_string(val / (1UL << 32)));
-      times.nested.emplace_back(std::to_string((1UL << 32)));
+      const uint64_t base = 4294967296L; // 2^32
+      times.nested.emplace_back(std::to_string(val / base));
+      times.nested.emplace_back(std::to_string(base));
       plus.nested.push_back(times);
-      plus.nested.emplace_back(std::to_string(val % (1UL << 32)));
+      plus.nested.emplace_back(std::to_string(val % base));
     } else {
       const std::string str_val{std::to_string(val)};
       return EOObject{str_val, EOObjectType::EO_LITERAL};
@@ -1566,10 +1567,10 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         }
       }
     }
-    if (typeInfo.typeStyle != ComplexType::RECORD &&
-        !(typeInfo.typeStyle == ComplexType::ARRAY &&
-          typeInfo.name != "string") &&
-        typeInfo.name != "undefinedtype") {
+    if ((typeInfo.typeStyle != ComplexType::RECORD &&
+         typeInfo.typeStyle != ComplexType::ARRAY &&
+         typeInfo.name != "undefinedtype") ||
+        typeInfo.name == "string") {
       binary_op.name += "-as-" + typeInfo.name;
     }
     binary_op.nested.emplace_back(GetStmtEOObject(left));

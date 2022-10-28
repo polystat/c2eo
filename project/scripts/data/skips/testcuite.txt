@@ -19,3 +19,5 @@
 00025, 00180, 00179: using str functions
 00214: using __builtin_expect
 00143: unsupported Tom Duff's switch
+
+00026: idk
