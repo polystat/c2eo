@@ -96,23 +96,29 @@ EOObject InitValueEOObj(const VarDecl *VD, bool is_init,
 
 EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl &typeInfo) {
   auto size = typeInfo.GetSizeOfType();
-  clang::APValue *init_val = VD->evaluateValue();
-  if (init_val == nullptr) {
-    return GetStmtEOObject(VD->getInit());
+  VD->dump();
+  std::cerr << '\n';
+  if (VD->ensureEvaluatedStmt()->IsEvaluating) {
+    clang::APValue *init_val = VD->evaluateValue();
+    if (init_val == nullptr) {
+      return GetStmtEOObject(VD->getInit());
+    }
+    std::string str;
+    if (init_val->isInt()) {
+      auto int_value = init_val->getInt().getExtValue();
+      str = std::to_string(int_value);
+    } else if (init_val->isFloat() && (size == double_size)) {
+      auto float_value = init_val->getFloat().convertToDouble();
+      str = std::to_string(float_value);
+    } else if (init_val->isFloat() && (size == float_size)) {
+      auto float_value = init_val->getFloat().convertToFloat();
+      str = std::to_string(float_value);
+    }
+    if (str.empty()) {
+      return GetStmtEOObject(VD->getInit());
+    }
+
+    return {str, EOObjectType::EO_LITERAL};
   }
-  std::string str;
-  if (init_val->isInt()) {
-    auto int_value = init_val->getInt().getExtValue();
-    str = std::to_string(int_value);
-  } else if (init_val->isFloat() && (size == double_size)) {
-    auto float_value = init_val->getFloat().convertToDouble();
-    str = std::to_string(float_value);
-  } else if (init_val->isFloat() && (size == float_size)) {
-    auto float_value = init_val->getFloat().convertToFloat();
-    str = std::to_string(float_value);
-  }
-  if (str.empty()) {
-    return GetStmtEOObject(VD->getInit());
-  }
-  return {str, EOObjectType::EO_LITERAL};
+  return GetStmtEOObject(VD->getInit());
 }

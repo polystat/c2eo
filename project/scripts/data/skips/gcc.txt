@@ -1,4 +1,7 @@
 limits-blockid, limits-externalid, limits-externdecl.c, limits-pointer, pr46534: time limit
 
+960405-1, 960513-1, va-arg-5, stdarg-1, regstack-1, fp-cmp-3, va-arg-6, pr44942, pr35043, 960215-1, pr36332, pr39228, 20020413-1, 20030914-1, 20080502-1, 20040208-1, cdivchkld, stdarg-2, inf-3, 20080628-1, pr48641, inf-2, complex-7: float llvm::detail::IEEEFloat::convertToFloat() const: Assertion `semantics == (const llvm::fltSemantics*)&semIEEEsingle && "Float semantics are not IEEEsingle"' failed.
+20001018-1, 950613-1, pr29128, pr72742, pr47427, comp-goto-1, arith-rand, arith-rand-ll, 20070129, pr84960, pr84960, pr78559, 20111208-1, 20020304-1, 920728-1: element with id not found
+
 limits-caselabels: Command terminated by signal 11
-complex-1, 20010226-1, 20010605-2, 20080628-1, pr48641, 20020304-1, inf-2, complex-7, 920728-1, inf-3, pr28865, pr85582-2, stdarg-2, cdivchkld, 20050801-2, 20111208-1, pr78559, pr42956, 20040208-1, pr61375, 20080502-1, pr32571, pr84960, 20030914-1, 20030305-1, 20020413-1, arith-rand-ll, pr39228, arith-rand, comp-goto-1, pr47427, pr72742, pr29128, dump-noaddr, 960215-1, pr35043, pr44942, pr44043, limits-fndefn, 20050122-2, va-arg-6, pr105613, 950613-1, fp-cmp-3, regstack-1, 20001018-1, stdarg-1, va-arg-5, 960513-1, 960405-1, 20070129, nestfunc-7, pr98474, pr36332, pr85582-3: SIGABRT with code -6 while tool run Command exited with non-zero status 255
+pr105613, limits-fndefn, pr44043, pr32571, 20050801-2: todo

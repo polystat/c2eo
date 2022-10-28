@@ -1677,9 +1677,13 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   const auto *ret_value = p_stmt->getRetValue();
   if (ret_value != nullptr) {
     EOObject ret{"write"};
-    const string postfix = GetPostfix(ret_value->getType());
-    if (!postfix.empty()) {
-      ret.name += "-as-" + postfix;
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(ret_value->getType().getTypePtrOrNull());
+    if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
+         typeInfo.typeStyle != ComplexType::RECORD &&
+         typeInfo.typeStyle != ComplexType::ARRAY) ||
+        typeInfo.name == "string") {
+      ret.name += "-as-" + typeInfo.name;
     }
     const EOObject address{"return"};
     ret.nested.push_back(address);
