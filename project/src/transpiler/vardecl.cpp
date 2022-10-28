@@ -96,8 +96,6 @@ EOObject InitValueEOObj(const VarDecl *VD, bool is_init,
 
 EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl &typeInfo) {
   auto size = typeInfo.GetSizeOfType();
-  VD->dump();
-  std::cerr << '\n';
   if (VD->ensureEvaluatedStmt()->IsEvaluating) {
     clang::APValue *init_val = VD->evaluateValue();
     if (init_val == nullptr) {

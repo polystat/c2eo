@@ -172,7 +172,7 @@ EOObject Variable::GetInitializer() const {
   EOObject res("write");
   EOObject constData{"write"};
   EOObject _value = value;
-  TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
+  const TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
   if (typeInfo.name == "ptr" && value.nested.empty()) {
     const TypeSimpl element_type =
         transpiler.type_manger_.GetById(typeInfo.subTypeId);

@@ -554,7 +554,6 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
       clang::RecordDecl *RD = type_ptr->getAsRecordDecl();
       ProcessRecordType(RD, false);
       recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
-      list->dump();
     }
     recElement = recordType->fields.begin();
   }
@@ -619,11 +618,6 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
            elementType.typeStyle != ComplexType::ARRAY) ||
           elementType.name == "string") {
         res.name += "-as-" + elementType.name;
-      } else /*if (elementType.name.empty())*/ {
-        //        list->dump();
-        //        std::cerr << ' ' << typeInfo.id << ' ' << typeInfo.name
-        //                  << ' ' << typeInfo.size << '\n'
-        //                  << '\n';
       }
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
@@ -903,10 +897,6 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   addr.nested.emplace_back(shift);
 
   const clang::Type *type = expr->IgnoreCasts()->getType().getTypePtrOrNull();
-  //  op->dump();
-  //  std::cerr << "-----\n";
-  //  type->dump();
-  //  std::cerr << '\n';
   const TypeSimpl typeInfo = transpiler.type_manger_.Add(type);
   if ((typeInfo.name == "ptr" ||
        IsLeftNestedObjectsContainLabel(addr, "addr-of")) &&
@@ -918,15 +908,7 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   }
   return addr;
 }
-// const Expr *GetPureStmtNode(const Expr *pExpr) {
-//   Stmt::StmtClass stmt_class = pExpr->getStmtClass();
-//   if (stmt_class >= clang::Stmt::firstCastExprConstant &&
-//       stmt_class <= clang::Stmt::lastCastExprConstant) {
-//     const auto *op = dyn_cast<CastExpr>(pExpr);
-//     return op.
-//   }
-//   return pExpr;
-// }
+
 bool IsLeftNestedObjectsContainLabel(const EOObject &object,
                                      const char *label = "") {
   if (object.name == label) {
@@ -985,9 +967,9 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
       call.nested.emplace_back(EOObjectType::EO_PLUG);
       return shift;
     }
-    TypeSimpl typeInfo =
+    const TypeSimpl typeInfo =
         transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
-    size_t type_size = typeInfo.GetSizeOfType();
+    const size_t type_size = typeInfo.GetSizeOfType();
     EOObject param{"write"};
     if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
          typeInfo.typeStyle != ComplexType::RECORD &&
@@ -1012,7 +994,7 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
 }
 
 EOObject GetEOReturnValue(const CallExpr *op) {
-  TypeSimpl typeInfo =
+  const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(op->getType().getTypePtrOrNull());
   const size_t type_size = typeInfo.GetSizeOfBaseType();  // todo check?
   // TEST
@@ -1129,9 +1111,6 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
         printf.nested.push_back(param);
       }
     } else {
-      //      if (idx == 0) {
-      //        op->dump();
-      //      }
       printf.nested.push_back(param);
     }
     idx++;
@@ -1525,7 +1504,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   }
   // Argument is Expr
   const auto *p_size_expr = p_expr->getArgumentExpr();
-  TypeSimpl typeInfo =
+  const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(p_size_expr->getType().getTypePtrOrNull());
   const std::string str_val{std::to_string(typeInfo.GetSizeOfType())};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
@@ -1620,12 +1599,6 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     if (type == nullptr) {
       return EOObject{EOObjectType::EO_PLUG};
     }
-    //    if (type->isPointerType()) {
-    //      EOObject globAddr{"address"};
-    //      globAddr.nested.emplace_back("global-ram");
-    //      globAddr.nested.emplace_back(var.alias);
-    //      return globAddr;
-    //    }
     if (type->isArrayType()) {
       EOObject array_as_ptr{"addr-of"};
       array_as_ptr.nested.emplace_back(var.alias);
@@ -1677,7 +1650,7 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   const auto *ret_value = p_stmt->getRetValue();
   if (ret_value != nullptr) {
     EOObject ret{"write"};
-    TypeSimpl typeInfo =
+    const TypeSimpl typeInfo =
         transpiler.type_manger_.Add(ret_value->getType().getTypePtrOrNull());
     if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
          typeInfo.typeStyle != ComplexType::RECORD &&
