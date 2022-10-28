@@ -993,7 +993,7 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
          typeInfo.typeStyle != ComplexType::RECORD &&
          typeInfo.typeStyle != ComplexType::ARRAY) ||
         typeInfo.name == "string") {
-      param.name += "-as-" + postfix;
+      param.name += "-as-" + typeInfo.name;
     }
     EOObject address{"address"};
     address.nested.emplace_back("global-ram");
