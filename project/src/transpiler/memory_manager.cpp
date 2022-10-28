@@ -116,14 +116,10 @@ std::string int_to_hex(T i) {
 }
 
 const Variable &MemoryManager::GetVarById(const clang::VarDecl *id) const {
-  //  TypeSimpl typeInfo =
-  //  transpiler.type_manger_.Add(id->getType().getTypePtrOrNull()); if
-  //  (typeInfo.id==-1){
-  //    return ;
-  //  }
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
+    id->getType().getTypePtrOrNull()->dump();
     throw std::invalid_argument("exception: element with id " +
                                 int_to_hex(reinterpret_cast<uint64_t>(id)) +
                                 " not found");

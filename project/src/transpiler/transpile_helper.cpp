@@ -989,8 +989,10 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
         transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
     size_t type_size = typeInfo.GetSizeOfType();
     EOObject param{"write"};
-    const string postfix = typeInfo.name;
-    if (!postfix.empty()) {
+    if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
+         typeInfo.typeStyle != ComplexType::RECORD &&
+         typeInfo.typeStyle != ComplexType::ARRAY) ||
+        typeInfo.name == "string") {
       param.name += "-as-" + postfix;
     }
     EOObject address{"address"};
