@@ -1055,28 +1055,22 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     return call;
   }
   // ======= The function call using pointer =======
-  const auto *func_ptr_decl = op->getCalleeDecl();
-  if (func_ptr_decl == nullptr) {
+  const auto *callee = op->getCallee();
+  if (callee == nullptr) {
     return EOObject{EOObjectType::EO_PLUG};
   }
-  if (func_ptr_decl->getKind() == clang::Decl::Var) {
-    const auto *varDecl = clang::dyn_cast<clang::VarDecl>(func_ptr_decl);
-    auto func_ptr_qualtype{varDecl->getType()};
-    if (func_ptr_qualtype->isFunctionPointerType()) {
-      auto pointee_type = func_ptr_qualtype->getPointeeType();
-      if (pointee_type->isFunctionNoProtoType() ||
-          pointee_type->isFunctionProtoType()) {
-        const size_t shift = GetEOParamsList(op, call);
-        EOObject call_ptr{"call", EOObjectType::EO_LITERAL};
-        EOObject func_ptr_value{"read-as-ptr"};
-        auto var{transpiler.glob_.GetVarById(varDecl)};
-        func_ptr_value.nested.emplace_back(var.alias);
-        call_ptr.nested.push_back(func_ptr_value);
-        call_ptr.nested.emplace_back("empty-local-position");
-        call_ptr.nested.emplace_back(to_string(shift),
-                                     EOObjectType::EO_LITERAL);
-        call.nested.push_back(call_ptr);
-      }
+  auto func_ptr_qualtype{callee->getType()};
+  if (func_ptr_qualtype->isFunctionPointerType()) {
+    auto pointee_type = func_ptr_qualtype->getPointeeType();
+    if (pointee_type->isFunctionNoProtoType() ||
+        pointee_type->isFunctionProtoType()) {
+      const size_t shift = GetEOParamsList(op, call);
+      EOObject call_ptr{"call", EOObjectType::EO_LITERAL};
+      EOObject func_ptr_value = GetStmtEOObject(callee);
+      call_ptr.nested.push_back(func_ptr_value);
+      call_ptr.nested.emplace_back("empty-local-position");
+      call_ptr.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
+      call.nested.push_back(call_ptr);
     }
     call.nested.push_back(GetEOReturnValue(op));
     return call;
