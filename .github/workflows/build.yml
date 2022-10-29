@@ -5,9 +5,6 @@ on:
     branches:
       - master
 
-  schedule:
-    - cron:  '0 23 * * *'
-
 jobs:
   xcop:
     runs-on: ubuntu-20.04
@@ -167,48 +164,6 @@ jobs:
         with:
           name: main
           path: project/bin/codecov.txt
-
-  csmith:
-    needs: [cpplint, clang-format]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: MarkusJx/googletest-installer@v1.1
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
-
-      - name: Install csmith
-        run: |
-          cd ..
-          git clone https://github.com/csmith-project/csmith.git
-          cd csmith
-          cmake -DCMAKE_INSTALL_PREFIX=csmith .
-          make
-
-      - name: Generating tests
-        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 40
-        
-      - name: Transpilation
-        run: cd ./project/scripts && python3 transpile.py ../tests/main/csmith -n || true
-
-      - name: Clean test directory
-        run: cd ./project/scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
-
-      - name: Make archive from csmith tests
-        run:  tar -cf csmith.tar.gz ./project/tests/main/csmith
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: csmith
-          path: csmith.tar.gz
 
   unit-tests:
     needs: [cpplint, clang-format]
