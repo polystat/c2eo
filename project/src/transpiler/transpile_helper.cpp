@@ -990,7 +990,8 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
       call.nested.emplace_back(EOObjectType::EO_PLUG);
       return shift;
     }
-    TypeSimpl typeInfo = transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
     size_t type_size = typeInfo.GetSizeOfType();
     EOObject param{"write"};
     if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
