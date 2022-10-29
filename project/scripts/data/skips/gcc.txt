@@ -3,5 +3,5 @@ limits-blockid, limits-externalid, limits-externdecl.c, limits-pointer, pr46534:
 limits-caselabels: Command terminated by signal 11
 pr105613, limits-fndefn: idk
 fp-cmp-8l, fp-cmp-4f, fp-cmp-8f, fp-cmp-4, fp-cmp-5, pr49768, fp-cmp-4l, pr38016, fp-cmp-8: segfault at address 0x30 while tool run Command exited with non-zero status 255
-nestfunc-3, nestfunc-6, pr42956, nestfunc-1, 921215-1, pr85582-2, pr28865, pr61375, 930506-2, nestfunc-5, 20030305-1, pr28865, nestfunc-2, 20050122-2, dump-noaddr, 20000822-1, pr98474, nested-1, pr27889, 20020412-1, pr85582-3, nestfunc-7: SIGABRT with code -6 while tool run Command exited with non-zero status 255
+nestfunc-3, nestfunc-6, pr42956, nestfunc-1, 921215-1, pr85582-2, pr28865, pr61375, 930506-2, nestfunc-5, 20030305-1, pr28865, nestfunc-2, 20050122-2, dump-noaddr, 20000822-1, pr98474, nested-1, pr27889, 20020412-1, pr85582-3, nestfunc-7, 20190827-1, gcc.c-torture/execute/20020320-1, gcc.c-torture/compile/20001121-1, pr32571, 991213-1, 20090907-1, pr37056, 20071107-1, statement-expression-1, 20110902, gcc.c-torture/compile/20030903-1, gcc.c-torture/compile/pr33382, 990517-1, pr33173, 20001203-2, pr51761, 921012-1: SIGABRT with code -6 while tool run Command exited with non-zero status 255
 pr28865, 20010226-1, pr28865: SIGABRT with code -6 while tool run Command exited with non-zero status

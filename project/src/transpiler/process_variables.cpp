@@ -104,26 +104,34 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
     ProcessIfStmtLocalVariables(all_local, shift, if_stmt, process_only_static);
   } else if (stmt_class == Stmt::StmtExprClass) {
     auto *se_stmt = dyn_cast<clang::StmtExpr>(stmt);
-    ProcessFunctionLocalVariables(se_stmt->getSubStmt(), all_local, shift,
-                                  process_only_static);
+    if (se_stmt != nullptr) {
+      ProcessFunctionLocalVariables(se_stmt->getSubStmt(), all_local, shift,
+                                    process_only_static);
+    }
   } else if (stmt_class == Stmt::ConditionalOperatorClass) {
     auto *cond_stmt = dyn_cast<clang::ConditionalOperator>(stmt);
-    ProcessStmtLocalVariables(all_local, shift, cond_stmt->getCond(),
-                              process_only_static);
-    ProcessStmtLocalVariables(all_local, shift, cond_stmt->getTrueExpr(),
-                              process_only_static);
-    ProcessStmtLocalVariables(all_local, shift, cond_stmt->getFalseExpr(),
-                              process_only_static);
+    if (cond_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, cond_stmt->getCond(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, cond_stmt->getTrueExpr(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, cond_stmt->getFalseExpr(),
+                                process_only_static);
+    }
   } else if (stmt_class == Stmt::ParenExprClass) {
     auto *paren_stmt = dyn_cast<clang::ParenExpr>(stmt);
-    ProcessStmtLocalVariables(all_local, shift, paren_stmt->getSubExpr(),
-                              process_only_static);
+    if (paren_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, paren_stmt->getSubExpr(),
+                                process_only_static);
+    }
   } else if (stmt_class == Stmt::BinaryOperatorClass) {
     auto *bin_stmt = dyn_cast<clang::BinaryOperator>(stmt);
-    ProcessStmtLocalVariables(all_local, shift, bin_stmt->getLHS(),
-                              process_only_static);
-    ProcessStmtLocalVariables(all_local, shift, bin_stmt->getRHS(),
-                              process_only_static);
+    if (bin_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, bin_stmt->getLHS(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, bin_stmt->getRHS(),
+                                process_only_static);
+    }
   }
 }
 
