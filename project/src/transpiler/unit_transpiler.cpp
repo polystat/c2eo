@@ -96,7 +96,7 @@ void UnitTranspiler::GenerateResult() {
     }
     if (!find_flag) {
       for (const auto &func : func_manager_.GetAllEoDefinitions()) {
-        std::string func_def_name = func.postfix;
+        const std::string func_def_name = func.postfix;
         if (func_name != func_def_name) {
           continue;
         }
@@ -147,7 +147,7 @@ void UnitTranspiler::GenerateResult() {
         result << alias << "\n";
       } catch (std::out_of_range &) {
         result << "+alias c2eo.external." << ext_obj << "\n";
-        std::string alias_file_name{path_name_ + ext_obj + ".eo.alias"};
+        const std::string alias_file_name{path_name_ + ext_obj + ".eo.alias"};
         std::ofstream alias_out(alias_file_name);
         alias_out << "+alias c2eo.coperators.printf\n\n"
                   << "+package c2eo.external\n\n"

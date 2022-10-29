@@ -13,7 +13,7 @@ include_directories("${PATH_TO_LLVM_BUILD}/include")
 link_directories("${PATH_TO_LLVM_BUILD}/lib/")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-
+set(CMAKE_BUILD_TYPE Debug)
 # Source files list
 set(SOURCE_FILES
         # Headers
@@ -33,6 +33,8 @@ set(SOURCE_FILES
         process_variables.h
         enumdecl.h
         enum_manager.h
+        type_manager.h
+
 
         # Sources
         main.cpp
@@ -50,7 +52,8 @@ set(SOURCE_FILES
         tracer.cpp
         process_variables.cpp
         enumdecl.cpp
-        enum_manager.cpp)
+        enum_manager.cpp
+        type_manager.cpp)
 
 # add_executable(recvisitor main.cpp)
 add_executable(c2eo ${SOURCE_FILES})

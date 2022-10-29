@@ -51,3 +51,5 @@ limits-blockid, limits-externalid, limits-externdecl: too much handling time
 limits-caselabels: exceeded the number of cases allowed by the c standard
 921215-1: Function inside function does not comply with the С standard
 20020604-1: Float semantics are not IEEEdouble
+990928-1: run with ASAN_OPTIONS=detect_leaks=0
+limits-pointer, pr46534: time limit

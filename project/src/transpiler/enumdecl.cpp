@@ -59,12 +59,11 @@ EnumType ProcessEnumDecl(const clang::EnumDecl *ED) {
       if (enum_const_decl == nullptr) {
         return {};
       }
-      clang::QualType qual_type = enum_const_decl->getType();
-      clang::TypeInfo type_info =
-          enum_const_decl->getASTContext().getTypeInfo(qual_type);
-      size = type_info.Width / byte_size;
-      std::string name = "c-" + enum_const_decl->getNameAsString();
-      int64_t value = enum_const_decl->getInitVal().getExtValue();
+      const TypeSimpl typeInfo = transpiler.type_manger_.Add(
+          enum_const_decl->getType().getTypePtrOrNull());
+      size = typeInfo.GetSizeOfType();
+      const std::string name = "c-" + enum_const_decl->getNameAsString();
+      const int64_t value = enum_const_decl->getInitVal().getExtValue();
       constants.push_back(EnumConstantType{enum_const_decl, name, value});
     }
   }

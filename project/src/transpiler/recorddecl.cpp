@@ -62,7 +62,7 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
 
   uint64_t size = 0;
 
-  std::vector<std::tuple<std::string, clang::QualType, size_t>> fields;
+  std::vector<std::tuple<std::string, TypeSimpl, size_t>> fields;
   size_t shift = 0;
 
   for (auto it = RD->decls_begin(); it != RD->decls_end(); it++) {
@@ -82,15 +82,15 @@ std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
       } else {
         field_name = "field" + std::to_string(field->getID());
       }
-      fields.emplace_back(field_name, field->getType(), shift);
+      const TypeSimpl typeInfo =
+          transpiler.type_manger_.Add(field->getType().getTypePtrOrNull());
+      fields.emplace_back(field_name, typeInfo, shift);
 
-      clang::QualType qual_type = field->getType();
-      clang::TypeInfo type_info = field->getASTContext().getTypeInfo(qual_type);
       if (RD->isStruct()) {
-        shift += type_info.Width / byte_size;
+        shift += typeInfo.GetSizeOfType();
         size = shift;
       } else {
-        size = std::max(size, type_info.Width / byte_size);
+        size = std::max(size, typeInfo.GetSizeOfType());
       }
     }
   }

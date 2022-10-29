@@ -30,7 +30,7 @@
 
 RecordType RecordManager::Add(
     int64_t id, std::string name, size_t size,
-    std::vector<std::tuple<std::string, clang::QualType, size_t>> fields,
+    std::vector<std::tuple<std::string, TypeSimpl, size_t>> fields,
     bool is_local = false) {
   RecordType record_type = {id, std::move(name), size, std::move(fields),
                             is_local};

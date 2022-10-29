@@ -31,6 +31,7 @@
 #include "src/transpiler/function_manager.h"
 #include "src/transpiler/memory_manager.h"
 #include "src/transpiler/record_manager.h"
+#include "src/transpiler/type_manager.h"
 #include "string"
 
 class UnitTranspiler {
@@ -47,6 +48,7 @@ class UnitTranspiler {
   FunctionManager func_manager_;
   RecordManager record_manager_;
   EnumManager enum_manager_;
+  TypeManger type_manger_;
   friend std::ostream &operator<<(std::ostream &os, UnitTranspiler unit);
 
   std::string name_;

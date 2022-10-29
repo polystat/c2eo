@@ -31,11 +31,12 @@
 #include <utility>
 
 #include "src/transpiler/transpile_helper.h"
-
-Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
-                            const std::string &type, const std::string &alias,
-                            EOObject value, std::string local_name,
-                            size_t shift, bool is_initialized) {
+#include "src/transpiler/unit_transpiler.h"
+extern UnitTranspiler transpiler;
+Variable MemoryManager::Add(const clang::VarDecl *id, int64_t typeInfoID,
+                            const std::string &alias, EOObject value,
+                            std::string local_name, size_t shift,
+                            bool is_initialized) {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res != variables_.end()) {
@@ -48,56 +49,34 @@ Variable MemoryManager::Add(const clang::VarDecl *id, size_t size,
     unique_alias = alias;
   }
   duplicates[alias]++;
-  std::string type_postfix = type.substr(2);
-  // TODO(nkchuykin) char!?
-  if (!((type_postfix.length() < 3 ||
-         (type_postfix.substr(0, 3) != "st-" &&
-          type_postfix.substr(0, 3) !=
-              "un-"))  // TODO(nkchuykin) recordDecl check
-        && type_postfix != "undefinedtype" && type_postfix != "char")) {
-    type_postfix = "";
-  }
   Variable var = {id,
                   pointer_,
-                  size,
-                  type,
+                  typeInfoID,
                   std::move(unique_alias),
                   std::move(value),
                   std::move(local_name),
                   shift,
-                  type_postfix,
                   is_initialized};
   // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
     var.value.name = "plug";
   }
   variables_.push_back(var);
-  pointer_ += size;
+  pointer_ += transpiler.type_manger_.GetById(typeInfoID).GetSizeOfType();
   return var;
 }
 
 Variable MemoryManager::AddExternal(
-    const clang::VarDecl *id, size_t size, const std::string &type,
-    std::string alias, EOObject value, std::string local_name, size_t shift,
+    const clang::VarDecl *id, int64_t typeInfoID, std::string alias,
+    EOObject value, std::string local_name, size_t shift,
     __attribute__((unused)) bool is_initialized) {
-  std::string type_postfix = type.substr(2);
-  // TODO(nkchuykin) char!?
-  if (!((type_postfix.length() < 3 ||
-         (type_postfix.substr(0, 3) != "st-" &&
-          type_postfix.substr(0, 3) !=
-              "un-"))  // TODO(nkchuykin) recordDecl check
-        && type_postfix != "undefinedtype" && type_postfix != "char")) {
-    type_postfix = "";
-  }
   Variable var = {id,
                   some_non_zero_position,
-                  size,
-                  type,
+                  typeInfoID,
                   std::move(alias),
                   std::move(value),
                   std::move(local_name),
                   shift,
-                  type_postfix,
                   false};
   // TODO(nkchuykin) fix this plug (rework for check value == EoObject::PLUG)
   if (var.value.name.empty()) {
@@ -137,6 +116,11 @@ std::string int_to_hex(T i) {
 }
 
 const Variable &MemoryManager::GetVarById(const clang::VarDecl *id) const {
+  //  TypeSimpl typeInfo =
+  //  transpiler.type_manger_.Add(id->getType().getTypePtrOrNull()); if
+  //  (typeInfo.id==-1){
+  //    return ;
+  //  }
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
@@ -157,15 +141,18 @@ EOObject MemoryManager::GetEOObject() const {
 void MemoryManager::RemoveAllUsed(const std::vector<Variable> &all_local) {
   for (const auto &var : all_local) {
     auto var_in_memory = find(variables_.begin(), variables_.end(), var);
-    pointer_ -= var_in_memory->size;
-    variables_.erase(var_in_memory);
+    if (var_in_memory != variables_.end()) {
+      pointer_ -= transpiler.type_manger_.GetById(var_in_memory->typeInfoID)
+                      .GetSizeOfType();
+      variables_.erase(var_in_memory);
+    }
   }
 }
 
 void MemoryManager::SetExtEqGlob() {
   for (auto &var : variables_) {
     if (var.alias.substr(0, 2) == "e-") {
-      std::string real_name = var.alias.substr(2, var.alias.size());
+      const std::string real_name = var.alias.substr(2, var.alias.size());
       auto place = std::find_if(variables_.begin(), variables_.end(),
                                 [real_name](const Variable &x) {
                                   return x.alias == "g-" + real_name;
@@ -177,6 +164,8 @@ void MemoryManager::SetExtEqGlob() {
   }
 }
 
+void MemoryManager::ShiftFreeSpacePointer(uint64_t shift) { pointer_ += shift; }
+
 EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
     return ReplaceEmpty(value, {alias, EOObjectType::EO_LITERAL});
@@ -185,18 +174,59 @@ EOObject Variable::GetInitializer() const {
     return EOObject(EOObjectType::EO_EMPTY);
   }
   EOObject res("write");
-  if (!type_postfix.empty()) {
-    res.name += "-as-" + type_postfix;
+  EOObject constData{"write"};
+  EOObject _value = value;
+  TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
+  if (typeInfo.name == "ptr" && value.nested.empty()) {
+    const TypeSimpl element_type =
+        transpiler.type_manger_.GetById(typeInfo.subTypeId);
+    if (element_type.name != "undefinedtype") {
+      uint64_t type_size = 0;
+      if (element_type.name == "int8") {
+        constData.name += "-as-string";
+        type_size = value.name.length() - 1;
+      } else {
+        if (element_type.typeStyle != ComplexType::RECORD &&
+            element_type.typeStyle != ComplexType::ARRAY &&
+            element_type.typeStyle != ComplexType::PHANTOM) {
+          constData.name += "-as-" + element_type.name;
+        }
+        type_size = typeInfo.GetSizeOfType();
+      }
+      {
+        EOObject address{"address"};
+        address.nested.emplace_back("global-ram");
+        address.nested.emplace_back(
+            std::to_string(transpiler.glob_.GetFreeSpacePointer()),
+            EOObjectType::EO_LITERAL);
+        transpiler.glob_.ShiftFreeSpacePointer(type_size);
+        constData.nested.push_back(address);
+        constData.nested.push_back(value);
+        _value = EOObject{"addr-of"};
+        _value.nested.push_back(address);
+      }
+    }
+  }
+  if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
+       typeInfo.typeStyle != ComplexType::RECORD &&
+       typeInfo.typeStyle != ComplexType::ARRAY) ||
+      typeInfo.name == "string") {
+    res.name += "-as-" + typeInfo.name;
   }
   res.nested.emplace_back(alias);
   if (value.type == EOObjectType::EO_PLUG) {
     // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
   } else {
-    // Probably just emplace value.
-    res.nested.emplace_back(value);
+    res.nested.push_back(_value);
   }
-  return res;
+  if (constData.nested.empty()) {
+    return res;
+  }
+  EOObject ret{EOObjectType::EO_EMPTY};
+  ret.nested.push_back(constData);
+  ret.nested.push_back(res);
+  return ret;
 }
 
 EOObject Variable::GetAddress(const std::string &mem_name) const {
