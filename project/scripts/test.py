@@ -42,9 +42,10 @@ from compile import Compiler
 class Tests(object):
 
     def __init__(self, path_to_tests: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
-                 need_to_generate_codecov: bool = False):
+                 need_to_generate_codecov: bool = False, ignore_errors: bool = False):
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.need_to_generate_codecov = need_to_generate_codecov
+        self.ignore_errors = ignore_errors
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
@@ -60,7 +61,8 @@ class Tests(object):
         start_time = time.time()
         self.transpilation_units, skip_result = Compiler(self.path_to_tests, self.skips_file_name,
                                                          self.need_to_prepare_c_code,
-                                                         self.need_to_generate_codecov).compile()
+                                                         self.need_to_generate_codecov,
+                                                         self.ignore_errors).compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
@@ -234,6 +236,9 @@ def create_parser() -> argparse.ArgumentParser:
 
     _parser.add_argument('-c', '--codecov', action='store_const', const=True, default=False,
                          help='the script will generate codecov files')
+
+    _parser.add_argument('-i', '--ignore_exceptions', action='store_const', const=True, default=False,
+                         help='the script will continue to work after the test exceptions')
     return _parser
 
 
@@ -243,6 +248,6 @@ if __name__ == '__main__':
     parser = create_parser()
     namespace = parser.parse_args()
     is_failed = Tests(Path(namespace.path_to_tests), namespace.skips_file_name, not namespace.not_prepare_c_code,
-                      namespace.codecov).test()
+                      namespace.codecov, namespace.ignore_exceptions).test()
     if is_failed:
         exit('Testing failed')
