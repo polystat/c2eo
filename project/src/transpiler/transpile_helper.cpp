@@ -1184,6 +1184,7 @@ EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
       times.nested.emplace_back(std::to_string(base));
       plus.nested.push_back(times);
       plus.nested.emplace_back(std::to_string(val % base));
+      return plus;
     } else {
       const std::string str_val{std::to_string(val)};
       return EOObject{str_val, EOObjectType::EO_LITERAL};
