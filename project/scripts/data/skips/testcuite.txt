@@ -8,18 +8,18 @@
 00186:                      f-sprintf is declaration only
 00187:                      f-fopen, f-fwrite, f-fclose, f-fread, f-fgetc is declaration only
 
-: Java
+# Java
 00173, 00175, 00187:        Error at "EOc2eo.EOcoperators.EOaddress#as-bytes" attribute TODO #366 #368 -
 00182, 00214:               Unexpected error 'null' of type EOFException
 00089, 00189, 00210:        Error at "EOorg.EOeolang.EOint#addr" attribute TODO #355 #358 #360
 00124:                      Error at "EOc2eo.EOcoperators.EOaddress#Δ" attribute TODO #356
 
-: PLUGs
+# PLUGs
 00149, 00150:               plug &(struct) TODO #378 #363
 00213:                      TODO if-else plug
 00219:                      _Generic plug #374
 
-: Wrong Answers
+# Wrong Answers
 00026, 00058, 00138:        char ptr on const string TODO #380 #369 #373
 00051:                      goto
 00104:                      uint64
