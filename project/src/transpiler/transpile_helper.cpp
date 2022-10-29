@@ -613,11 +613,6 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
            elementType.typeStyle != ComplexType::ARRAY) ||
           elementType.name == "string") {
         res.name += "-as-" + elementType.name;
-      } else /*if (elementType.name.empty())*/ {
-        //        list->dump();
-        //        std::cerr << ' ' << typeInfo.id << ' ' << typeInfo.name
-        //                  << ' ' << typeInfo.size << '\n'
-        //                  << '\n';
       }
       res.nested.emplace_back(shiftedAlias);
       res.nested.emplace_back(value);
@@ -814,7 +809,9 @@ EOObject GetCastEOObject(const CastExpr *op) {
     return read;
   }
   if (cast_kind == clang::CK_FloatingToIntegral ||
-      cast_kind == clang::CK_IntegralToFloating) {
+      cast_kind == clang::CK_IntegralToFloating ||
+      cast_kind == clang::CK_IntegralCast ||
+      cast_kind == clang::CK_FloatingCast) {
     EOObject cast{"as-" + type};
     cast.nested.push_back(GetStmtEOObject(*op->child_begin()));
     return cast;
@@ -897,10 +894,6 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   addr.nested.emplace_back(shift);
 
   const clang::Type *type = expr->IgnoreCasts()->getType().getTypePtrOrNull();
-  //  op->dump();
-  //  std::cerr << "-----\n";
-  //  type->dump();
-  //  std::cerr << '\n';
   const TypeSimpl typeInfo = transpiler.type_manger_.Add(type);
   if ((typeInfo.name == "ptr" ||
        IsLeftNestedObjectsContainLabel(addr, "addr-of")) &&
@@ -912,15 +905,6 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
   }
   return addr;
 }
-// const Expr *GetPureStmtNode(const Expr *pExpr) {
-//   Stmt::StmtClass stmt_class = pExpr->getStmtClass();
-//   if (stmt_class >= clang::Stmt::firstCastExprConstant &&
-//       stmt_class <= clang::Stmt::lastCastExprConstant) {
-//     const auto *op = dyn_cast<CastExpr>(pExpr);
-//     return op.
-//   }
-//   return pExpr;
-// }
 bool IsLeftNestedObjectsContainLabel(const EOObject &object,
                                      const char *label = "") {
   if (object.name == label) {

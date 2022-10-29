@@ -1,16 +1,29 @@
 00174, 00204, 00205, 00216: code too large
-00040, 00041: execution time EO file exceeded 60 seconds
+00040, 00041:               execution time EO file exceeded 60 seconds
 
-00010, 00199, 00207, 00129, 00213: goto is not supported
-00010, 00199, 00207: label is not supported
-00025, 00179: f-strcpy, f-strncpy, f-strcmp, f-strlen, f-strcat, f-strncmp, f-strchr is declaration only
-00180: f-strcpy is declaration only
-00186: f-sprintf is declaration only
-00187: f-fopen, f-fwrite, f-fclose, f-fread, f-fgetc is declaration only
+00129, 00213:               goto is not supported
+00010, 00199, 00207:        goto, label is not supported
+00025, 00179:               f-strcpy, f-strncpy, f-strcmp, f-strlen, f-strcat, f-strncmp, f-strchr is declaration only
+00180:                      f-strcpy is declaration only
+00186:                      f-sprintf is declaration only
+00187:                      f-fopen, f-fwrite, f-fclose, f-fread, f-fgetc is declaration only
 
-00173, 00175, 00187: as-char.a
-00182, 00214: null
-00089, 00189, 00210: addr-of.a
+: Java
+00173, 00175, 00187:        Error at "EOc2eo.EOcoperators.EOaddress#as-bytes" attribute TODO #366 #368 -
+00182, 00214:               Unexpected error 'null' of type EOFException
+00089, 00189, 00210:        Error at "EOorg.EOeolang.EOint#addr" attribute TODO #355 #358 #360
+00124:                      Error at "EOc2eo.EOcoperators.EOaddress#Δ" attribute TODO #356
 
-00087, 00124, 00149, 00150, 00213, 00219: it is plug
-00026, 00051, 00058, 00104, 00138, 00143, 00197, 00217, 00220: wrong answer
+: PLUGs
+00149, 00150:               plug &(struct) TODO #378 #363
+00213:                      TODO if-else plug
+00219:                      _Generic plug #374
+
+: Wrong Answers
+00026, 00058, 00138:        char ptr on const string TODO #380 #369 #373
+00051:                      goto
+00104:                      uint64
+00143:                      unsupported Tom Duff's switch
+00197:                      static TODO #379
+00217:                      cast TODO #419 #371
+00220:                      wchar_t TODO #364
