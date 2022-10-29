@@ -1046,27 +1046,29 @@ myFuncDef functionFactory(int n) {
 
 ### Goto and labels
 
-Current [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object can replace continue and break, but goto in C can jump anywhere in function body.
+The EO language has a [goto](https://github.com/objectionary/eo/blob/master/eo-runtime/src/main/eo/org/eolang/gray/goto.eo) object that supports transitions similar to the continue and break statements. We also use it to implement multiple return statements to terminate a function.
+
+The goto statements in the C language provides a variety of jumps to the appropriate labels, violating the principles of structured programming. It cannot be implemented for many situations using the goto object that EO has. Replacing goto in C with other statements requires additional effort. It is very difficult to implement based on AST analysis alone. For example:
 
 ```C
 if (a) {
-  A;
+  A();
   goto L3;
 }
-B;
+B();
 L1:
 if (b) {
 L2:
-  C;
+  C();
 L3:
-  D;
+  D();
   goto L1;
 }
 else if (c) {
-  E;
+  E();
   goto L2;
 }
-F;
+F();
 ```
 
 ```mermaid
@@ -1077,12 +1079,12 @@ stateDiagram-v2
     state "L1:" as L1
     state "L2:" as L2
     state "L3:" as L3
-    state "A;" as A
-    state "B;" as B
-    state "C;" as C
-    state "D;" as D
-    state "E;" as E
-    state "F;" as F
+    state "A();" as A
+    state "B();" as B
+    state "C();" as C
+    state "D();" as D
+    state "E();" as E
+    state "F();" as F
     [*] --> if_1
     if_1 --> A: True
     A --> L3
@@ -1100,12 +1102,17 @@ stateDiagram-v2
     if_3 --> F: False
     F --> [*]
 ```
+To solve this problem in the future, we can propose to implement `goto-statement` and `goto-label` objects in EO, which directly implement the goto semantics of the C language and are used when transforming from C to EO. The use of these objects in direct EO programming can be disabled. In addition, these constructs can be replaced when performing static analysis of EO programs.
+
 
 ### Calling functions with variable number of arguments
 
-Also in C it is possible to call a function with a variable number of arguments. The main problem for the implementation in EO is the use in C and special libraries (`va_start, va_end and itc.`) for reading arguments in such functions.
+Modern C compilers do not have direct support functions with a variable number of arguments. This is due to the use of new standards for passing arguments through registers. Therefore, an additional library is used for implementation, the interface of which is connected via the `stdarg.h` header file. The library describes such constructs as `va_list\verb`, `va_start`, `va_arg`, `va_end` and others that are added to a C program at link time. Therefore, the implementation of these functions during transformation is impossible. For example:
 
 ```c
+#include <stdarg.h>
+#include <stdio.h>
+
 double average(int num,...) {
   va_list valist;
   double sum = 0.0;
@@ -1123,9 +1130,11 @@ double average(int num,...) {
 
 int main() {
   printf("Average of 1, 2, 3, 4 = %f\n", average(4,  1, 2, 3, 4));
-  printf("Average of 1, 2, 3 = %f\n",    average(3,  1, 2, 3));
+  printf("Average of 1, 2, 3 = %f\n", average(3,  1, 2, 3));
 }
 ```
+
+In the further development of the project, it may be to try  implementing a linker that combines EO library packages with compilation units obtained during the transformation of C programs into a single program. Another possible, but labor-intensive option could be additional parsing of functions that support a variable number of parameters. This option introduces additional features, but leads to deviations from the standard of C compiler.
 
 ### Bitwise fields
 
