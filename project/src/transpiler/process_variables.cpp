@@ -102,6 +102,31 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
   } else if (stmt_class == Stmt::IfStmtClass) {
     auto *if_stmt = dyn_cast<IfStmt>(stmt);
     ProcessIfStmtLocalVariables(all_local, shift, if_stmt, process_only_static);
+  } else if (stmt_class == Stmt::StmtExprClass) {
+    auto *se_stmt = dyn_cast<clang::StmtExpr>(stmt);
+    ProcessFunctionLocalVariables(se_stmt->getSubStmt(), all_local, shift,
+                                  process_only_static);
+  } else if (stmt_class == Stmt::ConditionalOperatorClass) {
+    auto *cond_stmt = dyn_cast<clang::ConditionalOperator>(stmt);
+    ProcessStmtLocalVariables(all_local, shift, cond_stmt->getCond(),
+                              process_only_static);
+    ProcessStmtLocalVariables(all_local, shift, cond_stmt->getTrueExpr(),
+                              process_only_static);
+    ProcessStmtLocalVariables(all_local, shift, cond_stmt->getFalseExpr(),
+                              process_only_static);
+  } else if (stmt_class == Stmt::ParenExprClass) {
+    auto *paren_stmt = dyn_cast<clang::ParenExpr>(stmt);
+    ProcessStmtLocalVariables(all_local, shift, paren_stmt->getSubExpr(),
+                              process_only_static);
+  } else if (stmt_class == Stmt::BinaryOperatorClass) {
+    auto *bin_stmt = dyn_cast<clang::BinaryOperator>(stmt);
+    ProcessStmtLocalVariables(all_local, shift, bin_stmt->getLHS(),
+                              process_only_static);
+    ProcessStmtLocalVariables(all_local, shift, bin_stmt->getRHS(),
+                              process_only_static);
+  } else {
+    stmt->dump();
+    std::cerr << '\n';
   }
 }
 

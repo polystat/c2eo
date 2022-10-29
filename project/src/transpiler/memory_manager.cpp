@@ -124,6 +124,7 @@ const Variable &MemoryManager::GetVarById(const clang::VarDecl *id) const {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
+    id->dump();
     throw std::invalid_argument("exception: element with id " +
                                 int_to_hex(reinterpret_cast<uint64_t>(id)) +
                                 " not found");

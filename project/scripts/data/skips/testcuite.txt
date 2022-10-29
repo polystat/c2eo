@@ -16,7 +16,6 @@
 
 # PLUGs
 00149, 00150:               plug &(struct) TODO #378 #363
-00213:                      TODO if-else plug
 00219:                      _Generic plug #374
 
 # Wrong Answers

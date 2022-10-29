@@ -499,6 +499,10 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<clang::ConditionalOperator>(stmt);
     return GetConditionalStmtEOObject(op);
   }
+  if (stmt_class == Stmt::StmtExprClass) {
+    const auto *op = dyn_cast<clang::StmtExpr>(stmt);
+    return GetStmtEOObject(op->getSubStmt());
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
   return EOObject(EOObjectType::EO_PLUG);
