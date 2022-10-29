@@ -562,8 +562,8 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
-  const TypeSimpl typeInfo =
-      transpiler.type_manger_.Add(list->getType().getTypePtrOrNull());
+  const clang::Type *type_ptr = list->getType().getTypePtrOrNull();
+  const TypeSimpl typeInfo = transpiler.type_manger_.Add(type_ptr);
   const std::vector<EOObject> inits;
   TypeSimpl elementType;
   std::vector<std::tuple<std::string, TypeSimpl, size_t>>::iterator recElement;
@@ -573,6 +573,10 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     elementSize = elementType.GetSizeOfType();
   } else if (typeInfo.typeStyle == ComplexType::RECORD) {
     auto *recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
+    if (recordType == nullptr) {
+      ProcessRecordType(type_ptr->getAsRecordDecl());
+      recordType = transpiler.record_manager_.GetById(typeInfo.recordId);
+    }
     recElement = recordType->fields.begin();
   }
   int i = 0;
