@@ -124,9 +124,6 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                               process_only_static);
     ProcessStmtLocalVariables(all_local, shift, bin_stmt->getRHS(),
                               process_only_static);
-  } else {
-    stmt->dump();
-    std::cerr << '\n';
   }
 }
 
