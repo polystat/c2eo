@@ -15,7 +15,6 @@
 00124:                      Error at "EOc2eo.EOcoperators.EOaddress#Δ" attribute TODO #356
 
 # PLUGs
-00149, 00150:               plug &(struct) TODO #378 #363
 00219:                      _Generic plug TODO #374
 
 # Wrong Answers

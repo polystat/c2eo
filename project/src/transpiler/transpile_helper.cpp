@@ -152,7 +152,7 @@ EOObject GetGotoStmtEOObject(const clang::GotoStmt *p_stmt);
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt);
 EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt);
 bool IsLeftNestedObjectsContainLabel(const EOObject &object, const char *label);
-const Expr *GetPureStmtNode(const Expr *pExpr);
+EOObject GetCompoundLiteralEOObject(const clang::CompoundLiteralExpr *cle);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
@@ -503,9 +503,28 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
     const auto *op = dyn_cast<clang::StmtExpr>(stmt);
     return GetStmtEOObject(op->getSubStmt());
   }
+  if (stmt_class == Stmt::CompoundLiteralExprClass) {
+    const auto *op = dyn_cast<clang::CompoundLiteralExpr>(stmt);
+    return GetCompoundLiteralEOObject(op);
+  }
   llvm::errs() << "Warning: Unknown statement " << stmt->getStmtClassName()
                << "\n";
   return EOObject(EOObjectType::EO_PLUG);
+}
+EOObject GetCompoundLiteralEOObject(const clang::CompoundLiteralExpr *cle) {
+  const TypeSimpl typeInfo =
+      transpiler.type_manger_.Add(cle->getType().getTypePtrOrNull());
+  EOObject init = GetStmtEOObject(cle->getInitializer());
+  EOObject address{"address"};
+  address.nested.emplace_back("global-ram");
+  transpiler.glob_.ShiftMemoryLimitPointer(typeInfo.GetSizeOfType());
+  address.nested.emplace_back(
+      std::to_string(transpiler.glob_.GetMemoryLimitPointer()),
+      EOObjectType::EO_LITERAL);
+  EOObject res{EOObjectType::EO_EMPTY};
+  res.nested.push_back(address);
+  res.nested.push_back(ReplaceEmpty(init, address));
+  return res;
 }
 EOObject GetLabelStmtEOObject(const clang::LabelStmt *p_stmt) {
   if (p_stmt == nullptr) {
@@ -1428,7 +1447,16 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   if (op_code ==
       clang::UnaryOperatorKind::UO_AddrOf) {  // UNARY_OPERATION(AddrOf, "&")
     EOObject variable{"addr-of"};
-    variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
+    EOObject body = GetStmtEOObject(p_operator->getSubExpr());
+    if (body.type == EOObjectType::EO_EMPTY) {
+      variable.nested.push_back(body.nested[0]);
+      EOObject res{EOObjectType::EO_EMPTY};
+      res.nested.push_back(variable);
+      res.nested.insert(res.nested.end(), body.nested.begin() + 1,
+                        body.nested.end());
+      return res;
+    }
+    variable.nested.push_back(body);
     return variable;
   }
   if (op_code ==

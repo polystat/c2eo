@@ -221,6 +221,9 @@ EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_PLUG) {
     // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
+  } else if (value.type == EOObjectType::EO_EMPTY) {
+    res.nested.push_back(_value.nested[0]);
+    constData = _value.nested[1];
   } else {
     res.nested.push_back(_value);
   }
