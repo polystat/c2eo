@@ -990,19 +990,14 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
       call.nested.emplace_back(EOObjectType::EO_PLUG);
       return shift;
     }
-    auto arg_type = arg->getType();
-    size_t type_size = 0;
-    if (arg_type->isPointerType()) {
-      type_size = 8;
-      // TEST
-      // std::cout << "it is Pointer Type\n";
-    } else {
-      type_size = GetTypeSize(arg_type);
-    }
+    TypeSimpl typeInfo = transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
+    size_t type_size = typeInfo.GetSizeOfType();
     EOObject param{"write"};
-    const string postfix = GetPostfix(arg_type);
-    if (!postfix.empty()) {
-      param.name += "-as-" + postfix;
+    if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
+         typeInfo.typeStyle != ComplexType::RECORD &&
+         typeInfo.typeStyle != ComplexType::ARRAY) ||
+        typeInfo.name == "string") {
+      param.name += "-as-" + typeInfo.name;
     }
     EOObject address{"address"};
     address.nested.emplace_back("global-ram");
