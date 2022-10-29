@@ -165,7 +165,9 @@ void MemoryManager::SetExtEqGlob() {
   }
 }
 
-void MemoryManager::ShiftMemoryLimitPointer(int shift) { mem_size_ -= shift; }
+void MemoryManager::ShiftMemoryLimitPointer(size_t shift) {
+  mem_size_ -= static_cast<int>(shift);
+}
 size_t MemoryManager::GetMemoryLimitPointer() const { return mem_size_; }
 
 EOObject Variable::GetInitializer() const {
@@ -178,7 +180,7 @@ EOObject Variable::GetInitializer() const {
   EOObject res("write");
   EOObject constData{"write"};
   EOObject _value = value;
-  TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
+  const TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
   if (typeInfo.name == "ptr" && value.nested.empty()) {
     const TypeSimpl element_type =
         transpiler.type_manger_.GetById(typeInfo.subTypeId);

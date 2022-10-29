@@ -101,7 +101,7 @@ class MemoryManager {
 
   void SetExtEqGlob();
 
-  void ShiftMemoryLimitPointer(int shift);
+  void ShiftMemoryLimitPointer(size_t shift);
 
  private:
   // index of first free byte in memory

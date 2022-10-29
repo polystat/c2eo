@@ -998,7 +998,7 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
 }
 
 EOObject GetEOReturnValue(const CallExpr *op) {
-  TypeSimpl typeInfo =
+  const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(op->getType().getTypePtrOrNull());
   const size_t type_size = typeInfo.GetSizeOfBaseType();  // todo check?
   // TEST
@@ -1054,8 +1054,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
         pointee_type->isFunctionProtoType()) {
       const size_t shift = GetEOParamsList(op, call);
       EOObject call_ptr{"call", EOObjectType::EO_LITERAL};
-      EOObject func_ptr_value = GetStmtEOObject(callee);
-      call_ptr.nested.push_back(func_ptr_value);
+      call_ptr.nested.push_back(GetStmtEOObject(callee));
       call_ptr.nested.emplace_back("empty-local-position");
       call_ptr.nested.emplace_back(to_string(shift), EOObjectType::EO_LITERAL);
       call.nested.push_back(call_ptr);
@@ -1368,7 +1367,7 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   if (op_code ==
       clang::UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc,
                                                // "++")
-    TypeSimpl typeInfo =
+    const TypeSimpl typeInfo =
         transpiler.type_manger_.Add(p_operator->getType().getTypePtrOrNull());
     EOObject variable{"post-inc-" + typeInfo.name};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
@@ -1501,7 +1500,7 @@ EOObject GetUnaryExprOrTypeTraitExprEOObject(
   }
   // Argument is Expr
   const auto *p_size_expr = p_expr->getArgumentExpr();
-  TypeSimpl typeInfo =
+  const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(p_size_expr->getType().getTypePtrOrNull());
   const std::string str_val{std::to_string(typeInfo.GetSizeOfType())};
   return EOObject{str_val, EOObjectType::EO_LITERAL};
@@ -1653,7 +1652,7 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
   const auto *ret_value = p_stmt->getRetValue();
   if (ret_value != nullptr) {
     EOObject ret{"write"};
-    TypeSimpl typeInfo =
+    const TypeSimpl typeInfo =
         transpiler.type_manger_.Add(ret_value->getType().getTypePtrOrNull());
     if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
          typeInfo.typeStyle != ComplexType::RECORD &&

@@ -16,10 +16,10 @@
 
 # PLUGs
 00149, 00150:               plug &(struct) TODO #378 #363
-00219:                      _Generic plug #374
+00219:                      _Generic plug TODO #374
 
 # Wrong Answers
-00051:                      goto
+00051:                      goto without notification
 00104:                      uint64
 00143:                      unsupported Tom Duff's switch
 00197:                      static TODO #379
