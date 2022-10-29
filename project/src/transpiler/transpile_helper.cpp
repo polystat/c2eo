@@ -600,10 +600,10 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
           {
             EOObject address{"address"};
             address.nested.emplace_back("global-ram");
+            transpiler.glob_.ShiftMemoryLimitPointer(type_size);
             address.nested.emplace_back(
-                to_string(transpiler.glob_.GetFreeSpacePointer()),
+                to_string(transpiler.glob_.GetMemoryLimitPointer()),
                 EOObjectType::EO_LITERAL);
-            transpiler.glob_.ShiftFreeSpacePointer(type_size);
             constData.nested.push_back(address);
             constData.nested.push_back(value);
             value = EOObject{"addr-of"};
@@ -1534,10 +1534,10 @@ EOObject GetAssignmentOperatorEOObject(const BinaryOperator *p_operator) {
         {
           EOObject address{"address"};
           address.nested.emplace_back("global-ram");
+          transpiler.glob_.ShiftMemoryLimitPointer(type_size);
           address.nested.emplace_back(
-              to_string(transpiler.glob_.GetFreeSpacePointer()),
+              to_string(transpiler.glob_.GetMemoryLimitPointer()),
               EOObjectType::EO_LITERAL);
-          transpiler.glob_.ShiftFreeSpacePointer(type_size);
           constData.nested.push_back(address);
           constData.nested.push_back(eoRight);
           eoRight = EOObject{"addr-of"};

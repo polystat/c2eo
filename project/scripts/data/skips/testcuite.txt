@@ -19,7 +19,6 @@
 00219:                      _Generic plug #374
 
 # Wrong Answers
-00026, 00058, 00138:        char ptr on const string TODO #380 #369 #373
 00051:                      goto
 00104:                      uint64
 00143:                      unsupported Tom Duff's switch

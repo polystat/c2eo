@@ -165,7 +165,8 @@ void MemoryManager::SetExtEqGlob() {
   }
 }
 
-void MemoryManager::ShiftFreeSpacePointer(uint64_t shift) { pointer_ += shift; }
+void MemoryManager::ShiftMemoryLimitPointer(int shift) { mem_size_ -= shift; }
+size_t MemoryManager::GetMemoryLimitPointer() const { return mem_size_; }
 
 EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
@@ -197,10 +198,10 @@ EOObject Variable::GetInitializer() const {
       {
         EOObject address{"address"};
         address.nested.emplace_back("global-ram");
+        transpiler.glob_.ShiftMemoryLimitPointer(type_size);
         address.nested.emplace_back(
-            std::to_string(transpiler.glob_.GetFreeSpacePointer()),
+            std::to_string(transpiler.glob_.GetMemoryLimitPointer()),
             EOObjectType::EO_LITERAL);
-        transpiler.glob_.ShiftFreeSpacePointer(type_size);
         constData.nested.push_back(address);
         constData.nested.push_back(value);
         _value = EOObject{"addr-of"};

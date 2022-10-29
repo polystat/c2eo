@@ -85,6 +85,7 @@ class MemoryManager {
   bool Empty();
 
   [[nodiscard]] size_t GetFreeSpacePointer() const;
+  [[nodiscard]] size_t GetMemoryLimitPointer() const;
 
   const Variable &GetVarById(const clang::VarDecl *id) const;
 
@@ -100,7 +101,7 @@ class MemoryManager {
 
   void SetExtEqGlob();
 
-  void ShiftFreeSpacePointer(uint64_t shift);
+  void ShiftMemoryLimitPointer(int shift);
 
  private:
   // index of first free byte in memory
