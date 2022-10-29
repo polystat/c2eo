@@ -1386,8 +1386,9 @@ EOObject GetUnaryStmtEOObject(const UnaryOperator *p_operator) {
   if (op_code ==
       clang::UnaryOperatorKind::UO_PostInc) {  // UNARY_OPERATION(PostInc,
                                                // "++")
-    const std::string postfix = GetTypeName(p_operator->getType());
-    EOObject variable{"post-inc-" + postfix};
+    TypeSimpl typeInfo =
+        transpiler.type_manger_.Add(p_operator->getType().getTypePtrOrNull());
+    EOObject variable{"post-inc-" + typeInfo.name};
     variable.nested.push_back(GetStmtEOObject(p_operator->getSubExpr()));
     const QualType result_type = p_operator->getType();
     if (result_type->isPointerType()) {

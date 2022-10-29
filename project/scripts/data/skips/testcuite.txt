@@ -8,9 +8,8 @@
 00186: f-sprintf is declaration only
 00187: f-fopen, f-fwrite, f-fclose, f-fread, f-fgetc is declaration only
 
-00182: post-inc-string is declaration only
 00173, 00175, 00187: as-char.a
-00214: null
+00182, 00214: null
 00089, 00189, 00210: addr-of.a
 
 00087, 00124, 00149, 00150, 00213, 00219: it is plug
