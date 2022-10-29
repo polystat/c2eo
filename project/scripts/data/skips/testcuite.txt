@@ -1,23 +1,17 @@
-00204: TODO segfault at address 0x0 while tool run
-00087, 00089, 00124, 00189, 00210, 00216: TODO segfault at address 0x10 while tool run
-00150: TODO /home/maksim/llvm-clang/llvm/include/llvm/Support/Casting.h:104: static bool llvm::isa_impl_cl<To, const From*>::doit(const From*) [with To = clang::TranslationUnitDecl; From = clang::Decl]: Assertion `Val && "isa<> used on a null pointer"' failed. exception: SIGABRT with code -6 while tool run
-00220: TODO /home/maksim/Projects/c2eo/project/src/transpiler/../../../llvm-clang/clang/include/clang/AST/Expr.h:1840: llvm::StringRef clang::StringLiteral::getString() const: Assertion `getCharByteWidth() == 1 && "This function is used in places that assume strings use char"' failed. exception: SIGABRT with code -6 while tool run
-00173: TODO printf with char pointer
-00175: TODO printf char
-00058: TODO pointer on char
-00217: TODO pointer on function
-00138, 00219: TODO define function
-00149: TODO pointers on structures
-00197: TODO static variables
-00010, 00051, 00129, 00199, 00207, 00213: goto
-00174: using math.h
-00186: using sprintf
-00187: using stdio.h for work with files
-00041: too slow eo code
-00040, 00104, 00182: uint64 is unsupported
-00205: java code too large
-00025, 00180, 00179: using str functions
-00214: using __builtin_expect
-00143: unsupported Tom Duff's switch
+00174, 00204, 00205, 00216: code too large
+00040, 00041: execution time EO file exceeded 60 seconds
 
-00026: idk
+00010, 00199, 00207, 00129, 00213: goto is not supported
+00010, 00199, 00207: label is not supported
+00025, 00179: f-strcpy, f-strncpy, f-strcmp, f-strlen, f-strcat, f-strncmp, f-strchr is declaration only
+00180: f-strcpy is declaration only
+00186: f-sprintf is declaration only
+00187: f-fopen, f-fwrite, f-fclose, f-fread, f-fgetc is declaration only
+
+00182: post-inc-string is declaration only
+00173, 00175, 00187: as-char.a
+00214: null
+00089, 00189, 00210: addr-of.a
+
+00087, 00124, 00149, 00150, 00213, 00219: it is plug
+00026, 00051, 00058, 00104, 00138, 00143, 00197, 00217, 00220: wrong answer
