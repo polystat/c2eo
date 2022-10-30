@@ -484,6 +484,7 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
       // TODO(nchuykin) remove lines below after fixing printf EOObject
       value = std::regex_replace(value, std::regex("%[lh]{1,2}"), "%");
       value = std::regex_replace(value, std::regex("%u"), "%d");
+      //      value = std::regex_replace(value, std::regex("%c"), "%s");
 
       return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
     }
@@ -1138,7 +1139,8 @@ EOObject GetPrintfCallEOObject(const CallExpr *op) {
       }
       printf.nested.push_back(param);
     } else if (idx > 0 && idx <= formats.size() && !formats[idx - 1].empty()) {
-      if (param.type != EOObjectType::EO_LITERAL) {
+      if (formats[idx - 1] == "read-as-string" &&
+          param.type != EOObjectType::EO_LITERAL) {
         EOObject cast{formats[idx - 1]};
         EOObject addr{"address"};
         const EOObject ram{"global-ram"};
