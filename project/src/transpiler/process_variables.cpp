@@ -68,6 +68,9 @@ void ProcessDoStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                  DoStmt *do_stmt, bool process_only_static);
 void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                Stmt *stmt, bool process_only_static) {
+  if (stmt == nullptr) {
+    return;
+  }
   const Stmt::StmtClass stmt_class = stmt->getStmtClass();
   if (stmt_class == Stmt::DeclStmtClass) {
     auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
@@ -132,6 +135,41 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
       ProcessStmtLocalVariables(all_local, shift, bin_stmt->getRHS(),
                                 process_only_static);
     }
+  } else if (stmt_class == Stmt::LabelStmtClass) {
+    auto *label_stmt = dyn_cast<clang::LabelStmt>(stmt);
+    if (label_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, label_stmt->getSubStmt(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::ReturnStmtClass) {
+    auto *ret_stmt = dyn_cast<clang::ReturnStmt>(stmt);
+    if (ret_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, ret_stmt->getRetValue(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::CompoundAssignOperatorClass) {
+    auto *cao_stmt = dyn_cast<clang::CompoundAssignOperator>(stmt);
+    if (cao_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, cao_stmt->getLHS(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, cao_stmt->getRHS(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::ImplicitCastExprClass) {
+    auto *imp_stmt = dyn_cast<clang::ImplicitCastExpr>(stmt);
+    if (imp_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, imp_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::UnaryOperatorClass) {
+    auto *un_stmt = dyn_cast<clang::UnaryOperator>(stmt);
+    if (un_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, un_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else {
+    stmt->dump();
+    std::cerr << stmt->getStmtClassName() << "\n\n";
   }
 }
 
