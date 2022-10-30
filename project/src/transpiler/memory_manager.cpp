@@ -166,9 +166,9 @@ void MemoryManager::SetExtEqGlob() {
 }
 
 void MemoryManager::ShiftMemoryLimitPointer(size_t shift) {
-  mem_size_ -= static_cast<int>(shift);
+  mem_limit_ -= static_cast<int>(shift);
 }
-size_t MemoryManager::GetMemoryLimitPointer() const { return mem_size_; }
+size_t MemoryManager::GetMemoryLimitPointer() const { return mem_limit_; }
 
 EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {

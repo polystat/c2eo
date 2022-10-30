@@ -199,9 +199,6 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
       ProcessStmtLocalVariables(all_local, shift, member_stmt->getBase(),
                                 process_only_static);
     }
-    //  } else {
-    //    stmt->dump();
-    //    std::cerr << stmt->getStmtClassName() << "\n\n";
   }
 }
 

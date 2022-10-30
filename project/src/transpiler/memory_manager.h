@@ -106,7 +106,8 @@ class MemoryManager {
  private:
   // index of first free byte in memory
   size_t pointer_ = eight_bytes;
-  int mem_size_ = eight_kilobytes;
+  const int mem_size_ = eight_kilobytes;
+  int mem_limit_ = mem_size_;
   std::vector<Variable> variables_;
   std::map<std::string, int> duplicates;
 };
