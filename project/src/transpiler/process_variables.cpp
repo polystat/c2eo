@@ -176,8 +176,9 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
   } else if (stmt_class == Stmt::CallExprClass) {
     auto *call_stmt = dyn_cast<clang::CallExpr>(stmt);
     if (call_stmt != nullptr) {
-      ProcessStmtLocalVariables(all_local, shift, call_stmt->getCallee(),
-                                process_only_static);
+      for (auto *call : call_stmt->getRawSubExprs()) {
+        ProcessStmtLocalVariables(all_local, shift, call, process_only_static);
+      }
     }
   } else if (stmt_class == Stmt::CompoundLiteralExprClass) {
     auto *cle_stmt = dyn_cast<clang::CompoundLiteralExpr>(stmt);
@@ -188,7 +189,7 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
   } else if (stmt_class == Stmt::InitListExprClass) {
     auto *list_stmt = dyn_cast<clang::InitListExpr>(stmt);
     if (list_stmt != nullptr) {
-      for (auto init : list_stmt->inits()) {
+      for (auto *init : list_stmt->inits()) {
         ProcessStmtLocalVariables(all_local, shift, init, process_only_static);
       }
     }
@@ -198,9 +199,9 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
       ProcessStmtLocalVariables(all_local, shift, member_stmt->getBase(),
                                 process_only_static);
     }
-  } else {
-    stmt->dump();
-    std::cerr << stmt->getStmtClassName() << "\n\n";
+    //  } else {
+    //    stmt->dump();
+    //    std::cerr << stmt->getStmtClassName() << "\n\n";
   }
 }
 
@@ -261,6 +262,10 @@ void ProcessIfStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                  IfStmt *if_stmt, bool process_only_static) {
   if (if_stmt == nullptr) {
     return;
+  }
+  if (if_stmt->getThen() != nullptr) {
+    ProcessStmtLocalVariables(all_local, shift, if_stmt->getCond(),
+                              process_only_static);
   }
   if (if_stmt->getThen() != nullptr) {
     ProcessStmtLocalVariables(all_local, shift, if_stmt->getThen(),
