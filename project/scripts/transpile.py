@@ -45,13 +45,14 @@ import clean_before_transpilation
 class Transpiler(object):
 
     def __init__(self, path_to_c_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
-                 need_to_generate_codecov: bool = False):
+                 need_to_generate_codecov: bool = False, ignore_errors: bool = False):
         self.filters = None
         if path_to_c_files.is_file():
             self.filters = {path_to_c_files.name}
             path_to_c_files = path_to_c_files.parent
         self.skips = settings.get_skips(skips_file_name) if skips_file_name else {}
         self.need_to_generate_codecov = need_to_generate_codecov
+        self.ignore_errors = ignore_errors
         self.codecov_arg = ''
         if self.need_to_generate_codecov:
             self.codecov_arg = f'LLVM_PROFILE_FILE="{path_to_c_files.stem}_%p.profraw"'
@@ -97,7 +98,7 @@ class Transpiler(object):
         tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
         is_failed = sum(map(len, result[tools.EXCEPTION].values())) > 0
         tools.pprint_result('TRANSPILE', tests_count, int(time.time() - start_time), result, is_failed)
-        if is_failed:
+        if is_failed and not self.ignore_errors:
             exit('transpilation failed')
         self.prepare_eo_project()
         self.remove_unused_eo_src_files()
@@ -331,8 +332,13 @@ def prepare_c_code(data: list[str]) -> None:
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for translating C files to the EO files',
-                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    _parser = argparse.ArgumentParser(
+        description='This script is used to translate C files into EO files. It starts from building C2EO transpilator.'
+                    'Then the script recursively searches files with the C extension in the specified directory.'
+                    'After that, a C2EO transpiler is applied for each found file. Then the resulting EO files are moved'
+                    'to the special result folder. All additional files created during transpilation are moved to the'
+                    'c2eo-result folder next to the C files',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('path_to_c_files', metavar='PATH',
                          help='the relative path from the scripts folder to the folder with c files')
@@ -353,5 +359,5 @@ if __name__ == '__main__':
     tools.move_to_script_dir(Path(sys.argv[0]))
     parser = create_parser()
     namespace = parser.parse_args()
-    Transpiler(Path(namespace.path_to_c_files).resolve(), namespace.skips_file_name,
-               not namespace.not_prepare_c_code, namespace.codecov).transpile()
+    Transpiler(Path(namespace.path_to_c_files).resolve(), namespace.skips_file_name, not namespace.not_prepare_c_code,
+               namespace.codecov).transpile()

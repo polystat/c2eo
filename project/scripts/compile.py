@@ -40,9 +40,10 @@ from transpile import Transpiler
 class Compiler(object):
 
     def __init__(self, path_to_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
-                 need_to_generate_codecov: bool = False):
+                 need_to_generate_codecov: bool = False, ignore_errors: bool = False):
         self.need_to_generate_codecov = need_to_generate_codecov
         self.need_to_prepare_c_code = need_to_prepare_c_code
+        self.ignore_errors = ignore_errors
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
@@ -52,7 +53,8 @@ class Compiler(object):
         start_time = time.time()
         self.transpilation_units, skip_result = Transpiler(self.path_to_tests, self.skips_file_name,
                                                            self.need_to_prepare_c_code,
-                                                           self.need_to_generate_codecov).transpile()
+                                                           self.need_to_generate_codecov,
+                                                           self.ignore_errors).transpile()
         if self.transpilation_units:
             builder = EOBuilder(self.transpilation_units)
             if not builder.can_recompile:
@@ -66,8 +68,11 @@ class Compiler(object):
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for compiling translated files from C to EO',
-                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    _parser = argparse.ArgumentParser(
+        description='This script transpilates C files into EO files and compiles them. It reuses transpile script and'
+                    'starts to work after ending its work. It checks conditions for recompilation of the project and'
+                    'then recompile or compile it.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_files', metavar='PATH',
                          help='the relative path from the scripts folder to the c files folder')
