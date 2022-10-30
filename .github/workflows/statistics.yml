@@ -29,10 +29,16 @@ on:
           make
 
       - name: Generating tests
-        run: cd ./project/scripts && python3 csmith.py ../tests/main/csmith -c 200
+        run:  |
+          cd ./project/scripts
+          python3 csmith.py -h
+          python3 csmith.py ../tests/main/csmith -c 200
 
       - name: Transpilation
-        run: cd ./project/scripts && python3 test.py -p ../tests/main/csmith -n -i
+        run: |
+          cd ./project/scripts
+          python3 test.py -h
+          python3 test.py -p ../tests/main/csmith -n -i
 
       - name: Clean test directory
         run: cd ./project/scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
@@ -72,4 +78,7 @@ on:
         run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null
 
       - name: Compilation
-        run: cd ./project/scripts && python3 compile.py -p ../../gcc.c-torture -n -i
+        run: |
+          cd ./project/scripts
+          python3 compile.py -h
+          python3 compile.py -p ../../gcc.c-torture -n -i

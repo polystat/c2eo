@@ -61,7 +61,10 @@ jobs:
         run: sudo apt install clang-tidy
       
       - name: Clang-tidy
-        run: cd ./project/scripts && python3 clang_tidy.py
+        run: |
+          cd ./project/scripts
+          python3 clang_tidy.py -h
+          python3 clang_tidy.py
 
   gcc-c-torture:
     needs: [cpplint, clang-format]
@@ -91,7 +94,10 @@ jobs:
         run: tar -xvf gcc.c-torture.tar.gz -C . > /dev/null
 
       - name: Transpilation
-        run: cd ./project/scripts && python3 transpile.py ../../gcc.c-torture -s gcc -n
+        run: |
+          cd ./project/scripts
+          python3 transpile.py -h
+          python3 transpile.py ../../gcc.c-torture -s gcc -n
 
   c-testcuite:
     needs: [cpplint, clang-format]
@@ -121,7 +127,10 @@ jobs:
         run: tar -xvf c-testcuite.tar.gz -C . > /dev/null
 
       - name: Testing
-        run: cd ./project/scripts && python3 test.py -p ../../c-testcuite -s testcuite -n -c
+        run: |
+          cd ./project/scripts
+          python3 test.py -h
+          python3 test.py -p ../../c-testcuite -s testcuite -n -c
 
       - name: Convert raw code coverage to report
         run: |
@@ -152,7 +161,10 @@ jobs:
         run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Testing
-        run: cd ./project/scripts && python3 test.py -s test -c
+        run: |
+          cd ./project/scripts
+          python3 test.py -h
+          python3 test.py -s test -c
 
       - name: Convert raw code coverage to report
         run: |
