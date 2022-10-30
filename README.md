@@ -329,6 +329,7 @@ C is a _system-level procedural_ programming language with direct access to the 
 - [pointers](#pointers)
 - [external links](#external-links)
 - [if-else](#if-else)
+- [ternary operator](#ternary-operator)
 - [while](#while)
 - [do-while](#do-while)
 - [for](#for)
@@ -648,7 +649,9 @@ strncpy str2 st1 8
 
 ### If-else
 
-In EO, we have an analog of an [if-else](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if.eo) object, so we just convert without any significant changes.
+In EO, we have analogues of [if-else](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if-else.eo)
+and [if](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if.eo) 
+objects, so we just convert without any significant changes.
 
 ```c
 if (condition) {
@@ -657,10 +660,16 @@ if (condition) {
 else {
   ...
 }
+
+// -----------------
+
+if (condition) {
+  ...
+}
 ```
 
 ```java
-if
+if-else
   condition
   seq
     ...
@@ -668,6 +677,31 @@ if
   seq // else
     ...
     TRUE
+
+// -----------------
+
+if
+  condition
+  seq
+    ...
+    TRUE
+```
+
+### Ternary operator
+
+We can turn the ternary operator into the same [if-else](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if-else.eo), only seq must be without True at the end, because its return value will be used.
+
+```c
+condition ? a : b
+```
+
+```java
+if-else
+  condition
+  seq
+    a
+  seq // else
+    b
 ```
 
 ### While
