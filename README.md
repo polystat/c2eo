@@ -1139,7 +1139,7 @@ In the further development of the project, it may be to try  implementing a link
 ### Bitwise fields
 
 In the C language, bitwise fields can be formed as structures. They provide access to
-individual bits of signed and unsigned numbers. EO does not support bits, so their direct implementation is impossible.
+individual bits of signed and unsigned numbers. Since at the moment EO does not support work at the bit level, the implementation of work with bit fields requires a lot of time and manipulations with logical operations at the byte level.  This task was not a priority during the current development.
 
 ```c
  // memory-optimized date storage structure
