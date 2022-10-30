@@ -167,6 +167,37 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
       ProcessStmtLocalVariables(all_local, shift, un_stmt->getSubExpr(),
                                 process_only_static);
     }
+  } else if (stmt_class == Stmt::CStyleCastExprClass) {
+    auto *csc_stmt = dyn_cast<clang::CStyleCastExpr>(stmt);
+    if (csc_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, csc_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::CallExprClass) {
+    auto *call_stmt = dyn_cast<clang::CallExpr>(stmt);
+    if (call_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, call_stmt->getCallee(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::CompoundLiteralExprClass) {
+    auto *cle_stmt = dyn_cast<clang::CompoundLiteralExpr>(stmt);
+    if (cle_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, cle_stmt->getInitializer(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::InitListExprClass) {
+    auto *list_stmt = dyn_cast<clang::InitListExpr>(stmt);
+    if (list_stmt != nullptr) {
+      for (auto init : list_stmt->inits()) {
+        ProcessStmtLocalVariables(all_local, shift, init, process_only_static);
+      }
+    }
+  } else if (stmt_class == Stmt::MemberExprClass) {
+    auto *member_stmt = dyn_cast<clang::MemberExpr>(stmt);
+    if (member_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, member_stmt->getBase(),
+                                process_only_static);
+    }
   } else {
     stmt->dump();
     std::cerr << stmt->getStmtClassName() << "\n\n";
