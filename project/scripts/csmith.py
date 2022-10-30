@@ -75,7 +75,8 @@ def create_parser() -> argparse.ArgumentParser:
     _parser = argparse.ArgumentParser(
         description='This script uses the project https://github.com/csmith-project/csmith to generate random c files,'
                     'which are then used as tests. The script creates the folder you specified and generates the'
-                    'specified number of files. In addition, copies the necessary header files to the destination folder.',
+                    'specified number of files. In addition, copies the necessary header files to the destination folder. '
+                    'All arguments for csmith are set in the data/settings.yml file in csmith_args field.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('path_to_generate', metavar='PATH',
