@@ -4,6 +4,7 @@ on:
   schedule:
     - cron:  '0 6 * * 1'
 
+jobs:
   csmith:
     runs-on: ubuntu-22.04
     steps:
