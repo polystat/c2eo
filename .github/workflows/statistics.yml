@@ -1,8 +1,7 @@
 name: Statistics
 
 on:
-  schedule:
-    - cron:  '0 6 * * 1'
+  push
 
 jobs:
   csmith:
