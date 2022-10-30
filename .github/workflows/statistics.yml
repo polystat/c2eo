@@ -2,7 +2,7 @@ name: Statistics
 
 on:
   schedule:
-    - cron:  '0 6 * * 1'
+    - cron:  '0 2 * * 1'
 
 jobs:
   csmith:
@@ -33,9 +33,9 @@ jobs:
         run:  |
           cd ./project/scripts
           python3 csmith.py -h
-          python3 csmith.py ../tests/main/csmith -c 200
+          python3 csmith.py ../tests/main/csmith -c 50
 
-      - name: Transpilation
+      - name: Testing
         run: |
           cd ./project/scripts
           python3 test.py -h
@@ -82,4 +82,4 @@ jobs:
         run: |
           cd ./project/scripts
           python3 compile.py -h
-          python3 compile.py -p ../../gcc.c-torture -n -i
+          python3 compile.py -p ../../gcc.c-torture -s gcc -n -i
