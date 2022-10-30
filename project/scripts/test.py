@@ -42,10 +42,10 @@ from compile import Compiler
 class Tests(object):
 
     def __init__(self, path_to_tests: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
-                 need_to_generate_codecov: bool = False, ignore_errors: bool = False):
+                 need_to_generate_codecov: bool = False, ignore_exceptions: bool = False):
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.need_to_generate_codecov = need_to_generate_codecov
-        self.ignore_errors = ignore_errors
+        self.ignore_exceptions = ignore_exceptions
         self.skips_file_name = skips_file_name
         self.path_to_tests = path_to_tests
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
@@ -62,7 +62,7 @@ class Tests(object):
         self.transpilation_units, skip_result = Compiler(self.path_to_tests, self.skips_file_name,
                                                          self.need_to_prepare_c_code,
                                                          self.need_to_generate_codecov,
-                                                         self.ignore_errors).compile()
+                                                         self.ignore_exceptions).compile()
         if self.transpilation_units:
             self.get_result_for_tests()
             with tools.thread_pool() as threads:
