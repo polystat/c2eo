@@ -41,6 +41,7 @@ class Csmith(object):
     def __init__(self, path_to_generate: Path, files_count: int):
         self.csmith_args = ' '.join([f'--{arg}' for arg in settings.get_setting('csmith_args')])
         self.path_to_csmith = (settings.get_setting('path_to_csmith') / 'csmith').resolve()
+        self.generating_cmd = f'{self.path_to_csmith} {self.csmith_args}'
         self.path_to_csmith_runtime = settings.get_setting('path_to_csmith_runtime')
         self.path_to_generate = path_to_generate
         self.files_count = files_count
@@ -56,13 +57,13 @@ class Csmith(object):
         for file in tools.search_files_by_patterns(self.path_to_csmith_runtime, {'*.h'}, print_files=True):
             shutil.copy(file, self.path_to_generate)
         chdir(self.path_to_generate)
-        tools.pprint('\n', 'Running generating files:', '\n', slowly=True)
+        tools.pprint('\n', 'Running generating files with following arguments:', self.csmith_args, '\n', slowly=True)
         tools.print_progress_bar(0, self.files_count)
         with tools.thread_pool() as threads:
             list(threads.imap_unordered(self.generate_file, range(self.files_count)))
 
     def generate_file(self, number: int) -> (str, list[str]):
-        result = subprocess.run(f'{self.path_to_csmith} {self.csmith_args}', shell=True, text=True, capture_output=True)
+        result = subprocess.run(self.generating_cmd, shell=True, text=True, capture_output=True)
         file_name = Path(f'{number + 1:0{len(str(self.files_count))}}.c')
         file_name.write_text(result.stdout)
         self.generated_files_count += 1
@@ -71,8 +72,11 @@ class Csmith(object):
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for generating csmith testsuite for c2eo transpiler',
-                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    _parser = argparse.ArgumentParser(
+        description='This script uses the project https://github.com/csmith-project/csmith to generate random c files,'
+                    'which are then used as tests. The script creates the folder you specified and generates the'
+                    'specified number of files. In addition, copies the necessary header files to the destination folder.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('path_to_generate', metavar='PATH',
                          help='the relative path from the scripts folder to the generating folder')
