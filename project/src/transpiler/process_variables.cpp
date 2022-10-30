@@ -68,6 +68,9 @@ void ProcessDoStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                  DoStmt *do_stmt, bool process_only_static);
 void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                Stmt *stmt, bool process_only_static) {
+  if (stmt == nullptr) {
+    return;
+  }
   const Stmt::StmtClass stmt_class = stmt->getStmtClass();
   if (stmt_class == Stmt::DeclStmtClass) {
     auto *decl_stmt = dyn_cast<DeclStmt>(stmt);
@@ -102,6 +105,100 @@ void ProcessStmtLocalVariables(vector<Variable> &all_local, size_t shift,
   } else if (stmt_class == Stmt::IfStmtClass) {
     auto *if_stmt = dyn_cast<IfStmt>(stmt);
     ProcessIfStmtLocalVariables(all_local, shift, if_stmt, process_only_static);
+  } else if (stmt_class == Stmt::StmtExprClass) {
+    auto *se_stmt = dyn_cast<clang::StmtExpr>(stmt);
+    if (se_stmt != nullptr) {
+      ProcessFunctionLocalVariables(se_stmt->getSubStmt(), all_local, shift,
+                                    process_only_static);
+    }
+  } else if (stmt_class == Stmt::ConditionalOperatorClass) {
+    auto *cond_stmt = dyn_cast<clang::ConditionalOperator>(stmt);
+    if (cond_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, cond_stmt->getCond(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, cond_stmt->getTrueExpr(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, cond_stmt->getFalseExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::ParenExprClass) {
+    auto *paren_stmt = dyn_cast<clang::ParenExpr>(stmt);
+    if (paren_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, paren_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::BinaryOperatorClass) {
+    auto *bin_stmt = dyn_cast<clang::BinaryOperator>(stmt);
+    if (bin_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, bin_stmt->getLHS(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, bin_stmt->getRHS(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::LabelStmtClass) {
+    auto *label_stmt = dyn_cast<clang::LabelStmt>(stmt);
+    if (label_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, label_stmt->getSubStmt(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::ReturnStmtClass) {
+    auto *ret_stmt = dyn_cast<clang::ReturnStmt>(stmt);
+    if (ret_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, ret_stmt->getRetValue(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::CompoundAssignOperatorClass) {
+    auto *cao_stmt = dyn_cast<clang::CompoundAssignOperator>(stmt);
+    if (cao_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, cao_stmt->getLHS(),
+                                process_only_static);
+      ProcessStmtLocalVariables(all_local, shift, cao_stmt->getRHS(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::ImplicitCastExprClass) {
+    auto *imp_stmt = dyn_cast<clang::ImplicitCastExpr>(stmt);
+    if (imp_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, imp_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::UnaryOperatorClass) {
+    auto *un_stmt = dyn_cast<clang::UnaryOperator>(stmt);
+    if (un_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, un_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::CStyleCastExprClass) {
+    auto *csc_stmt = dyn_cast<clang::CStyleCastExpr>(stmt);
+    if (csc_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, csc_stmt->getSubExpr(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::CallExprClass) {
+    auto *call_stmt = dyn_cast<clang::CallExpr>(stmt);
+    if (call_stmt != nullptr) {
+      for (auto *call : call_stmt->getRawSubExprs()) {
+        ProcessStmtLocalVariables(all_local, shift, call, process_only_static);
+      }
+    }
+  } else if (stmt_class == Stmt::CompoundLiteralExprClass) {
+    auto *cle_stmt = dyn_cast<clang::CompoundLiteralExpr>(stmt);
+    if (cle_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, cle_stmt->getInitializer(),
+                                process_only_static);
+    }
+  } else if (stmt_class == Stmt::InitListExprClass) {
+    auto *list_stmt = dyn_cast<clang::InitListExpr>(stmt);
+    if (list_stmt != nullptr) {
+      for (auto *init : list_stmt->inits()) {
+        ProcessStmtLocalVariables(all_local, shift, init, process_only_static);
+      }
+    }
+  } else if (stmt_class == Stmt::MemberExprClass) {
+    auto *member_stmt = dyn_cast<clang::MemberExpr>(stmt);
+    if (member_stmt != nullptr) {
+      ProcessStmtLocalVariables(all_local, shift, member_stmt->getBase(),
+                                process_only_static);
+    }
   }
 }
 
@@ -162,6 +259,10 @@ void ProcessIfStmtLocalVariables(vector<Variable> &all_local, size_t shift,
                                  IfStmt *if_stmt, bool process_only_static) {
   if (if_stmt == nullptr) {
     return;
+  }
+  if (if_stmt->getThen() != nullptr) {
+    ProcessStmtLocalVariables(all_local, shift, if_stmt->getCond(),
+                              process_only_static);
   }
   if (if_stmt->getThen() != nullptr) {
     ProcessStmtLocalVariables(all_local, shift, if_stmt->getThen(),

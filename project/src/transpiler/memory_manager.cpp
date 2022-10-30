@@ -124,6 +124,7 @@ const Variable &MemoryManager::GetVarById(const clang::VarDecl *id) const {
   auto res = find_if(variables_.begin(), variables_.end(),
                      [id](const Variable &x) { return x.id == id; });
   if (res == variables_.end()) {
+    id->dump();
     throw std::invalid_argument("exception: element with id " +
                                 int_to_hex(reinterpret_cast<uint64_t>(id)) +
                                 " not found");
@@ -164,7 +165,10 @@ void MemoryManager::SetExtEqGlob() {
   }
 }
 
-void MemoryManager::ShiftFreeSpacePointer(uint64_t shift) { pointer_ += shift; }
+void MemoryManager::ShiftMemoryLimitPointer(size_t shift) {
+  mem_limit_ -= static_cast<int>(shift);
+}
+size_t MemoryManager::GetMemoryLimitPointer() const { return mem_limit_; }
 
 EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_EMPTY && value.name == "*") {
@@ -176,7 +180,7 @@ EOObject Variable::GetInitializer() const {
   EOObject res("write");
   EOObject constData{"write"};
   EOObject _value = value;
-  TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
+  const TypeSimpl typeInfo = transpiler.type_manger_.GetById(typeInfoID);
   if (typeInfo.name == "ptr" && value.nested.empty()) {
     const TypeSimpl element_type =
         transpiler.type_manger_.GetById(typeInfo.subTypeId);
@@ -196,10 +200,10 @@ EOObject Variable::GetInitializer() const {
       {
         EOObject address{"address"};
         address.nested.emplace_back("global-ram");
+        transpiler.glob_.ShiftMemoryLimitPointer(type_size);
         address.nested.emplace_back(
-            std::to_string(transpiler.glob_.GetFreeSpacePointer()),
+            std::to_string(transpiler.glob_.GetMemoryLimitPointer()),
             EOObjectType::EO_LITERAL);
-        transpiler.glob_.ShiftFreeSpacePointer(type_size);
         constData.nested.push_back(address);
         constData.nested.push_back(value);
         _value = EOObject{"addr-of"};
@@ -217,6 +221,9 @@ EOObject Variable::GetInitializer() const {
   if (value.type == EOObjectType::EO_PLUG) {
     // Probably just emplace value.
     res.nested.emplace_back(EOObjectType::EO_PLUG);
+  } else if (value.type == EOObjectType::EO_EMPTY) {
+    res.nested.push_back(_value.nested[0]);
+    constData = _value.nested[1];
   } else {
     res.nested.push_back(_value);
   }

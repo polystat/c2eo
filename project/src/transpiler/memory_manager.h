@@ -85,6 +85,7 @@ class MemoryManager {
   bool Empty();
 
   [[nodiscard]] size_t GetFreeSpacePointer() const;
+  [[nodiscard]] size_t GetMemoryLimitPointer() const;
 
   const Variable &GetVarById(const clang::VarDecl *id) const;
 
@@ -100,12 +101,13 @@ class MemoryManager {
 
   void SetExtEqGlob();
 
-  void ShiftFreeSpacePointer(uint64_t shift);
+  void ShiftMemoryLimitPointer(size_t shift);
 
  private:
   // index of first free byte in memory
   size_t pointer_ = eight_bytes;
-  int mem_size_ = eight_kilobytes;
+  const int mem_size_ = eight_kilobytes;
+  int mem_limit_ = mem_size_;
   std::vector<Variable> variables_;
   std::map<std::string, int> duplicates;
 };
