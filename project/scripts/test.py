@@ -221,9 +221,12 @@ def compare_test_results(unit: dict[str, str | Path | CompletedProcess | float])
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for testing the correctness of the execution of '
-                                                  'translated files from C to EO',
-                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    _parser = argparse.ArgumentParser(
+        description='This script transpilates C files into EO files, compiles and run them. It reuses compile script and'
+                    ' starts to work after ending its work. It runs compiled C and EO files, then compare their results.'
+                    ' Also for time optimization it check cache files in c2eo-result directory. Then prints testing'
+                    ' result after grouping result information.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_tests', metavar='PATH', default=settings.get_setting('path_to_tests'),
                          help='the relative path from the scripts folder to the tests folder')

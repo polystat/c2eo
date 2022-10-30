@@ -332,8 +332,13 @@ def prepare_c_code(data: list[str]) -> None:
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for translating C files to the EO files',
-                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    _parser = argparse.ArgumentParser(
+        description='This script is used to translate C files into EO files. It starts from building C2EO transpilator.'
+                    'Then the script recursively searches files with the C extension in the specified directory.'
+                    'After that, a C2EO transpiler is applied for each found file. Then the resulting EO files are moved'
+                    'to the special result folder. All additional files created during transpilation are moved to the'
+                    'c2eo-result folder next to the C files',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('path_to_c_files', metavar='PATH',
                          help='the relative path from the scripts folder to the folder with c files')

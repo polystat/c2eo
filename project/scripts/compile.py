@@ -68,8 +68,11 @@ class Compiler(object):
 
 
 def create_parser() -> argparse.ArgumentParser:
-    _parser = argparse.ArgumentParser(description='the script for compiling translated files from C to EO',
-                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    _parser = argparse.ArgumentParser(
+        description='This script transpilates C files into EO files and compiles them. It reuses transpile script and'
+                    'starts to work after ending its work. It checks conditions for recompilation of the project and'
+                    'then recompile or compile it.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     _parser.add_argument('-p', '--path_to_files', metavar='PATH',
                          help='the relative path from the scripts folder to the c files folder')
