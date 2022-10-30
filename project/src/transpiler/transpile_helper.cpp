@@ -397,28 +397,30 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::DeclStmtClass) {
     const auto *op = dyn_cast<DeclStmt>(stmt);
-    AppendDeclStmt(op);
-    EOObject result = EOObject{EOObjectType::EO_EMPTY};
-    for (auto *decl : op->decls()) {
-      if (decl->getKind() == clang::Decl::Var) {
-        auto *VD = dyn_cast<VarDecl>(decl);
-        result.nested.push_back(
-            transpiler.glob_.GetVarById(VD).GetInitializer());
-      } else if (decl->getKind() == Decl::Kind::Record) {
-        auto *record_decl = dyn_cast<RecordDecl>(decl);
-        auto types = ProcessRecordType(record_decl, true);
-        for (auto &type : types) {
-          auto eo_objs = type.GetEORecordDecl();
-          result.nested.insert(result.nested.end(), eo_objs.begin(),
-                               eo_objs.end());
+    if (op != nullptr) {
+      AppendDeclStmt(op);
+      EOObject result = EOObject{EOObjectType::EO_EMPTY};
+      for (auto *decl : op->decls()) {
+        if (decl->getKind() == clang::Decl::Var) {
+          auto *VD = dyn_cast<VarDecl>(decl);
+          result.nested.push_back(
+              transpiler.glob_.GetVarById(VD).GetInitializer());
+        } else if (decl->getKind() == Decl::Kind::Record) {
+          auto *record_decl = dyn_cast<RecordDecl>(decl);
+          auto types = ProcessRecordType(record_decl, true);
+          for (auto &type : types) {
+            auto eo_objs = type.GetEORecordDecl();
+            result.nested.insert(result.nested.end(), eo_objs.begin(),
+                                 eo_objs.end());
+          }
         }
       }
+      return result;
     }
-    return result;
   }
   if (stmt_class == Stmt::CallExprClass) {
     const auto *op = dyn_cast<CallExpr>(stmt);
-    if (op->getDirectCallee() != nullptr &&
+    if (op != nullptr && op->getDirectCallee() != nullptr &&
         op->getDirectCallee()->getNameInfo().getAsString() == "printf") {
       EOObject eo = GetPrintfCallEOObject(op);
       return eo;
@@ -458,7 +460,9 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::ConstantExprClass) {
     const auto *op = dyn_cast<ConstantExpr>(stmt);
-    return GetStmtEOObject(op->getSubExpr());
+    if (op != nullptr) {
+      return GetStmtEOObject(op->getSubExpr());
+    }
   }
   if (stmt_class == Stmt::NullStmtClass) {
     // The empty statement
@@ -474,13 +478,15 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::StringLiteralClass) {
     const auto *op = dyn_cast<clang::StringLiteral>(stmt);
-    //    op->getCharByteWidth() is important and can be > 1
-    std::string value = Escaped(op->getBytes().str());
-    // TODO(nchuykin) remove lines below after fixing printf EOObject
-    value = std::regex_replace(value, std::regex("%[lh]{1,2}"), "%");
-    value = std::regex_replace(value, std::regex("%u"), "%d");
+    if (op != nullptr) {
+      //    op->getCharByteWidth() is important and can be > 1
+      std::string value = Escaped(op->getBytes().str());
+      // TODO(nchuykin) remove lines below after fixing printf EOObject
+      value = std::regex_replace(value, std::regex("%[lh]{1,2}"), "%");
+      value = std::regex_replace(value, std::regex("%u"), "%d");
 
-    return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
+      return {"\"" + value + "\"", EOObjectType::EO_LITERAL};
+    }
   }
   if (stmt_class == Stmt::ImplicitValueInitExprClass) {
     //    const auto *op = dyn_cast<clang::ImplicitValueInitExpr>(stmt);
@@ -501,7 +507,9 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   }
   if (stmt_class == Stmt::StmtExprClass) {
     const auto *op = dyn_cast<clang::StmtExpr>(stmt);
-    return GetStmtEOObject(op->getSubStmt());
+    if (op != nullptr) {
+      return GetStmtEOObject(op->getSubStmt());
+    }
   }
   if (stmt_class == Stmt::CompoundLiteralExprClass) {
     const auto *op = dyn_cast<clang::CompoundLiteralExpr>(stmt);
@@ -512,6 +520,9 @@ EOObject GetStmtEOObject(const Stmt *stmt) {
   return EOObject(EOObjectType::EO_PLUG);
 }
 EOObject GetCompoundLiteralEOObject(const clang::CompoundLiteralExpr *cle) {
+  if (cle == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
   const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(cle->getType().getTypePtrOrNull());
   EOObject init = GetStmtEOObject(cle->getInitializer());
@@ -561,6 +572,9 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 }
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
+  if (list == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   const clang::Type *type_ptr = list->getType().getTypePtrOrNull();
   const TypeSimpl typeInfo = transpiler.type_manger_.Add(type_ptr);
@@ -671,6 +685,9 @@ EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias) {
 }
 
 EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
   EOObject goto_object{"goto"};
   EOObject return_label{EOObjectType::EO_ABSTRACT};
   return_label.arguments.emplace_back("end");
@@ -698,74 +715,78 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
   for (auto stmt = p_stmt->getBody()->child_begin(); stmt != end; ++stmt) {
     if ((*stmt)->getStmtClass() == Stmt::CaseStmtClass) {
       const auto *case_stmt = dyn_cast<CaseStmt>(*stmt);
-      EOObject if_obj{"if"};
-      vector<const Expr *> all_cases{case_stmt->getLHS()};
-      const auto *nested = case_stmt->getSubStmt();
-      while (nested != nullptr &&
-             nested->getStmtClass() == Stmt::CaseStmtClass) {
-        const auto *nested_case = dyn_cast<CaseStmt>(nested);
-        all_cases.push_back(nested_case->getLHS());
-        nested = nested_case->getSubStmt();
-      }
-      EOObject cond_obj{"or"};
-      EOObject eq_obj{"eq"};
-      cond_obj.nested.emplace_back("flag");
-      eq_obj.nested.push_back(switch_expr_object);
-      eq_obj.nested.push_back(GetStmtEOObject(case_stmt->getLHS()));
-      cond_obj.nested.push_back(
-          GetCaseCondEOObject(all_cases, switch_expr_object, 0));
-      if (nested != nullptr &&
-          nested->getStmtClass() == Stmt::DefaultStmtClass) {
-        EOObject always_true_obj{"or"};
-        always_true_obj.nested.push_back(cond_obj);
-        always_true_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-        if_obj.nested.push_back(always_true_obj);
-        const auto *def_stmt = dyn_cast<DefaultStmt>(nested);
-        nested = def_stmt->getSubStmt();
-      } else {
-        if_obj.nested.push_back(cond_obj);
-      }
-      EOObject buffer_obj{"seq"};
-      if (nested != nullptr &&
-          nested->getStmtClass() != Stmt::DefaultStmtClass) {
-        buffer_obj.nested.push_back(GetStmtEOObject(nested));
-      }
-      auto tmp = stmt;
-      tmp++;
-      while (tmp != end && (*tmp)->getStmtClass() != Stmt::CaseStmtClass &&
-             (*tmp)->getStmtClass() != Stmt::DefaultStmtClass) {
-        buffer_obj.nested.push_back(GetStmtEOObject(*tmp));
+      if (stmt != nullptr) {
+        EOObject if_obj{"if"};
+        vector<const Expr *> all_cases{case_stmt->getLHS()};
+        const auto *nested = case_stmt->getSubStmt();
+        while (nested != nullptr &&
+               nested->getStmtClass() == Stmt::CaseStmtClass) {
+          const auto *nested_case = dyn_cast<CaseStmt>(nested);
+          if (nested_case != nullptr) {
+            all_cases.push_back(nested_case->getLHS());
+            nested = nested_case->getSubStmt();
+          }
+        }
+        EOObject cond_obj{"or"};
+        EOObject eq_obj{"eq"};
+        cond_obj.nested.emplace_back("flag");
+        eq_obj.nested.push_back(switch_expr_object);
+        eq_obj.nested.push_back(GetStmtEOObject(case_stmt->getLHS()));
+        cond_obj.nested.push_back(
+            GetCaseCondEOObject(all_cases, switch_expr_object, 0));
+        if (nested != nullptr &&
+            nested->getStmtClass() == Stmt::DefaultStmtClass) {
+          EOObject always_true_obj{"or"};
+          always_true_obj.nested.push_back(cond_obj);
+          always_true_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+          if_obj.nested.push_back(always_true_obj);
+          const auto *def_stmt = dyn_cast<DefaultStmt>(nested);
+          nested = def_stmt->getSubStmt();
+        } else {
+          if_obj.nested.push_back(cond_obj);
+        }
+        EOObject buffer_obj{"seq"};
+        if (nested != nullptr &&
+            nested->getStmtClass() != Stmt::DefaultStmtClass) {
+          buffer_obj.nested.push_back(GetStmtEOObject(nested));
+        }
+        auto tmp = stmt;
         tmp++;
-      }
-      buffer_obj.nested.push_back(set_flag_object);
-      buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-      if_obj.nested.push_back(buffer_obj);
-      seq_object.nested.push_back(if_obj);
+        while (tmp != end && (*tmp)->getStmtClass() != Stmt::CaseStmtClass &&
+               (*tmp)->getStmtClass() != Stmt::DefaultStmtClass) {
+          buffer_obj.nested.push_back(GetStmtEOObject(*tmp));
+          tmp++;
+        }
+        buffer_obj.nested.push_back(set_flag_object);
+        buffer_obj.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+        if_obj.nested.push_back(buffer_obj);
+        seq_object.nested.push_back(if_obj);
 
-      if (nested != nullptr &&
-          nested->getStmtClass() == Stmt::DefaultStmtClass) {
-        const auto *default_stmt = dyn_cast<DefaultStmt>(nested);
-        EOObject buffer_obj_def{"seq"};
-        if (default_stmt->getSubStmt() != nullptr) {
-          buffer_obj_def.nested.push_back(
-              GetStmtEOObject(default_stmt->getSubStmt()));
-        }
-        auto tmp_def = stmt;
-        tmp_def++;
-        while (tmp_def != end &&
-               (*tmp_def)->getStmtClass() != Stmt::CaseStmtClass &&
-               (*tmp_def)->getStmtClass() != Stmt::DefaultStmtClass) {
-          buffer_obj_def.nested.push_back(GetStmtEOObject(*tmp_def));
+        if (nested != nullptr &&
+            nested->getStmtClass() == Stmt::DefaultStmtClass) {
+          const auto *default_stmt = dyn_cast<DefaultStmt>(nested);
+          EOObject buffer_obj_def{"seq"};
+          if (default_stmt->getSubStmt() != nullptr) {
+            buffer_obj_def.nested.push_back(
+                GetStmtEOObject(default_stmt->getSubStmt()));
+          }
+          auto tmp_def = stmt;
           tmp_def++;
+          while (tmp_def != end &&
+                 (*tmp_def)->getStmtClass() != Stmt::CaseStmtClass &&
+                 (*tmp_def)->getStmtClass() != Stmt::DefaultStmtClass) {
+            buffer_obj_def.nested.push_back(GetStmtEOObject(*tmp_def));
+            tmp_def++;
+          }
+          buffer_obj_def.nested.push_back(set_flag_object);
+          buffer_obj_def.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
+          seq_object.nested.push_back(buffer_obj_def);
         }
-        buffer_obj_def.nested.push_back(set_flag_object);
-        buffer_obj_def.nested.emplace_back("TRUE", EOObjectType::EO_LITERAL);
-        seq_object.nested.push_back(buffer_obj_def);
       }
     } else if ((*stmt)->getStmtClass() == Stmt::DefaultStmtClass) {
       const auto *default_stmt = dyn_cast<DefaultStmt>(*stmt);
       EOObject buffer_obj{"seq"};
-      if (default_stmt->getSubStmt() != nullptr) {
+      if (default_stmt != nullptr && default_stmt->getSubStmt() != nullptr) {
         buffer_obj.nested.push_back(
             GetStmtEOObject(default_stmt->getSubStmt()));
       }
@@ -788,6 +809,9 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
 }
 
 void AppendDeclStmt(const DeclStmt *stmt) {
+  if (stmt == nullptr) {
+    return;
+  }
   for (auto *decl : stmt->decls()) {
     if (decl->getKind() == Decl::Kind::Enum) {
       auto *enum_decl = dyn_cast<clang::EnumDecl>(decl);
@@ -908,6 +932,9 @@ EOObject GetForStmtEOObject(const ForStmt *p_stmt) {
   return for_stmt;
 }
 EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op) {
+  if (op == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
   auto index_name = GetStmtEOObject(op->getIdx());
   const uint64_t dim_size =
       transpiler.type_manger_.Add(op->getType().getTypePtr()).GetSizeOfType();
@@ -1616,8 +1643,10 @@ EOObject GetEODeclRefExpr(const DeclRefExpr *op) {
     }
     const auto *id = dyn_cast<VarDecl>(val);
     const auto &var = transpiler.glob_.GetVarById(id);
-    const clang::QualType qual_type = id->getType();
-    const clang::Type *type = qual_type.getTypePtrOrNull();
+    if (id == nullptr) {
+      return EOObject{EOObjectType::EO_PLUG};
+    }
+    const clang::Type *type = id->getType().getTypePtrOrNull();
     //    TypeSimpl typeInfo =
     //        transpiler.type_manger_.Add(id->getType().getTypePtrOrNull());
     if (type == nullptr) {
@@ -1700,6 +1729,9 @@ EOObject GetReturnStmtEOObject(const ReturnStmt *p_stmt) {
 }
 
 EOObject GetIfElseStmtEOObject(const IfStmt *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
   EOObject if_else_stmt{"if-else"};
   if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   if_else_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
@@ -1708,6 +1740,9 @@ EOObject GetIfElseStmtEOObject(const IfStmt *p_stmt) {
 }
 
 EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt) {
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
+  }
   EOObject if_else_stmt{"if-else"};
   if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
   if_else_stmt.nested.push_back(GetStmtEOObject(p_stmt->getTrueExpr()));
@@ -1716,13 +1751,13 @@ EOObject GetConditionalStmtEOObject(const clang::ConditionalOperator *p_stmt) {
 }
 
 EOObject GetIfStmtEOObject(const IfStmt *p_stmt) {
-  EOObject if_stmt{"if"};
-  if (p_stmt != nullptr) {
-    if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
-    if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
-    return if_stmt;
+  if (p_stmt == nullptr) {
+    return EOObject{EOObjectType::EO_PLUG};
   }
-  return EOObject{EOObjectType::EO_PLUG};
+  EOObject if_stmt{"if"};
+  if_stmt.nested.push_back(GetStmtEOObject(p_stmt->getCond()));
+  if_stmt.nested.push_back(GetSeqForBodyEOObject(p_stmt->getThen()));
+  return if_stmt;
 }
 
 EOObject GetWhileStmtEOObject(const WhileStmt *p_stmt) {
