@@ -715,7 +715,7 @@ EOObject GetSwitchEOObject(const SwitchStmt *p_stmt) {
   for (auto stmt = p_stmt->getBody()->child_begin(); stmt != end; ++stmt) {
     if ((*stmt)->getStmtClass() == Stmt::CaseStmtClass) {
       const auto *case_stmt = dyn_cast<CaseStmt>(*stmt);
-      if (stmt != nullptr) {
+      if (case_stmt != nullptr) {
         EOObject if_obj{"if"};
         vector<const Expr *> all_cases{case_stmt->getLHS()};
         const auto *nested = case_stmt->getSubStmt();
