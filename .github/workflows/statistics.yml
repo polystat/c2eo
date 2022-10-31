@@ -33,13 +33,13 @@ jobs:
         run:  |
           cd ./project/scripts
           python3 csmith.py -h
-          python3 csmith.py ../tests/main/csmith -c 50
+          python3 csmith.py ../tests/main/csmith -c 100
 
       - name: Testing
         run: |
           cd ./project/scripts
-          python3 test.py -h
-          python3 test.py -p ../tests/main/csmith -n -i
+          python3 transpile.py -h
+          python3 transpile.py ../tests/main/csmith -n
 
       - name: Clean test directory
         run: cd ./project/scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
