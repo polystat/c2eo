@@ -83,13 +83,16 @@ class Transpiler(object):
         clean_before_transpilation.main(self.path_to_c_files, '*.alias  *-eo.c')
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
-        if self.random_tests_count > 0:
-            c_files = random.sample(c_files, self.random_tests_count)
 
         with tools.thread_pool() as threads:
             self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
+
         generate_unique_names_for_units(self.transpilation_units)
         skip_result = self.check_skips()
+
+        if self.random_tests_count > 0:
+            self.transpilation_units = random.sample(self.transpilation_units, self.random_tests_count)
+
         original_path = Path.cwd()
         chdir(self.path_to_c2eo_transpiler)
         tools.pprint('\n', 'Transpile files:', '\n', slowly=True)
