@@ -1,7 +1,6 @@
 name: Statistics
 
 on:
-  push:
   schedule:
     - cron:  '0 2 * * *'
 
