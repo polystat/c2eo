@@ -36,4 +36,4 @@ jobs:
         run: |
           cd ./project/scripts
           python3 compile.py -h
-          python3 compile.py -p ../../gcc.c-torture -s gcc -n -i -r 100
+          python3 compile.py -p ../../gcc.c-torture -s gcc-compile -n -i -r 100
