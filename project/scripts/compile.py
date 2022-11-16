@@ -40,7 +40,7 @@ from transpile import Transpiler
 class Compiler(object):
 
     def __init__(self, path_to_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
-                 need_to_generate_codecov: bool = False, ignore_exceptions: bool = False):
+                 need_to_generate_codecov: bool = False, ignore_exceptions: bool = False, random_tests_count: int = 0):
         self.need_to_generate_codecov = need_to_generate_codecov
         self.need_to_prepare_c_code = need_to_prepare_c_code
         self.ignore_exceptions = ignore_exceptions
@@ -48,13 +48,13 @@ class Compiler(object):
         self.path_to_tests = path_to_files
         self.path_to_c2eo_build = settings.get_setting('path_to_c2eo_build')
         self.transpilation_units: list[dict[str, str | Path | CompletedProcess | float]] = []
+        self.random_tests_count = random_tests_count
 
     def compile(self) -> Transpiler.transpile:
         start_time = time.time()
         self.transpilation_units, skip_result = Transpiler(self.path_to_tests, self.skips_file_name,
-                                                           self.need_to_prepare_c_code,
-                                                           self.need_to_generate_codecov,
-                                                           self.ignore_exceptions).transpile()
+                                                           self.need_to_prepare_c_code, self.need_to_generate_codecov,
+                                                           self.ignore_exceptions, self.random_tests_count).transpile()
         if self.transpilation_units:
             builder = EOBuilder(self.transpilation_units)
             if not builder.can_recompile:
@@ -88,6 +88,10 @@ def create_parser() -> argparse.ArgumentParser:
 
     _parser.add_argument('-i', '--ignore_exceptions', action='store_const', const=True, default=False,
                          help='the script will continue to work after the test exceptions')
+
+    _parser.add_argument('-r', '--random_tests_count', type=int, default=0,
+                         help='this parameter is used for large test suites when we cannot test all the tests at once,'
+                              'instead we select a specified count of random tests.')
     return _parser
 
 
@@ -97,4 +101,4 @@ if __name__ == '__main__':
     parser = create_parser()
     namespace = parser.parse_args()
     Compiler(Path(namespace.path_to_files), namespace.skips_file_name, not namespace.not_prepare_c_code,
-             namespace.codecov, namespace.ignore_exceptions).compile()
+             namespace.codecov, namespace.ignore_exceptions, namespace.random_tests_count).compile()

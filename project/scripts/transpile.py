@@ -23,7 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
+import random
 import sys
 import time
 import argparse
@@ -45,7 +45,7 @@ import clean_before_transpilation
 class Transpiler(object):
 
     def __init__(self, path_to_c_files: Path, skips_file_name: str, need_to_prepare_c_code: bool = True,
-                 need_to_generate_codecov: bool = False, ignore_errors: bool = False):
+                 need_to_generate_codecov: bool = False, ignore_errors: bool = False, random_tests_count: int = 0):
         self.filters = None
         if path_to_c_files.is_file():
             self.filters = {path_to_c_files.name}
@@ -74,6 +74,7 @@ class Transpiler(object):
         self.replaced_path = self.path_to_c_files.parent
         self.files_handled_count = 0
         self.ignored_transpilation_warnings = settings.get_setting('ignored_transpilation_warnings') or []
+        self.random_tests_count = random_tests_count
 
     def transpile(self) -> (list[dict[str, str | Path | CompletedProcess | float]], dict[str, dict[str, set[str]]]):
         start_time = time.time()
@@ -82,10 +83,16 @@ class Transpiler(object):
         clean_before_transpilation.main(self.path_to_c_files, '*.alias  *-eo.c')
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
+
         with tools.thread_pool() as threads:
             self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
+
         generate_unique_names_for_units(self.transpilation_units)
         skip_result = self.check_skips()
+
+        if self.random_tests_count > 0:
+            self.transpilation_units = random.sample(self.transpilation_units, self.random_tests_count)
+
         original_path = Path.cwd()
         chdir(self.path_to_c2eo_transpiler)
         tools.pprint('\n', 'Transpile files:', '\n', slowly=True)
