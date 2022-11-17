@@ -90,7 +90,7 @@ def create_parser() -> argparse.ArgumentParser:
                          help='the script will continue to work after the test exceptions')
 
     _parser.add_argument('-r', '--random_tests_count', type=int, default=0,
-                         help='this parameter is used for large test suites when we cannot test all the tests at once,'
+                         help='this parameter is used for large test suites when we cannot test all the tests at once, '
                               'instead we select a specified count of random tests.')
     return _parser
 

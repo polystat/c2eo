@@ -87,6 +87,7 @@ class Transpiler(object):
         with tools.thread_pool() as threads:
             self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
 
+        tools.pprint('\n', 'Generating unique names for transpilation units', slowly=True)
         generate_unique_names_for_units(self.transpilation_units)
         skip_result = self.check_skips()
 
