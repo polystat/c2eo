@@ -84,6 +84,7 @@ class Transpiler(object):
         c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
 
+        tools.pprint('\n', 'Generating transpilation units', slowly=True)
         with tools.thread_pool() as threads:
             self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
 
