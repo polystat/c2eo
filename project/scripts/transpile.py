@@ -75,38 +75,49 @@ class Transpiler(object):
         self.files_handled_count = 0
         self.ignored_transpilation_warnings = settings.get_setting('ignored_transpilation_warnings') or []
         self.random_tests_count = random_tests_count
+        self.c_files = []
 
     def transpile(self) -> (list[dict[str, str | Path | CompletedProcess | float]], dict[str, dict[str, set[str]]]):
         start_time = time.time()
         self.build_c2eo()
         tools.pprint('\n', 'Transpilation start', '\n', slowly=True)
         clean_before_transpilation.main(self.path_to_c_files, '*.alias  *-eo.c')
-        c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
+        self.c_files = tools.search_files_by_patterns(self.path_to_c_files, {'*.c'}, filters=self.filters, recursive=True,
                                                  print_files=True)
 
+        tools.pprint('\n', 'Generate transpilation units', '\n', slowly=True)
+        tools.print_progress_bar(0, len(self.c_files))
+        self.files_handled_count = 0
         with tools.thread_pool() as threads:
-            self.transpilation_units = list(threads.imap_unordered(self.make_unit, c_files))
+            self.transpilation_units = list(threads.imap_unordered(self.make_unit, self.c_files))
+        tools.print_progress_bar(len(self.c_files), len(self.c_files))
 
+        tools.pprint('\n', 'Generate unique names for transpilation units', slowly=True, on_the_next_line=True)
         generate_unique_names_for_units(self.transpilation_units)
         skip_result = self.check_skips()
 
         if self.random_tests_count > 0:
+            tools.pprint('\n', f'Pick {self.random_tests_count} random files from the {len(self.transpilation_units)} left', slowly=True)
             self.transpilation_units = random.sample(self.transpilation_units, self.random_tests_count)
 
         original_path = Path.cwd()
         chdir(self.path_to_c2eo_transpiler)
         tools.pprint('\n', 'Transpile files:', '\n', slowly=True)
+        self.files_handled_count = 0
         tools.print_progress_bar(0, len(self.transpilation_units))
         with tools.thread_pool() as threads:
             list(threads.imap_unordered(self.start_transpilation, self.transpilation_units))
-        tools.print_progress_bar(self.files_handled_count, len(self.transpilation_units))
+        tools.print_progress_bar(len(self.transpilation_units), len(self.transpilation_units))
+
         result = self.group_transpilation_results()
         result[tools.SKIP] = skip_result
         tests_count = len(self.transpilation_units) + sum(map(len, skip_result.values()))
         is_failed = sum(map(len, result[tools.EXCEPTION].values())) > 0
         tools.pprint_result('TRANSPILE', tests_count, int(time.time() - start_time), result, is_failed)
+
         if is_failed and not self.ignore_errors:
             exit('transpilation failed')
+
         self.prepare_eo_project()
         self.remove_unused_eo_src_files()
         self.move_transpiled_files()
@@ -128,6 +139,8 @@ class Transpiler(object):
         rel_c_path = Path(str(c_file.parent).replace(str(self.replaced_path), '').lstrip(os_sep))
         full_name = f'{tools.make_name_from_path(rel_c_path)}.{c_file.stem}'
         prepared_c_file, result_path = self.prepare_c_file(c_file)
+        self.files_handled_count += 1
+        tools.print_progress_bar(self.files_handled_count, len(self.c_files))
         return {'c_file': c_file, 'rel_c_path': rel_c_path, 'full_name': full_name, 'prepared_c_file': prepared_c_file,
                 'result_path': result_path, 'name': c_file.stem, 'unique_name': c_file.stem,
                 'prepared_c_i_file': prepared_c_file.with_suffix('.c.i')}
@@ -145,6 +158,7 @@ class Transpiler(object):
                     skip_units.append(unit)
                     break
         self.transpilation_units = list(filter(lambda x: x not in skip_units, self.transpilation_units))
+        tools.pprint('\n', f'Skipped {len(skip_units)} files', slowly=True)
         return skips
 
     def start_transpilation(self, unit: dict[str, str | Path | CompletedProcess | float]) -> None:
