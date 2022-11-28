@@ -93,7 +93,7 @@ Formally speaking, this is where the preparation can be completed. However, in o
 
 ### Making changes
 
-All sources files of transpiler are located in `project/src/transpiler`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project` dir. For the first time, create the `build` folder:
+All sources files of transpiler are located in `project/src/transpiler`. The transpiler's work begins with the code from the source file `project/src/transpiler/main.cpp`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project` dir. For the first time, create the `build` folder:
 
 ```bash
 $ mkdir build
