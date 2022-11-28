@@ -24,6 +24,8 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <stdlib.h>
+#include <string.h>
 
 #include "src/transpiler/eo_object.h"
 #include "src/transpiler/matchers.h"
@@ -102,8 +104,36 @@ int main(int argc, const char **argv) {
   const char **parser_argv = TransformArgv(argv);
   filename = argv[2];
 
+  package_name = filename.substr(0, filename.size() - 3);
+  if (package_name.rfind('/') != std::string::npos) {
+    package_name = package_name.substr(package_name.rfind('/') + 1);
+  }
+  transpiler.SetPackageName(package_name);
+
+  std::string path_name = "";
+  auto pos = filename.rfind('/');
+  if (pos != std::string::npos) {
+    path_name = filename.substr(0, pos + 1);
+  }
+  transpiler.SetPathName(path_name);
+
   if (argc == 4) {
-    if (std::string("--meta") != argv[3]) {
+    if (std::string("--copy") == argv[3]) {
+      auto path = path_name;
+      if (path == "") {
+        path = ".";
+      }
+
+      int sz = path.length();
+
+	    char dest[40 + sz] = "bash ./../scripts/download_resources.sh ";
+	    for (int i = 0;i < sz;++i) {
+     	  dest[40 + i] = path[i];
+     	}
+
+     	// run download_resources.sh with argument 'path'
+      int status = system(dest);
+    } else if (std::string("--meta") != argv[3]) {
       llvm::errs()
           << "exception: incorrect command line format. Necessary: c2eo "
              "<C-file-name_> <EO-file-name_> [--meta]\n";
@@ -111,19 +141,6 @@ int main(int argc, const char **argv) {
     }
     transpiler.GenerateMeta();
   }
-
-  package_name = filename.substr(0, filename.size() - 3);
-  if (package_name.rfind('/') != std::string::npos) {
-    package_name = package_name.substr(package_name.rfind('/') + 1);
-  }
-  transpiler.SetPackageName(package_name);
-
-  std::string path_name;
-  auto pos = filename.rfind('/');
-  if (pos != std::string::npos) {
-    path_name = filename.substr(0, pos + 1);
-  }
-  transpiler.SetPathName(path_name);
 
   int parser_argc = parser_arg_count;
   auto expected_parser = CommonOptionsParser::create(
