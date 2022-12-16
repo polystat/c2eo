@@ -1,6 +1,6 @@
 <img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
 
-[![building](https://img.shields.io/github/workflow/status/polystat/c2eo/Build%20C2EO)](https://github.com/polystat/c2eo/actions?query=event%3Aschedule++)
+[![build](https://img.shields.io/github/actions/workflow/status/polystat/c2eo/build.yml?branch=master)](https://github.com/polystat/c2eo/actions/workflows/build.yml?query=event%3Aschedule)
 [![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)](https://github.com/polystat/c2eo/releases/latest)
 [![codecov](https://codecov.io/gh/polystat/c2eo/branch/master/graph/badge.svg)](https://codecov.io/gh/polystat/c2eo)
 ![Lines of code](https://tokei.rs/b1/github/polystat/c2eo)
