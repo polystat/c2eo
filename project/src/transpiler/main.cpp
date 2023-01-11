@@ -126,12 +126,12 @@ int main(int argc, const char **argv) {
 
       int sz = path.length();
 
-	    char dest[40 + sz] = "bash ./../scripts/download_resources.sh ";
-	    for (int i = 0;i < sz;++i) {
-     	  dest[40 + i] = path[i];
-     	}
+        char dest[40 + sz] = "bash ./../scripts/download_resources.sh ";
+        for (int i = 0; i < sz; ++i) {
+          dest[40 + i] = path[i];
+        }
 
-     	// run download_resources.sh with argument 'path'
+        // run download_resources.sh with argument 'path'
       int status = system(dest);
     } else if (std::string("--meta") != argv[3]) {
       llvm::errs()
