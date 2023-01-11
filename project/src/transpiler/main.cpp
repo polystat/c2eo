@@ -27,7 +27,6 @@
 #include <csignal>
 #include <cstdlib>
 
-
 #include "src/transpiler/eo_object.h"
 #include "src/transpiler/matchers.h"
 #include "src/transpiler/unit_transpiler.h"
