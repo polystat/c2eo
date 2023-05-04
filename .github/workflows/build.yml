@@ -84,7 +84,7 @@ jobs:
         run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Download gcc-c-torture
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           repository: "polystat/c2eo"
           tag: "0.1.16"
@@ -117,7 +117,7 @@ jobs:
         run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
 
       - name: Download c-testcuite
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           repository: "polystat/c2eo"
           tag: "0.1.16"
