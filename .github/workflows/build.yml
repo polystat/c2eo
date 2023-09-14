@@ -220,6 +220,6 @@ jobs:
           name: testcuite
           path: project/bin/testcuite/
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         with:
           files: ./project/bin/main/codecov.txt,./project/bin/testcuite/codecov.txt
