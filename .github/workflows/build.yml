@@ -209,13 +209,13 @@ jobs:
       - run: mkdir project/bin/
 
       - name: Download test main codecov report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: main
           path: project/bin/main/
 
       - name: Download testcuite codecov report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: testcuite
           path: project/bin/testcuite/
