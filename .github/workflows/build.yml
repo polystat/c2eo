@@ -138,7 +138,7 @@ jobs:
           llvm-profdata-14 merge -sparse *.profraw -o res.profdata
           llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: testcuite
           path: project/bin/codecov.txt
@@ -172,7 +172,7 @@ jobs:
           llvm-profdata-14 merge -sparse *.profraw -o res.profdata
           llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: main
           path: project/bin/codecov.txt
@@ -209,13 +209,13 @@ jobs:
       - run: mkdir project/bin/
 
       - name: Download test main codecov report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: main
           path: project/bin/main/
 
       - name: Download testcuite codecov report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: testcuite
           path: project/bin/testcuite/
