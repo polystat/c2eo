@@ -47,7 +47,7 @@ jobs:
       - name: Make archive from csmith tests
         run:  tar -cf csmith.tar.gz ./project/tests/main/csmith
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: csmith
           path: csmith.tar.gz
