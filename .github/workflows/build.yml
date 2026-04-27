@@ -7,19 +7,19 @@ on:
 
 jobs:
   xcop:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: g4s8/xcop-action@master
 
   pdd:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       # - uses: g4s8/pdd-action@master
 
   cpplint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -30,7 +30,7 @@ jobs:
         run: cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/**
 
   clang-format:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       
@@ -43,7 +43,7 @@ jobs:
 
   clang-tidy:
     needs: [cpplint, clang-format]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: MarkusJx/googletest-installer@v1.1
@@ -68,7 +68,7 @@ jobs:
 
   gcc-c-torture:
     needs: [cpplint, clang-format]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: MarkusJx/googletest-installer@v1.1
@@ -101,7 +101,7 @@ jobs:
 
   c-testcuite:
     needs: [cpplint, clang-format]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: MarkusJx/googletest-installer@v1.1
@@ -145,7 +145,7 @@ jobs:
 
   test_main:
     needs: [cpplint, clang-format]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: MarkusJx/googletest-installer@v1.1
@@ -179,7 +179,7 @@ jobs:
 
   unit-tests:
     needs: [cpplint, clang-format]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - uses: MarkusJx/googletest-installer@v1.1
@@ -202,7 +202,7 @@ jobs:
 
   codecov:
     needs: [clang-tidy, gcc-c-torture, c-testcuite, test_main, unit-tests]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
  
