@@ -47,8 +47,8 @@ llvm-clang/**
 **/.idea/**
 **/cmake-build-debug/**
 **/CMakeFiles/**
-**/build/**
-!**/build/.gitkeep
+build/**
+!build/.gitkeep
 **/src/result/**
 *.bak
 
