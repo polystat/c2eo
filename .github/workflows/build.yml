@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       
       - name: Clang-format
-        uses: jidicula/clang-format-action@v4.13.0
+        uses: jidicula/clang-format-action@v4.18.0
         with:
           clang-format-version: '14'
           check-path: 'project/src/transpiler'
