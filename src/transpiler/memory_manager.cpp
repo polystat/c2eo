@@ -10,7 +10,9 @@
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "src/transpiler/transpile_helper.h"
 #include "src/transpiler/unit_transpiler.h"

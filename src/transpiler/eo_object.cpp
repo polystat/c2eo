@@ -5,6 +5,8 @@
 
 #include "src/transpiler/eo_object.h"
 
+#include <iostream>
+#include <string>
 #include <utility>
 
 #include "src/transpiler/util.h"

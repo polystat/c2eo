@@ -5,10 +5,13 @@
 
 #include "src/transpiler/transpile_helper.h"
 
+#include <iostream>
 #include <map>
 #include <queue>
 #include <regex>
+#include <set>
 #include <sstream>
+#include <string>
 #include <tuple>
 #include <utility>
 #include <vector>

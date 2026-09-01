@@ -6,7 +6,9 @@
 #include "src/transpiler/record_manager.h"
 
 #include <map>
+#include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 RecordType RecordManager::Add(

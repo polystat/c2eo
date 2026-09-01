@@ -6,6 +6,7 @@
 #include "src/transpiler/type_manager.h"
 
 #include <iostream>
+#include <string>
 
 #include "clang/AST/ASTContext.h"
 #include "src/transpiler/unit_transpiler.h"

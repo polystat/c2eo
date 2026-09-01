@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <utility>
 
 #include "src/transpiler/aliases.h"

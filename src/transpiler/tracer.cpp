@@ -5,6 +5,7 @@
 
 #include "src/transpiler/tracer.h"
 
+#include <iostream>
 #include <string>
 
 using clang::BinaryOperatorKind;

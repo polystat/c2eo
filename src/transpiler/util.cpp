@@ -5,6 +5,9 @@
 
 #include "src/transpiler/util.h"
 
+#include <string>
+#include <vector>
+
 __attribute__((unused)) void Str2File(const std::string &str,
                                       const std::string &file_name) {
   std::ofstream out;

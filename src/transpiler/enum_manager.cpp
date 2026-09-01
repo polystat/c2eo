@@ -5,6 +5,10 @@
 
 #include "src/transpiler/enum_manager.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 EnumType EnumManager::Add(const clang::EnumDecl *id, std::string name,
                           size_t size,
                           const std::vector<EnumConstantType> &values) {

@@ -5,6 +5,8 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <iostream>
+#include <string>
 
 #include "src/transpiler/eo_object.h"
 #include "src/transpiler/matchers.h"
