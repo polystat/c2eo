@@ -3,8 +3,9 @@
 ---
 name: llvm
 description: |
-  Install LLVM/Clang 16 and GoogleTest from apt, and register the
-  unversioned tool names so that cmake and the scripts find them.
+  Install LLVM/Clang 16 and GoogleTest from apt, and select them under
+  the unversioned tool names, so that cmake and the scripts do not pick
+  up the newer clang the runner image ships with.
 runs:
   using: composite
   steps:
@@ -30,4 +31,7 @@ runs:
         for tool in clang clang++ clang-tidy llvm-cov llvm-profdata; do
           sudo update-alternatives --install \
             "/usr/bin/${tool}" "${tool}" "/usr/bin/${tool}-16" 100
+          sudo update-alternatives --set "${tool}" "/usr/bin/${tool}-16"
         done
+        clang --version
+        clang-tidy --version

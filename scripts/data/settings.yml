@@ -7,7 +7,6 @@ clang_tidy_checks:
 - mpi-*
 - bugprone-*
 - -bugprone-easily-swappable-parameters
-- -bugprone-unchecked-optional-access
 - portability-*
 - boost-*
 - cppcoreguidelines-*
