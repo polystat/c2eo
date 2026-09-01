@@ -85,7 +85,7 @@ jobs:
         run: |
           cd ./scripts
           python3 transpile.py -h
-          python3 transpile.py ../../gcc.c-torture -s gcc -n
+          python3 transpile.py ../gcc.c-torture -s gcc -n
 
   c-testcuite:
     needs: [cpplint, clang-format]
@@ -108,7 +108,7 @@ jobs:
         run: |
           cd ./scripts
           python3 test.py -h
-          python3 test.py -p ../../c-testcuite -s testcuite -n -c
+          python3 test.py -p ../c-testcuite -s testcuite -n -c
 
       - name: Convert raw code coverage to report
         run: |

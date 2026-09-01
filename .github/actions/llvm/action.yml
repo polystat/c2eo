@@ -23,6 +23,7 @@ runs:
           libzstd-dev \
           llvm-16 \
           llvm-16-dev \
+          python3-requests \
           python3-yaml \
           time \
           zlib1g-dev
