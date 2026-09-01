@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+ * SPDX-License-Identifier: MIT
+ */
+
 //
 // Created by yarrya on 22.08.22.
 //
