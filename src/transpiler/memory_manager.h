@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_MEMORY_MANAGER_H_
-#define PROJECT_SRC_TRANSPILER_MEMORY_MANAGER_H_
+#ifndef SRC_TRANSPILER_MEMORY_MANAGER_H_
+#define SRC_TRANSPILER_MEMORY_MANAGER_H_
 
 static const int some_non_zero_position = 999999;
 static const int eight_kilobytes = 8192;
@@ -112,4 +112,4 @@ class MemoryManager {
   std::map<std::string, int> duplicates;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_MEMORY_MANAGER_H_
+#endif  // SRC_TRANSPILER_MEMORY_MANAGER_H_

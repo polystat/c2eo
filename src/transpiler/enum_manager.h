@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_ENUM_MANAGER_H_
-#define PROJECT_SRC_TRANSPILER_ENUM_MANAGER_H_
+#ifndef SRC_TRANSPILER_ENUM_MANAGER_H_
+#define SRC_TRANSPILER_ENUM_MANAGER_H_
 
 #include <cstdint>
 #include <string>
@@ -61,4 +61,4 @@ class EnumManager {
   std::vector<EnumType> enum_types;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_ENUM_MANAGER_H_
+#endif  // SRC_TRANSPILER_ENUM_MANAGER_H_

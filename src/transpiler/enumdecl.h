@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_ENUMDECL_H_
-#define PROJECT_SRC_TRANSPILER_ENUMDECL_H_
+#ifndef SRC_TRANSPILER_ENUMDECL_H_
+#define SRC_TRANSPILER_ENUMDECL_H_
 
 #include "clang/AST/ASTContext.h"
 #include "clang/AST/Decl.h"
@@ -37,4 +37,4 @@
 
 EnumType ProcessEnumDecl(const clang::EnumDecl *ED);
 
-#endif  // PROJECT_SRC_TRANSPILER_ENUMDECL_H_
+#endif  // SRC_TRANSPILER_ENUMDECL_H_

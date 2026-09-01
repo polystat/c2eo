@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_FUNCTION_MANAGER_H_
-#define PROJECT_SRC_TRANSPILER_FUNCTION_MANAGER_H_
+#ifndef SRC_TRANSPILER_FUNCTION_MANAGER_H_
+#define SRC_TRANSPILER_FUNCTION_MANAGER_H_
 
 #include <cstdint>
 #include <map>
@@ -87,4 +87,4 @@ struct FunctionManager {
   int name_count;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_FUNCTION_MANAGER_H_
+#endif  // SRC_TRANSPILER_FUNCTION_MANAGER_H_

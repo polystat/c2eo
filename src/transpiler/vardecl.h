@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_VARDECL_H_
-#define PROJECT_SRC_TRANSPILER_VARDECL_H_
+#ifndef SRC_TRANSPILER_VARDECL_H_
+#define SRC_TRANSPILER_VARDECL_H_
 
 #include <string>
 
@@ -44,4 +44,4 @@ const int float_size = 32;
 Variable ProcessVariable(const clang::VarDecl *VD,
                          const std::string &local_name = "", size_t shift = 0);
 
-#endif  // PROJECT_SRC_TRANSPILER_VARDECL_H_
+#endif  // SRC_TRANSPILER_VARDECL_H_

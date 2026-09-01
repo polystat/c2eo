@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_TRANSPILE_HELPER_H_
-#define PROJECT_SRC_TRANSPILER_TRANSPILE_HELPER_H_
+#ifndef SRC_TRANSPILER_TRANSPILE_HELPER_H_
+#define SRC_TRANSPILER_TRANSPILE_HELPER_H_
 
 // Declares clang::SyntaxOnlyAction.
 #include <set>
@@ -52,4 +52,4 @@ EOObject ReplaceEmpty(const EOObject &eoObject, const EOObject &alias);
 
 std::set<std::string> FindAllExternalObjects(const EOObject &obj);
 
-#endif  // PROJECT_SRC_TRANSPILER_TRANSPILE_HELPER_H_
+#endif  // SRC_TRANSPILER_TRANSPILE_HELPER_H_

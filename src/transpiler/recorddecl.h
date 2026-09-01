@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_RECORDDECL_H_
-#define PROJECT_SRC_TRANSPILER_RECORDDECL_H_
+#ifndef SRC_TRANSPILER_RECORDDECL_H_
+#define SRC_TRANSPILER_RECORDDECL_H_
 
 #include <vector>
 
@@ -40,4 +40,4 @@
 std::vector<RecordType> ProcessRecordType(const clang::RecordDecl *RD,
                                           bool is_local = false);
 
-#endif  // PROJECT_SRC_TRANSPILER_RECORDDECL_H_
+#endif  // SRC_TRANSPILER_RECORDDECL_H_

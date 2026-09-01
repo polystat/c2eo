@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_RECORD_MANAGER_H_
-#define PROJECT_SRC_TRANSPILER_RECORD_MANAGER_H_
+#ifndef SRC_TRANSPILER_RECORD_MANAGER_H_
+#define SRC_TRANSPILER_RECORD_MANAGER_H_
 
 #include <cstdint>
 #include <map>
@@ -61,4 +61,4 @@ struct RecordManager {
   std::vector<RecordType> record_types;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_RECORD_MANAGER_H_
+#endif  // SRC_TRANSPILER_RECORD_MANAGER_H_

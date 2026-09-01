@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_ANALYZERS_H_
-#define PROJECT_SRC_TRANSPILER_ANALYZERS_H_
+#ifndef SRC_TRANSPILER_ANALYZERS_H_
+#define SRC_TRANSPILER_ANALYZERS_H_
 
 #include "src/transpiler/enumdecl.h"
 #include "src/transpiler/recorddecl.h"
@@ -84,4 +84,4 @@ class EnumDeclAnalyzer
       const clang::ast_matchers::MatchFinder::MatchResult &result) override;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_ANALYZERS_H_
+#endif  // SRC_TRANSPILER_ANALYZERS_H_

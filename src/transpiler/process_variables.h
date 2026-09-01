@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_PROCESS_VARIABLES_H_
-#define PROJECT_SRC_TRANSPILER_PROCESS_VARIABLES_H_
+#ifndef SRC_TRANSPILER_PROCESS_VARIABLES_H_
+#define SRC_TRANSPILER_PROCESS_VARIABLES_H_
 #include <vector>
 
 #include "src/transpiler/memory_manager.h"
@@ -35,4 +35,4 @@ void ProcessFunctionLocalVariables(const clang::CompoundStmt* CS,
 
 void ProcessCompoundStatementLocalVariables(const clang::CompoundStmt* CS,
                                             std::vector<Variable>& all_local);
-#endif  // PROJECT_SRC_TRANSPILER_PROCESS_VARIABLES_H_
+#endif  // SRC_TRANSPILER_PROCESS_VARIABLES_H_

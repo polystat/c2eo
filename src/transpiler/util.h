@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_UTIL_H_
-#define PROJECT_SRC_TRANSPILER_UTIL_H_
+#ifndef SRC_TRANSPILER_UTIL_H_
+#define SRC_TRANSPILER_UTIL_H_
 
 #include <fstream>
 #include <iostream>
@@ -41,4 +41,4 @@ __attribute__((unused)) void File2Vector(const std::string &file_name,
 __attribute__((unused)) void Text2File(std::vector<std::string> &text,
                                        const std::string &file_name);
 
-#endif  // PROJECT_SRC_TRANSPILER_UTIL_H_
+#endif  // SRC_TRANSPILER_UTIL_H_

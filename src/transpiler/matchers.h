@@ -22,11 +22,11 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_MATCHERS_H_
-#define PROJECT_SRC_TRANSPILER_MATCHERS_H_
+#ifndef SRC_TRANSPILER_MATCHERS_H_
+#define SRC_TRANSPILER_MATCHERS_H_
 
 #include "src/transpiler/analyzers.h"
 
 void AddMatchers(clang::ast_matchers::MatchFinder &finder);
 
-#endif  // PROJECT_SRC_TRANSPILER_MATCHERS_H_
+#endif  // SRC_TRANSPILER_MATCHERS_H_

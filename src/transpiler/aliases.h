@@ -25,8 +25,8 @@
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "cert-err58-cpp"
 #pragma ide diagnostic ignored "fuchsia-statically-constructed-objects"
-#ifndef PROJECT_SRC_TRANSPILER_ALIASES_H_
-#define PROJECT_SRC_TRANSPILER_ALIASES_H_
+#ifndef SRC_TRANSPILER_ALIASES_H_
+#define SRC_TRANSPILER_ALIASES_H_
 
 #include "map"
 #include "set"
@@ -170,6 +170,6 @@ std::map<std::string, std::string> known_aliases = {
     {"write-as-uint64", "+alias c2eo.coperators.write-as-uint64"},
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_ALIASES_H_
+#endif  // SRC_TRANSPILER_ALIASES_H_
 
 #pragma clang diagnostic pop

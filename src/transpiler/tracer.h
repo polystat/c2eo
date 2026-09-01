@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_TRACER_H_
-#define PROJECT_SRC_TRANSPILER_TRACER_H_
+#ifndef SRC_TRANSPILER_TRACER_H_
+#define SRC_TRANSPILER_TRACER_H_
 
 #include <iostream>
 
@@ -51,4 +51,4 @@ __attribute__((unused)) void TraceOutEOObject(EOObject &eo_object);
 
 void TraceOutFunctionDecl(const clang::FunctionDecl *FD);
 
-#endif  // PROJECT_SRC_TRANSPILER_TRACER_H_
+#endif  // SRC_TRANSPILER_TRACER_H_

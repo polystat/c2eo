@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_UNIT_TRANSPILER_H_
-#define PROJECT_SRC_TRANSPILER_UNIT_TRANSPILER_H_
+#ifndef SRC_TRANSPILER_UNIT_TRANSPILER_H_
+#define SRC_TRANSPILER_UNIT_TRANSPILER_H_
 
 #include "iostream"
 #include "set"
@@ -72,4 +72,4 @@ class UnitTranspiler {
   bool generate_meta_ = false;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_UNIT_TRANSPILER_H_
+#endif  // SRC_TRANSPILER_UNIT_TRANSPILER_H_

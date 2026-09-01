@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef PROJECT_SRC_TRANSPILER_EO_OBJECT_H_
-#define PROJECT_SRC_TRANSPILER_EO_OBJECT_H_
+#ifndef SRC_TRANSPILER_EO_OBJECT_H_
+#define SRC_TRANSPILER_EO_OBJECT_H_
 
 #include <ostream>
 #include <string>
@@ -70,4 +70,4 @@ struct EOObject {
   inline static int indent = 0;
 };
 
-#endif  // PROJECT_SRC_TRANSPILER_EO_OBJECT_H_
+#endif  // SRC_TRANSPILER_EO_OBJECT_H_
