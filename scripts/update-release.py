@@ -105,7 +105,7 @@ def try_shell(param, fatal=True, private=False):
 def make_deb(date, deb_name):
     global libs_set, control
     if deb_name == 'c2eo':
-        try_shell('cp ../../project/bin/c2eo usr/bin')
+        try_shell('cp ../../bin/c2eo usr/bin')
     else:
         for path in libs_set:
             try_shell(f'cp {path} usr/lib')
@@ -148,8 +148,8 @@ def make_repo():
 def copy_libs():
     global libs_set
     flag = True
-    with open('../../release/todo.sh', 'w') as todo:
-        with open('../../llvm-clang/libs.txt', 'r') as libs:
+    with open('../release/todo.sh', 'w') as todo:
+        with open('../llvm-clang/libs.txt', 'r') as libs:
             for line in libs.readlines():
                 lib_info = re.split(r'\s', line)
                 lib = [e for e in lib_info if e]
@@ -204,13 +204,13 @@ if __name__ == '__main__':
     os.chdir('../')
     os.makedirs('build', exist_ok=True)
     os.chdir('build')
-    os.makedirs('../../release/', exist_ok=True)
+    os.makedirs('../release/', exist_ok=True)
     make_bin()
 
-    try_shell('ldd ../bin/c2eo > ../../llvm-clang/libs.txt')
+    try_shell('ldd ../bin/c2eo > ../llvm-clang/libs.txt')
     copy_libs()
 
-    os.chdir('../../release/')
+    os.chdir('../release/')
     os.makedirs('repository/conf', exist_ok=True)
 
     debs = ['c2eo', 'llvm-libs']

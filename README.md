@@ -87,13 +87,13 @@ $ megadl 'https://mega.nz/#!cZ9WQCqB!z713CuC-GNFQAXIxZwZxI05zOH4FAOpwYHEElgOZflA
 $ tar -xvf llvm-clang.tar.gz
 ```
 
-It is assumed that the `llvm-clang` dir is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/master/project/src/transpiler/CMakeLists.txt#L6).
+It is assumed that the `llvm-clang` dir is located in the `c2eo` dir. If your `llvm-clang` is in different place, set the path in that [line](https://github.com/polystat/c2eo/blob/master/src/transpiler/CMakeLists.txt#L6).
 
 Formally speaking, this is where the preparation can be completed. However, in order to fully work with the project, testing and executing the translated code, you need to study the [EO compiler project](https://github.com/objectionary/eo) and fulfill its necessary requirements. After that, it will be possible to proceed with further steps.
 
 ### Making changes
 
-All sources files of transpiler are located in `project/src/transpiler`. The transpiler's work begins with the code from the source file `project/src/transpiler/main.cpp`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the `project` dir. For the first time, create the `build` folder:
+All sources files of transpiler are located in `src/transpiler`. The transpiler's work begins with the code from the source file `src/transpiler/main.cpp`. Аfter making changes in these files, we will need to rebuild the executable file `c2eo`. To do this, you need to go to the repository root. For the first time, create the `build` folder:
 
 ```bash
 $ mkdir build
@@ -106,7 +106,7 @@ $ cmake ..
 $ make
 ``` 
 
-As you have already noticed, the project is being built in the `project/build` folder. The result of this build is the `c2eo` file in `project/bin`. Now you have a transpiler and you can convert programs from C to EO. Just run:
+As you have already noticed, the project is being built in the `build` folder. The result of this build is the `c2eo` file in `bin`. Now you have a transpiler and you can convert programs from C to EO. Just run:
 
 ```bash
 $ ./c2eo <path-to-c-file-name> <eo-file-name>.eo
@@ -119,47 +119,47 @@ Your PR will pass the following checks, so before creating PR run these locally 
 
 1. [clang-format-14](https://pypi.org/project/clang-format/)
 ```bash
-$ clang-format project/src/transpiler/*.(cpp|h) -i 
+$ clang-format src/transpiler/*.(cpp|h) -i 
 ```
 
 2. [cpplint](https://github.com/cpplint/cpplint)
 ```bash
-$ cpplint --filter=-runtime/references,-runtime/string,-build/c++11 project/src/transpiler/** 
+$ cpplint --filter=-runtime/references,-runtime/string,-build/c++11 src/transpiler/** 
 ```
 3. [clang-tidy](https://packages.ubuntu.com/en/bionic/clang-tidy)
 ```bash
-$ cd project/scripts
+$ cd scripts
 $ python3 clang_tidy.py
 ```
 4. [gcc.c-torture](https://github.com/polystat/c2eo/releases/download/0.1.16/gcc.c-torture.tar.gz)
 ```bash
-$ cd project/scripts
+$ cd scripts
 $ python3 transpile.py <your_path_to_the_folder>/gcc.c-torture -s gcc -n
 ```
 
 5. [c-testcuite](https://github.com/polystat/c2eo/releases/download/0.1.16/c-testcuite.tar.gz)
 ```bash
-$ cd project/scripts
+$ cd scripts
 $ python3 test.py -p <your_path_to_the_folder>/c-testcuite -s testcuite -n
 ```
 
 6. test
 ```bash
-$ cd project/scripts
+$ cd scripts
 $ python3 test.py -s test
 ```
 
 7. unit-tests
 ```bash
-$ cd project/scripts
+$ cd scripts
 $ python3 build_c2eo.py
-$ project/bin/
+$ cd ../bin/
 $ ./unit_tests --gtest_filter=*
 ```
 
 ## How to release
 
-From `project/scripts/` directory:
+From `scripts/` directory:
 
 ```bash
 $ python3 update-release.py -h
@@ -649,8 +649,8 @@ strncpy str2 st1 8
 
 ### If-else
 
-In EO, we have analogues of [if-else](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if-else.eo)
-and [if](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if.eo) 
+In EO, we have analogues of [if-else](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/if-else.eo)
+and [if](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/if.eo) 
 objects, so we just convert without any significant changes.
 
 ```c
@@ -689,7 +689,7 @@ if
 
 ### Ternary operator
 
-We can turn the ternary operator into the same [if-else](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/if-else.eo), only seq must be without True at the end, because its return value will be used.
+We can turn the ternary operator into the same [if-else](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/if-else.eo), only seq must be without True at the end, because its return value will be used.
 
 ```c
 condition ? a : b
@@ -910,36 +910,36 @@ The table of all C operators and similar objects in the EO.
 
 С|EO
 -|-
-+|[plus](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/plus.eo)
--|[minus](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/minus.eo)
-*|[times](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/times.eo)
-*|[write\|read-as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/read-as-int64.eo)
-/|[div](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/div.eo)
-=|[write-as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/write-as-int64.eo)
-%|[mod](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/mod.eo)
-+x|[pos](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pos.eo)
--x|[neg](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/neg.eo)
-++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pre-inc-int64.eo)
-x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/post-inc-int64.eo)
---x|[pre-dec-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/pre-dec-int64.eo)
-x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/post-dec-int64.eo)
-==|[eq](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/eq.eo)
-!=|[neq](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/neq.eo)
-<|[lt](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/lt.eo)
-<=|[lte](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/lte.eo)
-\>|[gt](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/gt.eo)
-\>=|[gte](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/gte.eo)
-&&|[and](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/and.eo)
-\|\||[or](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/or.eo)
-!|[not](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/not.eo)
-&|[bit-and](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-and.eo)
-&|[addr-of](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/addr-of.eo)
-\||[bit-or](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-or.eo)
-^|[bit-xor](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-xor.eo)
-~|[bit-not](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/bit-not.eo)
-<<|[shift-right](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/shift-right.eo)
-\>>|[shift-left](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/shift-left.eo)
-(type casting)|[as-\<type>](https://github.com/polystat/c2eo/tree/master/project/eo-lib/coperators/as-int64.eo)
++|[plus](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/plus.eo)
+-|[minus](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/minus.eo)
+*|[times](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/times.eo)
+*|[write\|read-as-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/read-as-int64.eo)
+/|[div](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/div.eo)
+=|[write-as-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/write-as-int64.eo)
+%|[mod](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/mod.eo)
++x|[pos](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/pos.eo)
+-x|[neg](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/neg.eo)
+++x|[pre-inc-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/pre-inc-int64.eo)
+x++|[post-inc-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/post-inc-int64.eo)
+--x|[pre-dec-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/pre-dec-int64.eo)
+x--|[post-dec-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/post-dec-int64.eo)
+==|[eq](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/eq.eo)
+!=|[neq](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/neq.eo)
+<|[lt](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/lt.eo)
+<=|[lte](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/lte.eo)
+\>|[gt](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/gt.eo)
+\>=|[gte](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/gte.eo)
+&&|[and](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/and.eo)
+\|\||[or](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/or.eo)
+!|[not](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/not.eo)
+&|[bit-and](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/bit-and.eo)
+&|[addr-of](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/addr-of.eo)
+\||[bit-or](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/bit-or.eo)
+^|[bit-xor](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/bit-xor.eo)
+~|[bit-not](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/bit-not.eo)
+<<|[shift-right](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/shift-right.eo)
+\>>|[shift-left](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/shift-left.eo)
+(type casting)|[as-\<type>](https://github.com/polystat/c2eo/tree/master/eo-lib/coperators/as-int64.eo)
 
 ```c
 x += 10;

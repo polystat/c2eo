@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 project(c2eo)
 
 # llvm_config
-set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
+set(PATH_TO_LLVM_SOURCE "../../llvm-clang")
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${PATH_TO_LLVM_SOURCE}")
     set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")

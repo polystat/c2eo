@@ -2,7 +2,7 @@
 
 Make sure you completely follow the main [guide](https://github.com/polystat/c2eo#How-to-contribute)
 
-All scripts are run from the `project/scripts` folder
+All scripts are run from the `scripts` folder
 
 ### 1. build_c2eo.py
 

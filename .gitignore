@@ -36,7 +36,7 @@
 *.app
 
 # c2eo and temp eo files
-project/bin/*
+bin/*
 
 #LLVM directory
 llvm-clang/**
@@ -95,14 +95,14 @@ fabric.properties
 
 # EO project files
 result/**/*
-project/**/global.eo
+**/global.eo
 *.glob
 *.stat
 
 # Test temp files and dirs
-project/tests/scripts/env/*.c
-project/tests/scripts/env/*.txt
-project/tests/**/*.eo
+tests/scripts/env/*.c
+tests/scripts/env/*.txt
+tests/**/*.eo
 
 
 # Python cache

@@ -31,21 +31,21 @@ jobs:
 
       - name: Generating tests
         run:  |
-          cd ./project/scripts
+          cd ./scripts
           python3 csmith.py -h
           python3 csmith.py ../tests/main/csmith -c 100
 
       - name: Testing
         run: |
-          cd ./project/scripts
+          cd ./scripts
           python3 transpile.py -h
           python3 transpile.py ../tests/main/csmith -n
 
       - name: Clean test directory
-        run: cd ./project/scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
+        run: cd ./scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
 
       - name: Make archive from csmith tests
-        run:  tar -cf csmith.tar.gz ./project/tests/main/csmith
+        run:  tar -cf csmith.tar.gz ./tests/main/csmith
 
       - uses: actions/upload-artifact@v3
         with:
