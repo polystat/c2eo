@@ -510,7 +510,7 @@ EOObject GetCompoundLiteralEOObject(const clang::CompoundLiteralExpr *cle) {
   }
   const TypeSimpl typeInfo =
       transpiler.type_manger_.Add(cle->getType().getTypePtrOrNull());
-  EOObject init = GetStmtEOObject(cle->getInitializer());
+  const EOObject init = GetStmtEOObject(cle->getInitializer());
   EOObject address{"address"};
   address.nested.emplace_back("global-ram");
   transpiler.glob_.ShiftMemoryLimitPointer(typeInfo.GetSizeOfType());
@@ -1002,9 +1002,9 @@ size_t GetEOParamsList(const CallExpr *op, EOObject &call) {
       call.nested.emplace_back(EOObjectType::EO_PLUG);
       return shift;
     }
-    TypeSimpl typeInfo =
+    const TypeSimpl typeInfo =
         transpiler.type_manger_.Add(arg->getType().getTypePtrOrNull());
-    size_t type_size = typeInfo.GetSizeOfType();
+    const size_t type_size = typeInfo.GetSizeOfType();
     EOObject param{"write"};
     if ((typeInfo.name != "undefinedtype" && !typeInfo.name.empty() &&
          typeInfo.typeStyle != ComplexType::RECORD &&

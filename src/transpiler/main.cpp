@@ -5,6 +5,7 @@
 
 #include <csignal>
 #include <cstdlib>
+#include <exception>
 #include <iostream>
 #include <string>
 
@@ -19,7 +20,9 @@ using clang::tooling::ClangTool;
 using clang::tooling::CommonOptionsParser;
 using clang::tooling::newFrontendActionFactory;
 
-static llvm::cl::OptionCategory MyToolCategory("c2eo options");
+namespace {
+llvm::cl::OptionCategory MyToolCategory("c2eo options");
+}  // namespace
 
 const char **TransformArgv(const char *const *argv);
 
@@ -54,7 +57,9 @@ void SigAbrtSigaction(int /*unused*/, siginfo_t *si, void * /*unused*/) {
   exit(-1);
 }
 
-int main(int argc, const char **argv) {
+namespace {
+
+int Transpile(int argc, const char **argv) {
   struct sigaction sa {};
   memset(&sa, 0, sizeof(struct sigaction));
   sigemptyset(&sa.sa_mask);
@@ -134,6 +139,18 @@ int main(int argc, const char **argv) {
   }
   std::ofstream out(filename);
   out << transpiler;
+  return 0;
+}
+
+}  // namespace
+
+int main(int argc, const char **argv) {
+  try {
+    return Transpile(argc, argv);
+  } catch (const std::exception &error) {
+    llvm::errs() << "exception: " << error.what() << " while tool run\n";
+    return -1;
+  }
 }
 
 #pragma clang diagnostic push
