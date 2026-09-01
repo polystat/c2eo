@@ -29,6 +29,8 @@ SOFTWARE.
   <version>1.0-SNAPSHOT</version>
   <properties>
     <eolang.version>0.28.0</eolang.version>
+    <eo-collections.version>0.0.3</eo-collections.version>
+    <eo-math.version>0.2.3</eo-math.version>
   </properties>
   <build>
     <plugins>
@@ -41,18 +43,79 @@ SOFTWARE.
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.1</version>
+        <executions>
+          <execution>
+            <id>eo-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.eolang</groupId>
+                  <artifactId>eo-runtime</artifactId>
+                  <version>${eolang.version}</version>
+                  <includes>EO-SOURCES/**</includes>
+                  <outputDirectory>${project.basedir}/eo</outputDirectory>
+                  <fileMappers>
+                    <org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                      <pattern>^EO-SOURCES/(.*)$</pattern>
+                      <replacement>$1</replacement>
+                    </org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                  </fileMappers>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eolang</groupId>
+                  <artifactId>eo-collections</artifactId>
+                  <version>${eo-collections.version}</version>
+                  <includes>EO-SOURCES/**</includes>
+                  <outputDirectory>${project.basedir}/eo</outputDirectory>
+                  <fileMappers>
+                    <org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                      <pattern>^EO-SOURCES/(.*)$</pattern>
+                      <replacement>$1</replacement>
+                    </org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                  </fileMappers>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.eolang</groupId>
+                  <artifactId>eo-math</artifactId>
+                  <version>${eo-math.version}</version>
+                  <includes>EO-SOURCES/**</includes>
+                  <outputDirectory>${project.basedir}/eo</outputDirectory>
+                  <fileMappers>
+                    <org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                      <pattern>^EO-SOURCES/(.*)$</pattern>
+                      <replacement>$1</replacement>
+                    </org.codehaus.plexus.components.io.filemappers.RegExpFileMapper>
+                  </fileMappers>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.eolang</groupId>
         <artifactId>eo-maven-plugin</artifactId>
         <version>${eolang.version}</version>
         <configuration>
-          <hash>0.28.0</hash>
+          <discoverSelf>true</discoverSelf>
           <failOnError>false</failOnError>
         </configuration>
         <executions>
           <execution>
             <goals>
               <goal>register</goal>
-              <goal>assemble</goal>
+              <goal>parse</goal>
+              <goal>optimize</goal>
+              <goal>discover-foreign</goal>
+              <goal>resolve</goal>
+              <goal>extend</goal>
+              <goal>place</goal>
               <goal>transpile</goal>
             </goals>
             <configuration>
