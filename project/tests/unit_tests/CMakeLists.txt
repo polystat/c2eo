@@ -16,14 +16,10 @@ add_executable(unit_tests
 # add pthread for unix systems
 if (UNIX)
     find_package(Threads REQUIRED)
-    target_link_libraries(
-        unit_tests
-        ${GTEST_LIBRARIES}
-        Threads::Threads
-    )
+    target_link_libraries(unit_tests Threads::Threads)
 endif ()
 
-target_link_libraries(unit_tests gtest_main gmock_main)
+target_link_libraries(unit_tests GTest::gtest_main GTest::gmock_main)
 
 enable_testing()
 add_test(unit_tests "./unit_tests")

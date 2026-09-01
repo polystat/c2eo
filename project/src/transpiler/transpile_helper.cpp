@@ -1193,7 +1193,7 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
                    &llvm::APFloat::IEEEsingle())) {
       ss << std::fixed << an_float.convertToFloat();
     } else {
-      an_float.dump();
+      an_float.print(llvm::errs());
     }
     std::cout << "Checkout 03\n";
   }

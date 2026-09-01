@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <exception>
 #include <iomanip>
+#include <sstream>
 #include <stdexcept>
 #include <utility>
 

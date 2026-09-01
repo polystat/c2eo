@@ -5,12 +5,24 @@ project(c2eo)
 # llvm_config
 set(PATH_TO_LLVM_SOURCE "../../../llvm-clang")
 
-set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
-include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
-include_directories("${PATH_TO_LLVM_SOURCE}/llvm/include")
-include_directories("${PATH_TO_LLVM_BUILD}/tools/clang/include")
-include_directories("${PATH_TO_LLVM_BUILD}/include")
-link_directories("${PATH_TO_LLVM_BUILD}/lib/")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${PATH_TO_LLVM_SOURCE}")
+    set(PATH_TO_LLVM_BUILD "${PATH_TO_LLVM_SOURCE}/build")
+    include_directories("${PATH_TO_LLVM_SOURCE}/clang/include")
+    include_directories("${PATH_TO_LLVM_SOURCE}/llvm/include")
+    include_directories("${PATH_TO_LLVM_BUILD}/tools/clang/include")
+    include_directories("${PATH_TO_LLVM_BUILD}/include")
+    link_directories("${PATH_TO_LLVM_BUILD}/lib/")
+else()
+    find_package(Clang REQUIRED CONFIG
+            HINTS
+            /opt/homebrew/opt/llvm@16
+            /opt/homebrew/opt/llvm
+            /usr/local/opt/llvm@16
+            /usr/local/opt/llvm
+            /usr/lib/llvm-16)
+    include_directories(${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS})
+    message(STATUS "Using installed LLVM/Clang ${LLVM_PACKAGE_VERSION} from ${LLVM_DIR}")
+endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 set(CMAKE_BUILD_TYPE Debug)
