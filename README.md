@@ -1,4 +1,4 @@
-<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" /> 
+<img src="https://www.yegor256.com/images/books/elegant-objects/cactus.svg" height="92px" />
 
 [![build](https://img.shields.io/github/actions/workflow/status/polystat/c2eo/build.yml?branch=master)](https://github.com/polystat/c2eo/actions/workflows/build.yml?query=event%3Aschedule)
 [![version](https://img.shields.io/github/v/release/polystat/c2eo?include_prereleases)](https://github.com/polystat/c2eo/releases/latest)
@@ -43,13 +43,13 @@ However, you can try to build the project from source at your own risk.
 ## How to Contribute
 
 Again, we recommend [Ubuntu 22.04+](https://ubuntu.com/download) and you will need
-[wget 1.21+](https://www.tecmint.com/install-wget-in-linux/), 
-[tar 1.30+](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/), 
+[wget 1.21+](https://www.tecmint.com/install-wget-in-linux/),
+[tar 1.30+](https://www.tecmint.com/install-tar-in-centos-rhel-and-fedora/),
 [git 2.32.+](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
-[cmake 3.18+](https://cmake.org/download/), 
-[gcc 11.2.+](http://mirror.linux-ia64.org/gnu/gcc/releases/), 
-[g++ 11.2.+](https://pkgs.org/download/g++), 
-[ninja-build 1.10.1+](https://ninja-build.org/), 
+[cmake 3.18+](https://cmake.org/download/),
+[gcc 11.2.+](http://mirror.linux-ia64.org/gnu/gcc/releases/),
+[g++ 11.2.+](https://pkgs.org/download/g++),
+[ninja-build 1.10.1+](https://ninja-build.org/),
 [clang 14.0.0+](https://releases.llvm.org/14.0.0/tools/clang/docs/)
 and
 [python3 3.10.0+](https://www.python.org/downloads/).
@@ -104,7 +104,7 @@ then go to the `build` folder and run the following commands:
 ```bash
 $ cmake ..
 $ make
-``` 
+```
 
 As you have already noticed, the project is being built in the `build` folder. The result of this build is the `c2eo` file in `bin`. Now you have a transpiler and you can convert programs from C to EO. Just run:
 
@@ -119,12 +119,12 @@ Your PR will pass the following checks, so before creating PR run these locally 
 
 1. [clang-format-14](https://pypi.org/project/clang-format/)
 ```bash
-$ clang-format src/transpiler/*.(cpp|h) -i 
+$ clang-format src/transpiler/*.(cpp|h) -i
 ```
 
 2. [cpplint](https://github.com/cpplint/cpplint)
 ```bash
-$ cpplint --filter=-runtime/references,-runtime/string,-build/c++11 src/transpiler/** 
+$ cpplint --filter=-runtime/references,-runtime/string,-build/c++11 src/transpiler/**
 ```
 3. [clang-tidy](https://packages.ubuntu.com/en/bionic/clang-tidy)
 ```bash
@@ -307,7 +307,7 @@ $ git log $(git describe --tags --abbrev=0)..HEAD --merges --oneline --format=" 
     │                   └── c2eo_X.X.X_all.deb
     ├── todo.sh
     └── update-release.py
-    
+
     35 directories, 120 files
 </details>
 
