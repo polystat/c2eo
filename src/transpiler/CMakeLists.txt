@@ -71,15 +71,21 @@ set(SOURCE_FILES
 add_executable(c2eo ${SOURCE_FILES})
 
 # llvm libraries
-target_link_libraries(c2eo
-        clangAST
-        clangASTMatchers
-        clangBasic
-        clangFrontend
-        clangSerialization
-        clangTooling
-        LLVMSupport
-        LLVMFrontendOpenMP)
+if(LLVM_LINK_LLVM_DYLIB)
+    # Adding the static components next to the dylib would register every
+    # command line option twice and abort at startup.
+    target_link_libraries(c2eo clang-cpp LLVM)
+else()
+    target_link_libraries(c2eo
+            clangAST
+            clangASTMatchers
+            clangBasic
+            clangFrontend
+            clangSerialization
+            clangTooling
+            LLVMSupport
+            LLVMFrontendOpenMP)
+endif()
 
 set(LLVM_LINK_COMPONENTS
         Support)

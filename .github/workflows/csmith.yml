@@ -1,25 +1,23 @@
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+# SPDX-License-Identifier: MIT
+---
 name: Csmith
 
 on:
   schedule:
-    - cron:  '0 2 * * 1'
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: csmith-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   csmith:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: MarkusJx/googletest-installer@v1.1
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
+      - uses: ./.github/actions/llvm
 
       - name: Install csmith
         run: |
@@ -30,7 +28,7 @@ jobs:
           make
 
       - name: Generating tests
-        run:  |
+        run: |
           cd ./scripts
           python3 csmith.py -h
           python3 csmith.py ../tests/main/csmith -c 100
@@ -45,9 +43,9 @@ jobs:
         run: cd ./scripts && python3 clean_before_transpilation.py -p ../tests/main/csmith
 
       - name: Make archive from csmith tests
-        run:  tar -cf csmith.tar.gz ./tests/main/csmith
+        run: tar -cf csmith.tar.gz ./tests/main/csmith
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: csmith
           path: csmith.tar.gz

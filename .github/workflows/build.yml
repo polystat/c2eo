@@ -1,9 +1,19 @@
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+# SPDX-License-Identifier: MIT
+---
 name: Build C2EO
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
     branches:
       - master
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   xcop:
@@ -33,7 +43,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      
+
       - name: Clang-format
         uses: jidicula/clang-format-action@v4.13.0
         with:
@@ -46,20 +56,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: MarkusJx/googletest-installer@v1.1
+      - uses: ./.github/actions/llvm
 
-      - name: Cache LLVM
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
-      
-      - name: Install clang-tidy
-        run: sudo apt install clang-tidy
-      
       - name: Clang-tidy
         run: |
           cd ./scripts
@@ -71,17 +69,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: MarkusJx/googletest-installer@v1.1
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
+      - uses: ./.github/actions/llvm
 
       - name: Download gcc-c-torture
         uses: robinraju/release-downloader@v1.11
@@ -104,17 +92,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: MarkusJx/googletest-installer@v1.1
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
+      - uses: ./.github/actions/llvm
 
       - name: Download c-testcuite
         uses: robinraju/release-downloader@v1.11
@@ -135,10 +113,10 @@ jobs:
       - name: Convert raw code coverage to report
         run: |
           cd ./bin/
-          llvm-profdata-14 merge -sparse *.profraw -o res.profdata
-          llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
+          llvm-profdata-16 merge -sparse *.profraw -o res.profdata
+          llvm-cov-16 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: testcuite
           path: bin/codecov.txt
@@ -148,17 +126,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: MarkusJx/googletest-installer@v1.1
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
+      - uses: ./.github/actions/llvm
 
       - name: Testing
         run: |
@@ -169,10 +137,10 @@ jobs:
       - name: Convert raw code coverage to report
         run: |
           cd ./bin/
-          llvm-profdata-14 merge -sparse *.profraw -o res.profdata
-          llvm-cov-14 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
+          llvm-profdata-16 merge -sparse *.profraw -o res.profdata
+          llvm-cov-16 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: main
           path: bin/codecov.txt
@@ -182,17 +150,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      - uses: MarkusJx/googletest-installer@v1.1
-
-      - name: Cache LLVM
-        id: cache-llvm
-        uses: actions/cache@v3
-        with:
-          path: llvm-clang.tar.gz
-          key: ${{ runner.os }}-llvm-clang
-
-      - name: Unpack LLVM
-        run: sudo chmod ugo+rwx llvm-clang.tar.gz && tar -xvf llvm-clang.tar.gz -C . > /dev/null
+      - uses: ./.github/actions/llvm
 
       - name: Build c2eo
         run: cd ./scripts && python3 build_c2eo.py
@@ -205,21 +163,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
- 
+
       - run: mkdir bin/
 
       - name: Download test main codecov report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: main
           path: bin/main/
 
       - name: Download testcuite codecov report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: testcuite
           path: bin/testcuite/
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           files: ./bin/main/codecov.txt,./bin/testcuite/codecov.txt

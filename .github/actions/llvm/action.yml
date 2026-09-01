@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+# SPDX-License-Identifier: MIT
+---
+name: llvm
+description: |
+  Install LLVM/Clang 16 and GoogleTest from apt, and register the
+  unversioned tool names so that cmake and the scripts find them.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+          clang-16 \
+          clang-tidy-16 \
+          libclang-16-dev \
+          libcurl4-openssl-dev \
+          libedit-dev \
+          libgmock-dev \
+          libgtest-dev \
+          libxml2-dev \
+          libzstd-dev \
+          llvm-16 \
+          llvm-16-dev \
+          python3-yaml \
+          time \
+          zlib1g-dev
+        for tool in clang clang++ clang-tidy llvm-cov llvm-profdata; do
+          sudo update-alternatives --install \
+            "/usr/bin/${tool}" "${tool}" "/usr/bin/${tool}-16" 100
+        done
