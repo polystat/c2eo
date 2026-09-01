@@ -7,6 +7,7 @@
 #define SRC_TRANSPILER_TRANSPILE_HELPER_H_
 
 // Declares clang::SyntaxOnlyAction.
+#include <cstdint>
 #include <set>
 #include <string>
 
@@ -16,8 +17,11 @@
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
+#include "llvm/ADT/APSInt.h"
 #include "llvm/Support/CommandLine.h"
 #include "src/transpiler/eo_object.h"
+
+int64_t GetInt64Value(const llvm::APSInt &value);
 
 std::string GetTypeName(clang::QualType qual_type);
 

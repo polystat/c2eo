@@ -140,6 +140,13 @@ EOObject GetCompoundLiteralEOObject(const clang::CompoundLiteralExpr *cle);
 extern UnitTranspiler transpiler;
 extern ASTContext *context;
 
+int64_t GetInt64Value(const llvm::APSInt &value) {
+  if (value.isSigned()) {
+    return value.getSExtValue();
+  }
+  return static_cast<int64_t>(value.getZExtValue());
+}
+
 std::string Escaped(const std::string &input) {
   std::string output;
   output.reserve(input.size());
@@ -1186,17 +1193,11 @@ EOObject GetFloatingLiteralEOObject(const FloatingLiteral *p_literal) {
 
 EOObject GetIntegerLiteralEOObject(const IntegerLiteral *p_literal) {
   if (p_literal != nullptr) {
-    const bool is_signed = p_literal->getType()->isSignedIntegerType();
-    const llvm::APInt an_int = p_literal->getValue();
-    if (is_signed) {
-      const int64_t val = an_int.getSExtValue();
-      const std::string str_val{std::to_string(val)};
-      return EOObject{str_val, EOObjectType::EO_LITERAL};
-    }
     // todo uint64
-    const auto val = static_cast<int64_t>(an_int.getZExtValue());
-    const std::string str_val{std::to_string(val)};
-    return EOObject{str_val, EOObjectType::EO_LITERAL};
+    const llvm::APSInt an_int{p_literal->getValue(),
+                              !p_literal->getType()->isSignedIntegerType()};
+    return EOObject{std::to_string(GetInt64Value(an_int)),
+                    EOObjectType::EO_LITERAL};
   }
   return EOObject{EOObjectType::EO_PLUG};
 }

@@ -44,7 +44,7 @@ EnumType ProcessEnumDecl(const clang::EnumDecl *ED) {
           enum_const_decl->getType().getTypePtrOrNull());
       size = typeInfo.GetSizeOfType();
       const std::string name = "c-" + enum_const_decl->getNameAsString();
-      const int64_t value = enum_const_decl->getInitVal().getExtValue();
+      const int64_t value = GetInt64Value(enum_const_decl->getInitVal());
       constants.push_back(EnumConstantType{enum_const_decl, name, value});
     }
   }

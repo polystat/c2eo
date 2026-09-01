@@ -84,8 +84,7 @@ EOObject InitValueAnalysis(const VarDecl *VD, const TypeSimpl &typeInfo) {
   }
   std::string str;
   if (init_val->isInt()) {
-    auto int_value = init_val->getInt().getExtValue();
-    str = std::to_string(int_value);
+    str = std::to_string(GetInt64Value(init_val->getInt()));
   } else if (init_val->isFloat() && (size == double_size)) {
     auto float_value = init_val->getFloat().convertToDouble();
     str = std::to_string(float_value);
