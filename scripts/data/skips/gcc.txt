@@ -1,4 +1,4 @@
-limits-blockid, limits-externalid, limits-externdecl.c, limits-pointer, pr46534: time limit
+limits-blockid, limits-externalid, limits-externdecl, limits-pointer, pr46534: time limit
 limits-caselabels: Command terminated by signal 11
 pr28865, pr28865, 20030305-1, dump-noaddr, pr85582-2, pr85582-3, pr61375, nestfunc-7, pr42956, pr98474, 20050122-2: vardecl.cpp InitValueAnalysis
 limits-fndefn, pr105613: idk
