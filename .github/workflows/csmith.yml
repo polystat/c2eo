@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
 # SPDX-License-Identifier: MIT
 ---
-name: Csmith
+name: csmith
 
 on:
   schedule:
