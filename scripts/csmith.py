@@ -41,12 +41,14 @@ class Csmith(object):
             list(threads.imap_unordered(self.generate_file, range(self.files_count)))
 
     def generate_file(self, number: int) -> (str, list[str]):
-        result = subprocess.run(self.generating_cmd, shell=True, text=True, capture_output=True)
+        result = subprocess.run(self.generating_cmd, shell=True, text=True, capture_output=True, check=True)
+        if not result.stdout:
+            raise RuntimeError(f'csmith wrote nothing to stdout running "{self.generating_cmd}"')
         file_name = Path(f'{number + 1:0{len(str(self.files_count))}}.c')
         file_name.write_text(result.stdout)
         self.generated_files_count += 1
         tools.print_progress_bar(self.generated_files_count, self.files_count)
-        return file_name, result.stderr if result.returncode else result.stdout
+        return file_name, result.stdout
 
 
 def create_parser() -> argparse.ArgumentParser:
