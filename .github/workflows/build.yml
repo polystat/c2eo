@@ -17,12 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  xcop:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
-      - uses: g4s8/xcop-action@master
-
   pdd:
     runs-on: ubuntu-24.04
     steps:
