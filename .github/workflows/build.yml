@@ -20,13 +20,13 @@ jobs:
   pdd:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       # - uses: g4s8/pdd-action@master
 
   cpplint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
 
       - name: Install cpplint
         run: sudo pip install cpplint
@@ -37,7 +37,7 @@ jobs:
   clang-format:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
 
       - name: Clang-format
         uses: jidicula/clang-format-action@v4.13.0
@@ -50,7 +50,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - uses: ./.github/actions/llvm
 
       - name: Clang-tidy
@@ -63,7 +63,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - uses: ./.github/actions/llvm
 
       - name: Download gcc-c-torture
@@ -86,7 +86,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - uses: ./.github/actions/llvm
 
       - name: Download c-testcuite
@@ -120,7 +120,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - uses: ./.github/actions/llvm
 
       - name: Testing
@@ -144,7 +144,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
       - uses: ./.github/actions/llvm
 
       - name: Build c2eo
@@ -157,7 +157,7 @@ jobs:
     needs: [clang-tidy, gcc-c-torture, c-testcuite, test_main, unit-tests]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
 
       - run: mkdir bin/
 
