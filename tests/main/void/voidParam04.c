@@ -16,4 +16,3 @@ int main(){
   print_min(a,b);
   print_min(b,a);
 }
-

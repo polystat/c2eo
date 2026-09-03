@@ -8,4 +8,3 @@ int main() {
     printf("%lld\n", *&a);
     return 0;
 }
-

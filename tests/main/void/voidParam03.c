@@ -14,4 +14,3 @@ int main(){
   fun(5);
   fun(b);
 }
-

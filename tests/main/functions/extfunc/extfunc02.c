@@ -14,4 +14,3 @@ extern long long f();
 long long f() {return 100;}
 
 extern long long f();
-

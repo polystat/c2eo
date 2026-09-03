@@ -1,9 +1,10 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 Polystat.org
 # SPDX-License-Identifier: MIT
 ---
+# yamllint disable rule:line-length
 name: build
 
-on:
+'on':
   push:
     branches:
       - master
@@ -19,19 +20,19 @@ jobs:
   xcop:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: g4s8/xcop-action@master
 
   pdd:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       # - uses: g4s8/pdd-action@master
 
   cpplint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
 
       - name: Install cpplint
         run: sudo pip install cpplint
@@ -42,7 +43,7 @@ jobs:
   clang-format:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
 
       - name: Clang-format
         uses: jidicula/clang-format-action@v4.13.0
@@ -55,7 +56,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: ./.github/actions/llvm
 
       - name: Clang-tidy
@@ -68,7 +69,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: ./.github/actions/llvm
 
       - name: Download gcc-c-torture
@@ -91,7 +92,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: ./.github/actions/llvm
 
       - name: Download c-testcuite
@@ -113,7 +114,7 @@ jobs:
       - name: Convert raw code coverage to report
         run: |
           cd ./bin/
-          llvm-profdata-16 merge -sparse *.profraw -o res.profdata
+          llvm-profdata-16 merge -sparse ./*.profraw -o res.profdata
           llvm-cov-16 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
 
       - uses: actions/upload-artifact@v4
@@ -125,7 +126,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: ./.github/actions/llvm
 
       - name: Testing
@@ -137,7 +138,7 @@ jobs:
       - name: Convert raw code coverage to report
         run: |
           cd ./bin/
-          llvm-profdata-16 merge -sparse *.profraw -o res.profdata
+          llvm-profdata-16 merge -sparse ./*.profraw -o res.profdata
           llvm-cov-16 show ./c2eo ../src/transpiler/*.cpp -instr-profile=res.profdata > codecov.txt
 
       - uses: actions/upload-artifact@v4
@@ -149,7 +150,7 @@ jobs:
     needs: [cpplint, clang-format]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: ./.github/actions/llvm
 
       - name: Build c2eo
@@ -162,7 +163,7 @@ jobs:
     needs: [clang-tidy, gcc-c-torture, c-testcuite, test_main, unit-tests]
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
 
       - run: mkdir bin/
 

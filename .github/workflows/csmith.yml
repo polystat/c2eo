@@ -1,9 +1,10 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 Polystat.org
 # SPDX-License-Identifier: MIT
 ---
+# yamllint disable rule:line-length
 name: csmith
 
-on:
+'on':
   schedule:
     - cron: '0 2 * * 1'
   workflow_dispatch:
@@ -16,7 +17,7 @@ jobs:
   csmith:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4
       - uses: ./.github/actions/llvm
 
       - name: Install csmith

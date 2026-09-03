@@ -9,7 +9,7 @@ int main() {
     printf("%lld\n", n);
     if (n > 5) {
       break;
-    }   
+    }
   }
   return 0;
 }

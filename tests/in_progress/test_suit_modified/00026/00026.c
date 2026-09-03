@@ -2,7 +2,7 @@ int
 test()
 {
 	char *p;
-	
+
 	p = "hello";
 	return p[0] - 104;
 }

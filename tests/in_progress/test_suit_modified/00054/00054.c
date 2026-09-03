@@ -15,7 +15,7 @@ test()
 		return 2;
 	if(z != 2)
 		return 3;
-	
+
 	e = x;
 	return e;
 }

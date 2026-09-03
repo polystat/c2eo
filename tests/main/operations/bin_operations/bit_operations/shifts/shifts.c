@@ -11,5 +11,5 @@ int main() {
     printf("%d\n", a << i);
     printf("%d\n", b << i);
     printf("%d\n", c << i);
-  } 
+  }
 }

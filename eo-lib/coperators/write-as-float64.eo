@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 Polystat.org
+# SPDX-License-Identifier: MIT
 +alias c2eo.coperators.read-as-float64
 
 +package c2eo.coperators

@@ -32,4 +32,3 @@ int main() {
 int func01() {
   return 1234;
 }
-

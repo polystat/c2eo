@@ -8,4 +8,3 @@ int main() {
     printf("%hd\n", *&a);
     return 0;
 }
-

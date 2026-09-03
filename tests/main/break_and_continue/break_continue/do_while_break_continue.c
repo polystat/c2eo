@@ -11,7 +11,7 @@ int main() {
     printf("%lld\n", n);
     if (n > 5) {
       break;
-    }   
+    }
   } while (1);
   return 0;
 }

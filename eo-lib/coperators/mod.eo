@@ -1,5 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 Polystat.org
+# SPDX-License-Identifier: MIT
 +package c2eo.coperators
 
 [a b] > mod
   a.minus ((a.div b).times b) > @
-

@@ -21,7 +21,7 @@ test()
 		return 1;
 	if (ZERO_1_VAR(1, 2, 3))
 		return 1;
-		
+
 	return 0;
 }
 

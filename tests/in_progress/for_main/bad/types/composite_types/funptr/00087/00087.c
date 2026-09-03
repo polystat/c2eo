@@ -13,7 +13,7 @@ int
 test()
 {
 	struct S v;
-	
+
 	v.fptr = foo;
 	return v.fptr();
 }

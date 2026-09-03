@@ -4,7 +4,7 @@ test()
 	int x;
 
 	x = 50;
-	do 
+	do
 		x = x - 1;
 	while(x);
 	return x;

@@ -14,7 +14,7 @@ int
 test()
 {
 	char *p;
-	
+
 	p = "hello";
 // 	return strlen(p) - 5;
 	return strlen_for_test(p) - 5;

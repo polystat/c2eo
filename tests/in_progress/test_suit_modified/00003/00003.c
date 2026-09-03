@@ -2,7 +2,7 @@ int
 test()
 {
 	int x;
-	
+
 	x = 4;
 	return x - 4;
 }

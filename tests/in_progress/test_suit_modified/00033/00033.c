@@ -11,7 +11,7 @@ int
 test()
 {
     int x;
-    
+
     g = 0;
     x = 0;
     if(x && effect())
@@ -39,7 +39,7 @@ test()
     		return 7;
     } else {
     	return 8;
-    } 
+    }
     return 0;
 }
 

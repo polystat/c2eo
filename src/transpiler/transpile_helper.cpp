@@ -98,7 +98,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list);
 vector<Variable> ProcessFunctionParams(ArrayRef<ParmVarDecl *> params,
                                        size_t shift);
 
-vector<EOObject> PrecessRecordTypes(CompoundStmt *CS);
+vector<EOObject> ProcessRecordTypes(CompoundStmt *CS);
 
 size_t GetParamMemorySize(ArrayRef<ParmVarDecl *> params);
 
@@ -208,7 +208,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   const size_t param_memory_size = GetParamMemorySize(FD->parameters());
   const vector<Variable> all_param =
       ProcessFunctionParams(FD->parameters(), shift);
-  const vector<EOObject> all_types = PrecessRecordTypes(func_body);
+  const vector<EOObject> all_types = ProcessRecordTypes(func_body);
 
   vector<Variable> all_local;
   ProcessFunctionLocalVariables(func_body, all_local, shift + param_memory_size,
@@ -259,7 +259,7 @@ EOObject GetFunctionBody(const clang::FunctionDecl *FD) {
   return func_body_eo;
 }
 
-vector<EOObject> PrecessRecordTypes(CompoundStmt *const CS) {
+vector<EOObject> ProcessRecordTypes(CompoundStmt *const CS) {
   vector<EOObject> local_type_decls;
   for (auto *stmt : CS->body()) {
     const Stmt::StmtClass stmt_class = stmt->getStmtClass();
@@ -1065,7 +1065,7 @@ EOObject GetFunctionCallEOObject(const CallExpr *op) {
     return EOObject{EOObjectType::EO_PLUG};
   }
   // TEST
-  // std::cout << "NamArgs = " << op->getNumArgs() << "\n";
+  // std::cout << "NumArgs = " << op->getNumArgs() << "\n";
   const auto *func_decl = op->getDirectCallee();
   // ======= The function call =======
   if (func_decl != nullptr) {  // The direct function call generation

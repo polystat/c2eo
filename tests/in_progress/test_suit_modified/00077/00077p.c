@@ -63,7 +63,7 @@ test()
 // 	int x = 5;
  	int x[100];
 	x[0] = 1000;
-	
+
 	return foo(x);
 // 	return foo(x);
 }

@@ -18,4 +18,3 @@ int main(){
     fun(5, x);
     fun(b, 2.5);
 }
-

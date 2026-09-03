@@ -1,7 +1,11 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021-2022 c2eo team
+# SPDX-FileCopyrightText: Copyright (c) 2021-2022 Polystat.org
 # SPDX-License-Identifier: MIT
 
 [files]
 extend-exclude = [
-
+  "tests/**",
 ]
+
+[default.extend-identifiers]
+EOint = "EOint"
+ParmVarDecl = "ParmVarDecl"
