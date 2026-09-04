@@ -28,7 +28,7 @@ SOFTWARE.
   <artifactId>c2eo-transpiler</artifactId>
   <version>1.0-SNAPSHOT</version>
   <properties>
-    <eolang.version>0.28.0</eolang.version>
+    <eolang.version>0.63.1</eolang.version>
     <eo-collections.version>0.0.3</eo-collections.version>
     <eo-math.version>0.2.3</eo-math.version>
   </properties>
